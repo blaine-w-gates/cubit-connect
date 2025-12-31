@@ -1,0 +1,63 @@
+# Cubit Connect Rules
+
+## Context Management
+- You must always read `docs/product_requirement_docs.md` and `docs/architecture.md` before proposing big changes.
+- You must update `tasks/active_context.md` at the end of every significant step.
+- Never generate code without a plan.
+
+## 1. Browser Reality Checks (The "Antigravity" Protocols)
+
+### ASYNC VIDEO
+- Never loop through timestamps synchronously
+- Use a recursive queue that waits for `video.onseeked` event
+- Pattern: `seek` → `wait for onseeked` → `capture` → `next`
+
+### MEMORY SAFETY
+- Always downscale canvas images to max 640px width
+- Use JPEG quality 0.7 for screenshots
+- Never store video blob in IndexedDB
+
+### JSON SAFETY
+- Always wrap `JSON.parse` in try/catch
+- Strip markdown code fences before parsing: ` ```json ` and ` ``` `
+- Validate parsed data with type guards
+
+### AI SAFETY
+- Handle `finishReason: SAFETY` gracefully with user message
+- Handle `finishReason: ERROR` with retry option
+- Never expose raw API errors to user
+
+### STRICT MODE
+- Use `useRef` lock to prevent double-execution of effects
+- Check `isMounted` before setting state in async callbacks
+
+## 2. Architecture Constraints
+
+### STATE MANAGEMENT
+- Use `zustand` for all global state
+- Avoid `useContext` for data (only for truly static config)
+- Persist critical state to IndexedDB via custom middleware
+
+### NO SERVERS
+- GitHub Pages static hosting only
+- No API routes, no server components
+- All secrets (API key) stored client-side
+
+### NO FFMPEG
+- Use Canvas API for frame capture
+- Use native HTML5 Video API for seeking
+- No WebAssembly video processing
+
+### SECURITY
+- Sanitize all text inputs via DOMPurify
+- No `dangerouslySetInnerHTML` without purification
+- Validate API key format before test call
+
+## 3. Tech Stack
+
+- **Framework:** Next.js 14 (App Router, Static Export)
+- **State:** Zustand
+- **Storage:** idb-keyval (IndexedDB), LocalStorage
+- **Security:** isomorphic-dompurify
+- **Styling:** Tailwind CSS (Mobile-first)
+- **AI:** @google/generative-ai (gemini-1.5-flash)
