@@ -2,7 +2,7 @@
  * Safety utilities for input sanitization and AI response parsing
  */
 
-import DOMPurify from 'isomorphic-dompurify';
+import DOMPurify from 'dompurify';
 import type { TaskItem } from './types';
 
 /**
@@ -12,6 +12,11 @@ import type { TaskItem } from './types';
 export function sanitizeInput(text: string): string {
   if (!text || typeof text !== 'string') {
     return '';
+  }
+
+  // Skip sanitization during SSR (no window/document available)
+  if (typeof window === 'undefined') {
+    return text.trim();
   }
 
   // DOMPurify with strict config - allow NO HTML tags
