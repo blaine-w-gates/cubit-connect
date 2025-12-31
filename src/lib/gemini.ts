@@ -55,7 +55,7 @@ export async function analyzeTranscript(
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.0-flash-lite',
       generationConfig: {
         temperature: 0.3,
         maxOutputTokens: 4096,
@@ -155,7 +155,7 @@ export async function generateSubSteps(
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({ 
-      model: 'gemini-2.0-flash',
+      model: 'gemini-2.0-flash-lite',
       generationConfig: {
         temperature: 0.4,
         maxOutputTokens: 1024,

@@ -38,7 +38,7 @@ export function ApiKeyInput() {
 
     try {
       const genAI = new GoogleGenerativeAI(trimmedKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' });
       
       // Test call using generateContent (more reliable than countTokens)
       await model.generateContent('Test');

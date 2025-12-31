@@ -1,12 +1,30 @@
 # Active Context: Cubit Connect
 
 **Last Updated:** 2026-01-01  
-**Current Phase:** Phase 1 - Setup & Safety Harness  
-**Status:** 🟢 Phase 1 Complete — All steps finished
+**Current Phase:** Phase 3 - Post-Launch  
+**Status:** 🚀 **DEPLOYED** to GitHub Pages
+
+**Live URL:** https://blaine-w-gates.github.io/cubit-connect/
 
 ---
 
-## Phase 1: Setup & Safety Harness (Config, Zustand, IDB wrapper)
+## Phase 3: Post-Launch
+
+### 3.1 Deployment ✅
+- [x] Configure `next.config.js` for GitHub Pages subdirectory (`/cubit-connect`)
+- [x] Fix ESM/CommonJS conflict (replace `isomorphic-dompurify` with `dompurify`)
+- [x] Fix API validation (replace `countTokens` with `generateContent`)
+- [x] Upgrade model to `gemini-2.0-flash`
+- [x] Deploy to GitHub Pages via GitHub Actions
+
+### 3.2 Monitoring (Active)
+- [ ] Monitor GitHub Pages deployment for issues
+- [ ] Gather user feedback
+- [ ] Track any runtime errors
+
+---
+
+## Phase 1: Setup & Safety Harness ✅
 
 ### 1.1 Project Scaffolding ✅
 - [x] Initialize Next.js 14 with App Router
@@ -37,20 +55,14 @@
 
 ### 1.5 API Key Flow ✅
 - [x] Create `ApiKeyInput.tsx` component with validation
-- [x] Gemini key validation via `countTokens("test")` call
+- [x] Gemini key validation via `generateContent("Test")` call
 - [x] Save valid key to LocalStorage
 - [x] State router in `page.tsx` (Loading → Setup → Dashboard)
-- [x] "Reset Key" button functional
+- [x] "New Project" / "Reset All" buttons functional
 
 ---
 
-## Current Focus
-
-**MVP Feature-Complete!** All core features implemented including the Cubit drill-down.
-
----
-
-## Phase 2: Core Features
+## Phase 2: Core Features ✅
 
 ### 2.1 Inputs & Parsing ✅
 - [x] Create `src/lib/vtt-parser.ts` — Loose regex VTT/SRT parser
@@ -79,8 +91,9 @@
 |----------|-----------|------|
 | Zustand over Context | Less boilerplate, better performance | 2024-12-31 |
 | idb-keyval over raw IDB | Simpler API, Promise-based | 2024-12-31 |
-| gemini-1.5-flash | Fast, cost-effective for MVP | 2024-12-31 |
+| gemini-2.0-flash | Stable model, `countTokens` was flaky on 1.5-flash | 2026-01-01 |
 | Loose VTT regex | MacWhisper compatibility | 2024-12-31 |
+| dompurify over isomorphic | Avoid ESM/CJS build conflicts on GitHub Actions | 2026-01-01 |
 
 ---
 
@@ -97,13 +110,13 @@
 
 ## Phase 2: Polish (Future)
 
-The following features are explicitly **out of scope for MVP** but tracked for future implementation:
+The following features are tracked for future implementation:
 
 - [ ] **HEVC Codec Check** — Detect iOS/Windows HEVC issues before processing
 - [ ] **"Talking Head" Offset** — Add +1.5s to timestamps to skip past speaker face
 - [ ] **Data Export/Import (JSON)** — Allow users to backup/restore projects
 - [ ] **Granular Retry Buttons** — Retry individual failed screenshots or AI calls
-- [ ] **Smart Reset** — Clear project data but keep API key
+- [x] **Smart Reset** — Clear project data but keep API key ✅ (Implemented)
 - [ ] **Theme Toggle** — Light/dark mode support
 - [ ] **Keyboard Shortcuts** — Quick navigation
 - [ ] **Full WCAG 2.1 AA Compliance** — Screen reader support, focus management
