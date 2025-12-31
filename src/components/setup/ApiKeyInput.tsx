@@ -38,10 +38,10 @@ export function ApiKeyInput() {
 
     try {
       const genAI = new GoogleGenerativeAI(trimmedKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
       
-      // Lightweight test call
-      await model.countTokens('test');
+      // Test call using generateContent (more reliable than countTokens)
+      await model.generateContent('Test');
       
       // Success - save the key
       await setApiKey(trimmedKey);
