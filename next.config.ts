@@ -1,9 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "export",
+  output: 'export', // CRITICAL: Required for GitHub Pages
   images: {
-    unoptimized: true,
+    unoptimized: true, // CRITICAL: Next/Image doesn't work with 'export' without this
   },
 };
 

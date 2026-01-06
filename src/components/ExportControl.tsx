@@ -1,9 +1,13 @@
 import { useRef, ChangeEvent } from 'react';
-import { Download, Upload, FileJson } from 'lucide-react';
+import { Download, Upload, Printer } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { TaskItem } from '@/services/storage';
 
-export default function ExportControl() {
+interface ExportControlProps {
+    onPrint?: () => void;
+}
+
+export default function ExportControl({ onPrint }: ExportControlProps) {
     const { tasks, importTasks } = useAppStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -65,6 +69,21 @@ export default function ExportControl() {
 
     return (
         <div className="flex items-center gap-2">
+            {onPrint && (
+                <>
+                    <button
+                        onClick={onPrint}
+                        disabled={tasks.length === 0}
+                        className="flex items-center gap-2 text-xs text-zinc-400 hover:text-purple-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Print PDF"
+                    >
+                        <Printer className="w-4 h-4" />
+                        <span className="hidden sm:inline">PDF</span>
+                    </button>
+                    <div className="h-4 w-[1px] bg-zinc-800 mx-1" />
+                </>
+            )}
+
             <button
                 onClick={handleExport}
                 disabled={tasks.length === 0}

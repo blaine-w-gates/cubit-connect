@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   description: "AI Video Documentation",
 };
 
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+
+// ... existing imports ...
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -28,7 +32,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        {children}
+        <ErrorBoundary>
+          {children}
+        </ErrorBoundary>
       </body>
     </html>
   );

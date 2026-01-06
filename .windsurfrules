@@ -9,6 +9,7 @@
 * **AI SAFETY:** Handle `finishReason: SAFETY` gracefully.
 * **STRICT MODE:** Use `useRef` lock or Zustand machine to prevent double-execution of AI calls.
 * **RATE LIMITS:** Respect a robust delay between AI calls (default 2s+).
+* **HYDRATION:** Always keep `suppressHydrationWarning` on `<html>` and `<body>` to prevent "Jetski" extension crashes.
 
 ## 2. Architecture Constraints
 

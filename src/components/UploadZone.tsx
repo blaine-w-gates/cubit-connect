@@ -23,6 +23,14 @@ export default function UploadZone({ onVideoSelected, onTranscriptParsed }: Uplo
                 return;
             }
 
+            // Size Limit (500MB)
+            const MAX_SIZE = 500 * 1024 * 1024; // 500MB
+            if (file.size > MAX_SIZE) {
+                alert("Video too large for browser processing (Max 500MB). Please compress the file.");
+                setError("File exceeds 500MB limit.");
+                return;
+            }
+
             // HEVC Check
             const testVid = document.createElement('video');
             const canPlayHevc = testVid.canPlayType('video/mp4; codecs="hvc1"');

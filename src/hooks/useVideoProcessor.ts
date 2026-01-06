@@ -20,8 +20,9 @@ export const useVideoProcessor = () => {
         const currentTask = queue[0];
         const video = videoRef.current;
 
-        if (!video) {
-            console.error("Video ref missing during processing");
+        if (!video || !video.src) {
+            console.warn("Video source lost. Waiting for user re-selection.");
+            alert("Video source connection lost. Please re-select the video file to resume processing.");
             setProcessing(false);
             return;
         }

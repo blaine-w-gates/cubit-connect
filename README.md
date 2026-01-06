@@ -1,36 +1,55 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cubit Connect (MVP)
+**Local-First AI Video Documentation**
 
-## Getting Started
+Cubit Connect is a browser-based tool that uses AI (Google Gemini) to watch your screen recordings and automatically generate step-by-step documentation, checklists, and summary reports. 
 
-First, run the development server:
+## 🚀 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+*   **Local-First Privacy:** Video files *never* leave your device. Analysis happens by extracting text transcripts and screenshots locally in the browser.
+*   **AI-Powered Breakdown:** Converts messy VTT transcripts into structured, actionable tasks.
+*   **Recursive Detail:** Click "Deep Dive" on any step to break it down further into micro-steps.
+*   **Offline Mode:** Works without internet (viewing/exporting). AI features gracefully disable when offline.
+*   **PDF Export:** One-click generation of ink-saving, black-and-white checklists for physical printing.
+*   **Project Backup:** Export/Import your entire workspace as a JSON file.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Setup Guide
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Since this is a client-side application, you can run it locally or host it on any static file server (GitHub Pages, Vercel, etc.).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Prerequisites
+1.  **Node.js** (v18 or higher)
+2.  **Google Gemini API Key** (Free Tier available)
 
-## Learn More
+### Installation
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/cubit-connect.git
+    cd cubit-connect
+    ```
+2.  Install dependencies:
+    ```bash
+    npm install
+    ```
+3.  Run the development server:
+    ```bash
+    npm run dev
+    ```
+4.  Open [http://localhost:3000](http://localhost:3000).
 
-To learn more about Next.js, take a look at the following resources:
+## 🔑 Getting an API Key
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1.  Go to [Google AI Studio](https://aistudio.google.com/).
+2.  Click **"Get API Key"**.
+3.  Copy the key.
+4.  In Cubit Connect, click the **Settings (Gear)** icon and paste your key. 
+    *   *Note: The key is stored in your browser's Local Storage. It is never sent to our servers.*
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 🛡️ Privacy & Security
 
-## Deploy on Vercel
+*   **No Backend:** There is no database or server storage.
+*   **Browser Sandbox:** All processing (video seeking, screenshot capture) happens inside the Chrome/Edge security sandbox.
+*   **Data Persistence:** Your projects are saved to your browser's `IndexedDB`. If you clear your cache, you lose your data! **Export backups regularly.**
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📄 License
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT License.

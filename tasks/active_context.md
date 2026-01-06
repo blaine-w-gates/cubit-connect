@@ -35,4 +35,6 @@ This file tracks the active plan and phase of the Cubit Connect project.
 - [x] Run full build check.
 - [x] Fix `date-fns` build error.
 - [x] Fix Gemini Model Name (404 Error) - Upgrading to `gemini-1.5-flash-002` (v2.0 was 429).
-- [ ] Verify with provided API Key - Listing models to confirm access.
+- [x] Verify with provided API Key - Listing models to confirm access.
+- [x] UI Fix: Expose "Disconnect Key" button.
+- [x] Fix Build Error (missing `fullLogout` import).

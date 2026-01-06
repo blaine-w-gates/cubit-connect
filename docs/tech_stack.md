@@ -1,8 +1,6 @@
-- **Framework:** Next.js 14 (App Router)
-- **Deployment:** `output: 'export'`, `images: { unoptimized: true }`
-- **State Management:** Zustand (for complex queue management)
-- **Storage:** `idb-keyval` (IndexedDB wrapper)
-- **Styling:** Tailwind CSS (Mobile-first)
-- **Video:** HTML5 Video API + Canvas
-- **Performance:** `react-virtuoso` (for virtualized lists)
-- **Utils:** Regex for VTT (No strict parser libs).
+- **Framework:** Next.js 16 (App Router)
+- **AI:** `@google/generative-ai` (Model: `gemini-2.5-flash-lite` or validated equivalent like `gemini-flash-latest` that maps to it)
+- **State:** Zustand + `idb-keyval`
+- **Styling:** Tailwind CSS 4 (Geist Font)
+- **Safety:** `.windsurfrules` enforced (Async Video, Rate Limiting).
+- **Docs:** `docs/` is the Source of Truth.

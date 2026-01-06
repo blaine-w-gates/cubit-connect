@@ -4,12 +4,16 @@ import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { GemininService } from '@/services/gemini';
 import { useVideoProcessor } from '@/hooks/useVideoProcessor';
+import { useNetworkStatus } from '@/hooks/useNetworkStatus';
+import { useReactToPrint } from 'react-to-print';
+import { useRef } from 'react';
 
 // Components
 import SettingsDialog from '@/components/SettingsDialog';
 import UploadZone from '@/components/UploadZone';
 import TaskFeed from '@/components/TaskFeed';
 import ExportControl from '@/components/ExportControl';
+import { PrintableReport } from '@/components/PrintableReport';
 
 export default function Home() {
   const {
@@ -23,7 +27,13 @@ export default function Home() {
     setVideoHandleState
   } = useAppStore();
 
+  const isOnline = useNetworkStatus();
   const { videoRef, startProcessing } = useVideoProcessor();
+  const printRef = useRef<HTMLDivElement>(null);
+  const handlePrint = useReactToPrint({
+    contentRef: printRef,
+    documentTitle: "Cubit Connect Report"
+  });
 
   // Hydrate on mount
   useEffect(() => {
@@ -61,47 +71,32 @@ export default function Home() {
 
   // Handler: When user provides VTT and clicks Analyze
   const handleTranscriptParsed = async (transcriptText: string) => {
-    if (!apiKey) return; // Should be handled by SettingsDialog
+    if (!apiKey) return;
+    if (!isOnline) {
+      alert("You are offline. AI analysis requires an internet connection.");
+      return;
+    }
 
     try {
-      // 1. Parse VTT to get timestamps map if needed, or pass raw text behavior.
-      // The current GemininService.analyzeTranscript takes raw text and Gemini extracts timestamps.
-      // We might want to pass the parsed cues to be more precise, but following Phase 1 logic:
-      // We send text to Gemini.
+      // 1. Save Transcript to Store for Context Awareness
+      await useAppStore.getState().setTranscript(transcriptText);
 
-      // However, we also have GemininService.parseVTT available. 
-      // Let's use it to clean the text at least? 
-      // Actually, let's stick to the simpler flow: 
-      // Send raw text -> Gemini returns JSON tasks with timestamps.
-
+      // 2. Generate Tasks
       const newTasks = await GemininService.analyzeTranscript(apiKey, transcriptText);
-
-      // 2. Clear old legacy
-      // (Optional: resetProject() if we want fresh start)
 
       // 3. Populate Store
       for (const task of newTasks) {
         await saveTask(task);
       }
 
-      // 4. Start Video Processing (Screenshots)
-      // We need to wait a tick for store to update? 
-      // No, saveTask is async but startProcessing checks store.
-      // We should trigger processing *after* tasks are in store.
-
-      // Small delay or effect dependency could handle this, 
-      // but explicit call is safer if tasks is valid.
-
-      // Limitation: useVideoProcessor reads `tasks` from store. 
-      // Since `saveTask` updates store, but `tasks` in `useVideoProcessor` comes from the hook's subscription,
-      // we might need to rely on an Effect or simply call startProcessing() in a `setTimeout`.
+      // 4. Start Video Processing
       setTimeout(() => {
         startProcessing();
       }, 500);
 
     } catch (e: any) {
       console.error("Analysis Failed", e);
-      if (e?.message?.includes('503') || e?.message?.includes('overloaded')) {
+      if (e?.message?.includes('503') || e?.message?.includes('overloaded') || e?.message === "OVERLOADED") {
         alert("Gemini is currently overloaded. Please wait 30 seconds and try again.");
       } else {
         alert("Analysis Failed. Check console for details.");
@@ -118,20 +113,40 @@ export default function Home() {
 
 
   // Handler: Cubit Generation
-  const handleCubit = async (taskId: string, taskName: string, desc: string) => {
+  const handleCubit = async (taskId: string, context: string, stepId?: string) => {
     if (!apiKey) return;
+    if (!isOnline) {
+      alert("You are offline. AI features unavailable.");
+      return;
+    }
 
-    // 1. Optimistic / Loading State could go here
+    // Get current transcript from store
+    const fullTranscript = useAppStore.getState().transcript;
 
     try {
-      const steps = await GemininService.generateSubSteps(apiKey, taskName, desc);
+      // Pass fullTranscript to service
+      const rawSteps = await GemininService.generateSubSteps(apiKey, "Task", context, fullTranscript || undefined);
 
-      // 2. Update Store
-      await useAppStore.getState().updateTask(taskId, { sub_steps: steps });
+      if (stepId) {
+        // CASE: DEEP DIVE (Level 3)
+        await useAppStore.getState().addMicroSteps(taskId, stepId, rawSteps);
+      } else {
+        // CASE: TOP LEVEL (Level 2)
+        const objectSteps = rawSteps.map(text => ({
+          id: crypto.randomUUID(),
+          text: text,
+          sub_steps: []
+        }));
+        await useAppStore.getState().updateTask(taskId, { sub_steps: objectSteps });
+      }
 
-    } catch (e) {
-      alert("Failed to Cubit.");
+    } catch (e: any) {
       console.error(e);
+      if (e.message === "OVERLOADED") {
+        alert("⚠️ AI is overloaded (429). Please wait 10 seconds and try again.");
+      } else {
+        alert("Failed to Cubit: " + (e.message || "Unknown Error"));
+      }
     }
   };
 
@@ -141,7 +156,7 @@ export default function Home() {
   const safeApiKey = mounted ? apiKey : null;
 
   return (
-    <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
+    <main className="min-h-screen text-zinc-100 flex flex-col">
       <SettingsDialog />
 
       {/* Hidden Video Element for Processing */}
@@ -154,12 +169,18 @@ export default function Home() {
       />
 
       {/* Header */}
-      <header className="h-[60px] border-b border-zinc-800 flex items-center justify-between px-6 bg-zinc-950/80 backdrop-blur z-10">
-        <div className="font-bold text-lg tracking-tight">
-          Cubit Connect <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">MVP</span>
+      <header className="sticky top-0 z-50 h-[60px] border-b border-white/10 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-xl">
+        <div className="font-bold text-lg tracking-tight flex items-center gap-2">
+          Cubit Connect
+          <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">MVP</span>
+          {!isOnline && (
+            <span className="text-xs bg-red-900/50 text-red-200 border border-red-800 px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
+              <span className="w-1.5 h-1.5 bg-red-500 rounded-full" /> Offline
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-4">
-          <ExportControl />
+          <ExportControl onPrint={() => handlePrint && handlePrint()} />
           {safeApiKey && (
             <button
               onClick={() => {
@@ -189,8 +210,8 @@ export default function Home() {
                 }
               }}
               className={`text-xs px-3 py-1.5 rounded transition-colors ${confirmingReset
-                  ? "bg-red-600 text-white hover:bg-red-500 font-bold"
-                  : "text-red-400 hover:text-red-300"
+                ? "bg-red-600 text-white hover:bg-red-500 font-bold"
+                : "text-red-400 hover:text-red-300"
                 }`}
             >
               {confirmingReset ? "Sure? Click Again" : "Reset Project"}
@@ -234,6 +255,9 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* Shadow Component for Printing */}
+      <PrintableReport ref={printRef} tasks={tasks} />
     </main>
   );
 }
