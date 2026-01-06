@@ -8,7 +8,13 @@ export default function SettingsDialog() {
     const [inputKey, setInputKey] = useState('');
     const [isValidating, setIsValidating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [mounted, setMounted] = useState(false);
 
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!mounted) return null;
     if (apiKey) return null;
 
     const handleSave = async () => {
