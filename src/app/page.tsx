@@ -28,7 +28,27 @@ export default function Home() {
   // Hydrate on mount
   useEffect(() => {
     loadProject();
+    setMounted(true);
   }, [loadProject]);
+
+  const [mounted, setMounted] = useState(false);
+  const [confirmingReset, setConfirmingReset] = useState(false);
+  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
+
+  // Auto-reset confirmation states if tasks change or 3s timeout
+  useEffect(() => {
+    if (confirmingReset) {
+      const timer = setTimeout(() => setConfirmingReset(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmingReset]);
+
+  useEffect(() => {
+    if (confirmingDisconnect) {
+      const timer = setTimeout(() => setConfirmingDisconnect(false), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [confirmingDisconnect]);
 
   // Handler: When user selects a video file
   const handleVideoSelected = (file: File) => {
@@ -115,6 +135,11 @@ export default function Home() {
     }
   };
 
+  // Hydration Fix:
+  // Server sees null apiKey. Client sees value.
+  // We must force client to behave like server until mounted.
+  const safeApiKey = mounted ? apiKey : null;
+
   return (
     <main className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col">
       <SettingsDialog />
@@ -135,24 +160,40 @@ export default function Home() {
         </div>
         <div className="flex items-center gap-4">
           <ExportControl />
-          {apiKey && (
+          {safeApiKey && (
             <button
               onClick={() => {
-                if (confirm("Disconnect API Key & Clear Data?")) fullLogout();
+                if (confirmingDisconnect) {
+                  fullLogout();
+                  setConfirmingDisconnect(false);
+                } else {
+                  setConfirmingDisconnect(true);
+                }
               }}
-              className="text-xs bg-zinc-900 border border-zinc-700 hover:bg-zinc-800 text-zinc-300 px-3 py-1.5 rounded transition-colors"
+              className={`text-xs px-3 py-1.5 rounded transition-colors border ${confirmingDisconnect
+                ? "bg-red-900/50 border-red-500 text-red-200 hover:bg-red-900"
+                : "bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-300"
+                }`}
             >
-              Disconnect Key
+              {confirmingDisconnect ? "Confirm Disconnect?" : "Disconnect Key"}
             </button>
           )}
-          {tasks.length > 0 && (
+          {mounted && tasks.length > 0 && (
             <button
               onClick={() => {
-                if (confirm("Reset everything?")) resetProject();
+                if (confirmingReset) {
+                  resetProject();
+                  setConfirmingReset(false);
+                } else {
+                  setConfirmingReset(true);
+                }
               }}
-              className="text-xs text-red-400 hover:text-red-300 transition-colors"
+              className={`text-xs px-3 py-1.5 rounded transition-colors ${confirmingReset
+                  ? "bg-red-600 text-white hover:bg-red-500 font-bold"
+                  : "text-red-400 hover:text-red-300"
+                }`}
             >
-              Reset Project
+              {confirmingReset ? "Sure? Click Again" : "Reset Project"}
             </button>
           )}
         </div>
@@ -160,7 +201,7 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex-1 relative">
-        {!apiKey ? (
+        {!safeApiKey ? (
           <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
             Waiting for Configuration...
           </div>
