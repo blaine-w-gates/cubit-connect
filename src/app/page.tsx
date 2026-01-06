@@ -79,9 +79,13 @@ export default function Home() {
         startProcessing();
       }, 500);
 
-    } catch (e) {
+    } catch (e: any) {
       console.error("Analysis Failed", e);
-      alert("Analysis Failed. Check console.");
+      if (e?.message?.includes('503') || e?.message?.includes('overloaded')) {
+        alert("Gemini is currently overloaded. Please wait 30 seconds and try again.");
+      } else {
+        alert("Analysis Failed. Check console for details.");
+      }
     }
   };
 
