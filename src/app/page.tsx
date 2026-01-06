@@ -32,7 +32,7 @@ export default function Home() {
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({
     contentRef: printRef,
-    documentTitle: "Cubit Connect Report"
+    documentTitle: `Cubit_Connect_Report_${new Date().toISOString().split('T')[0]}`
   });
 
   // Hydrate on mount

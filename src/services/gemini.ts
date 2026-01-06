@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TaskItem } from './storage';
 
-const MODEL_NAME = "gemini-2.0-flash-lite-preview-02-05"; // Pinned Stable Version
+const MODEL_NAME = "gemini-2.5-flash-lite"; // Standard 2026 Production Model
 const MIN_DELAY_MS = 2000;
 let lastCallTime = 0;
 

@@ -1,5 +1,5 @@
-import { useRef, ChangeEvent } from 'react';
-import { Download, Upload, Printer } from 'lucide-react';
+import { useRef, ChangeEvent, useState } from 'react';
+import { Download, Upload, Printer, Copy, Check } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { TaskItem } from '@/services/storage';
 
@@ -10,6 +10,40 @@ interface ExportControlProps {
 export default function ExportControl({ onPrint }: ExportControlProps) {
     const { tasks, importTasks } = useAppStore();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [copied, setCopied] = useState(false);
+
+    const handleCopyMarkdown = async () => {
+        if (tasks.length === 0) return;
+
+        let md = `# Cubit Connect Report\nGenerated: ${new Date().toLocaleDateString()}\n\n`;
+
+        tasks.forEach((task, i) => {
+            // Level 1
+            md += `## ${i + 1}. ${task.task_name}\n`;
+            md += `> ${task.description}\n\n`;
+
+            // Level 2
+            task.sub_steps?.forEach((step, j) => {
+                md += `* **${i + 1}.${j + 1} ${step.text}**\n`;
+
+                // Level 3
+                step.sub_steps?.forEach((micro) => {
+                    const text = typeof micro === 'string' ? micro : micro.text;
+                    md += `  * ${text}\n`;
+                });
+                md += `\n`;
+            });
+            md += `\n---\n\n`;
+        });
+
+        try {
+            await navigator.clipboard.writeText(md);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+            console.error("Failed to copy", err);
+        }
+    };
 
     const handleExport = () => {
         if (tasks.length === 0) return;
@@ -69,6 +103,17 @@ export default function ExportControl({ onPrint }: ExportControlProps) {
 
     return (
         <div className="flex items-center gap-2">
+            <button
+                onClick={handleCopyMarkdown}
+                disabled={tasks.length === 0}
+                className="flex items-center gap-2 text-xs text-zinc-400 hover:text-emerald-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Copy Markdown for AI"
+            >
+                {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                <span className="hidden sm:inline">{copied ? 'Copied' : 'MD'}</span>
+            </button>
+            <div className="h-4 w-[1px] bg-zinc-800 mx-1" />
+
             {onPrint && (
                 <>
                     <button
