@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { GemininService } from '@/services/gemini';
 import { Loader2 } from 'lucide-react';
