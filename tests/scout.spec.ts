@@ -1,47 +1,79 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Scout Feature', () => {
+
     test.beforeEach(async ({ page }) => {
-        await page.goto('/');
-        // Wait for hydration and basic UI
-        await expect(page.locator('h1').filter({ hasText: 'Cubit Connect' })).toBeVisible({ timeout: 10000 });
+        // Mock Gemini API
+        await page.route(/generativelanguage\.googleapis\.com/, async route => {
+            const url = route.request().url();
+            if (url.includes(':countTokens')) {
+                await route.fulfill({ json: { totalTokens: 10 } });
+            } else {
+                const json = {
+                    candidates: [{
+                        content: {
+                            parts: [{
+                                text: JSON.stringify([
+                                    "#SourdoughStarter",
+                                    "#BakingTips",
+                                    "#BreadMaking"
+                                ])
+                            }]
+                        }
+                    }]
+                };
+                await route.fulfill({ json });
+            }
+        });
     });
 
-    test('should allow user to enter a topic and generate results', async ({ page }) => {
-        // 1. Wait for UploadZone to appear
-        // Use a distinctive element from UploadZone to ensure FadeIn is complete
-        await expect(page.getByText('Start Analysis')).toBeVisible();
+    test('Happy Path: Ignite and Scout', async ({ page }) => {
+        // 1. Visit Landing Page
+        await page.goto('/');
+        await expect(page.locator('h1').filter({ hasText: 'Recipes for Life' })).toBeVisible();
 
-        // 2. Navigate to Scout Mode
-        const scoutTrigger = page.getByText('Scout for topics');
-        await expect(scoutTrigger).toBeVisible();
-        await scoutTrigger.click();
+        // 2. Ignite (Login)
+        await page.getByPlaceholder(/Enter API keys/i).fill('test-key');
+        await page.getByRole('button', { name: 'START' }).click();
 
-        // 3. Verify Scout UI is visible
-        await expect(page.getByText('The Scout')).toBeVisible();
+        // 3. Verify Engine Loaded
+        await page.waitForURL('**/engine');
+        await expect(page.getByText('Cubit Connect', { exact: false })).toBeVisible();
 
-        // 4. Locate the Scout Input
+        // 4. Open Scout
+        // Click the Scout button in the Header
+        await page.getByRole('button', { name: 'Scout' }).first().click();
+
+        // 5. Verify Scout View
+        await expect(page.getByRole('heading', { name: 'The Scout' })).toBeVisible();
+
+        // 6. Enter Topic and Search
         const scoutInput = page.getByPlaceholder('What do you want to learn?');
         await expect(scoutInput).toBeVisible();
-
-        // 5. Test Case: No API Key (Expected Failure Flow)
         await scoutInput.fill('Sourdough');
-        await page.getByRole('button', { name: 'SEARCH' }).click();
+        await page.getByRole('button', { name: 'SEARCH', exact: true }).click();
 
-        // Expect Toast Error
-        await expect(page.getByText('Ignition Key Missing')).toBeVisible();
+        // 7. Verify Results
+        await expect(page.getByText('#SourdoughStarter')).toBeVisible();
     });
 
-    test('should toggle platforms', async ({ page }) => {
-        // Wait for load
-        await expect(page.getByText('Start Analysis')).toBeVisible();
+    test('Happy Path: Toggle Platforms', async ({ page }) => {
+        // Inject key to skip login
+        await page.addInitScript(() => {
+            localStorage.setItem('cubit_api_key', 'test-key');
+        });
 
-        // Navigate
-        await page.getByText('Scout for topics').click();
+        await page.goto('/engine');
 
+        // Open Scout
+        await page.getByRole('button', { name: 'Scout' }).first().click();
+
+        // Toggle Platform
         const redditBtn = page.getByRole('button', { name: 'Reddit' });
-
         await redditBtn.click();
-        await expect(redditBtn).toBeVisible();
+
+        // Verify visual state
+        await expect(redditBtn).toHaveAttribute('aria-pressed', 'true');
     });
+
 });
