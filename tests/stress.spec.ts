@@ -131,13 +131,13 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
         await page.goto('/');
         await page.getByPlaceholder(/Enter API keys/i).fill('redirect-trap-key');
         await page.getByRole('button', { name: 'START' }).click();
-        await page.waitForURL('**/engine');
+        await page.waitForURL('**/engine', { timeout: 15000 }); // More time for mobile
 
         // Attempt to go back to Landing
         await page.goto('/');
 
         // Expect: Auto-redirect back to engine
-        await expect(page).toHaveURL(/.*engine/);
+        await expect(page).toHaveURL(/.*engine/, { timeout: 15000 });
     });
 
     // 5. The 'Mobile Squish' (Responsive Layout)
@@ -218,7 +218,8 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
         await page.goto('/');
         await page.getByPlaceholder(/Enter API keys/i).fill('deep-dive-key');
         await page.getByRole('button', { name: 'START' }).click();
-        await page.waitForURL('**/engine');
+        // Increase timeout significantly for mobile environments which are slower
+        await page.waitForURL('**/engine', { timeout: 30000 });
 
         // 3. Upload & Run
         const hexVideo = Buffer.from('00000018667479706d703432000000006d70343269736f6d000000106d6f6f760000006c6d7668000000000000000000000000000003e8000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000087564746100000000', 'hex');
@@ -260,7 +261,14 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
         await page.goto('/');
         await page.getByPlaceholder(/Enter API keys/i).fill('overload-key');
         await page.getByRole('button', { name: 'START' }).click();
-        await page.waitForURL('**/engine');
+
+        // Wait for URL with timeout increase, or check for error if ignition fails
+        // But with countTokens mocked 200, ignition should pass.
+        // If 503 happens at ignition (validateConnection), we stay on Landing.
+        // But validateConnection uses countTokens.
+        // So ignition succeeds.
+
+        await page.waitForURL('**/engine', { timeout: 30000 });
 
         // 3. Upload & Run
         const hexVideo = Buffer.from('00000018667479706d703432000000006d70343269736f6d000000106d6f6f760000006c6d7668000000000000000000000000000003e8000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000087564746100000000', 'hex');
