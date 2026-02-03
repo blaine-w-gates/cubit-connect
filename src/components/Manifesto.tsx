@@ -3,93 +3,110 @@ import { Compass, Layers, Share2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 
 export function Manifesto() {
-    const { setInputMode } = useAppStore();
+  const { setInputMode } = useAppStore();
 
-    const scrollToIgnition = () => {
-        document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
-    };
+  const scrollToIgnition = () => {
+    document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
-    const [activeAlert, setActiveAlert] = useState<string | null>(null);
+  const [activeAlert, setActiveAlert] = useState<string | null>(null);
 
-    return (
-        <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 animate-in fade-in duration-700 relative">
-            <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-50 mb-4 tracking-tight">
-                Learn, Create, Engage!
-            </h2>
-            <p className="text-zinc-500 dark:text-zinc-400 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
-                You can copy posts, expand them into step-by-step plans. Use your recipes to engage with others, and make them your own posts.
+  return (
+    <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 animate-in fade-in duration-700 relative">
+      <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-50 mb-4 tracking-tight">
+        Learn, Create, Engage!
+      </h2>
+      <p className="text-zinc-500 dark:text-zinc-400 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
+        You can copy posts, expand them into step-by-step plans. Use your recipes to engage with
+        others, and make them your own posts.
+      </p>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-3xl w-full">
+        {/* SCOUT CARD */}
+        <button
+          onClick={() => {
+            setInputMode('scout');
+            scrollToIgnition();
+          }}
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+        >
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors self-center">
+            <Compass className="w-6 h-6" />
+          </div>
+          <div className="space-y-1 w-full">
+            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Scout</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+              Find high-signal topics.
             </p>
+          </div>
+        </button>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-3xl w-full">
-                {/* SCOUT CARD */}
-                <button
-                    onClick={() => {
-                        setInputMode('scout');
-                        scrollToIgnition();
-                    }}
-                    className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
-                >
-                    <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors self-center">
-                        <Compass className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1 w-full">
-                        <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Scout</h3>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">Find high-signal topics.</p>
-                    </div>
-                </button>
+        {/* STRUCTURE CARD */}
+        <button
+          onClick={() => {
+            setInputMode('video');
+            scrollToIgnition();
+          }}
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+        >
+          <div className="p-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors self-center">
+            <Layers className="w-6 h-6" />
+          </div>
+          <div className="space-y-1 w-full">
+            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Structure</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+              Break complexity into steps.
+            </p>
+          </div>
+        </button>
 
-                {/* STRUCTURE CARD */}
-                <button
-                    onClick={() => {
-                        setInputMode('video');
-                        scrollToIgnition();
-                    }}
-                    className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
-                >
-                    <div className="p-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors self-center">
-                        <Layers className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1 w-full">
-                        <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Structure</h3>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">Break complexity into steps.</p>
-                    </div>
-                </button>
+        {/* EXPORT CARD */}
+        <button
+          onClick={() =>
+            setActiveAlert(
+              'Start by uploading a video and transcript or pasting text of something you want to learn.',
+            )
+          }
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+        >
+          <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors self-center">
+            <Share2 className="w-6 h-6" />
+          </div>
+          <div className="space-y-1 w-full">
+            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Export</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">
+              PDF & Markdown ready.
+            </p>
+          </div>
+        </button>
+      </div>
 
-                {/* EXPORT CARD */}
-                <button
-                    onClick={() => setActiveAlert("Start by uploading a video and transcript or pasting text of something you want to learn.")}
-                    className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
-                >
-                    <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors self-center">
-                        <Share2 className="w-6 h-6" />
-                    </div>
-                    <div className="space-y-1 w-full">
-                        <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Export</h3>
-                        <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center">PDF & Markdown ready.</p>
-                    </div>
-                </button>
+      {/* CUSTOM ALERT MODAL */}
+      {activeAlert && (
+        <div
+          className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-black/60 backdrop-blur-sm rounded-xl"
+          onClick={() => setActiveAlert(null)}
+        >
+          <div
+            className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-700 max-w-sm mx-4 animate-in zoom-in-95 duration-200 text-center space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-full w-12 h-12 flex items-center justify-center mx-auto">
+              <Share2 className="w-6 h-6" />
             </div>
-
-            {/* CUSTOM ALERT MODAL */}
-            {activeAlert && (
-                <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-black/60 backdrop-blur-sm rounded-xl" onClick={() => setActiveAlert(null)}>
-                    <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-700 max-w-sm mx-4 animate-in zoom-in-95 duration-200 text-center space-y-4" onClick={(e) => e.stopPropagation()}>
-                        <div className="p-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-full w-12 h-12 flex items-center justify-center mx-auto">
-                            <Share2 className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h4 className="font-bold text-zinc-900 dark:text-zinc-50 mb-1">Hold on!</h4>
-                            <p className="text-sm text-zinc-500 dark:text-zinc-400">{activeAlert}</p>
-                        </div>
-                        <button
-                            onClick={() => setActiveAlert(null)}
-                            className="bg-black dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all"
-                        >
-                            Got it
-                        </button>
-                    </div>
-                </div>
-            )}
+            <div>
+              <h4 className="font-bold text-zinc-900 dark:text-zinc-50 mb-1">Hold on!</h4>
+              <p className="text-sm text-zinc-500 dark:text-zinc-400">{activeAlert}</p>
+            </div>
+            <button
+              onClick={() => setActiveAlert(null)}
+              className="bg-black dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all"
+            >
+              Got it
+            </button>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 }

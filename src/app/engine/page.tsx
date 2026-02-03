@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
@@ -17,20 +17,19 @@ import ProcessingLog from '@/components/ProcessingLog';
 import { GlobalAlert } from '@/components/GlobalAlert';
 import { FadeIn } from '@/components/ui/FadeIn';
 
-
 export default function EnginePage() {
   const router = useRouter();
 
   // 🧠 PERFORMANCE: Granular Selectors
-  const apiKey = useAppStore(state => state.apiKey);
-  const tasks = useAppStore(state => state.tasks);
-  const loadProject = useAppStore(state => state.loadProject);
-  const resetProject = useAppStore(state => state.resetProject);
-  const hasVideoHandle = useAppStore(state => state.hasVideoHandle);
-  const projectTitle = useAppStore(state => state.projectTitle);
-  const projectType = useAppStore(state => state.projectType);
-  const isProcessing = useAppStore(state => state.isProcessing);
-  const isHydrated = useAppStore(state => state.isHydrated); // New Selector
+  const apiKey = useAppStore((state) => state.apiKey);
+  const tasks = useAppStore((state) => state.tasks);
+  const loadProject = useAppStore((state) => state.loadProject);
+  const resetProject = useAppStore((state) => state.resetProject);
+  const hasVideoHandle = useAppStore((state) => state.hasVideoHandle);
+  const projectTitle = useAppStore((state) => state.projectTitle);
+  const projectType = useAppStore((state) => state.projectType);
+  const isProcessing = useAppStore((state) => state.isProcessing);
+  const isHydrated = useAppStore((state) => state.isHydrated); // New Selector
   // const setInputMode = useAppStore(state => state.setInputMode); // Unused
   // const isOnline = useNetworkStatus(); // Unused here, passed to children via logic check if needed? No, logic is in components.
   const { videoRef, startProcessing } = useVideoProcessor();
@@ -42,7 +41,9 @@ export default function EnginePage() {
     documentTitle: `Cubit_Report_${projectTitle.replace(/[^a-z0-9]/gi, '_')}`, // Clean Filename
     // @ts-expect-error: onBeforeGetContent exists in standard usage but types may be strict
     onBeforeGetContent: () => {
-      toast.info("Generating PDF Report...", { description: "Please wait while we prepare your document." });
+      toast.info('Generating PDF Report...', {
+        description: 'Please wait while we prepare your document.',
+      });
     },
   });
 
@@ -68,7 +69,7 @@ export default function EnginePage() {
   // Wrapper for Hard Reset (Clears Store + Remounts Input Components)
   const handleManualReset = async () => {
     await resetProject();
-    setResetKey(prev => prev + 1);
+    setResetKey((prev) => prev + 1);
   };
 
   // Auto-reset confirmation states
@@ -81,7 +82,7 @@ export default function EnginePage() {
 
   // Re-trigger processing if we gain the video handle and have pending tasks
   useEffect(() => {
-    if (hasVideoHandle && tasks.some(t => !t.screenshot_base64)) {
+    if (hasVideoHandle && tasks.some((t) => !t.screenshot_base64)) {
       startProcessing();
     }
   }, [hasVideoHandle, tasks, startProcessing]);
@@ -95,7 +96,6 @@ export default function EnginePage() {
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
       <GlobalAlert />
-
 
       {/* Hidden Video Element for Processing */}
       <video
@@ -119,23 +119,19 @@ export default function EnginePage() {
       />
 
       {/* Main Content: THE WORKSHEET */}
-      <FadeIn when={isHydrated} className="flex-1 w-full max-w-7xl mx-auto border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300">
-
+      <FadeIn
+        when={isHydrated}
+        className="flex-1 w-full max-w-7xl mx-auto border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300"
+      >
         {/* Step 2: The Assessment (Bento Grid) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
-
-
           {/* Main App (Left) */}
           <div className="lg:col-span-12 space-y-8">
-
             {/* 2A: Ignition (Manifesto + Input) */}
             <div className="border border-black dark:border-stone-700 p-1 bg-[#FAFAFA] dark:bg-stone-950/50 transition-colors">
               <div className="border border-black dark:border-stone-700 border-dashed p-6">
-
                 {/* Manifesto Splash (Visible only when empty and idle) */}
-                {tasks.length === 0 && !isProcessing && (
-                  <Manifesto />
-                )}
+                {tasks.length === 0 && !isProcessing && <Manifesto />}
 
                 {/* Video/Text Input */}
                 <VideoInput key={resetKey} videoRef={videoRef} startProcessing={startProcessing} />
@@ -161,16 +157,19 @@ export default function EnginePage() {
               </div>
             )}
           </div>
-
         </div>
-
       </FadeIn>
 
       {/* Task 3: The 'System Drawer' (Fixed Bottom) */}
       <ProcessingLog />
 
       {/* Shadow Component for Printing */}
-      <PrintableReport ref={printRef} tasks={tasks} projectTitle={projectTitle} projectType={projectType} />
+      <PrintableReport
+        ref={printRef}
+        tasks={tasks}
+        projectTitle={projectTitle}
+        projectType={projectType}
+      />
     </main>
   );
 }
