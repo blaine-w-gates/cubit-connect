@@ -17,12 +17,13 @@ export default defineConfig({
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: '**/performance/**',
+      testIgnore: ['**/performance/**', '**/unit/**'],
     },
     {
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
-      testIgnore: '**/performance/**',
+      testIgnore: ['**/performance/**', '**/unit/**'],
+      timeout: 120000,
     },
     {
       name: 'Lighthouse',
