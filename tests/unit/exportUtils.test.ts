@@ -20,9 +20,11 @@ describe('generateMarkdown', () => {
   it('should generate basic markdown', () => {
     const tasks = [
       {
+        id: '1',
         task_name: 'Task 1',
         timestamp_seconds: 0,
         description: 'Desc 1',
+        screenshot_base64: '',
         sub_steps: [],
       },
     ];
@@ -35,8 +37,11 @@ describe('generateMarkdown', () => {
   it('should format timestamps correctly', () => {
     const tasks = [
       {
+        id: '1',
         task_name: 'Task 1',
         timestamp_seconds: 65, // 01:05
+        description: '',
+        screenshot_base64: '',
         sub_steps: [],
       },
     ];
