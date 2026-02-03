@@ -37,7 +37,8 @@ test.describe('Scout Feature', () => {
         await page.getByRole('button', { name: 'START' }).click();
 
         // 3. Verify Engine Loaded
-        await page.waitForURL('**/engine');
+        // Increased timeout for Mobile Safari in CI which can be very slow
+        await page.waitForURL('**/engine', { timeout: 60000 });
         await expect(page.getByText('Cubit Connect', { exact: false })).toBeVisible();
 
         // 4. Open Scout
