@@ -30,7 +30,7 @@ test.describe('Accessibility Compliance', () => {
         await page.goto('/engine');
 
         // Wait for engine load
-        await expect(page.getByText('Cubit Connect', { exact: false }).first()).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
 
         const accessibilityScanResults = await new AxeBuilder({ page })
             .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
