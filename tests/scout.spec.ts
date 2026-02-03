@@ -1,80 +1,78 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Scout Feature', () => {
+  test.beforeEach(async ({ page }) => {
+    // Mock Gemini API
+    await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
+      const url = route.request().url();
+      if (url.includes(':countTokens')) {
+        await route.fulfill({ json: { totalTokens: 10 } });
+      } else {
+        const json = {
+          candidates: [
+            {
+              content: {
+                parts: [
+                  {
+                    text: JSON.stringify(['#SourdoughStarter', '#BakingTips', '#BreadMaking']),
+                  },
+                ],
+              },
+            },
+          ],
+        };
+        await route.fulfill({ json });
+      }
+    });
+  });
 
-    test.beforeEach(async ({ page }) => {
-        // Mock Gemini API
-        await page.route(/generativelanguage\.googleapis\.com/, async route => {
-            const url = route.request().url();
-            if (url.includes(':countTokens')) {
-                await route.fulfill({ json: { totalTokens: 10 } });
-            } else {
-                const json = {
-                    candidates: [{
-                        content: {
-                            parts: [{
-                                text: JSON.stringify([
-                                    "#SourdoughStarter",
-                                    "#BakingTips",
-                                    "#BreadMaking"
-                                ])
-                            }]
-                        }
-                    }]
-                };
-                await route.fulfill({ json });
-            }
-        });
+  test('Happy Path: Ignite and Scout', async ({ page }) => {
+    // 1. Visit Landing Page
+    await page.goto('/');
+    await expect(page.locator('h1').filter({ hasText: 'Recipes for Life' })).toBeVisible();
+
+    // 2. Ignite (Login)
+    await page.getByPlaceholder(/Enter API keys/i).fill('test-key');
+    await page.getByRole('button', { name: 'START' }).click();
+
+    // 3. Verify Engine Loaded
+    // Increased timeout for Mobile Safari in CI which can be very slow
+    await page.waitForURL('**/engine', { timeout: 60000 });
+    await expect(page.getByText('Cubit Connect', { exact: false })).toBeVisible();
+
+    // 4. Open Scout
+    // Click the Scout button in the Header
+    await page.getByRole('button', { name: 'Scout' }).first().click();
+
+    // 5. Verify Scout View
+    await expect(page.getByRole('heading', { name: 'The Scout' })).toBeVisible();
+
+    // 6. Enter Topic and Search
+    const scoutInput = page.getByPlaceholder('What do you want to learn?');
+    await expect(scoutInput).toBeVisible();
+    await scoutInput.fill('Sourdough');
+    await page.getByRole('button', { name: 'SEARCH', exact: true }).click();
+
+    // 7. Verify Results
+    await expect(page.getByText('#SourdoughStarter')).toBeVisible();
+  });
+
+  test('Happy Path: Toggle Platforms', async ({ page }) => {
+    // Inject key to skip login
+    await page.addInitScript(() => {
+      localStorage.setItem('cubit_api_key', 'test-key');
     });
 
-    test('Happy Path: Ignite and Scout', async ({ page }) => {
-        // 1. Visit Landing Page
-        await page.goto('/');
-        await expect(page.locator('h1').filter({ hasText: 'Recipes for Life' })).toBeVisible();
+    await page.goto('/engine');
 
-        // 2. Ignite (Login)
-        await page.getByPlaceholder(/Enter API keys/i).fill('test-key');
-        await page.getByRole('button', { name: 'START' }).click();
+    // Open Scout
+    await page.getByRole('button', { name: 'Scout' }).first().click();
 
-        // 3. Verify Engine Loaded
-        // Increased timeout for Mobile Safari in CI which can be very slow
-        await page.waitForURL('**/engine', { timeout: 60000 });
-        await expect(page.getByText('Cubit Connect', { exact: false })).toBeVisible();
+    // Toggle Platform
+    const redditBtn = page.getByRole('button', { name: 'Reddit' });
+    await redditBtn.click();
 
-        // 4. Open Scout
-        // Click the Scout button in the Header
-        await page.getByRole('button', { name: 'Scout' }).first().click();
-
-        // 5. Verify Scout View
-        await expect(page.getByRole('heading', { name: 'The Scout' })).toBeVisible();
-
-        // 6. Enter Topic and Search
-        const scoutInput = page.getByPlaceholder('What do you want to learn?');
-        await expect(scoutInput).toBeVisible();
-        await scoutInput.fill('Sourdough');
-        await page.getByRole('button', { name: 'SEARCH', exact: true }).click();
-
-        // 7. Verify Results
-        await expect(page.getByText('#SourdoughStarter')).toBeVisible();
-    });
-
-    test('Happy Path: Toggle Platforms', async ({ page }) => {
-        // Inject key to skip login
-        await page.addInitScript(() => {
-            localStorage.setItem('cubit_api_key', 'test-key');
-        });
-
-        await page.goto('/engine');
-
-        // Open Scout
-        await page.getByRole('button', { name: 'Scout' }).first().click();
-
-        // Toggle Platform
-        const redditBtn = page.getByRole('button', { name: 'Reddit' });
-        await redditBtn.click();
-
-        // Verify visual state
-        await expect(redditBtn).toHaveAttribute('aria-pressed', 'true');
-    });
-
+    // Verify visual state
+    await expect(redditBtn).toHaveAttribute('aria-pressed', 'true');
+  });
 });

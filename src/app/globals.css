@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @plugin "tailwindcss-animate";
 
@@ -13,7 +13,7 @@
 
 /* 3. Define the actual color values */
 :root {
-  --background: #FAFAFA;
+  --background: #fafafa;
   --foreground: #111111;
   color-scheme: light;
 }
@@ -21,7 +21,7 @@
 .dark {
   --background: #1c1917;
   /* Stone 900 (Warm Dark Grey) */
-  --foreground: #E6E4D9;
+  --foreground: #e6e4d9;
   /* Antigravity Beige */
   color-scheme: dark;
 }
@@ -44,7 +44,7 @@ body {
 .dark ::selection {
   background-color: #57534e;
   /* Stone 600 */
-  color: #E6E4D9;
+  color: #e6e4d9;
   /* Beige */
 }
 

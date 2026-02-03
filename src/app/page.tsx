@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -24,7 +24,7 @@ export default function LandingPage() {
     }
   }, [router]);
 
-  // Re-show header on scroll? User said "header will appear whenever someone is scrolling up or down" 
+  // Re-show header on scroll? User said "header will appear whenever someone is scrolling up or down"
   // Implementing simple scroll listener for re-appearance
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -40,18 +40,21 @@ export default function LandingPage() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-
   return (
     <main className="min-h-[100dvh] bg-[#FAFAFA] text-[#111111] flex flex-col font-sans overflow-x-hidden">
       {/* 1. Header (Sticky/Auto-Hide) */}
-      <header className={`sticky top-0 z-50 h-[60px] flex items-center justify-center bg-[#FAFAFA]/95 border-b border-black transition-transform duration-500 ${showHeader ? 'translate-y-0' : '-translate-y-full'}`}>
+      <header
+        className={`sticky top-0 z-50 h-[60px] flex items-center justify-center bg-[#FAFAFA]/95 border-b border-black transition-transform duration-500 ${showHeader ? 'translate-y-0' : '-translate-y-full'}`}
+      >
         <h1 className="font-serif text-xl font-bold tracking-tight">Recipes for Life</h1>
       </header>
 
       {/* 2. Headline */}
       <section className="text-center py-12 px-4 bg-[#FAFAFA]">
         <h2 className="text-3xl md:text-5xl font-serif font-black mb-4 tracking-tight leading-tight">
-          Turn doom scrolling<br />into micro learning
+          Turn doom scrolling
+          <br />
+          into micro learning
         </h2>
       </section>
 
@@ -73,13 +76,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-
       {/* 5. Ignition (Input) */}
       <section className="bg-white text-[#111111] py-24 px-6 text-center border-t border-black">
         <div className="max-w-xl mx-auto">
-          <p className="font-mono text-xs uppercase tracking-widest mb-4 text-zinc-500">
-            Ignition
-          </p>
+          <p className="font-mono text-xs uppercase tracking-widest mb-4 text-zinc-500">Ignition</p>
           <IgnitionForm />
         </div>
       </section>
