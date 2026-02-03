@@ -1,263 +1,88 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useAppStore } from '@/store/useAppStore';
-import { GemininService } from '@/services/gemini';
-import { useVideoProcessor } from '@/hooks/useVideoProcessor';
-import { useNetworkStatus } from '@/hooks/useNetworkStatus';
-import { useReactToPrint } from 'react-to-print';
-import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import HeroCarousel from '@/components/HeroCarousel';
+import IgnitionForm from '@/components/IgnitionForm';
 
-// Components
-import SettingsDialog from '@/components/SettingsDialog';
-import UploadZone from '@/components/UploadZone';
-import TaskFeed from '@/components/TaskFeed';
-import ExportControl from '@/components/ExportControl';
-import { PrintableReport } from '@/components/PrintableReport';
+export default function LandingPage() {
+  const router = useRouter();
+  const [showHeader, setShowHeader] = useState(true);
 
-export default function Home() {
-  const {
-    apiKey,
-    tasks,
-    loadProject,
-    saveTask,
-    resetProject,
-    fullLogout,
-    hasVideoHandle,
-    setVideoHandleState
-  } = useAppStore();
-
-  const isOnline = useNetworkStatus();
-  const { videoRef, startProcessing } = useVideoProcessor();
-  const printRef = useRef<HTMLDivElement>(null);
-  const handlePrint = useReactToPrint({
-    contentRef: printRef,
-    documentTitle: `Cubit_Connect_Report_${new Date().toISOString().split('T')[0]}`
-  });
-
-  // Hydrate on mount
+  // Auto-hide header after 2 seconds as per requirements
   useEffect(() => {
-    loadProject();
-    setMounted(true);
-  }, [loadProject]);
+    const timer = setTimeout(() => setShowHeader(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const [mounted, setMounted] = useState(false);
-  const [confirmingReset, setConfirmingReset] = useState(false);
-  const [confirmingDisconnect, setConfirmingDisconnect] = useState(false);
-
-  // Auto-reset confirmation states if tasks change or 3s timeout
+  // Back Button Trap: If user has key, send them to Engine automatically
+  // We check directly against LocalStorage here for speed, matching the Store key.
   useEffect(() => {
-    if (confirmingReset) {
-      const timer = setTimeout(() => setConfirmingReset(false), 3000);
-      return () => clearTimeout(timer);
+    // Use the STORE_KEY defined in useAppStore (cubit_api_key)
+    if (typeof window !== 'undefined' && localStorage.getItem('cubit_api_key')) {
+      router.push('/engine');
     }
-  }, [confirmingReset]);
+  }, [router]);
 
+  // Re-show header on scroll? User said "header will appear whenever someone is scrolling up or down" 
+  // Implementing simple scroll listener for re-appearance
   useEffect(() => {
-    if (confirmingDisconnect) {
-      const timer = setTimeout(() => setConfirmingDisconnect(false), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, [confirmingDisconnect]);
-
-  // Handler: When user selects a video file
-  const handleVideoSelected = (file: File) => {
-    if (videoRef.current) {
-      const url = URL.createObjectURL(file);
-      videoRef.current.src = url;
-      setVideoHandleState(true);
-    }
-  };
-
-  // Handler: When user provides VTT and clicks Analyze
-  const handleTranscriptParsed = async (transcriptText: string) => {
-    if (!apiKey) return;
-    if (!isOnline) {
-      alert("You are offline. AI analysis requires an internet connection.");
-      return;
-    }
-
-    try {
-      // 1. Save Transcript to Store for Context Awareness
-      await useAppStore.getState().setTranscript(transcriptText);
-
-      // 2. Generate Tasks
-      const newTasks = await GemininService.analyzeTranscript(apiKey, transcriptText);
-
-      // 3. Populate Store
-      for (const task of newTasks) {
-        await saveTask(task);
-      }
-
-      // 4. Start Video Processing
-      setTimeout(() => {
-        startProcessing();
-      }, 500);
-
-    } catch (e: any) {
-      console.error("Analysis Failed", e);
-      if (e?.message?.includes('503') || e?.message?.includes('overloaded') || e?.message === "OVERLOADED") {
-        alert("Gemini is currently overloaded. Please wait 30 seconds and try again.");
+    let lastScrollY = window.scrollY;
+    const handleScroll = () => {
+      if (window.scrollY < lastScrollY || window.scrollY < 50) {
+        setShowHeader(true);
       } else {
-        alert("Analysis Failed. Check console for details.");
+        setShowHeader(false);
       }
-    }
-  };
+      lastScrollY = window.scrollY;
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
-  // Re-trigger processing if we gain the video handle and have pending tasks
-  useEffect(() => {
-    if (hasVideoHandle && tasks.some(t => !t.screenshot_base64)) {
-      startProcessing();
-    }
-  }, [hasVideoHandle, tasks, startProcessing]);
-
-
-  // Handler: Cubit Generation
-  const handleCubit = async (taskId: string, context: string, stepId?: string) => {
-    if (!apiKey) return;
-    if (!isOnline) {
-      alert("You are offline. AI features unavailable.");
-      return;
-    }
-
-    // Get current transcript from store
-    const fullTranscript = useAppStore.getState().transcript;
-
-    try {
-      // Pass fullTranscript to service
-      const rawSteps = await GemininService.generateSubSteps(apiKey, "Task", context, fullTranscript || undefined);
-
-      if (stepId) {
-        // CASE: DEEP DIVE (Level 3)
-        await useAppStore.getState().addMicroSteps(taskId, stepId, rawSteps);
-      } else {
-        // CASE: TOP LEVEL (Level 2)
-        const objectSteps = rawSteps.map(text => ({
-          id: crypto.randomUUID(),
-          text: text,
-          sub_steps: []
-        }));
-        await useAppStore.getState().updateTask(taskId, { sub_steps: objectSteps });
-      }
-
-    } catch (e: any) {
-      console.error(e);
-      if (e.message === "OVERLOADED") {
-        alert("⚠️ AI is overloaded (429). Please wait 10 seconds and try again.");
-      } else {
-        alert("Failed to Cubit: " + (e.message || "Unknown Error"));
-      }
-    }
-  };
-
-  // Hydration Fix:
-  // Server sees null apiKey. Client sees value.
-  // We must force client to behave like server until mounted.
-  const safeApiKey = mounted ? apiKey : null;
 
   return (
-    <main className="min-h-screen text-zinc-100 flex flex-col">
-      <SettingsDialog />
-
-      {/* Hidden Video Element for Processing */}
-      <video
-        ref={videoRef}
-        className="fixed top-0 left-0 w-1 pointer-events-none opacity-0"
-        playsInline
-        muted
-        crossOrigin="anonymous"
-      />
-
-      {/* Header */}
-      <header className="sticky top-0 z-50 h-[60px] border-b border-white/10 flex items-center justify-between px-6 bg-zinc-950/60 backdrop-blur-xl">
-        <div className="font-bold text-lg tracking-tight flex items-center gap-2">
-          Cubit Connect
-          <span className="text-xs bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">MVP</span>
-          {!isOnline && (
-            <span className="text-xs bg-red-900/50 text-red-200 border border-red-800 px-2 py-0.5 rounded flex items-center gap-1 animate-pulse">
-              <span className="w-1.5 h-1.5 bg-red-500 rounded-full" /> Offline
-            </span>
-          )}
-        </div>
-        <div className="flex items-center gap-4">
-          <ExportControl onPrint={() => handlePrint && handlePrint()} />
-          {safeApiKey && (
-            <button
-              onClick={() => {
-                if (confirmingDisconnect) {
-                  fullLogout();
-                  setConfirmingDisconnect(false);
-                } else {
-                  setConfirmingDisconnect(true);
-                }
-              }}
-              className={`text-xs px-3 py-1.5 rounded transition-colors border ${confirmingDisconnect
-                ? "bg-red-900/50 border-red-500 text-red-200 hover:bg-red-900"
-                : "bg-zinc-900 border-zinc-700 hover:bg-zinc-800 text-zinc-300"
-                }`}
-            >
-              {confirmingDisconnect ? "Confirm Disconnect?" : "Disconnect Key"}
-            </button>
-          )}
-          {mounted && tasks.length > 0 && (
-            <button
-              onClick={() => {
-                if (confirmingReset) {
-                  resetProject();
-                  setConfirmingReset(false);
-                } else {
-                  setConfirmingReset(true);
-                }
-              }}
-              className={`text-xs px-3 py-1.5 rounded transition-colors ${confirmingReset
-                ? "bg-red-600 text-white hover:bg-red-500 font-bold"
-                : "text-red-400 hover:text-red-300"
-                }`}
-            >
-              {confirmingReset ? "Sure? Click Again" : "Reset Project"}
-            </button>
-          )}
-        </div>
+    <main className="min-h-[100dvh] bg-[#FAFAFA] text-[#111111] flex flex-col font-sans overflow-x-hidden">
+      {/* 1. Header (Sticky/Auto-Hide) */}
+      <header className={`sticky top-0 z-50 h-[60px] flex items-center justify-center bg-[#FAFAFA]/95 border-b border-black transition-transform duration-500 ${showHeader ? 'translate-y-0' : '-translate-y-full'}`}>
+        <h1 className="font-serif text-xl font-bold tracking-tight">Recipes for Life</h1>
       </header>
 
-      {/* Main Content */}
-      <div className="flex-1 relative">
-        {!safeApiKey ? (
-          <div className="absolute inset-0 flex items-center justify-center text-zinc-600">
-            Waiting for Configuration...
-          </div>
-        ) : tasks.length === 0 ? (
-          <UploadZone
-            onVideoSelected={handleVideoSelected}
-            onTranscriptParsed={handleTranscriptParsed}
-          />
-        ) : (
-          <div className="h-full">
-            {/* Re-Hydration Check */}
-            {!hasVideoHandle && (
-              <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6">
-                <div className="bg-zinc-900 border border-red-900/50 p-6 rounded-xl max-w-md text-center">
-                  <h3 className="text-xl font-bold text-red-400 mb-2">Resume Session</h3>
-                  <p className="text-zinc-400 mb-4">
-                    We have your data, but the browser lost access to the video file.
-                    Please re-select the video to continue processing screenshots.
-                  </p>
-                  <label className="inline-block bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 px-6 rounded-lg cursor-pointer">
-                    Re-Select Video
-                    <input type="file" accept="video/*" className="hidden" onChange={(e) => {
-                      if (e.target.files?.[0]) handleVideoSelected(e.target.files[0]);
-                    }} />
-                  </label>
-                </div>
-              </div>
-            )}
-            <TaskFeed tasks={tasks} onCubit={handleCubit} />
-          </div>
-        )}
-      </div>
+      {/* 2. Headline */}
+      <section className="text-center py-12 px-4 bg-[#FAFAFA]">
+        <h2 className="text-3xl md:text-5xl font-serif font-black mb-4 tracking-tight leading-tight">
+          Turn doom scrolling<br />into micro learning
+        </h2>
+      </section>
 
-      {/* Shadow Component for Printing */}
-      <PrintableReport ref={printRef} tasks={tasks} />
+      {/* 3. Hero Carousel (The Hook) */}
+      <section className="flex-1 w-full max-w-7xl mx-auto border-y border-black bg-[#FAFAFA] min-h-[500px] relative overflow-hidden">
+        <HeroCarousel />
+      </section>
+
+      {/* 4. The Steps (The Process) */}
+      <section className="py-12 bg-white border-b border-black">
+        <div className="max-w-4xl mx-auto px-6 font-mono text-sm space-y-4">
+          <p>STEP ONE – HELP ME SEARCH FOR AN INSTAGRAM TOPIC AND POSTS</p>
+          <p>STEP TWO – USE THE POSTS TO CREATE RECIPES</p>
+          <p>STEP THREE – USE YOUR RECIPE TO INTERACT WITH OTHERS</p>
+          <p>STEP FOUR – CREATE AN ORIGINAL POST WITH YOUR IMPROVEMENTS</p>
+          <p className="pt-4 font-sans text-lg italic">
+            Use social media to learn and add value to the social media space
+          </p>
+        </div>
+      </section>
+
+
+      {/* 5. Ignition (Input) */}
+      <section className="bg-white text-[#111111] py-24 px-6 text-center border-t border-black">
+        <div className="max-w-xl mx-auto">
+          <p className="font-mono text-xs uppercase tracking-widest mb-4 text-zinc-500">
+            Ignition
+          </p>
+          <IgnitionForm />
+        </div>
+      </section>
     </main>
   );
 }

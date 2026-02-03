@@ -13,11 +13,19 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Cubit Connect",
-  description: "AI Video Documentation",
+  title: "Cubit Connect | AI Knowledge Distillation",
+  description: "Turn chaotic video and text into actionable, step-by-step documentation. Local-first, private, and powered by Gemini.",
+  openGraph: {
+    title: "Cubit Connect | AI Knowledge Distillation",
+    description: "Turn chaotic video and text into actionable, step-by-step documentation. Local-first, private, and powered by Gemini.",
+    type: "website",
+  },
 };
 
-import { ErrorBoundary } from "@/components/ErrorBoundary";
+import ErrorBoundary from '@/components/ErrorBoundary';
+import { GlobalErrorListener } from '@/components/GlobalErrorListener';
+import { Toaster } from 'sonner';
+import { ThemeProvider } from 'next-themes';
 
 // ... existing imports ...
 
@@ -33,7 +41,11 @@ export default function RootLayout({
         suppressHydrationWarning
       >
         <ErrorBoundary>
-          {children}
+          <GlobalErrorListener />
+          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            {children}
+            <Toaster richColors position="bottom-right" />
+          </ThemeProvider>
         </ErrorBoundary>
       </body>
     </html>

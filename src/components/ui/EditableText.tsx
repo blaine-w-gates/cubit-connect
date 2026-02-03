@@ -1,4 +1,7 @@
 import { useState, useRef, useEffect, KeyboardEvent } from 'react';
+import ReactMarkdown from 'react-markdown';
+import rehypeSanitize from 'rehype-sanitize';
+import remarkBreaks from 'remark-breaks';
 
 interface EditableTextProps {
     value: string;
@@ -19,25 +22,24 @@ export function EditableText({
     const [tempValue, setTempValue] = useState(value);
     const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
-    // Focus when entering edit mode
+    // Focus management
     useEffect(() => {
         if (isEditing && inputRef.current) {
             inputRef.current.focus();
-            // Optional: Select all text? Or Cursor at end? Let's do cursor at end.
             const len = inputRef.current.value.length;
             inputRef.current.setSelectionRange(len, len);
         }
     }, [isEditing]);
 
-    const handleStartEdit = (e: React.MouseEvent) => {
-        e.stopPropagation(); // Prevent accordion toggling
+    const handleStartEdit = (e: React.SyntheticEvent) => {
+        e.stopPropagation();
         setTempValue(value);
         setIsEditing(true);
     };
 
     const handleSave = () => {
-        if (tempValue.trim() !== value) {
-            onSave(tempValue); // Only save if changed
+        if (tempValue?.trim() !== value) {
+            onSave(tempValue);
         }
         setIsEditing(false);
     };
@@ -48,19 +50,19 @@ export function EditableText({
                 e.preventDefault();
                 handleSave();
             } else if (e.ctrlKey || e.metaKey) {
-                // Ctrl+Enter to save in Textarea
                 e.preventDefault();
                 handleSave();
             }
         }
         if (e.key === 'Escape') {
             e.preventDefault();
-            setTempValue(value); // Revert
+            setTempValue(value);
             setIsEditing(false);
         }
-        e.stopPropagation(); // Prevent parent listeners
+        e.stopPropagation();
     };
 
+    // 1. EDIT MODE (Textarea/Input)
     if (isEditing) {
         if (multiline) {
             return (
@@ -70,8 +72,8 @@ export function EditableText({
                     onChange={(e) => setTempValue(e.target.value)}
                     onBlur={handleSave}
                     onKeyDown={handleKeyDown}
-                    className={`bg-zinc-950/50 border border-blue-500/50 rounded px-1 outline-none resize-none overflow-hidden w-full ${className}`}
-                    style={{ minHeight: '60px' }} // Heuristic for description
+                    className={`bg-zinc-50 dark:bg-stone-800 border border-purple-500 dark:border-purple-600 rounded px-2 py-1 outline-none resize-none w-full text-zinc-900 dark:text-stone-200 ${className}`}
+                    style={{ minHeight: '60px' }}
                     onClick={(e) => e.stopPropagation()}
                 />
             );
@@ -83,23 +85,40 @@ export function EditableText({
                 onChange={(e) => setTempValue(e.target.value)}
                 onBlur={handleSave}
                 onKeyDown={handleKeyDown}
-                className={`bg-zinc-950/50 border border-blue-500/50 rounded px-1 outline-none w-full ${className}`}
+                className={`bg-zinc-50 dark:bg-stone-800 border border-purple-500 dark:border-purple-600 rounded px-2 outline-none w-full text-zinc-900 dark:text-stone-200 ${className}`}
                 onClick={(e) => e.stopPropagation()}
             />
         );
     }
 
+    // 2. VIEW MODE (Markdown)
+    // Uses "prose" for styling but forces compact margins for High Density
     return (
-        <span
+        <div
             onClick={handleStartEdit}
-            className={`cursor-text hover:bg-white/5 rounded px-1 -mx-1 transition-colors border border-transparent hover:border-zinc-800 ${className} ${!value.trim() ? 'italic text-zinc-600' : ''}`}
+            className={`
+                cursor-text hover:bg-zinc-100 dark:hover:bg-stone-800 rounded px-2 py-0.5 -mx-2 transition-colors border border-transparent 
+                min-h-[24px] 
+                prose prose-sm prose-zinc dark:prose-invert max-w-none
+                prose-p:my-0 prose-ul:my-0 prose-li:my-0 prose-headings:my-1
+                leading-normal
+                ${className} 
+                ${!value?.trim() ? 'italic text-zinc-400 dark:text-stone-500' : 'text-zinc-900 dark:text-stone-300'}
+            `}
             role="button"
             tabIndex={0}
-            onKeyDown={(e) => {
-                if (e.key === 'Enter') handleStartEdit(e as any);
-            }}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleStartEdit(e); }}
         >
-            {value || placeholder}
-        </span>
+            {value ? (
+                <ReactMarkdown
+                    rehypePlugins={[rehypeSanitize]}
+                    remarkPlugins={[remarkBreaks]}
+                >
+                    {value}
+                </ReactMarkdown>
+            ) : (
+                placeholder
+            )}
+        </div>
     );
 }

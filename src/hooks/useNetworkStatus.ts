@@ -6,6 +6,7 @@ export function useNetworkStatus() {
     useEffect(() => {
         // Initial check (Client only)
         if (typeof window !== 'undefined') {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsOnline(navigator.onLine);
         }
 

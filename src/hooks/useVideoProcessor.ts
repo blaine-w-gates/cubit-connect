@@ -9,11 +9,16 @@ export const useVideoProcessor = () => {
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-    const { tasks, updateTask, setProcessing } = useAppStore();
+    // 🧠 PERFORMANCE: Use granular selectors to prevent re-renders and potential hook loops
+    const updateTask = useAppStore(state => state.updateTask);
+    const setProcessing = useAppStore(state => state.setProcessing);
+    const addLog = useAppStore(state => state.addLog);
 
-    const processQueue = useCallback(async (queue: TaskItem[]) => {
+    const processQueue = useCallback(async function processNext(queue: TaskItem[]) {
         if (queue.length === 0) {
             setProcessing(false);
+            addLog("Processing Complete.");
+            addLog("Ready for Export.");
             return;
         }
 
@@ -55,33 +60,62 @@ export const useVideoProcessor = () => {
                 updateTask(currentTask.id, { screenshot_base64: base64 });
 
                 // 5. Next Task (Recursive)
-                // Cleanup event listener is handled by the "once" option or manual removal if we strictly separate
-                // But here we rely on the flow: seek -> event -> callback. 
-                // We'll proceed to the next item in the remaining queue.
-                processQueue(queue.slice(1));
+                processNext(queue.slice(1));
             }
         };
 
         // The Critical Async Flow
+        // We define timeout first, but we need the function to reference it.
+        // We use a mutable object to hold the ID to satisfy 'const' rules if needed, 
+        // OR we just ignore the linter for this specific pattern if 'let' is required.
+        // Actually, cleaner approach:
+
+        let timeoutId: NodeJS.Timeout; // eslint-disable-line prefer-const
+
         const onSeeked = () => {
+            clearTimeout(timeoutId);
             captureFrame();
         };
 
         // Setup "once" listener for the seeked event
         video.addEventListener('seeked', onSeeked, { once: true });
 
-        // Trigger the seek
-        video.currentTime = currentTask.timestamp_seconds + 1.5;
+        // Safety: Force capture if browser throttles seek (tab inactive etc)
+        timeoutId = setTimeout(() => {
+            console.warn(`Seek timeout for task ${currentTask.id}. Forcing capture.`);
+            video.removeEventListener('seeked', onSeeked);
+            captureFrame();
+        }, 2000);
 
-    }, [setProcessing, updateTask]);
+        // Trigger the seek (with Visual Buffer)
+        const targetTime = currentTask.timestamp_seconds + 0.5;
+
+        // ⚡️ OPTIMIZATION: If already close to target (duplicate timestamps), skip seek wait
+        if (Math.abs(video.currentTime - targetTime) < 0.1) {
+            clearTimeout(timeoutId); // Clear safety if skipping
+            video.removeEventListener('seeked', onSeeked); // Remove unused listener
+            captureFrame();
+        } else {
+            video.currentTime = targetTime;
+        }
+
+    }, [setProcessing, updateTask, addLog]);
 
     const startProcessing = useCallback(() => {
-        const pendingTasks = tasks.filter(t => !t.screenshot_base64);
+        // 🧠 ARCHITECT: Use getState() to avoid stale closure issues when called from async contexts
+        const currentTasks = useAppStore.getState().tasks;
+        const currentProcessingState = useAppStore.getState().isProcessing;
+
+        if (currentProcessingState) return;
+
+        const pendingTasks = currentTasks.filter(t => !t.screenshot_base64);
         if (pendingTasks.length > 0) {
             setProcessing(true);
+            addLog(`Initializing Media Engine... Queue Size: ${pendingTasks.length}`);
             processQueue(pendingTasks);
+        } else {
         }
-    }, [tasks, setProcessing, processQueue]);
+    }, [setProcessing, processQueue, addLog]);
 
     return {
         videoRef,

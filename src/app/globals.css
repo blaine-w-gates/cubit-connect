@@ -1,22 +1,59 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@plugin "tailwindcss-animate";
+
+/* 1. Force Class-Based Dark Mode for Tailwind v4 */
+@variant dark (&:where(.dark, .dark *));
+
+/* 2. Define Theme Variables so standard utilities work */
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
 }
 
+/* 3. Define the actual color values */
+:root {
+  --background: #FAFAFA;
+  --foreground: #111111;
+  color-scheme: light;
+}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+.dark {
+  --background: #1c1917;
+  /* Stone 900 (Warm Dark Grey) */
+  --foreground: #E6E4D9;
+  /* Antigravity Beige */
+  color-scheme: dark;
 }
 
 body {
-  /* Deep space gradient */
-  background: radial-gradient(circle at 50% 0%, #1a1a2e 0%, #000000 100%);
-  min-height: 100vh;
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans);
+  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  @apply antialiased;
+}
+
+::selection {
+  background-color: #e7e5e4;
+  /* Stone 200 */
+  color: #1c1917;
+  /* Stone 900 */
+}
+
+.dark ::selection {
+  background-color: #57534e;
+  /* Stone 600 */
+  color: #E6E4D9;
+  /* Beige */
+}
+
+/* 4. Autofill Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

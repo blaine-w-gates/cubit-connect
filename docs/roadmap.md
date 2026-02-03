@@ -5,12 +5,14 @@
 **Technical Requirement:** `EditableText` component (Inline Edit).
 **Risk:** Deeply nested updates (Task -> CubitStep -> MicroStep) are hard to handle with just `updateTask`. We might need a specialized store action `updateSubStep` to avoid performance issues or data loss.
 
-## Phase 2: Visual Refinement (Glassmorphism)
-**Context:** The app looks too "Engineer Dark Mode". Needs a premium feel.
-**Technical Requirement:**
-- Background mesh gradients (fixed).
-- `backdrop-blur` on cards.
-- Layout persistence (don't break Virtualization with heavy CSS filters).
+## Phase 2: Visual Refinement (Clean Enterprise)
+**Context:** The visual style has been calibrated to "Clean Enterprise".
+**Status:** ✅ COMPLETED / LOCKED.
+**Standards:**
+- Background: `#FAFAFA` (Zinc-50).
+- No Dark Mode.
+- No Glassmorphism blur abuse.
+- Touch targets min 44px.
 
 ## Phase 3: Pre-Flight Safety (QA)
 **Context:** Robustness check.
