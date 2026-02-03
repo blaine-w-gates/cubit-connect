@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
-// USER PROVIDED KEY - FOR VERIFICATION ONLY
-const TEST_API_KEY = "AIzaSyDGaVCjDFo4xP1tPq5PnPvZ--sP6S7WYPE";
+// MOCK KEY FOR UI TESTING ONLY (Not a real credential)
+const TEST_API_KEY = "MOCK_GOOGLE_API_KEY_FOR_TESTING";
 
 test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
 

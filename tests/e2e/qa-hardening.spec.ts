@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-const TEST_API_KEY = "AIzaSyDGaVCjDFo4xP1tPq5PnPvZ--sP6S7WYPE"; // Mock key, request interception handles logic
+const TEST_API_KEY = "MOCK_GOOGLE_API_KEY_FOR_TESTING"; // Mock key, request interception handles logic
 
 test.describe('QA Hardening: Robustness Checks', () => {
 
