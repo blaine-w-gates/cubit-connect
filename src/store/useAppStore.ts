@@ -29,6 +29,7 @@ export interface ProjectState {
   setVideoHandleState: (hasHandle: boolean) => void;
   loadProject: () => Promise<void>;
   saveTask: (task: TaskItem) => Promise<void>;
+  saveTasks: (tasks: TaskItem[]) => Promise<void>;
   updateTask: (taskId: string, updates: Partial<TaskItem>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   resetProject: () => Promise<void>;
@@ -174,6 +175,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ tasks: newTasks });
 
     // Persist to IDB
+  },
+
+  saveTasks: async (newTasksList: TaskItem[]) => {
+    const { tasks } = get();
+    const updatedTasks = [...tasks, ...newTasksList];
+    set({ tasks: updatedTasks });
   },
 
   updateTask: async (taskId: string, updates: Partial<TaskItem>) => {
