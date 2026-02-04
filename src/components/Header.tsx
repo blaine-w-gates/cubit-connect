@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Key, Menu, X, Compass } from 'lucide-react'; // Added Compass
+import { Key, Menu, X, Compass } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ExportControl from '@/components/ExportControl';
 import { useAppStore } from '@/store/useAppStore';
@@ -27,7 +27,7 @@ export default function Header({
 }: HeaderProps) {
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { setInputMode } = useAppStore(); // Selector
+  const { setInputMode } = useAppStore();
 
   // Close mobile menu when clicking outside
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export default function Header({
     <header className="sticky top-0 z-50 h-[60px] border-b border-zinc-200 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm relative">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">
         {/* LOGO */}
-        <div className="font-bold text-base md:text-lg tracking-tight flex items-center gap-2 font-serif text-zinc-900 dark:text-white">
+        <div className="font-bold text-base md:text-lg tracking-tight flex items-center gap-2 font-serif text-zinc-900 dark:text-white shrink-0">
           Cubit Connect
           <span className="text-xs bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 px-2 py-0.5 rounded-none font-mono hidden min-[360px]:inline-block">
             Engine
@@ -105,28 +105,33 @@ export default function Header({
           <ThemeSelector />
         </div>
 
-        {/* MOBILE */}
-        <div className="flex md:hidden items-center gap-2">
-          {/* Scout Icon Mobile */}
+        {/* MOBILE - CLEANED UP FOR "MOBILE SMASH" */}
+        <div className="flex md:hidden items-center gap-1">
+          {/* Scout Icon Mobile - Hidden on very small screens if needed, but flex-shrink helps */}
           <button
             onClick={() => {
               setInputMode('scout');
               document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
             }}
-            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 transition-transform"
+            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95 transition-transform"
+            aria-label="Scout"
           >
             <Compass className="w-5 h-5" />
           </button>
 
+          {/* API Key - Moved to Menu for small screens? No, kept but sized better */}
           <button
             onClick={() => setIsSettingsOpen(true)}
-            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[44px] min-h-[44px] flex items-center justify-center active:scale-95 transition-transform"
+            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95 transition-transform"
+            aria-label="Settings"
           >
             <Key className="w-5 h-5" />
           </button>
+
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center text-black dark:text-stone-200 active:scale-95 transition-transform"
+            className="min-w-[40px] min-h-[40px] flex items-center justify-center text-black dark:text-stone-200 active:scale-95 transition-transform ml-1"
+            aria-label="Menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>

@@ -3,16 +3,18 @@ import { getSafeFilename, generateMarkdown } from '@/utils/exportUtils';
 
 describe('getSafeFilename', () => {
   it('should replace special characters with underscores', () => {
-    expect(getSafeFilename('My Plan!')).toBe('my_plan.md');
+    // getSafeFilename now returns the name WITHOUT extension by default (utility logic changed)
+    // The extension is added in the download function or consumer.
+    expect(getSafeFilename('My Plan!')).toBe('my_plan');
   });
 
   it('should lower case input', () => {
-    expect(getSafeFilename('TeSt')).toBe('test.md');
+    expect(getSafeFilename('TeSt')).toBe('test');
   });
 
   it('should trim leading/trailing underscores', () => {
     // Implementation check: `replace(/^_+|_+$/g, '')`
-    expect(getSafeFilename('_test_')).toBe('test.md');
+    expect(getSafeFilename('_test_')).toBe('test');
   });
 });
 

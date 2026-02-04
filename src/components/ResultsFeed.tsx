@@ -4,6 +4,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { GemininService } from '@/services/gemini';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import TaskFeed from '@/components/TaskFeed';
+import { toast } from 'sonner';
 
 import { useCallback } from 'react';
 
@@ -28,7 +29,7 @@ export default function ResultsFeed() {
 
       if (!apiKey) return;
       if (!isOnline) {
-        alert('You are offline. AI features unavailable.');
+        toast.error('Offline Mode', { description: 'You are offline. AI features unavailable.' });
         return;
       }
 
@@ -83,9 +84,9 @@ export default function ResultsFeed() {
         const err = e as Error;
         console.error(err);
         if (err.message === 'OVERLOADED') {
-          alert('⚠️ AI is overloaded (429). Please wait 10 seconds and try again.');
+          toast.warning('AI Overloaded', { description: 'Rate limit hit (429). Please wait 10 seconds.' });
         } else {
-          alert('Failed to Cubit: ' + (err.message || 'Unknown Error'));
+          toast.error('Cubit Failed', { description: err.message || 'Unknown Error' });
         }
       } finally {
         // Electric UI: Clear Active ID

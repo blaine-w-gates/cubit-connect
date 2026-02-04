@@ -6,7 +6,7 @@ export const getSafeFilename = (title: string): string => {
     title
       .replace(/[^a-z0-9]+/gi, '_')
       .toLowerCase()
-      .replace(/^_+|_+$/g, '') + '.md'
+      .replace(/^_+|_+$/g, '')
   );
 };
 
@@ -51,4 +51,20 @@ export const generateMarkdown = (tasks: TaskItem[], title: string = 'Cubit Expor
   });
 
   return md;
+};
+
+export const downloadMarkdown = (tasks: TaskItem[], title: string = 'cubit-export') => {
+  const markdown = generateMarkdown(tasks, title);
+  const filename = `${getSafeFilename(title)}.md`;
+
+  const blob = new Blob([markdown], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };
