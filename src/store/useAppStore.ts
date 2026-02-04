@@ -163,18 +163,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       isHydrated: true, // ✅ Hydration Complete
     });
 
-    // If we migrated something, save it back to DB immediately so it's permanent
-    if (JSON.stringify(migratedTasks) !== JSON.stringify(data.tasks)) {
-      await storageService.saveProject(
-        migratedTasks,
-        data.transcript,
-        data.scoutResults,
-        data.projectType,
-        data.projectTitle,
-        data.scoutTopic,
-        data.scoutPlatform,
-      );
-    }
+    // Manual save removed here (Optimization)
   },
 
   saveTask: async (task: TaskItem) => {
@@ -382,18 +371,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   importTasks: async (newTasks: TaskItem[]) => {
     // Logic: Import usually implies replacing data. But transcript might be missing in import.
     // Let's assume keep existing transcript for now unless we import full project.
-    const { transcript, scoutResults, projectType, projectTitle, scoutTopic, scoutPlatform } =
-      get();
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
+    // Manual save removed (Optimization)
   },
 
   setProcessing: (isProcessing: boolean) => {
