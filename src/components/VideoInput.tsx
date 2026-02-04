@@ -29,16 +29,17 @@ interface VideoInputProps {
 }
 
 export default function VideoInput({ videoRef, startProcessing }: VideoInputProps) {
-  const { apiKey, setApiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } = useAppStore(
-    useShallow((state) => ({
-      apiKey: state.apiKey,
-      setApiKey: state.setApiKey,
-      setVideoHandleState: state.setVideoHandleState,
-      saveTasks: state.saveTasks,
-      inputMode: state.inputMode,
-      setInputMode: state.setInputMode,
-    })),
-  );
+  const { apiKey, setApiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } =
+    useAppStore(
+      useShallow((state) => ({
+        apiKey: state.apiKey,
+        setApiKey: state.setApiKey,
+        setVideoHandleState: state.setVideoHandleState,
+        saveTasks: state.saveTasks,
+        inputMode: state.inputMode,
+        setInputMode: state.setInputMode,
+      })),
+    );
   const isOnline = useNetworkStatus();
 
   // Ignition State

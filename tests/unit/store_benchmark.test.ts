@@ -65,7 +65,9 @@ describe('Store Performance Benchmark', () => {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    console.log(`\n\n[BASELINE] Time to add ${taskCount} tasks sequentially: ${duration.toFixed(2)}ms\n`);
+    console.log(
+      `\n\n[BASELINE] Time to add ${taskCount} tasks sequentially: ${duration.toFixed(2)}ms\n`,
+    );
 
     expect(useAppStore.getState().tasks).toHaveLength(taskCount);
   });
@@ -78,7 +80,9 @@ describe('Store Performance Benchmark', () => {
     const endTime = performance.now();
     const duration = endTime - startTime;
 
-    console.log(`\n\n[OPTIMIZED] Time to add ${taskCount} tasks via batch: ${duration.toFixed(2)}ms\n`);
+    console.log(
+      `\n\n[OPTIMIZED] Time to add ${taskCount} tasks via batch: ${duration.toFixed(2)}ms\n`,
+    );
 
     expect(useAppStore.getState().tasks).toHaveLength(taskCount);
 

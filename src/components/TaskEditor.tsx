@@ -18,13 +18,23 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
   const [expanded, setExpanded] = useState(false);
 
   // Performance: Use shallow selector to prevent stable re-renders
+  // Optimized: Only return activeProcessingId if it matches THIS task or its sub-steps
   const { updateTask, updateDeepStep, toggleStepCompletion, activeProcessingId } = useAppStore(
-    useShallow((state) => ({
-      updateTask: state.updateTask,
-      updateDeepStep: state.updateDeepStep,
-      toggleStepCompletion: state.toggleStepCompletion,
-      activeProcessingId: state.activeProcessingId,
-    })),
+    useShallow((state) => {
+      let relevantId: string | null = null;
+      if (state.activeProcessingId === task.id) {
+        relevantId = state.activeProcessingId;
+      } else if (task.sub_steps?.some((step) => step.id === state.activeProcessingId)) {
+        relevantId = state.activeProcessingId;
+      }
+
+      return {
+        updateTask: state.updateTask,
+        updateDeepStep: state.updateDeepStep,
+        toggleStepCompletion: state.toggleStepCompletion,
+        activeProcessingId: relevantId,
+      };
+    }),
   );
 
   return (
