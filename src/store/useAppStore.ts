@@ -178,91 +178,32 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   saveTask: async (task: TaskItem) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
     const newTasks = [...tasks, task];
 
     // Update local state immediately (Optimistic UI)
     set({ tasks: newTasks });
 
     // Persist to IDB
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   updateTask: async (taskId: string, updates: Partial<TaskItem>) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
     const newTasks = tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
 
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   deleteTask: async (taskId: string) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
     const newTasks = tasks.filter((t) => t.id !== taskId);
 
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   // New Action: Specifically for adding Level 3 Micro-steps
   addMicroSteps: async (taskId: string, stepId: string, microSteps: string[]) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
     const newTasks = tasks.map((task) => {
       if (task.id !== taskId) return task;
 
@@ -283,28 +224,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
 
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   // New Action: Update text of any step (Level 2 or 3)
   updateDeepStep: async (taskId: string, stepId: string, newText: string) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
 
     // Recursive helper to find and update nested steps
     const updateRecursive = (steps: CubitStep[]): CubitStep[] => {
@@ -338,28 +262,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
 
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   // New Action: Toggle Checkbox (Level 2 or 3)
   toggleStepCompletion: async (taskId: string, stepId: string) => {
-    const {
-      tasks,
-      transcript,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    } = get();
+    const { tasks } = get();
 
     // Recursive helper
     const toggleRecursive = (steps: CubitStep[]): CubitStep[] => {
@@ -387,91 +294,32 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
 
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   setTranscript: async (text: string) => {
-    const { tasks, scoutResults, projectType, projectTitle, scoutTopic, scoutPlatform } = get();
     set({ transcript: text });
-    await storageService.saveProject(
-      tasks,
-      text,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   setScoutResults: async (results: string[]) => {
-    const { tasks, transcript, projectType, projectTitle, scoutTopic, scoutPlatform } = get();
     set({ scoutResults: results });
-    await storageService.saveProject(
-      tasks,
-      transcript || undefined,
-      results,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   setProjectType: async (type: 'video' | 'text') => {
-    const { tasks, transcript, scoutResults, projectTitle, scoutTopic, scoutPlatform } = get();
     set({ projectType: type });
-    await storageService.saveProject(
-      tasks,
-      transcript || undefined,
-      scoutResults,
-      type,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   setProjectTitle: async (title: string) => {
-    const { tasks, transcript, scoutResults, projectType, scoutTopic, scoutPlatform } = get();
     set({ projectTitle: title });
-    await storageService.saveProject(
-      tasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      title,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   // Atomic Action for Text Mode Initialization
   startTextProject: async (title: string, text: string) => {
-    const { tasks, scoutResults, scoutTopic, scoutPlatform } = get();
     const type = 'text';
     set({
       projectType: type,
       projectTitle: title,
       transcript: text,
     });
-    await storageService.saveProject(
-      tasks,
-      text,
-      scoutResults,
-      type,
-      title,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   // ⚡️ GLITCH-FREE RESET: For "Start Analysis" workflow
@@ -532,20 +380,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   importTasks: async (newTasks: TaskItem[]) => {
-    const { transcript, scoutResults, projectType, projectTitle, scoutTopic, scoutPlatform } =
-      get();
     // Logic: Import usually implies replacing data. But transcript might be missing in import.
     // Let's assume keep existing transcript for now unless we import full project.
     set({ tasks: newTasks });
-    await storageService.saveProject(
-      newTasks,
-      transcript || undefined,
-      scoutResults,
-      projectType,
-      projectTitle,
-      scoutTopic,
-      scoutPlatform,
-    );
   },
 
   setProcessing: (isProcessing: boolean) => {
