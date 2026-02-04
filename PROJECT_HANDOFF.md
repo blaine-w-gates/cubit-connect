@@ -1,9 +1,9 @@
-# CUBIT CONNECT | PROJECT HANDOFF PROTOCOL (v1.0)
+# CUBIT CONNECT | PROJECT HANDOFF PROTOCOL (v1.1)
 
 **Date:** Jan 23, 2026
-**Version:** Gold Master Candidate (v1.0)
-**Current Phase:** Sprint 2 Scoping (Robustness)
-**Last Active Strike:** Strike 11 (Handoff Generation)
+**Version:** Gold Master Candidate (v1.1)
+**Current Phase:** Maintenance & Feature Expansion (Bleeding Edge)
+**Last Active Strike:** Strike 12 (Quality Assurance & Future Proofing)
 
 ## 1. THE MISSION: "Process, Don't just Perform"
 
@@ -52,17 +52,18 @@ The project is maintained by three distinct intelligences. You must adopt the re
   - **LocalStorage:** Stores API Keys (`cubit_api_key`) and User Settings.
 - **Icons:** `lucide-react` **ONLY**. (Ban `react-icons`, `fontawesome`).
 
-### B. The Visual DNA (Strict Light Mode)
+### B. The Visual DNA (Adaptive Theme)
 
-- **Theme:** **Clean Enterprise**.
-- **Palette:** Background `#FAFAFA` (Zinc-50), Surface `white`, Text `text-zinc-900`.
+- **Theme:** **Clean Enterprise**. Supports Light and Dark modes.
+- **Palette (Light):** Background `#FAFAFA` (Zinc-50), Surface `white`, Text `text-zinc-900`.
+- **Palette (Dark):** Background `#1C1917` (Stone-900), Surface `stone-800`, Text `text-stone-100`.
 - **Accents:** `text-purple-700` (Brand).
-- **FORBIDDEN:** Dark Mode, Neon Gradients, Glassmorphism blur abuse, "Ghost Buttons".
+- **FORBIDDEN:** Neon Gradients, Glassmorphism blur abuse, "Ghost Buttons" (except in specific contexts).
 - **Mobile Rule:** All touch targets min 44px. Layouts must verify for "Mobile Smash" (pre-check `col` vs `row`).
 
 ### C. The AI Engine (Gemini)
 
-- **Active Model:** `gemini-2.5-flash-lite` (Confirmed by User).
+- **Active Model:** `gemini-2.5-flash-lite` (Verify constantly for deprecations).
 - **Active Delay:** **2000ms Delay** (`MIN_DELAY_MS` in `gemini.ts`).
   - _Context:_ Quota limit is ~20 RPD on free tier.
 - **Quota Strategy:** If `429` (Quota Exceeded) occurs, **STOP**. The UI automatically prompts the user for a _New Project API Key_ (Silent retry stops after safety check).
@@ -75,14 +76,15 @@ The project is maintained by three distinct intelligences. You must adopt the re
 
 ## 4. CURRENT CONTEXT (STATE VECTOR)
 
-- **Active Strike:** 11 (Project Handoff).
-- **Next Objective:** Hardening Validation (Zod Schemas) & Error Boundaries.
+- **Active Strike:** 12 (Quality Assurance).
+- **Next Objective:** Stabilize Tests & Mobile Optimization.
 - **Known Bugs (Ghosts):**
   - **The Quota Trap:** Lite model has a hard 20/day limit.
   - **The Mobile Smash:** Header elements can overlap on iPhone SE widths (Watch for layout shift in `Header.tsx`).
+  - **The Flaky Test:** `gemini_rate_limit.test.ts` fails intermittently due to timer precision.
 - **Frozen Zones (Do Not Touch without Plan):**
-  - `src/services/gemini.ts` (Rate limit logic).
   - `src/components/VideoInput.tsx` (Drag & drop state machine).
+  - *Note:* `gemini.ts` is UNLOCKED for API maintenance.
 
 ## 5. OPERATIONAL PROTOCOLS
 
@@ -90,7 +92,7 @@ The project is maintained by three distinct intelligences. You must adopt the re
 2.  **No Regressions:** Never revert specific "Instructional Designer" prompts to generic "Summary" prompts.
 3.  **Self-Correction:** If a build fails, read the error log. Do not guess.
 4.  **Clean Console:** `console.log` is for dev only. Remove before Strike Completion.
-5.  **Chain of Thought:** Before coding, output a "Strike Plan".
+5.  **Health Checks:** Review `docs/MAINTENANCE.md` regularly for scheduled audits.
 
 ## 6. CRITICAL FILE MAP (CONTEXT GROUNDING)
 
@@ -105,6 +107,7 @@ _(The new instance must assume these files exist and are populated)_
 - `src/components/TaskEditor.tsx` (Individual Cards + Recursive Cubit Logic)
 - `src/components/VideoInput.tsx` (Drag & Drop + Media Capture)
 - `src/utils/exportUtils.ts` (Markdown Generation)
+- `docs/MAINTENANCE.md` (Scheduled Checks)
 
 ---
 
