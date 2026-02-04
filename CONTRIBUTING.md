@@ -50,6 +50,7 @@ We use **Prettier** to enforce code formatting.
 - **Check Formatting:** `npm run format:check`
 - **Fix Formatting:** `npm run format`
 - **Linting:** `npm run lint`
+- **Type Checking:** `npm run type-check`
 
 ## 🚀 CI/CD
 

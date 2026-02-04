@@ -1,9 +1,9 @@
-# CUBIT CONNECT | PROJECT HANDOFF PROTOCOL (v1.1)
+# CUBIT CONNECT | PROJECT HANDOFF PROTOCOL (v1.2)
 
 **Date:** Jan 23, 2026
-**Version:** Gold Master Candidate (v1.1)
+**Version:** Gold Master Candidate (v1.2)
 **Current Phase:** Maintenance & Feature Expansion (Bleeding Edge)
-**Last Active Strike:** Strike 12 (Quality Assurance & Future Proofing)
+**Last Active Strike:** Strike 13 (Robustness & Hygiene)
 
 ## 1. THE MISSION: "Process, Don't just Perform"
 
@@ -76,12 +76,11 @@ The project is maintained by three distinct intelligences. You must adopt the re
 
 ## 4. CURRENT CONTEXT (STATE VECTOR)
 
-- **Active Strike:** 12 (Quality Assurance).
-- **Next Objective:** Stabilize Tests & Mobile Optimization.
+- **Active Strike:** 13 (Robustness & Hygiene).
+- **Next Objective:** Feature Expansion (Mobile Header, Markdown Export).
 - **Known Bugs (Ghosts):**
   - **The Quota Trap:** Lite model has a hard 20/day limit.
   - **The Mobile Smash:** Header elements can overlap on iPhone SE widths (Watch for layout shift in `Header.tsx`).
-  - **The Flaky Test:** `gemini_rate_limit.test.ts` fails intermittently due to timer precision.
 - **Frozen Zones (Do Not Touch without Plan):**
   - `src/components/VideoInput.tsx` (Drag & drop state machine).
   - *Note:* `gemini.ts` is UNLOCKED for API maintenance.

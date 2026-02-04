@@ -6,16 +6,21 @@ import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib
 // High Throughput (30 RPM) | 1M Context | Video Optimized
 const MODEL_NAME = 'gemini-2.5-flash-lite';
 const MIN_DELAY_MS = 2000; // conservative backoff for safety
-let lastCallTime = 0;
+let nextAllowedTime = 0;
 
 export const GemininService = {
   async enforceRateLimit() {
     const now = Date.now();
-    const timeSinceLastCall = now - lastCallTime;
-    if (timeSinceLastCall < MIN_DELAY_MS) {
-      await new Promise((resolve) => setTimeout(resolve, MIN_DELAY_MS - timeSinceLastCall));
+    // Use Math.max to respect future reservations or current time
+    const targetTime = Math.max(now, nextAllowedTime);
+
+    // Reserve the slot for the NEXT caller
+    nextAllowedTime = targetTime + MIN_DELAY_MS;
+
+    const waitTime = targetTime - now;
+    if (waitTime > 0) {
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
-    lastCallTime = Date.now();
   },
 
   async retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
