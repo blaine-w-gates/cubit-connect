@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { TaskItem, CubitStep } from '@/services/storage';
+import { TaskItem } from '@/services/storage';
 
 // Mock state structure for the test
 interface MockState {
@@ -52,6 +52,7 @@ describe('TaskEditor Selector Optimization', () => {
     task_name: 'Test Task',
     description: '',
     timestamp_seconds: 0,
+    screenshot_base64: '',
     sub_steps: [
       { id: 'step-1', text: 'Step 1', sub_steps: [] },
       { id: 'step-2', text: 'Step 2', sub_steps: [] },
