@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "serve -s out",
+    "start": "serve -s out -l tcp://0.0.0.0:${PORT:-3000}",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
