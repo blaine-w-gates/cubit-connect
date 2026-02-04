@@ -29,12 +29,11 @@ interface VideoInputProps {
 }
 
 export default function VideoInput({ videoRef, startProcessing }: VideoInputProps) {
-  const { apiKey, setApiKey, setVideoHandleState, saveTask, saveTasks, inputMode, setInputMode } = useAppStore(
+  const { apiKey, setApiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } = useAppStore(
     useShallow((state) => ({
       apiKey: state.apiKey,
       setApiKey: state.setApiKey,
       setVideoHandleState: state.setVideoHandleState,
-      saveTask: state.saveTask,
       saveTasks: state.saveTasks,
       inputMode: state.inputMode,
       setInputMode: state.setInputMode,

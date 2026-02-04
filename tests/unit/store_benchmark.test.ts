@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAppStore } from '@/store/useAppStore';
-import { TaskItem } from '@/services/storage';
+import { TaskItem, storageService } from '@/services/storage';
 
 // Mock storage service to avoid side effects
 vi.mock('@/services/storage', () => ({
@@ -34,9 +34,14 @@ Object.defineProperty(window, 'localStorage', {
 
 describe('Store Performance Benchmark', () => {
   beforeEach(async () => {
+    vi.useFakeTimers();
     // Reset store
     await useAppStore.getState().resetProject();
     vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   const taskCount = 10000;
@@ -45,6 +50,7 @@ describe('Store Performance Benchmark', () => {
     task_name: `Task ${i}`,
     timestamp_seconds: i,
     description: `Description ${i}`,
+    screenshot_base64: '',
     sub_steps: [],
   }));
 
@@ -64,7 +70,7 @@ describe('Store Performance Benchmark', () => {
     expect(useAppStore.getState().tasks).toHaveLength(taskCount);
   });
 
-  it('measures performance of adding tasks via batch saveTasks', async () => {
+  it('measures performance of adding tasks via batch saveTasks and verifies persistence', async () => {
     const startTime = performance.now();
 
     await useAppStore.getState().saveTasks(tasks);
@@ -75,5 +81,9 @@ describe('Store Performance Benchmark', () => {
     console.log(`\n\n[OPTIMIZED] Time to add ${taskCount} tasks via batch: ${duration.toFixed(2)}ms\n`);
 
     expect(useAppStore.getState().tasks).toHaveLength(taskCount);
+
+    // Verify persistence (Debounced by 500ms)
+    vi.advanceTimersByTime(600);
+    expect(storageService.saveProject).toHaveBeenCalled();
   });
 });
