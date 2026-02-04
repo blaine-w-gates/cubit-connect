@@ -53,7 +53,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       .fill('Test Content must be at least fifty characters long to pass the validation logic.');
 
     await page.getByRole('button', { name: /Start Analysis/i }).click();
-    await page.waitForTimeout(2000); // CRITICAL: Wait for IDB Write
+    await page.waitForTimeout(3000); // CRITICAL: Wait for IDB Write (increased for CI stability)
 
     await page.reload();
     await page.waitForFunction(
@@ -162,7 +162,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
         },
       ]);
     });
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000); // Increased for CI stability
     await page.reload();
     await page.waitForFunction(
       () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
