@@ -54,6 +54,7 @@
     "playwright-lighthouse": "^4.0.0",
     "prettier": "^3.8.1",
     "serve": "^14.2.5",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.0.5",

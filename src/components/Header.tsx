@@ -107,31 +107,10 @@ export default function Header({
 
         {/* MOBILE - CLEANED UP FOR "MOBILE SMASH" */}
         <div className="flex md:hidden items-center gap-1">
-          {/* Scout Icon Mobile - Hidden on very small screens if needed, but flex-shrink helps */}
-          <button
-            onClick={() => {
-              setInputMode('scout');
-              document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95 transition-transform"
-            aria-label="Scout"
-          >
-            <Compass className="w-5 h-5" />
-          </button>
-
-          {/* API Key - Moved to Menu for small screens? No, kept but sized better */}
-          <button
-            onClick={() => setIsSettingsOpen(true)}
-            className="text-zinc-500 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 min-w-[40px] min-h-[40px] flex items-center justify-center active:scale-95 transition-transform"
-            aria-label="Settings"
-          >
-            <Key className="w-5 h-5" />
-          </button>
-
           <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="min-w-[40px] min-h-[40px] flex items-center justify-center text-black dark:text-stone-200 active:scale-95 transition-transform ml-1"
-            aria-label="Menu"
+            aria-label="Toggle menu"
           >
             {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -145,6 +124,32 @@ export default function Header({
           className="absolute top-[60px] right-0 w-64 bg-white dark:bg-stone-900 border-l border-b border-zinc-200 dark:border-stone-800 shadow-xl p-4 flex flex-col gap-4 md:hidden animate-in slide-in-from-top-2 duration-200"
         >
           <div className="space-y-4">
+            <div className="pb-4 border-b border-zinc-100 dark:border-stone-800">
+              <div className="text-xs font-mono text-zinc-400 dark:text-stone-500 uppercase mb-2">
+                Tools
+              </div>
+              <button
+                onClick={() => {
+                  setInputMode('scout');
+                  document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+              >
+                <Compass className="w-4 h-4" />
+                Scout
+              </button>
+              <button
+                onClick={() => {
+                  setIsSettingsOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+              >
+                <Key className="w-4 h-4" />
+                API Key
+              </button>
+            </div>
             <div className="pb-4 border-b border-zinc-100 dark:border-stone-800">
               <div className="text-xs font-mono text-zinc-400 dark:text-stone-500 uppercase mb-2">
                 Export

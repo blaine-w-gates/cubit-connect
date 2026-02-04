@@ -86,8 +86,8 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
         </button>
 
         <button onClick={handleDownloadMarkdown} className={btnClass} title="Download Markdown">
-            <Download className="w-4 h-4" />
-            <span className={variant === 'row' ? 'hidden sm:inline' : ''}>Download .md</span>
+          <Download className="w-4 h-4" />
+          <span className={variant === 'row' ? 'hidden sm:inline' : ''}>Download .md</span>
         </button>
 
         <button onClick={handleCopyMarkdown} className={btnClass} title="Copy Markdown">
