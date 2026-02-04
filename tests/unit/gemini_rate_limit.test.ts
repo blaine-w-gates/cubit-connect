@@ -1,13 +1,12 @@
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 
 describe('GeminiService Rate Limit', () => {
   beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(1600000000000));
-    // Advance time to clear any previous rate limit state
-    // This ensures lastCallTime (or nextCallTime) is far in the past
-    vi.advanceTimersByTime(100000);
+    // Reset internal state to ensure test isolation
+    GeminiService._resetRateLimit();
   });
 
   afterEach(() => {
@@ -21,14 +20,14 @@ describe('GeminiService Rate Limit', () => {
     const recordCompletion = () => results.push(Date.now());
 
     // Fire 3 calls "concurrently"
-    const p1 = GemininService.enforceRateLimit().then(recordCompletion);
+    const p1 = GeminiService.enforceRateLimit().then(recordCompletion);
 
     // Slight delay to ensure order but still "concurrent" w.r.t rate limit
     await vi.advanceTimersByTimeAsync(10);
-    const p2 = GemininService.enforceRateLimit().then(recordCompletion);
+    const p2 = GeminiService.enforceRateLimit().then(recordCompletion);
 
     await vi.advanceTimersByTimeAsync(10);
-    const p3 = GemininService.enforceRateLimit().then(recordCompletion);
+    const p3 = GeminiService.enforceRateLimit().then(recordCompletion);
 
     // Run timers forward enough to cover all delays
     // Expected: 0, 2000, 4000. So 5000 is plenty.

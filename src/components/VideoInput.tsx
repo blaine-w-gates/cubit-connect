@@ -3,7 +3,7 @@
 import { RefObject, useCallback, useState, useEffect, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import UploadZone from '@/components/UploadZone';
 import { Key, Search, ArrowRight, Loader2 } from 'lucide-react';
@@ -127,7 +127,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
 
         // 4. Generate Tasks
         const projectType = useAppStore.getState().projectType;
-        const newTasks = await GemininService.analyzeTranscript(
+        const newTasks = await GeminiService.analyzeTranscript(
           apiKey,
           transcriptText,
           projectType,

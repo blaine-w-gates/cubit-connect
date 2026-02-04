@@ -1,7 +1,7 @@
 const MIN_DELAY_MS = 200; // Use smaller delay for faster test, but enough to measure
 let lastCallTime = 0;
 
-const GemininService = {
+const GeminiService = {
   async enforceRateLimit() {
     const now = Date.now();
     const timeSinceLastCall = now - lastCallTime;
@@ -25,7 +25,7 @@ const GemininService = {
   // Fire 3 calls "concurrently"
   for (let i = 0; i < 3; i++) {
     calls.push(
-      GemininService.enforceRateLimit().then(() => {
+      GeminiService.enforceRateLimit().then(() => {
         const finished = Date.now();
         console.log(`Call ${i} finished at ${finished - start}ms`);
         return finished;

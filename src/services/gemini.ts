@@ -8,7 +8,7 @@ const MODEL_NAME = 'gemini-2.5-flash-lite';
 const MIN_DELAY_MS = 2000; // conservative backoff for safety
 let nextAllowedTime = 0;
 
-export const GemininService = {
+export const GeminiService = {
   async enforceRateLimit() {
     const now = Date.now();
     // Use Math.max to respect future reservations or current time
@@ -21,6 +21,11 @@ export const GemininService = {
     if (waitTime > 0) {
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
+  },
+
+  // Internal testing method to reset state
+  _resetRateLimit() {
+    nextAllowedTime = 0;
   },
 
   async retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {

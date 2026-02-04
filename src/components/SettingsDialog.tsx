@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 import { Loader2, LogOut } from 'lucide-react';
 
 interface SettingsProps {
@@ -32,7 +32,7 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsProps) {
     setError(null);
     try {
       // Use default model (2.5-flash-lite)
-      await GemininService.analyzeTranscript(inputKey, 'Test');
+      await GeminiService.analyzeTranscript(inputKey, 'Test');
       setApiKey(inputKey);
       onOpenChange(false);
     } catch {

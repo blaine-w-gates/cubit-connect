@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, ArrowRight } from 'lucide-react';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 import { useAppStore } from '@/store/useAppStore';
 
 export default function IgnitionForm() {
@@ -19,7 +19,7 @@ export default function IgnitionForm() {
     try {
       // 🧠 ARCHITECT: The "Law of Ignition"
       // Use lightweight validation (countTokens) instead of full generation
-      await GemininService.validateConnection(key);
+      await GeminiService.validateConnection(key);
 
       // Success
       setApiKey(key); // Save to Store (LocalStorage)

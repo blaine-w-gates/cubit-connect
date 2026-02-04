@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { Search, Loader2, ArrowRight, Check } from 'lucide-react';
 import { toast } from 'sonner';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 
 export default function ScoutView() {
   const { apiKey, scoutTopic, setScoutTopic, scoutPlatform, setScoutPlatform, setInputMode } =
@@ -34,7 +34,7 @@ export default function ScoutView() {
       }
 
       // Omni-Mix: Generate 10 mixed results regardless of platform.
-      const results = await GemininService.generateSearchQueries(apiKey, cleanTopic);
+      const results = await GeminiService.generateSearchQueries(apiKey, cleanTopic);
       setStoreResults(results);
     } catch (e: unknown) {
       console.error('Scout failed', e);
