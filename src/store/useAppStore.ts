@@ -103,7 +103,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ hasVideoHandle: hasHandle });
   },
 
-  loadProject: async () => { console.log('LOADING PROJECT...');
+  loadProject: async () => {
+    console.log('LOADING PROJECT...');
     const data = await storageService.getProject();
 
     // --- MIGRATION LAYER ---

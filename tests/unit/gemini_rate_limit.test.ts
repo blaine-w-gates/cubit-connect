@@ -38,13 +38,16 @@ describe('GeminiService Rate Limit', () => {
 
     results.sort((a, b) => a - b);
 
-    console.log('Completion times:', results.map(t => t - start));
+    console.log(
+      'Completion times:',
+      results.map((t) => t - start),
+    );
 
     expect(results.length).toBe(3);
 
     // Check gaps
     for (let i = 1; i < results.length; i++) {
-      const gap = results[i] - results[i-1];
+      const gap = results[i] - results[i - 1];
       // We expect >= 2000ms.
       // Due to initial 10ms staggering, the gaps might be exactly 2000 or slightly adjusted depending on implementation details.
       // But they should definitely be close to 2000.

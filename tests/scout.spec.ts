@@ -26,9 +26,9 @@ test.describe('Scout Feature', () => {
     });
   });
 
-    test('Happy Path: Ignite and Scout', async ({ page, browserName }) => {
-        // Skip Mobile Safari due to persistent CI environment timeouts
-        test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('Happy Path: Ignite and Scout', async ({ page, browserName }) => {
+    // Skip Mobile Safari due to persistent CI environment timeouts
+    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
 
     // 1. Visit Landing Page
     await page.goto('/');

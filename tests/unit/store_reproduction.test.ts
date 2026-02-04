@@ -33,7 +33,7 @@ describe('Store Double Save Reproduction', () => {
         timestamp_seconds: 0,
         description: 'Test description',
         sub_steps: [],
-        screenshot_base64: '' // Required by schema default? It's optional in Zod but inferred type might require it if not strict
+        screenshot_base64: '', // Required by schema default? It's optional in Zod but inferred type might require it if not strict
       },
     ];
 
@@ -53,14 +53,14 @@ describe('Store Double Save Reproduction', () => {
   it('loadProject with migration triggers only ONE save (Subscription only)', async () => {
     // Mock getProject to return legacy data requiring migration
     const legacyTasks = [
-       {
-         id: '1',
-         task_name: 'Legacy Task', // FIX: 'text' -> 'task_name'
-         timestamp_seconds: 0,
-         description: 'Legacy Desc',
-         sub_steps: ['Legacy Step 1'], // String array triggers migration
-         screenshot_base64: ''
-       }
+      {
+        id: '1',
+        task_name: 'Legacy Task', // FIX: 'text' -> 'task_name'
+        timestamp_seconds: 0,
+        description: 'Legacy Desc',
+        sub_steps: ['Legacy Step 1'], // String array triggers migration
+        screenshot_base64: '',
+      },
     ];
 
     vi.mocked(storageService.getProject).mockResolvedValue({
@@ -72,7 +72,7 @@ describe('Store Double Save Reproduction', () => {
       projectTitle: 'Legacy Project',
       scoutTopic: '',
       scoutPlatform: 'instagram',
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     });
 
     await useAppStore.getState().loadProject();

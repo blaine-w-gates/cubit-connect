@@ -124,7 +124,7 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
     // Ensure clipboard API works in CI/Headless by mocking it
     // If writeText fails (common in CI), the UI state might not update
     await page.evaluate(() => {
-            // @ts-expect-error - navigator.clipboard is read-only in some environments, mocking for test
+      // @ts-expect-error - navigator.clipboard is read-only in some environments, mocking for test
       if (!navigator.clipboard) navigator.clipboard = {};
       navigator.clipboard.writeText = async () => Promise.resolve();
     });
