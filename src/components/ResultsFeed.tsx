@@ -84,7 +84,9 @@ export default function ResultsFeed() {
         const err = e as Error;
         console.error(err);
         if (err.message === 'OVERLOADED') {
-          toast.warning('AI Overloaded', { description: 'Rate limit hit (429). Please wait 10 seconds.' });
+          toast.warning('AI Overloaded', {
+            description: 'Rate limit hit (429). Please wait 10 seconds.',
+          });
         } else {
           toast.error('Cubit Failed', { description: err.message || 'Unknown Error' });
         }

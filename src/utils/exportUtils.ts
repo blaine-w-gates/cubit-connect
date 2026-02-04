@@ -2,12 +2,10 @@ import { TaskItem, CubitStep } from '@/services/storage';
 
 // Helper to sanitize filenames
 export const getSafeFilename = (title: string): string => {
-  return (
-    title
-      .replace(/[^a-z0-9]+/gi, '_')
-      .toLowerCase()
-      .replace(/^_+|_+$/g, '')
-  );
+  return title
+    .replace(/[^a-z0-9]+/gi, '_')
+    .toLowerCase()
+    .replace(/^_+|_+$/g, '');
 };
 
 // Helper to format time MM:SS

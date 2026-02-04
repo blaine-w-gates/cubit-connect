@@ -83,7 +83,7 @@ The project is maintained by three distinct intelligences. You must adopt the re
   - **The Mobile Smash:** Header elements can overlap on iPhone SE widths (Watch for layout shift in `Header.tsx`).
 - **Frozen Zones (Do Not Touch without Plan):**
   - `src/components/VideoInput.tsx` (Drag & drop state machine).
-  - *Note:* `gemini.ts` is UNLOCKED for API maintenance.
+  - _Note:_ `gemini.ts` is UNLOCKED for API maintenance.
 
 ## 5. OPERATIONAL PROTOCOLS
 
