@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/store/useAppStore';
-import { GemininService } from '@/services/gemini';
+import { GeminiService } from '@/services/gemini';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import TaskFeed from '@/components/TaskFeed';
 import { toast } from 'sonner';
@@ -61,7 +61,7 @@ export default function ResultsFeed() {
         }
 
         // Pass context + neighbors
-        const rawSteps = await GemininService.generateSubSteps(
+        const rawSteps = await GeminiService.generateSubSteps(
           apiKey,
           context,
           fullTranscript || undefined,

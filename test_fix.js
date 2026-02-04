@@ -1,7 +1,7 @@
 const MIN_DELAY_MS = 200;
 let nextCallTime = 0;
 
-const GemininService = {
+const GeminiService = {
   async enforceRateLimit() {
     const now = Date.now();
     const waitTime = Math.max(0, nextCallTime - now);
@@ -22,7 +22,7 @@ const GemininService = {
   // Fire 3 calls "concurrently"
   for (let i = 0; i < 3; i++) {
     calls.push(
-      GemininService.enforceRateLimit().then(() => {
+      GeminiService.enforceRateLimit().then(() => {
         const finished = Date.now();
         console.log(`Call ${i} finished at ${finished - start}ms`);
         return finished;
