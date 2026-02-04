@@ -13,13 +13,13 @@ export const storageService = {
    */
   async getProject(): Promise<StoredProjectData> {
     try {
-      const raw = await get(PROJECT_KEY);
+      const raw = await get(PROJECT_KEY); console.log('RAW STORAGE:', JSON.stringify(raw));
       if (!raw) return { tasks: [], updatedAt: Date.now() };
 
       const result = ProjectDataSchema.safeParse(raw);
 
       if (!result.success) {
-        console.error('CRITICAL: Storage Schema Validation Failed', result.error);
+        console.error('CRITICAL: Storage Schema Validation Failed', JSON.stringify(result.error));
         // 🛡️ MIGRATION / FALLBACK STRATEGY
         // If it fails, we shouldn't just wipe their data silently.
         // But for "Clean Enterprise" v1.0, treating corruption as "Start Over" is acceptable

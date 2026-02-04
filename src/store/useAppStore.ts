@@ -102,7 +102,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ hasVideoHandle: hasHandle });
   },
 
-  loadProject: async () => {
+  loadProject: async () => { console.log('LOADING PROJECT...');
     const data = await storageService.getProject();
 
     // --- MIGRATION LAYER ---
@@ -382,7 +382,18 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   importTasks: async (newTasks: TaskItem[]) => {
     // Logic: Import usually implies replacing data. But transcript might be missing in import.
     // Let's assume keep existing transcript for now unless we import full project.
+    const { transcript, scoutResults, projectType, projectTitle, scoutTopic, scoutPlatform } =
+      get();
     set({ tasks: newTasks });
+    await storageService.saveProject(
+      newTasks,
+      transcript || undefined,
+      scoutResults,
+      projectType,
+      projectTitle,
+      scoutTopic,
+      scoutPlatform,
+    );
   },
 
   setProcessing: (isProcessing: boolean) => {
