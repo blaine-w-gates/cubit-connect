@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "serve -s out",
     "lint": "eslint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
@@ -32,6 +32,7 @@
     "remark-breaks": "^4.0.0",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
+    "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^4.3.6",
     "zustand": "^5.0.9"
