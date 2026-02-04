@@ -91,7 +91,7 @@ export const GemininService = {
 
             RULES FOR TASKS:
             1. **Granularity:** Break the content into 4-8 distinct "Modules" or "Steps."
-            2. **Naming:** Task names must be Action Verbs (e.g., "Scrape Leads" instead of "Scraping").
+            2. **Naming:** Task names must be Action Verbs (e.g. "Scrape Leads" instead of "Scraping").
             3. **Description:** The description must summarize the *value* of this step (Why do we do this?).
             4. **Visual Match:** Select timestamp where the speaker *starts* explaining a new visual concept.
             5. **Language:** Simple, direct, no jargon. Use short sentences.

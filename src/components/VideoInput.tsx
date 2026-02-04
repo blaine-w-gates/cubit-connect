@@ -29,12 +29,12 @@ interface VideoInputProps {
 }
 
 export default function VideoInput({ videoRef, startProcessing }: VideoInputProps) {
-  const { apiKey, setApiKey, setVideoHandleState, saveTask, inputMode, setInputMode } = useAppStore(
+  const { apiKey, setApiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } = useAppStore(
     useShallow((state) => ({
       apiKey: state.apiKey,
       setApiKey: state.setApiKey,
       setVideoHandleState: state.setVideoHandleState,
-      saveTask: state.saveTask,
+      saveTasks: state.saveTasks,
       inputMode: state.inputMode,
       setInputMode: state.setInputMode,
     })),
@@ -134,9 +134,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         );
 
         // 5. Populate Store
-        for (const task of newTasks) {
-          await saveTask(task);
-        }
+        await saveTasks(newTasks);
 
         // 6. Start Processing (VIDEO ONLY)
         if (projectType === 'video') {
@@ -178,7 +176,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         }
       }
     },
-    [apiKey, isOnline, saveTask, startProcessing],
+    [apiKey, isOnline, saveTasks, startProcessing],
   );
 
   // Scout State Removed -> Delegated to ScoutView.tsx
