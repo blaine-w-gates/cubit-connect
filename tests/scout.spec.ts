@@ -41,7 +41,8 @@ test.describe('Scout Feature', () => {
     // 3. Verify Engine Loaded
     // Increased timeout for Mobile Safari in CI which can be very slow
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
-    await expect(page.getByText('Cubit Connect', { exact: false })).toBeVisible();
+    // Fix: Use specific heading locator to avoid strict mode violations (matching footer/nav text)
+    await expect(page.getByRole('heading', { name: 'Cubit Connect' })).toBeVisible();
 
     // 4. Open Scout
     // Click the Scout button in the Header
