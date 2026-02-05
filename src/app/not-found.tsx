@@ -1,14 +1,26 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { toast } from 'sonner';
 import { Check, Loader2 } from 'lucide-react';
 
 export default function NotFound() {
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'success'>('idle');
+  // Initialize with a deterministic value to satisfy SSR hydration matches
+  const [randomDelay, setRandomDelay] = useState(5);
+
+  useEffect(() => {
+    // Update with random value only on client-side mount
+    // Wrapping in requestAnimationFrame to ensure it runs after render commit
+    // avoiding the immediate sync setState warning
+    const id = requestAnimationFrame(() => {
+        setRandomDelay(5 + Math.random() * 5);
+    });
+    return () => cancelAnimationFrame(id);
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,7 +43,7 @@ export default function NotFound() {
     }, 800);
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -42,16 +54,16 @@ export default function NotFound() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+      transition: { duration: 0.6, ease: "easeInOut" },
     },
   };
 
-  const glitchVariants = {
+  const glitchVariants: Variants = {
     initial: { x: 0, textShadow: '0px 0px 0px rgba(0,0,0,0)' },
     animate: {
       x: [0, -2, 2, -1, 1, 0],
@@ -65,9 +77,9 @@ export default function NotFound() {
       ],
       transition: {
         repeat: Infinity,
-        repeatType: 'mirror' as const,
+        repeatType: 'mirror',
         duration: 4,
-        repeatDelay: 5 + Math.random() * 5,
+        repeatDelay: randomDelay,
         times: [0, 0.05, 0.1, 0.15, 0.2, 1],
       },
     },
