@@ -14,7 +14,6 @@ import { PrintableReport } from '@/components/PrintableReport';
 import VideoInput from '@/components/VideoInput';
 import ResultsFeed from '@/components/ResultsFeed';
 import ProcessingLog from '@/components/ProcessingLog';
-import { GlobalAlert } from '@/components/GlobalAlert';
 import { FadeIn } from '@/components/ui/FadeIn';
 
 export default function EnginePage() {
@@ -95,7 +94,6 @@ export default function EnginePage() {
   return (
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
       <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
-      <GlobalAlert />
 
       {/* Hidden Video Element for Processing */}
       <video

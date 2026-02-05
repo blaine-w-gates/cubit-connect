@@ -1,6 +1,6 @@
-import { useState } from 'react';
 import { Compass, Layers, Share2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import { toast } from 'sonner';
 
 export function Manifesto() {
   const { setInputMode } = useAppStore();
@@ -8,8 +8,6 @@ export function Manifesto() {
   const scrollToIgnition = () => {
     document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
   };
-
-  const [activeAlert, setActiveAlert] = useState<string | null>(null);
 
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 animate-in fade-in duration-700 relative">
@@ -63,9 +61,9 @@ export function Manifesto() {
         {/* EXPORT CARD */}
         <button
           onClick={() =>
-            setActiveAlert(
-              'Start by uploading a video and transcript or pasting text of something you want to learn.',
-            )
+            toast.warning('Start a Project First', {
+              description: 'Upload a video or paste text to unlock this tool.',
+            })
           }
           className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
@@ -80,33 +78,6 @@ export function Manifesto() {
           </div>
         </button>
       </div>
-
-      {/* CUSTOM ALERT MODAL */}
-      {activeAlert && (
-        <div
-          className="absolute inset-0 z-50 flex items-center justify-center bg-white/60 dark:bg-black/60 backdrop-blur-sm rounded-xl"
-          onClick={() => setActiveAlert(null)}
-        >
-          <div
-            className="bg-white dark:bg-zinc-900 p-6 rounded-2xl shadow-xl border border-zinc-100 dark:border-zinc-700 max-w-sm mx-4 animate-in zoom-in-95 duration-200 text-center space-y-4"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-3 bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300 rounded-full w-12 h-12 flex items-center justify-center mx-auto">
-              <Share2 className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="font-bold text-zinc-900 dark:text-zinc-50 mb-1">Hold on!</h4>
-              <p className="text-sm text-zinc-500 dark:text-zinc-400">{activeAlert}</p>
-            </div>
-            <button
-              onClick={() => setActiveAlert(null)}
-              className="bg-black dark:bg-white text-white dark:text-zinc-900 hover:bg-zinc-800 dark:hover:bg-zinc-200 w-full py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all"
-            >
-              Got it
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
