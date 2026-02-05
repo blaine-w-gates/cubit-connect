@@ -8,7 +8,8 @@ export interface ProjectState {
   isProcessing: boolean;
   tasks: TaskItem[];
   transcript: string | null; // New state
-  scoutResults: string[]; // New: Scout feature persistence
+  scoutResults: string[];
+  scoutHistory: string[]; // New: Scout feature persistence
   projectType: 'video' | 'text'; // New: MVP Text Mode
   projectTitle: string; // New: Title Persistence
   apiKey: string | null;
@@ -41,10 +42,10 @@ export interface ProjectState {
   toggleStepCompletion: (taskId: string, stepId: string) => Promise<void>; // New Action
   setTranscript: (text: string) => Promise<void>; // New action
   setScoutResults: (results: string[]) => Promise<void>;
+  addToScoutHistory: (topic: string) => void;
   setProjectType: (type: 'video' | 'text') => Promise<void>;
   setProjectTitle: (title: string) => Promise<void>;
   startTextProject: (title: string, text: string) => Promise<void>;
-
 
   // Log Persistence
   logs: LogEntry[];
@@ -68,6 +69,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   tasks: [],
   transcript: null,
   scoutResults: [],
+  scoutHistory: [],
   projectType: 'video', // Default
   projectTitle: 'New Project', // Default
   apiKey:
@@ -82,7 +84,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setScoutTopic: (topic) => set({ scoutTopic: topic }),
   scoutPlatform: 'instagram',
   setScoutPlatform: (platform) => set({ scoutPlatform: platform }),
-
+  addToScoutHistory: (topic: string) =>
+    set((state) => {
+      const current = state.scoutHistory;
+      if (!topic.trim()) return state;
+      const filtered = current.filter((t) => t !== topic);
+      const updated = [topic, ...filtered].slice(0, 5);
+      return { scoutHistory: updated };
+    }),
 
   logs: [],
 
@@ -156,7 +165,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       projectType: data.projectType || 'video',
       projectTitle: data.projectTitle || 'New Project',
       scoutTopic: data.scoutTopic || '', // Restore or default
-      scoutPlatform: data.scoutPlatform || 'instagram', // Restore or default
+      scoutPlatform: data.scoutPlatform || 'instagram',
+      scoutHistory: data.scoutHistory || [], // Restore or default
       isHydrated: true, // ✅ Hydration Complete
     });
 
@@ -322,6 +332,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       tasks: [],
       transcript: null,
       scoutResults: [],
+      scoutHistory: [],
       // Keep existing handle/key/processing/inputMode
       projectType: type,
       projectTitle: title,
@@ -340,6 +351,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       tasks: [],
       transcript: null,
       scoutResults: [],
+      scoutHistory: [],
       hasVideoHandle: false,
       projectType: 'video',
       projectTitle: 'New Project',
@@ -360,6 +372,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       tasks: [],
       transcript: null,
       scoutResults: [],
+      scoutHistory: [],
       hasVideoHandle: false,
       apiKey: null,
       projectType: 'video',
@@ -437,6 +450,7 @@ useAppStore.subscribe((state) => {
           state.projectTitle,
           state.scoutTopic,
           state.scoutPlatform,
+          state.scoutHistory,
         );
       } catch (err) {
         console.error('Auto-Save Failed:', err);

@@ -11,17 +11,23 @@ export default function ScoutView() {
     useAppStore();
 
   const [isScouting, setIsScouting] = useState(false);
-  const { scoutResults: storeResults, setScoutResults: setStoreResults } = useAppStore();
+  const {
+    scoutResults: storeResults,
+    setScoutResults: setStoreResults,
+    scoutHistory,
+    addToScoutHistory,
+  } = useAppStore();
 
   // Platforms
   const platforms = ['Instagram', 'TikTok', 'Reddit', 'LinkedIn', 'Facebook', 'Copy Only'];
 
   // Handler: Generate Terms (Gemini)
-  const handleGenerate = async () => {
-    if (!scoutTopic.trim() || isScouting) return;
+  const handleGenerate = async (topic?: string) => {
+    const activeTopic = topic || scoutTopic;
+    if (!activeTopic.trim() || isScouting) return;
 
     // Security: Sanitize Input (Basic XSS/Injection prevention)
-    const cleanTopic = scoutTopic.replace(/[<>]/g, '').trim();
+    const cleanTopic = activeTopic.replace(/[<>]/g, '').trim();
     if (!cleanTopic) return;
 
     setIsScouting(true);
@@ -35,6 +41,7 @@ export default function ScoutView() {
 
       // Omni-Mix: Generate 10 mixed results regardless of platform.
       const results = await GeminiService.generateSearchQueries(apiKey, cleanTopic);
+      addToScoutHistory(cleanTopic);
       setStoreResults(results);
     } catch (e: unknown) {
       console.error('Scout failed', e);
@@ -132,7 +139,7 @@ export default function ScoutView() {
                 autoFocus
               />
               <button
-                onClick={handleGenerate}
+                onClick={() => handleGenerate()}
                 disabled={isScouting || !scoutTopic.trim()}
                 className="w-full sm:w-auto bg-zinc-900 hover:bg-black dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white px-8 py-3 sm:py-0 rounded-xl sm:rounded-l-none sm:rounded-r-xl font-mono text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all min-w-[120px]"
               >
@@ -224,7 +231,33 @@ export default function ScoutView() {
             </div>
           )}
 
-          {!storeResults.length && <div className="h-8" />}
+          {!storeResults.length && (
+            <div className="min-h-8 flex flex-col items-center justify-center space-y-3 mt-4">
+              {scoutHistory && scoutHistory.length > 0 ? (
+                <>
+                  <p className="text-[10px] text-zinc-400 uppercase tracking-widest font-medium">
+                    Recent
+                  </p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {scoutHistory.map((term, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          setScoutTopic(term);
+                          handleGenerate(term);
+                        }}
+                        className="rounded-full bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 px-3 py-1 text-xs hover:bg-zinc-100 dark:hover:bg-zinc-700 cursor-pointer text-zinc-600 dark:text-zinc-300 transition-colors"
+                      >
+                        {term}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <div className="h-8" />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
