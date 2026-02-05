@@ -45,9 +45,6 @@ export interface ProjectState {
   setProjectTitle: (title: string) => Promise<void>;
   startTextProject: (title: string, text: string) => Promise<void>;
 
-  // Global Alert Modal
-  modalAlert: string | null;
-  setModalAlert: (message: string | null) => void;
 
   // Log Persistence
   logs: LogEntry[];
@@ -86,8 +83,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   scoutPlatform: 'instagram',
   setScoutPlatform: (platform) => set({ scoutPlatform: platform }),
 
-  modalAlert: null,
-  setModalAlert: (message) => set({ modalAlert: message }),
 
   logs: [],
 

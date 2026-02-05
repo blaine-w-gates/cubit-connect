@@ -11,13 +11,11 @@ interface ExportControlProps {
 export default function ExportControl({ onPrint, variant = 'row' }: ExportControlProps) {
   const { projectTitle, tasks } = useAppStore();
 
-  const setModalAlert = useAppStore((state) => state.setModalAlert);
-
   const checkEmpty = () => {
     if (!tasks || tasks.length === 0) {
-      setModalAlert(
-        'Start by uploading a video and transcript or pasting text of something you want to learn.',
-      );
+      toast.warning('Project Empty', {
+        description: 'Start by uploading content.',
+      });
       return true;
     }
     return false;
