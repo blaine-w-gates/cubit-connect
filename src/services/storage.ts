@@ -62,6 +62,7 @@ export const storageService = {
     projectTitle?: string,
     scoutTopic?: string,
     scoutPlatform?: string,
+    scoutHistory?: string[],
   ): Promise<void> {
     try {
       const payload: StoredProjectData = {
@@ -72,6 +73,7 @@ export const storageService = {
         projectTitle,
         scoutTopic,
         scoutPlatform,
+        scoutHistory,
         updatedAt: Date.now(),
       };
       await set(PROJECT_KEY, payload);

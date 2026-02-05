@@ -39,6 +39,7 @@ export const ProjectDataSchema = z.object({
   projectTitle: z.string().optional(),
   scoutTopic: z.string().optional(),
   scoutPlatform: z.string().optional(),
+  scoutHistory: z.array(z.string()).optional(),
   updatedAt: z.number(),
 });
 
