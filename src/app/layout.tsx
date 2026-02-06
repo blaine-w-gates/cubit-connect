@@ -22,6 +22,21 @@ export const metadata: Metadata = {
     description:
       'Turn chaotic video and text into actionable, step-by-step documentation. Local-first, private, and powered by Gemini.',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Cubit Connect - Knowledge Distillation Engine',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Cubit Connect | AI Knowledge Distillation',
+    description:
+      'Turn chaotic video and text into actionable, step-by-step documentation. Local-first, private, and powered by Gemini.',
+    images: ['/opengraph-image.png'],
   },
 };
 
