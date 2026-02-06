@@ -13,6 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://cubit-connect.onrender.com'),
   title: 'Cubit Connect | AI Knowledge Distillation',
   description:
     'Turn chaotic video and text into actionable, step-by-step documentation. Local-first, private, and powered by Gemini.',
