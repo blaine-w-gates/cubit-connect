@@ -7,15 +7,5 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-✓ Ready in 1158ms
- GET / 200 in 874ms (compile: 449ms, render: 425ms)
- GET / 200 in 134ms (compile: 11ms, render: 124ms)
-○ Compiling /engine ...
- GET /engine 200 in 4.4s (compile: 4.4s, render: 64ms)
- GET /engine 200 in 4.5s (compile: 4.2s, render: 325ms)
- GET / 200 in 97ms (compile: 8ms, render: 90ms)
- GET /engine 200 in 38ms (compile: 12ms, render: 26ms)
- GET /engine 200 in 143ms (compile: 6ms, render: 138ms)
- GET / 200 in 76ms (compile: 6ms, render: 69ms)
- GET /engine 200 in 32ms (compile: 10ms, render: 22ms)
- GET /engine 200 in 173ms (compile: 7ms, render: 166ms)
+✓ Ready in 1097ms
+ GET /sandbox 200 in 2.5s (compile: 2.1s, render: 442ms)
