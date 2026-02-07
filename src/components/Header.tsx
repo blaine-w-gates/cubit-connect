@@ -7,8 +7,6 @@ import ThemeSelector from './ThemeSelector';
 
 interface HeaderProps {
   onPrint?: () => void;
-  isSettingsOpen: boolean;
-  setIsSettingsOpen: (v: boolean) => void;
   confirmingReset: boolean;
   setConfirmingReset: (v: boolean) => void;
   resetProject: () => void;
@@ -18,7 +16,6 @@ interface HeaderProps {
 
 export default function Header({
   onPrint,
-  setIsSettingsOpen,
   confirmingReset,
   setConfirmingReset,
   resetProject,
@@ -27,7 +24,7 @@ export default function Header({
 }: HeaderProps) {
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { setInputMode } = useAppStore();
+  const { setInputMode, setIsSettingsOpen } = useAppStore();
 
   // Close mobile menu when clicking outside
   const menuRef = useRef<HTMLDivElement>(null);

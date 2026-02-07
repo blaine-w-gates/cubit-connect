@@ -39,14 +39,19 @@ export const GeminiService = {
     }
   },
 
-  _resetRateLimit() {
+  resetState() {
     nextAllowedTime = 0;
     primaryCooldownUntil = 0;
+    emitLog('Systems Normal. Quota Reset.', 'info');
+  },
+
+  _resetRateLimit() {
+    this.resetState();
   },
 
   async retryWithBackoff<T>(fn: (modelName: string) => Promise<T>, retries = 3, delay = 2000): Promise<T> {
     // 1. Determine which model to start with
-    let currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
+    const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
 
     // Log the start if it's the first attempt (heuristic)
     if (retries === 3) {
@@ -134,6 +139,18 @@ export const GeminiService = {
       mode === 'text'
         ? `TEXT MODE: Source is raw text. SET "timestamp_seconds": 0 for all tasks.`
         : `VIDEO MODE: Identify timestamps where new topics begin.`;
+
+    // 0. CONTEXT CHECK (Safety Valve for Lite)
+    // If transcript is huge (>25k tokens approx 100k chars), force Primary Model or fail if Primary is hot.
+    // We act conservatively: If > 100,000 chars, we assume it's too big for Lite.
+    const isHugeContext = transcript.length > 100000;
+
+    if (isHugeContext && !this.isPrimaryCool()) {
+      // Ideally we wait, but for now we just warn and try Primary anyway? 
+      // No, if Primary is cool, we use it. If Primary is HOT (rate limited) and we try Fallback, Fallback will crash.
+      // So if Primary is HOT and Context is HUGE -> We must FAIL fast to save user time.
+      throw new Error('PROJECT_QUOTA_EXCEEDED: Content too large for backup model. Please upgrade or wait.');
+    }
 
     const prompt = `
             You are an expert Instructional Designer creating a "Recipe for Life" guide for high school students.

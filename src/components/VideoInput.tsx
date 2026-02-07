@@ -38,21 +38,13 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         saveTasks: state.saveTasks,
         inputMode: state.inputMode,
         setInputMode: state.setInputMode,
+        setIsSettingsOpen: state.setIsSettingsOpen,
       })),
     );
   const isOnline = useNetworkStatus();
 
-  // Ignition State
-  const [showKeyInput, setShowKeyInput] = useState(false);
-  const [tempKey, setTempKey] = useState('');
-  const [engineError, setEngineError] = useState<string | null>(null);
-  const keyInputRef = useRef<HTMLInputElement>(null);
+  // Ignition State removed (using global settings)
 
-  // Initial check: If key exists, ensure ignition is ready (hidden)
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    if (apiKey) setShowKeyInput(false);
-  }, [apiKey]);
 
   // Handler: When user selects a video file
   const handleVideoSelected = useCallback(
@@ -89,12 +81,14 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
 
       // 1. Ignition Check
       if (!apiKey) {
-        setEngineError('Ignition Key Required');
-        setShowKeyInput(true);
-        setTimeout(() => {
-          keyInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          keyInputRef.current?.focus();
-        }, 100);
+        toast.error('Ignition Key Required', {
+          description: 'Please enter your API Key to proceed.',
+          action: {
+            label: 'Enter Key',
+            onClick: () => useAppStore.getState().setIsSettingsOpen(true)
+          }
+        });
+        useAppStore.getState().setIsSettingsOpen(true);
         return;
       }
 
@@ -158,10 +152,11 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         const errString = String((e as Error)?.message || e || '').toLowerCase();
 
         if (errString.includes('429') || errString.includes('quota') || errString.includes('403')) {
-          setEngineError(
-            "You've reached the 20 requests quota. To continue, create a new project and new keys by clicking the link.",
-          );
-          setShowKeyInput(true);
+          toast.error('Quota Limit Reached', {
+            description: "You've exhausted your free tier. Please update your API Key.",
+            duration: 8000,
+          });
+          useAppStore.getState().setIsSettingsOpen(true);
         } else if (errString.includes('503') || errString.includes('overloaded')) {
           toast.warning('Engine Overheated (Gemini 503)', {
             description: 'The AI is cooling down. Please try again in a moment.',
@@ -216,95 +211,6 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
 
       {/* The Scout Mode */}
       {inputMode === 'scout' && <ScoutView />}
-
-      {/* Igniton Slot (Absolute overlay or integrated?)
-                Design Choice: Integrated into the bottom of UploadZone via portal or just state check
-                Simplest: Render below UploadZone if showing key.
-            */}
-
-      <AnimatePresence>
-        <AnimatePresence>
-          {showKeyInput && (
-            <>
-              {/* Backdrop */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-zinc-900/40 backdrop-blur-sm z-50 transition-opacity"
-                onClick={() => setShowKeyInput(false)} // Allow dismissal
-              />
-
-              {/* Modal Card */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl p-8 z-50 border border-zinc-100 dark:border-zinc-800"
-              >
-                <div className="flex flex-col gap-6">
-                  {/* Header / Error Message */}
-                  <div className="space-y-2 text-center">
-                    <div className="mx-auto w-10 h-10 bg-red-50 rounded-full flex items-center justify-center mb-2">
-                      <Key className="w-5 h-5 text-red-600" />
-                    </div>
-                    <h3 className="text-lg font-bold text-zinc-900 dark:text-white">
-                      {engineError ? 'Quota Limit Reached' : 'API Key Required'}
-                    </h3>
-                    <p className="text-sm text-zinc-500 leading-relaxed px-2">
-                      {engineError || 'Please enter your Google Gemini API key to continue.'}
-                    </p>
-                  </div>
-
-                  {/* Input Section */}
-                  <div className="space-y-4">
-                    <div className="relative">
-                      <input
-                        ref={keyInputRef}
-                        type="password"
-                        value={tempKey}
-                        onChange={(e) => setTempKey(e.target.value)}
-                        placeholder="sk-..."
-                        className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 focus:border-red-500 focus:bg-white dark:focus:bg-zinc-900 rounded-xl py-3 px-4 font-mono text-sm outline-none transition-all shadow-sm dark:text-white"
-                        autoFocus
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') {
-                            setApiKey(tempKey);
-                            setShowKeyInput(false);
-                          }
-                        }}
-                      />
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setApiKey(tempKey);
-                        setShowKeyInput(false);
-                      }}
-                      className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-95 transition-all text-sm uppercase tracking-wide"
-                    >
-                      Save & Continue
-                    </button>
-
-                    {/* Helper Link */}
-                    <div className="text-center pt-2">
-                      <a
-                        href="https://aistudio.google.com/app/apikey"
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs text-zinc-400 hover:text-red-600 transition-colors font-medium group"
-                      >
-                        <span>Get new key from Google AI Studio</span>
-                        <ArrowRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </AnimatePresence>
     </div>
   );
 }

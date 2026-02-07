@@ -3,13 +3,10 @@ import { useAppStore } from '@/store/useAppStore';
 import { GeminiService } from '@/services/gemini';
 import { Loader2, LogOut } from 'lucide-react';
 
-interface SettingsProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
-
-export default function SettingsDialog({ open, onOpenChange }: SettingsProps) {
-  const { apiKey, setApiKey, fullLogout } = useAppStore();
+export default function SettingsDialog() {
+  const { apiKey, setApiKey, fullLogout, isSettingsOpen, setIsSettingsOpen } = useAppStore();
+  const open = isSettingsOpen;
+  const onOpenChange = setIsSettingsOpen;
   const [inputKey, setInputKey] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,11 +87,10 @@ export default function SettingsDialog({ open, onOpenChange }: SettingsProps) {
                   setConfirmDisconnect(true);
                 }
               }}
-              className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${
-                confirmDisconnect
+              className={`w-full py-3 rounded-lg flex items-center justify-center gap-2 font-bold transition-all ${confirmDisconnect
                   ? 'bg-red-600 hover:bg-red-700 text-white'
                   : 'bg-white border border-zinc-200 text-zinc-700 hover:bg-zinc-50 hover:text-zinc-900'
-              }`}
+                }`}
             >
               <LogOut className="w-4 h-4" />
               {confirmDisconnect ? 'Confirm Disconnect?' : 'Disconnect Session'}

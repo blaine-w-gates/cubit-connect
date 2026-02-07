@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { storageService, TaskItem, CubitStep } from '@/services/storage';
-import { GeminiEvents } from '@/services/gemini';
+import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 
 export interface ProjectState {
@@ -25,6 +25,10 @@ export interface ProjectState {
 
   activeProcessingId: string | null; // Electric UI
   setActiveProcessingId: (id: string | null) => void;
+
+  // UI State
+  isSettingsOpen: boolean;
+  setIsSettingsOpen: (isOpen: boolean) => void;
 
   // Actions
   setApiKey: (key: string) => void;
@@ -101,6 +105,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const safeKey = cryptoUtils.cleanInput(key);
     const encrypted = cryptoUtils.encrypt(safeKey);
     localStorage.setItem(STORAGE_KEY_API, encrypted);
+    GeminiService.resetState();
     set({ apiKey: safeKey });
   },
 
@@ -399,6 +404,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // Contextual Loading State (Electric UI)
   activeProcessingId: null,
   setActiveProcessingId: (id: string | null) => set({ activeProcessingId: id }),
+
+  // UI State
+  isSettingsOpen: false,
+  setIsSettingsOpen: (isOpen: boolean) => set({ isSettingsOpen: isOpen }),
 
   addLog: (message: string) => {
     set((state) => {

@@ -48,7 +48,7 @@ export default function EnginePage() {
 
   const [mounted, setMounted] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  // isSettingsOpen moved to Global Store
   const [resetKey, setResetKey] = useState(0);
 
   // Hydrate on mount
@@ -93,7 +93,7 @@ export default function EnginePage() {
 
   return (
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
-      <SettingsDialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen} />
+      <SettingsDialog />
 
       {/* Hidden Video Element for Processing */}
       <video
@@ -107,8 +107,7 @@ export default function EnginePage() {
       {/* Header */}
       <Header
         onPrint={() => handlePrint && handlePrint()}
-        isSettingsOpen={isSettingsOpen}
-        setIsSettingsOpen={setIsSettingsOpen}
+        // Settings State moved to Global Store
         confirmingReset={confirmingReset}
         setConfirmingReset={setConfirmingReset}
         resetProject={handleManualReset}
