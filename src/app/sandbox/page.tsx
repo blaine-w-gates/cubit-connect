@@ -135,12 +135,12 @@ export default function SandboxPage() {
       );
       const data = await response.json();
       if (data.models) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const filtered = data.models
           .filter(
-            (m: any) => m.supportedGenerationMethods?.includes('generateContent'),
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (m: any) => m.supportedGenerationMethods?.includes('generateContent'),
           )
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           .map((m: any) => ({
             name: m.name,
             version: m.version,
