@@ -156,7 +156,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
             description: "You've exhausted your free tier. Please update your API Key.",
             duration: 8000,
           });
-          useAppStore.getState().setIsSettingsOpen(true);
+          useAppStore.getState().setIsSettingsOpen(true, 'quota');
         } else if (errString.includes('503') || errString.includes('overloaded')) {
           toast.warning('Engine Overheated (Gemini 503)', {
             description: 'The AI is cooling down. Please try again in a moment.',

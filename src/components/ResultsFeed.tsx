@@ -83,7 +83,16 @@ export default function ResultsFeed() {
       } catch (e: unknown) {
         const err = e as Error;
         console.error(err);
-        if (err.message === 'OVERLOADED') {
+        if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {
+          toast.error('Quota Limit Reached', {
+            description: "You've exhausted your free tier. Please update your API Key.",
+            action: {
+              label: 'Update Key',
+              onClick: () => useAppStore.getState().setIsSettingsOpen(true, 'quota'),
+            },
+          });
+          useAppStore.getState().setIsSettingsOpen(true, 'quota');
+        } else if (err.message === 'OVERLOADED') {
           toast.warning('AI Overloaded', {
             description: 'Rate limit hit (429). Please wait 10 seconds.',
           });

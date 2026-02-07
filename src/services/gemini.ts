@@ -281,9 +281,13 @@ export const GeminiService = {
         return this.withTimeout(model.generateContent(prompt));
       });
       return safeParseSubSteps(result.response.text());
-    } catch (e) {
-      console.warn('SubStep Fail:', e);
-      return [];
+    } catch (e: unknown) {
+      const err = e as Error;
+      console.warn('SubStep Fail:', err);
+      if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {
+        throw err;
+      }
+      throw err;
     }
   },
 };

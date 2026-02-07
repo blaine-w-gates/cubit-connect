@@ -2,7 +2,25 @@
 
 import { useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { Search, Loader2, ArrowRight, Check } from 'lucide-react';
+import { Search, ArrowRight, Check } from 'lucide-react';
+
+const Spinner = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
+
 import { toast } from 'sonner';
 import { GeminiService } from '@/services/gemini';
 
@@ -45,9 +63,21 @@ export default function ScoutView() {
       setStoreResults(results);
     } catch (e: unknown) {
       console.error('Scout failed', e);
-      toast.error('Scout Failed', {
-        description: (e as Error).message || 'Could not generate search terms. Try again.',
-      });
+      const err = e as Error;
+      if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {
+        toast.error('Quota Limit Reached', {
+          description: "You've exhausted your free tier. Please update your API Key.",
+          action: {
+            label: 'Update Key',
+            onClick: () => useAppStore.getState().setIsSettingsOpen(true, 'quota'),
+          },
+        });
+        useAppStore.getState().setIsSettingsOpen(true, 'quota');
+      } else {
+        toast.error('Scout Failed', {
+          description: err.message || 'Could not generate search terms. Try again.',
+        });
+      }
     } finally {
       setIsScouting(false);
     }
@@ -143,7 +173,7 @@ export default function ScoutView() {
                 disabled={isScouting || !scoutTopic.trim()}
                 className="w-full sm:w-auto bg-zinc-900 hover:bg-black dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white px-8 py-3 sm:py-0 rounded-xl sm:rounded-l-none sm:rounded-r-xl font-mono text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all min-w-[120px]"
               >
-                {isScouting ? <Loader2 className="w-4 h-4 animate-spin" /> : 'SEARCH'}
+                {isScouting ? <Spinner className="w-4 h-4 animate-spin" /> : 'SEARCH'}
               </button>
             </div>
 
@@ -164,11 +194,10 @@ export default function ScoutView() {
                       aria-pressed={isActive}
                       className={`
                                                 relative px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all whitespace-nowrap
-                                                ${
-                                                  isActive
-                                                    ? 'bg-white dark:bg-zinc-700 text-black dark:text-zinc-50 shadow-sm'
-                                                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
-                                                }
+                                                ${isActive
+                          ? 'bg-white dark:bg-zinc-700 text-black dark:text-zinc-50 shadow-sm'
+                          : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
+                        }
                                             `}
                     >
                       {p === 'Copy Only' ? '📋 Copy' : p}
@@ -208,11 +237,10 @@ export default function ScoutView() {
                       onClick={() => handleResultClick(query, idx)}
                       className={`
                                             px-4 py-2.5 rounded-full border transition-all cursor-pointer text-xs font-mono flex items-center gap-2 group
-                                            ${
-                                              copiedId === idx
-                                                ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-                                                : `bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm ${accentClass}`
-                                            }
+                                            ${copiedId === idx
+                          ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                          : `bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm ${accentClass}`
+                        }
                                         `}
                     >
                       <Search

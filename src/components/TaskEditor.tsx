@@ -1,7 +1,25 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Wand2, Check, Loader2 } from 'lucide-react';
+import { ChevronDown, ChevronRight, Wand2, Check } from 'lucide-react';
+
+// Safe internal Spinner to prevent Lucide import issues
+const Spinner = ({ className }: { className?: string }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+  </svg>
+);
 import { EditableText } from '@/components/ui/EditableText';
 import { useAppStore } from '@/store/useAppStore';
 import { TaskItem, CubitStep } from '@/services/storage';
@@ -66,7 +84,7 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
               aria-label="Generate sub-steps"
             >
               {activeProcessingId === task.id ? (
-                <Loader2 className="w-3 h-3 animate-spin" />
+                <Spinner className="w-3 h-3 animate-spin" />
               ) : (
                 <Wand2 className="w-3 h-3" />
               )}
@@ -114,11 +132,10 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                     aria-label={
                       step.isCompleted ? 'Mark step as incomplete' : 'Mark step as complete'
                     }
-                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      step.isCompleted
-                        ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
-                        : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
-                    }`}
+                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${step.isCompleted
+                      ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
+                      : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
+                      }`}
                   >
                     {step.isCompleted && (
                       <Check className="w-2.5 h-2.5 text-white dark:text-zinc-900" />
@@ -148,7 +165,7 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                   aria-label="Deep Dive"
                 >
                   {activeProcessingId === step.id ? (
-                    <Loader2 className="w-3 h-3 animate-spin" />
+                    <Spinner className="w-3 h-3 animate-spin" />
                   ) : (
                     <Wand2 className="w-3 h-3" />
                   )}

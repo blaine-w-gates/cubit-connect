@@ -28,7 +28,8 @@ export interface ProjectState {
 
   // UI State
   isSettingsOpen: boolean;
-  setIsSettingsOpen: (isOpen: boolean) => void;
+  settingsVariant: 'default' | 'quota';
+  setIsSettingsOpen: (isOpen: boolean, variant?: 'default' | 'quota') => void;
 
   // Actions
   setApiKey: (key: string) => void;
@@ -407,7 +408,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // UI State
   isSettingsOpen: false,
-  setIsSettingsOpen: (isOpen: boolean) => set({ isSettingsOpen: isOpen }),
+  settingsVariant: 'default',
+  setIsSettingsOpen: (isOpen: boolean, variant: 'default' | 'quota' = 'default') =>
+    set({ isSettingsOpen: isOpen, settingsVariant: variant }),
 
   addLog: (message: string) => {
     set((state) => {
