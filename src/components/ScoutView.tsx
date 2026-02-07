@@ -194,10 +194,11 @@ export default function ScoutView() {
                       aria-pressed={isActive}
                       className={`
                                                 relative px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all whitespace-nowrap
-                                                ${isActive
-                          ? 'bg-white dark:bg-zinc-700 text-black dark:text-zinc-50 shadow-sm'
-                          : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
-                        }
+                                                ${
+                                                  isActive
+                                                    ? 'bg-white dark:bg-zinc-700 text-black dark:text-zinc-50 shadow-sm'
+                                                    : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
+                                                }
                                             `}
                     >
                       {p === 'Copy Only' ? '📋 Copy' : p}
@@ -237,10 +238,11 @@ export default function ScoutView() {
                       onClick={() => handleResultClick(query, idx)}
                       className={`
                                             px-4 py-2.5 rounded-full border transition-all cursor-pointer text-xs font-mono flex items-center gap-2 group
-                                            ${copiedId === idx
-                          ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
-                          : `bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm ${accentClass}`
-                        }
+                                            ${
+                                              copiedId === idx
+                                                ? 'bg-green-50 dark:bg-green-900/30 border-green-200 dark:border-green-800 text-green-700 dark:text-green-300'
+                                                : `bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 shadow-sm ${accentClass}`
+                                            }
                                         `}
                     >
                       <Search

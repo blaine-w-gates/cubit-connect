@@ -3,7 +3,6 @@ import { useAppStore } from '@/store/useAppStore';
 import { toast } from 'sonner';
 import { CubitStep } from '@/schemas/storage';
 
-
 interface ExportControlProps {
   onPrint?: () => void;
   variant?: 'row' | 'col';
@@ -40,9 +39,7 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
       let result = `${indent}- ${content}`;
 
       if (typeof step !== 'string' && step.sub_steps && step.sub_steps.length > 0) {
-        const children = step.sub_steps
-          .map((child) => formatStep(child, depth + 1))
-          .join('\n');
+        const children = step.sub_steps.map((child) => formatStep(child, depth + 1)).join('\n');
         result += `\n${children}`;
       }
       return result;
@@ -71,8 +68,6 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
       toast.error('Copy Failed', { description: 'Could not access clipboard.' });
     }
   };
-
-
 
   const btnClass =
     variant === 'row'

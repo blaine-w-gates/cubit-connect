@@ -132,10 +132,11 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                     aria-label={
                       step.isCompleted ? 'Mark step as incomplete' : 'Mark step as complete'
                     }
-                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${step.isCompleted
-                      ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
-                      : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
-                      }`}
+                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
+                      step.isCompleted
+                        ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
+                        : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
+                    }`}
                   >
                     {step.isCompleted && (
                       <Check className="w-2.5 h-2.5 text-white dark:text-zinc-900" />

@@ -45,7 +45,6 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
 
   // Ignition State removed (using global settings)
 
-
   // Handler: When user selects a video file
   const handleVideoSelected = useCallback(
     (file: File) => {
@@ -85,8 +84,8 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
           description: 'Please enter your API Key to proceed.',
           action: {
             label: 'Enter Key',
-            onClick: () => useAppStore.getState().setIsSettingsOpen(true)
-          }
+            onClick: () => useAppStore.getState().setIsSettingsOpen(true),
+          },
         });
         useAppStore.getState().setIsSettingsOpen(true);
         return;
