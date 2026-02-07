@@ -4,13 +4,13 @@ import React, { useState, useEffect } from 'react';
 import { Loader2, Play, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 const MODELS = [
-  { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', role: 'The Workhorse' },
-  { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', role: 'The Brain' },
-  { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Exp', role: 'The Future' },
-  { id: 'gemini-1.0-pro', name: 'Gemini 1.0 Pro', role: 'The Safety Net' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', role: 'The New Workhorse' },
+  { id: 'gemini-flash-latest', name: 'Gemini Flash Latest', role: 'The Rolling Edge' },
+  { id: 'gemini-2.5-flash-lite-preview-09-2025', name: 'Gemini 2.5 Flash Lite', role: 'The Future Lite' },
+  { id: 'gemini-flash-lite-latest', name: 'Gemini Flash Lite Latest', role: 'The Efficiency Standard' },
 ];
 
-const DEFAULT_KEY = 'AIzaSyCFuvR1qzRPYu_NsiEhWu8YDQ0XA6H3aIs';
+const DEFAULT_KEY = '';
 
 interface ModelResult {
   status: 'idle' | 'loading' | 'success' | 'error';
@@ -25,6 +25,7 @@ export default function SandboxPage() {
   const [systemPrompt, setSystemPrompt] = useState('You are a concise diagnostic computer.');
   const [userPrompt, setUserPrompt] = useState('Identify yourself. State your model version.');
   const [results, setResults] = useState<Record<string, ModelResult>>({});
+  const [scanResult, setScanResult] = useState<string>('');
 
   useEffect(() => {
     const storedKey = localStorage.getItem('cubit_api_key');
@@ -119,6 +120,32 @@ export default function SandboxPage() {
     }
   };
 
+  const handleScan = async () => {
+    setScanResult('Scanning network for available models...');
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`
+      );
+      const data = await response.json();
+      if (data.models) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const filtered = data.models.filter((m: any) =>
+          m.supportedGenerationMethods?.includes('generateContent')
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ).map((m: any) => ({
+          name: m.name,
+          version: m.version,
+          displayName: m.displayName
+        }));
+        setScanResult(JSON.stringify(filtered, null, 2));
+      } else {
+        setScanResult(JSON.stringify(data, null, 2));
+      }
+    } catch (error) {
+      setScanResult(`Error scanning network: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6 font-mono selection:bg-red-900 selection:text-white">
       {/* Header */}
@@ -144,23 +171,23 @@ export default function SandboxPage() {
               />
             </div>
             <div>
-               <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">System Prompt</label>
-               <textarea
-                 value={systemPrompt}
-                 onChange={(e) => setSystemPrompt(e.target.value)}
-                 className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded text-sm focus:border-red-500 focus:outline-none transition-colors h-24 font-mono resize-none"
-               />
+              <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">System Prompt</label>
+              <textarea
+                value={systemPrompt}
+                onChange={(e) => setSystemPrompt(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded text-sm focus:border-red-500 focus:outline-none transition-colors h-24 font-mono resize-none"
+              />
             </div>
           </div>
 
           <div className="space-y-4 flex flex-col">
             <div className="flex-grow">
-               <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">User Prompt</label>
-               <textarea
-                 value={userPrompt}
-                 onChange={(e) => setUserPrompt(e.target.value)}
-                 className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded text-sm focus:border-red-500 focus:outline-none transition-colors h-[138px] font-mono resize-none"
-               />
+              <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">User Prompt</label>
+              <textarea
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+                className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded text-sm focus:border-red-500 focus:outline-none transition-colors h-[138px] font-mono resize-none"
+              />
             </div>
             <button
               onClick={handleIgnite}
@@ -168,6 +195,13 @@ export default function SandboxPage() {
             >
               <Play className="w-4 h-4 fill-current" />
               Ignite Sequence
+            </button>
+            <button
+              onClick={handleScan}
+              className="mt-2 w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 px-4 rounded transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase tracking-widest"
+            >
+              <span className="w-4 h-4">📡</span>
+              Scan Network
             </button>
           </div>
         </div>
@@ -225,7 +259,7 @@ export default function SandboxPage() {
                     <p className="font-bold mb-1">ERROR:</p>
                     <pre className="whitespace-pre-wrap">{result.errorMsg}</pre>
                     {result.output && (
-                       <pre className="mt-2 text-zinc-600 border-t border-zinc-800 pt-2">{result.output}</pre>
+                      <pre className="mt-2 text-zinc-600 border-t border-zinc-800 pt-2">{result.output}</pre>
                     )}
                   </div>
                 )}
@@ -234,6 +268,16 @@ export default function SandboxPage() {
           );
         })}
       </div>
+
+      {/* Terminal Output */}
+      {scanResult && (
+        <div className="mt-8 bg-zinc-900 border border-zinc-800 p-4 rounded-lg">
+          <h3 className="text-zinc-500 text-xs uppercase tracking-wider mb-2">Network Scan Results</h3>
+          <pre className="bg-zinc-950 p-4 rounded overflow-x-auto text-xs text-green-400 font-mono border border-zinc-800/50">
+            {scanResult}
+          </pre>
+        </div>
+      )}
     </div>
   );
 }

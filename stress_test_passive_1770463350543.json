@@ -1,0 +1,496 @@
+{
+  "mode": "passive",
+  "logs": [
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "optimal"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "status": "eco",
+      "msg": "Running in Eco Mode"
+    },
+    {
+      "status": "eco",
+      "msg": "Switching to Eco Mode..."
+    },
+    {
+      "time": 30,
+      "status": "cooldown",
+      "msg": "Rate Limited. Cooling down..."
+    }
+  ],
+  "calls": [
+    {
+      "call": 1,
+      "status": "success",
+      "duration": 17307,
+      "time": "2026-02-07T11:22:47.850Z"
+    },
+    {
+      "call": 2,
+      "status": "success",
+      "duration": 13831,
+      "time": "2026-02-07T11:23:01.681Z"
+    },
+    {
+      "call": 3,
+      "status": "success",
+      "duration": 11694,
+      "time": "2026-02-07T11:23:13.375Z"
+    },
+    {
+      "call": 4,
+      "status": "success",
+      "duration": 13040,
+      "time": "2026-02-07T11:23:26.415Z"
+    },
+    {
+      "call": 5,
+      "status": "success",
+      "duration": 16927,
+      "time": "2026-02-07T11:23:43.342Z"
+    },
+    {
+      "call": 6,
+      "status": "success",
+      "duration": 14822,
+      "time": "2026-02-07T11:23:58.164Z"
+    },
+    {
+      "call": 7,
+      "status": "success",
+      "duration": 19050,
+      "time": "2026-02-07T11:24:17.214Z"
+    },
+    {
+      "call": 8,
+      "status": "success",
+      "duration": 18499,
+      "time": "2026-02-07T11:24:35.713Z"
+    },
+    {
+      "call": 9,
+      "status": "success",
+      "duration": 12404,
+      "time": "2026-02-07T11:24:48.118Z"
+    },
+    {
+      "call": 10,
+      "status": "success",
+      "duration": 18698,
+      "time": "2026-02-07T11:25:06.816Z"
+    },
+    {
+      "call": 11,
+      "status": "success",
+      "duration": 15299,
+      "time": "2026-02-07T11:25:22.115Z"
+    },
+    {
+      "call": 12,
+      "status": "success",
+      "duration": 13547,
+      "time": "2026-02-07T11:25:35.662Z"
+    },
+    {
+      "call": 13,
+      "status": "success",
+      "duration": 16547,
+      "time": "2026-02-07T11:25:52.209Z"
+    },
+    {
+      "call": 14,
+      "status": "success",
+      "duration": 17900,
+      "time": "2026-02-07T11:26:10.109Z"
+    },
+    {
+      "call": 15,
+      "status": "success",
+      "duration": 16352,
+      "time": "2026-02-07T11:26:26.461Z"
+    },
+    {
+      "call": 16,
+      "status": "success",
+      "duration": 16818,
+      "time": "2026-02-07T11:26:43.279Z"
+    },
+    {
+      "call": 17,
+      "status": "success",
+      "duration": 10517,
+      "time": "2026-02-07T11:26:53.796Z"
+    },
+    {
+      "call": 18,
+      "status": "success",
+      "duration": 17655,
+      "time": "2026-02-07T11:27:11.451Z"
+    },
+    {
+      "call": 19,
+      "status": "success",
+      "duration": 12449,
+      "time": "2026-02-07T11:27:23.901Z"
+    },
+    {
+      "call": 20,
+      "status": "success",
+      "duration": 15281,
+      "time": "2026-02-07T11:27:39.182Z"
+    },
+    {
+      "call": 21,
+      "status": "success",
+      "duration": 7670,
+      "time": "2026-02-07T11:27:46.852Z"
+    },
+    {
+      "call": 22,
+      "status": "success",
+      "duration": 7475,
+      "time": "2026-02-07T11:27:54.328Z"
+    },
+    {
+      "call": 23,
+      "status": "success",
+      "duration": 7726,
+      "time": "2026-02-07T11:28:02.054Z"
+    },
+    {
+      "call": 24,
+      "status": "success",
+      "duration": 7012,
+      "time": "2026-02-07T11:28:09.066Z"
+    },
+    {
+      "call": 25,
+      "status": "success",
+      "duration": 7761,
+      "time": "2026-02-07T11:28:16.827Z"
+    },
+    {
+      "call": 26,
+      "status": "success",
+      "duration": 7348,
+      "time": "2026-02-07T11:28:24.175Z"
+    },
+    {
+      "call": 27,
+      "status": "success",
+      "duration": 7040,
+      "time": "2026-02-07T11:28:31.215Z"
+    },
+    {
+      "call": 28,
+      "status": "success",
+      "duration": 8517,
+      "time": "2026-02-07T11:28:39.732Z"
+    },
+    {
+      "call": 29,
+      "status": "success",
+      "duration": 8168,
+      "time": "2026-02-07T11:28:47.900Z"
+    },
+    {
+      "call": 30,
+      "status": "success",
+      "duration": 7510,
+      "time": "2026-02-07T11:28:55.410Z"
+    },
+    {
+      "call": 31,
+      "status": "success",
+      "duration": 7419,
+      "time": "2026-02-07T11:29:02.829Z"
+    },
+    {
+      "call": 32,
+      "status": "success",
+      "duration": 7164,
+      "time": "2026-02-07T11:29:09.993Z"
+    },
+    {
+      "call": 33,
+      "status": "success",
+      "duration": 7499,
+      "time": "2026-02-07T11:29:17.492Z"
+    },
+    {
+      "call": 34,
+      "status": "success",
+      "duration": 7474,
+      "time": "2026-02-07T11:29:24.966Z"
+    },
+    {
+      "call": 35,
+      "status": "success",
+      "duration": 7623,
+      "time": "2026-02-07T11:29:32.589Z"
+    },
+    {
+      "call": 36,
+      "status": "success",
+      "duration": 7572,
+      "time": "2026-02-07T11:29:40.161Z"
+    },
+    {
+      "call": 37,
+      "status": "success",
+      "duration": 7476,
+      "time": "2026-02-07T11:29:47.637Z"
+    },
+    {
+      "call": 38,
+      "status": "success",
+      "duration": 7784,
+      "time": "2026-02-07T11:29:55.421Z"
+    },
+    {
+      "call": 39,
+      "status": "success",
+      "duration": 7755,
+      "time": "2026-02-07T11:30:03.176Z"
+    },
+    {
+      "call": 40,
+      "status": "success",
+      "duration": 7984,
+      "time": "2026-02-07T11:30:11.160Z"
+    },
+    {
+      "call": 41,
+      "status": "success",
+      "duration": 7267,
+      "time": "2026-02-07T11:30:18.427Z"
+    },
+    {
+      "call": 42,
+      "status": "failed",
+      "error": "[GoogleGenerativeAI Error]: Error fetching from https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent: [429 Too Many Requests] You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash-lite\nPlease retry in 35.782335497s. [{\"@type\":\"type.googleapis.com/google.rpc.Help\",\"links\":[{\"description\":\"Learn more about Gemini API quotas\",\"url\":\"https://ai.google.dev/gemini-api/docs/rate-limits\"}]},{\"@type\":\"type.googleapis.com/google.rpc.QuotaFailure\",\"violations\":[{\"quotaMetric\":\"generativelanguage.googleapis.com/generate_content_free_tier_requests\",\"quotaId\":\"GenerateRequestsPerDayPerProjectPerModel-FreeTier\",\"quotaDimensions\":{\"location\":\"global\",\"model\":\"gemini-2.5-flash-lite\"},\"quotaValue\":\"20\"}]},{\"@type\":\"type.googleapis.com/google.rpc.RetryInfo\",\"retryDelay\":\"35s\"}]",
+      "time": "2026-02-07T11:30:24.290Z"
+    }
+  ]
+}

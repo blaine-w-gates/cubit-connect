@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { storageService, TaskItem, CubitStep } from '@/services/storage';
+import { GeminiEvents } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 
 export interface ProjectState {
@@ -458,3 +459,14 @@ useAppStore.subscribe((state) => {
     }
   }, 500);
 });
+// ---------------------------------------------------------------------------
+// 🌍 GEMINI SYSTEM LOG BRIDGE
+// ---------------------------------------------------------------------------
+if (typeof window !== 'undefined') {
+  GeminiEvents.addEventListener('gemini-log', ((event: CustomEvent) => {
+    const { message, type } = event.detail;
+    // Prefix message with type if warning/error for better visibility in simple log
+    const prefix = type === 'warning' ? '⚠️ ' : type === 'error' ? '🔴 ' : '';
+    useAppStore.getState().addLog(`${prefix}${message}`);
+  }) as EventListener);
+}

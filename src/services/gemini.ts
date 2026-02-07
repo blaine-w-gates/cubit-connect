@@ -2,51 +2,91 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
 
-// UPGRADE: Gemini 2.5 Flash-Lite (Stable)
-// High Throughput (30 RPM) | 1M Context | Video Optimized
-const MODEL_NAME = 'gemini-2.5-flash-lite';
-const MIN_DELAY_MS = 2000; // conservative backoff for safety
+// MODELS
+const PRIMARY_MODEL = 'gemini-2.5-flash';
+const FALLBACK_MODEL = 'gemini-2.5-flash-lite';
+
+// CIRCUIT BREAKER STATE
+const COOLDOWN_DURATION = 60000; // 60 Seconds
+let primaryCooldownUntil = 0;
+
+// RATE LIMIT STATE
+const MIN_DELAY_MS = 2000;
 let nextAllowedTime = 0;
 
+// EVENT BUS for System Logs
+export const GeminiEvents = new EventTarget();
+
+function emitLog(message: string, type: 'info' | 'warning' | 'error' = 'info') {
+  GeminiEvents.dispatchEvent(
+    new CustomEvent('gemini-log', { detail: { message, type, timestamp: new Date().toLocaleTimeString() } })
+  );
+}
+
 export const GeminiService = {
+  // Check if Primary is hot
+  isPrimaryCool() {
+    return Date.now() > primaryCooldownUntil;
+  },
+
   async enforceRateLimit() {
     const now = Date.now();
-    // Use Math.max to respect future reservations or current time
     const targetTime = Math.max(now, nextAllowedTime);
-
-    // Reserve the slot for the NEXT caller
     nextAllowedTime = targetTime + MIN_DELAY_MS;
-
     const waitTime = targetTime - now;
     if (waitTime > 0) {
       await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   },
 
-  // Internal testing method to reset state
   _resetRateLimit() {
     nextAllowedTime = 0;
+    primaryCooldownUntil = 0;
   },
 
-  async retryWithBackoff<T>(fn: () => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+  async retryWithBackoff<T>(fn: (modelName: string) => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+    // 1. Determine which model to start with
+    let currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
+
+    // Log the start if it's the first attempt (heuristic)
+    if (retries === 3) {
+      // emitLog(`Starting generation with ${currentModel}...`, 'info'); 
+      // Commented out to reduce noise, we only log switches.
+    }
+
     try {
-      return await fn();
+      return await fn(currentModel);
     } catch (error: unknown) {
       const err = error as Error;
       const msg = err?.message?.toLowerCase() || '';
 
-      // Handle Overloaded (503), Rate Limited (429), or Network Errors (Fetch failed)
-      const isQuota = msg.includes('quota');
-      const isNetwork = msg.includes('fetch failed') || msg.includes('network error');
-      const isRetryable =
-        msg.includes('503') || msg.includes('overloaded') || msg.includes('429') || isNetwork;
+      // 429 DETECTION & FALLBACK LOGIC
+      if (msg.includes('429') || msg.includes('quota') || msg.includes('resource_exhausted')) {
 
-      if (!isQuota && retries > 0 && isRetryable) {
-        if (process.env.NODE_ENV === 'development')
-          console.warn(`Gemini Retry (${retries} left): ${msg}`);
+        // Scenario A: We are on PRIMARY and hit a limit.
+        if (currentModel === PRIMARY_MODEL) {
+          primaryCooldownUntil = Date.now() + COOLDOWN_DURATION;
+          emitLog(`⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`, 'warning');
+
+          // IMMEDIATE RETRY with Fallback (No backoff delay needed, just switch)
+          return this.retryWithBackoff(fn, retries, delay);
+        }
+
+        // Scenario B: We are already on FALLBACK and hit a limit.
+        if (currentModel === FALLBACK_MODEL) {
+          emitLog(`🔴 Project Quota Exceeded. Both models exhausted.`, 'error');
+          throw new Error('PROJECT_QUOTA_EXCEEDED: Please update your API Key.');
+        }
+      }
+
+      // Standard Retry Logic for Network Blips (503, etc)
+      const isNetwork = msg.includes('fetch failed') || msg.includes('network error') || msg.includes('503');
+      if (retries > 0 && isNetwork) {
+        if (process.env.NODE_ENV === 'development') console.warn(`Gemini Retry (${retries} left): ${msg}`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return this.retryWithBackoff(fn, retries - 1, delay * 2);
       }
+
       throw error;
     }
   },
@@ -71,10 +111,15 @@ export const GeminiService = {
   async countTokens(apiKey: string, text: string): Promise<number> {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: MODEL_NAME });
+    // Use Primary for token counting, fallback doesn't matter much here
+    const model = genAI.getGenerativeModel({ model: PRIMARY_MODEL });
     const { totalTokens } = await model.countTokens(text);
     return totalTokens;
   },
+
+  // ---------------------------------------------------------------------------
+  // CORE GENERATION METHODS (Updated to use dynamic modelName)
+  // ---------------------------------------------------------------------------
 
   async analyzeTranscript(
     apiKey: string,
@@ -84,12 +129,7 @@ export const GeminiService = {
   ): Promise<TaskItem[]> {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      generationConfig: { responseMimeType: 'application/json' },
-    });
 
-    // Prompt Logic based on Mode
     const promptRules =
       mode === 'text'
         ? `TEXT MODE: Source is raw text. SET "timestamp_seconds": 0 for all tasks.`
@@ -116,14 +156,16 @@ export const GeminiService = {
         `;
 
     try {
-      const result = await this.retryWithBackoff(() =>
-        this.withTimeout(model.generateContent(prompt)),
-      );
+      // Pass a closure that accepts the modelName
+      const result = await this.retryWithBackoff(async (modelName) => {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
+        });
+        return this.withTimeout(model.generateContent(prompt));
+      });
 
-      // 🛡️ IRON DOME: Use Centralized Safe Parser
       const tasks = safeParseTasks(result.response.text());
-
-      // ⚡️ STRICT ORDERING: Force sort by time to prevent "Time Traveling" tasks
       tasks.sort((a, b) => a.timestamp_seconds - b.timestamp_seconds);
       return tasks.map((t) => ({
         ...t,
@@ -134,13 +176,9 @@ export const GeminiService = {
     } catch (error: unknown) {
       const err = error as Error;
       console.error('Gemini Error:', err);
-
-      // Check for Safety Block (GoogleGenerativeAI Error)
       if (err?.message?.includes('SAFETY') || err?.message?.includes('blocked')) {
         throw new Error('Safety Block: Content violates AI safety guidelines.');
       }
-
-      // safeParseTasks throws Error, which we catch here
       throw error;
     }
   },
@@ -148,10 +186,6 @@ export const GeminiService = {
   async generateSearchQueries(apiKey: string, topic: string): Promise<string[]> {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      generationConfig: { responseMimeType: 'application/json' },
-    });
 
     const prompt = `
             Generate a "Mix Tape" of 10 high-signal search queries for the topic: "${topic}".
@@ -171,20 +205,20 @@ export const GeminiService = {
             - Format: JSON Array of strings.
         `;
     try {
-      const result = await this.retryWithBackoff(() =>
-        this.withTimeout(model.generateContent(prompt)),
-      );
-      // 🛡️ IRON DOME: Use Centralized Safe Parser
+      const result = await this.retryWithBackoff(async (modelName) => {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
+        });
+        return this.withTimeout(model.generateContent(prompt));
+      });
       return safeParseSearchQueries(result.response.text());
     } catch (e: unknown) {
       const err = e as Error;
       console.warn('Scout Fail:', err);
-
-      // Check for Safety Block or specific known errors
       if (err?.message?.includes('SAFETY') || err?.message?.includes('blocked')) {
         throw new Error('Safety Block: Topics violate safety guidelines.');
       }
-      // Propagate error so UI can show Toast
       throw e;
     }
   },
@@ -197,10 +231,6 @@ export const GeminiService = {
   ): Promise<string[]> {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({
-      model: MODEL_NAME,
-      generationConfig: { responseMimeType: 'application/json' },
-    });
 
     const prompt = `
             You are a mentor teaching a student how to execute a specific task.
@@ -226,9 +256,13 @@ export const GeminiService = {
             FORMAT: JSON Array of 4 Strings.
         `;
     try {
-      const result = await this.retryWithBackoff(() =>
-        this.withTimeout(model.generateContent(prompt)),
-      );
+      const result = await this.retryWithBackoff(async (modelName) => {
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
+        });
+        return this.withTimeout(model.generateContent(prompt));
+      });
       return safeParseSubSteps(result.response.text());
     } catch (e) {
       console.warn('SubStep Fail:', e);
