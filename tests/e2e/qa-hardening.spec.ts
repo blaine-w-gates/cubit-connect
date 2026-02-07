@@ -20,7 +20,7 @@ test.describe('QA Hardening: Robustness Checks', () => {
   // TEST 1: Quota Exceeded (Graceful Failure)
   test('Gracefully handles API Quota Exceeded (429)', async ({ page }) => {
     // 1. Mock 429 Error on Gemini API
-    await page.route('**/generativelanguage.googleapis.com/**/generateContent*', async (route) => {
+    await page.route(/generativelanguage\.googleapis\.com\/.*generateContent/, async (route) => {
       await route.fulfill({
         status: 429,
         contentType: 'application/json',
@@ -35,7 +35,7 @@ test.describe('QA Hardening: Robustness Checks', () => {
     });
 
     // Also mock countTokens because validateConnection calls it on Ignition
-    await page.route('**/generativelanguage.googleapis.com/**/countTokens*', async (route) => {
+    await page.route(/generativelanguage\.googleapis\.com\/.*countTokens/, async (route) => {
       await route.fulfill({ json: { totalTokens: 10 } });
     });
 
@@ -43,7 +43,7 @@ test.describe('QA Hardening: Robustness Checks', () => {
 
     // 2. Trigger Analysis (Text Mode for speed)
     await page.getByText('Text Mode').click();
-    await page.getByPlaceholder('Project Title').fill('Quota Test Project');
+    await page.getByPlaceholder('Project Title').fill('Robustness Test Project');
     await page
       .getByPlaceholder('Paste your text content')
       .fill(
@@ -86,11 +86,10 @@ test.describe('QA Hardening: Robustness Checks', () => {
     });
 
     // Now check if we have an error visible.
-    const quotaText = page.getByText(/Quota|Limit|Exhausted|429/i);
-    const apiKeyInput = page.locator('input[type="password"]');
+    // The error UI includes the Modal ("Usage Limit Reached") AND the Toast ("Quota Limit Reached").
+    // We check for the Modal Header as a strong indicator of success.
 
-    // Either the modal is open OR a toast is visible
-    await expect(quotaText.or(apiKeyInput)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Usage Limit|Quota Limit/i })).toBeVisible();
   });
 
   // TEST 2: Missing Video Handle (Zombie Process Protection)

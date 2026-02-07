@@ -60,14 +60,15 @@ export default function ProcessingLog() {
           {logs.map((log) => (
             <div
               key={log.id}
-              className={`${log.message.includes('Complete') || log.message.includes('Success')
+              className={`${
+                log.message.includes('Complete') || log.message.includes('Success')
                   ? 'text-emerald-700 dark:text-emerald-400'
                   : log.message.includes('⚠️')
                     ? 'text-amber-600 dark:text-amber-400 font-bold'
                     : log.message.includes('🔴')
                       ? 'text-red-600 dark:text-red-400 font-bold'
                       : 'text-zinc-700 dark:text-stone-400'
-                } mb-1 border-l-2 border-zinc-300 dark:border-stone-700 pl-2 flex gap-2`}
+              } mb-1 border-l-2 border-zinc-300 dark:border-stone-700 pl-2 flex gap-2`}
             >
               <span className="text-zinc-400 dark:text-stone-600 font-bold shrink-0">
                 [{log.timestamp}]

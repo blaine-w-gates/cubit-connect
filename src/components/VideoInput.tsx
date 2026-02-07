@@ -1,14 +1,13 @@
 'use client';
 
-import { RefObject, useCallback, useState, useEffect, useRef } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useAppStore } from '@/store/useAppStore';
 import { GeminiService } from '@/services/gemini';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import UploadZone from '@/components/UploadZone';
-import { Key, Search, ArrowRight, Loader2 } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
 
 import { useShallow } from 'zustand/react/shallow';
 
@@ -29,7 +28,7 @@ interface VideoInputProps {
 }
 
 export default function VideoInput({ videoRef, startProcessing }: VideoInputProps) {
-  const { apiKey, setApiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } =
+  const { apiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } =
     useAppStore(
       useShallow((state) => ({
         apiKey: state.apiKey,
@@ -44,7 +43,6 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
   const isOnline = useNetworkStatus();
 
   // Ignition State removed (using global settings)
-
 
   // Handler: When user selects a video file
   const handleVideoSelected = useCallback(
@@ -85,8 +83,8 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
           description: 'Please enter your API Key to proceed.',
           action: {
             label: 'Enter Key',
-            onClick: () => useAppStore.getState().setIsSettingsOpen(true)
-          }
+            onClick: () => useAppStore.getState().setIsSettingsOpen(true),
+          },
         });
         useAppStore.getState().setIsSettingsOpen(true);
         return;

@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react';
 import { TaskItem } from '@/services/storage';
 
 interface PrintableReportProps {

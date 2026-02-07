@@ -19,7 +19,9 @@ export const GeminiEvents = new EventTarget();
 
 function emitLog(message: string, type: 'info' | 'warning' | 'error' = 'info') {
   GeminiEvents.dispatchEvent(
-    new CustomEvent('gemini-log', { detail: { message, type, timestamp: new Date().toLocaleTimeString() } })
+    new CustomEvent('gemini-log', {
+      detail: { message, type, timestamp: new Date().toLocaleTimeString() },
+    }),
   );
 }
 
@@ -49,13 +51,17 @@ export const GeminiService = {
     this.resetState();
   },
 
-  async retryWithBackoff<T>(fn: (modelName: string) => Promise<T>, retries = 3, delay = 2000): Promise<T> {
+  async retryWithBackoff<T>(
+    fn: (modelName: string) => Promise<T>,
+    retries = 3,
+    delay = 2000,
+  ): Promise<T> {
     // 1. Determine which model to start with
     const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
 
     // Log the start if it's the first attempt (heuristic)
     if (retries === 3) {
-      // emitLog(`Starting generation with ${currentModel}...`, 'info'); 
+      // emitLog(`Starting generation with ${currentModel}...`, 'info');
       // Commented out to reduce noise, we only log switches.
     }
 
@@ -67,11 +73,13 @@ export const GeminiService = {
 
       // 429 DETECTION & FALLBACK LOGIC
       if (msg.includes('429') || msg.includes('quota') || msg.includes('resource_exhausted')) {
-
         // Scenario A: We are on PRIMARY and hit a limit.
         if (currentModel === PRIMARY_MODEL) {
           primaryCooldownUntil = Date.now() + COOLDOWN_DURATION;
-          emitLog(`⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`, 'warning');
+          emitLog(
+            `⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`,
+            'warning',
+          );
 
           // IMMEDIATE RETRY with Fallback (No backoff delay needed, just switch)
           return this.retryWithBackoff(fn, retries, delay);
@@ -85,9 +93,11 @@ export const GeminiService = {
       }
 
       // Standard Retry Logic for Network Blips (503, etc)
-      const isNetwork = msg.includes('fetch failed') || msg.includes('network error') || msg.includes('503');
+      const isNetwork =
+        msg.includes('fetch failed') || msg.includes('network error') || msg.includes('503');
       if (retries > 0 && isNetwork) {
-        if (process.env.NODE_ENV === 'development') console.warn(`Gemini Retry (${retries} left): ${msg}`);
+        if (process.env.NODE_ENV === 'development')
+          console.warn(`Gemini Retry (${retries} left): ${msg}`);
         await new Promise((resolve) => setTimeout(resolve, delay));
         return this.retryWithBackoff(fn, retries - 1, delay * 2);
       }
@@ -146,10 +156,12 @@ export const GeminiService = {
     const isHugeContext = transcript.length > 100000;
 
     if (isHugeContext && !this.isPrimaryCool()) {
-      // Ideally we wait, but for now we just warn and try Primary anyway? 
+      // Ideally we wait, but for now we just warn and try Primary anyway?
       // No, if Primary is cool, we use it. If Primary is HOT (rate limited) and we try Fallback, Fallback will crash.
       // So if Primary is HOT and Context is HUGE -> We must FAIL fast to save user time.
-      throw new Error('PROJECT_QUOTA_EXCEEDED: Content too large for backup model. Please upgrade or wait.');
+      throw new Error(
+        'PROJECT_QUOTA_EXCEEDED: Content too large for backup model. Please upgrade or wait.',
+      );
     }
 
     const prompt = `
