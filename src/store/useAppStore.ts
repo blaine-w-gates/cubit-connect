@@ -115,7 +115,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   loadProject: async () => {
-    console.log('LOADING PROJECT...');
     const data = await storageService.getProject();
 
     // --- MIGRATION LAYER ---
