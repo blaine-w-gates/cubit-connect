@@ -43,6 +43,8 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
   // TEST 1: Persistence & Text Mode Logic
   test('Persistence: Text Mode data survives reload & No Error Banner', async ({ page }) => {
     await page.goto('/engine');
+    // Wait for hydration to prevent race condition with loadProject
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
     await page.getByRole('button', { name: /Text/i }).click();
     await expect(page.getByText(/Video Source Disconnected/i)).toBeHidden();
 
@@ -70,8 +72,9 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
 
   // TEST 2: Recursive Object Serialization
   test('Serialization: Markdown handles object micro-steps', async ({ page }) => {
-    test.skip(true, 'Skipping Clipboard Test in CI environment');
     await page.goto('/engine');
+    // Wait for hydration to prevent race condition with loadProject
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
     // FIX: Use async actions to ensure persistence, direct setState does not trigger IDB save
     await page.evaluate(async () => {
@@ -102,7 +105,26 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
     );
 
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    // Mock Clipboard API for Headless/Safari support
+    await page.evaluate(() => {
+      let clipboardContent = '';
+      const mockClipboard = {
+        writeText: async (text: string) => { clipboardContent = text; },
+        readText: async () => clipboardContent,
+      };
+      Object.defineProperty(navigator, 'clipboard', {
+        value: mockClipboard,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    // Mobile Support: Open menu if needed
+    const menuBtn = page.getByLabel('Toggle menu');
+    if (await menuBtn.isVisible()) {
+      await menuBtn.click();
+    }
+
     await page.getByRole('button', { name: /Copy/i }).click();
     const clipboardText = await page.evaluate(() => navigator.clipboard.readText());
 
@@ -112,6 +134,8 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
   // TEST 3: Memory Leak Spy
   test('Memory: revokeObjectURL is called after video selection', async ({ page }) => {
     await page.goto('/engine');
+    // Wait for hydration to prevent race condition with loadProject
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
     // 1. Ensure file input is ready
     await page.locator('input[accept="video/*"]').waitFor({ state: 'attached' });
@@ -151,6 +175,8 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
   test.fixme('Electric UI: Pulse animation and ID uniqueness', async ({ page }) => {
     // Skipping due to persistent CI timeouts (Electric UI Pulse Animation)
     await page.goto('/engine');
+    // Wait for hydration to prevent race condition with loadProject
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
     await page.evaluate(async () => {
       await (window as unknown as CustomWindow).__STORE__.getState().importTasks([
         {

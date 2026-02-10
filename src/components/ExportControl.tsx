@@ -35,10 +35,21 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
     // Recursive helper for steps
     const formatStep = (step: CubitStep | string, depth = 0): string => {
       const indent = '  '.repeat(depth);
-      const content = typeof step === 'string' ? step : step.text;
+
+      // Robust Content Extraction (Fix for [object Object] edge case)
+      let content = '';
+      if (typeof step === 'string') {
+        content = step;
+      } else if (typeof step === 'object' && step !== null) {
+        // Explicitly check for 'text' property, fallback to safely stringified representation or placeholder
+        content = step.text || 'Untitled Step';
+      } else {
+        content = String(step); // Last resort
+      }
+
       let result = `${indent}- ${content}`;
 
-      if (typeof step !== 'string' && step.sub_steps && step.sub_steps.length > 0) {
+      if (typeof step !== 'string' && step !== null && typeof step === 'object' && step.sub_steps && Array.isArray(step.sub_steps) && step.sub_steps.length > 0) {
         const children = step.sub_steps.map((child) => formatStep(child, depth + 1)).join('\n');
         result += `\n${children}`;
       }
