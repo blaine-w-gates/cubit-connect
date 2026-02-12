@@ -5,6 +5,30 @@ import { TaskItem } from '@/services/storage';
 const MAX_WIDTH = 640;
 const QUALITY = 0.7;
 
+// Helper: Async Canvas to Blob
+const canvasToBlob = (canvas: HTMLCanvasElement, type: string, quality: number): Promise<Blob> => {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => {
+        if (blob) resolve(blob);
+        else reject(new Error('Canvas to Blob failed'));
+      },
+      type,
+      quality,
+    );
+  });
+};
+
+// Helper: Async Blob to Base64
+const blobToDataURL = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
+};
+
 export const useVideoProcessor = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -43,7 +67,7 @@ export const useVideoProcessor = () => {
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
 
-      const captureFrame = () => {
+      const captureFrame = async () => {
         // 1. Resize logic
         const scale = Math.min(1, MAX_WIDTH / video.videoWidth);
         const width = video.videoWidth * scale;
@@ -56,38 +80,42 @@ export const useVideoProcessor = () => {
         if (ctx) {
           ctx.drawImage(video, 0, 0, width, height);
 
-          // 3. Compress & Save
-          const base64 = canvas.toDataURL('image/jpeg', QUALITY);
+          try {
+            // 3. Compress & Save (Async)
+            const blob = await canvasToBlob(canvas, 'image/jpeg', QUALITY);
+            const base64 = await blobToDataURL(blob);
 
-          // 4. Update Store (Async persistence happens inside store)
-          updateTask(currentTask.id, { screenshot_base64: base64 });
+            // 4. Update Store (Async persistence happens inside store)
+            updateTask(currentTask.id, { screenshot_base64: base64 });
 
-          // 5. Next Task (Recursive)
-          processNext(queue.slice(1));
+            // 5. Next Task (Recursive)
+            await processNext(queue.slice(1));
+          } catch (error) {
+            console.error('Frame capture failed:', error);
+            addLog(`Error processing frame for task ${currentTask.id}`);
+            // Continue to next task even on error? Or stop?
+            // Usually safer to try next one
+            await processNext(queue.slice(1));
+          }
         }
       };
 
       // The Critical Async Flow
-      // We define timeout first, but we need the function to reference it.
-      // We use a mutable object to hold the ID to satisfy 'const' rules if needed,
-      // OR we just ignore the linter for this specific pattern if 'let' is required.
-      // Actually, cleaner approach:
-
       let timeoutId: NodeJS.Timeout; // eslint-disable-line prefer-const
 
-      const onSeeked = () => {
+      const onSeeked = async () => {
         clearTimeout(timeoutId);
-        captureFrame();
+        await captureFrame();
       };
 
       // Setup "once" listener for the seeked event
       video.addEventListener('seeked', onSeeked, { once: true });
 
       // Safety: Force capture if browser throttles seek (tab inactive etc)
-      timeoutId = setTimeout(() => {
+      timeoutId = setTimeout(async () => {
         console.warn(`Seek timeout for task ${currentTask.id}. Forcing capture.`);
         video.removeEventListener('seeked', onSeeked);
-        captureFrame();
+        await captureFrame();
       }, 2000);
 
       // Trigger the seek (with Visual Buffer)
@@ -97,7 +125,7 @@ export const useVideoProcessor = () => {
       if (Math.abs(video.currentTime - targetTime) < 0.1) {
         clearTimeout(timeoutId); // Clear safety if skipping
         video.removeEventListener('seeked', onSeeked); // Remove unused listener
-        captureFrame();
+        await captureFrame();
       } else {
         video.currentTime = targetTime;
       }
