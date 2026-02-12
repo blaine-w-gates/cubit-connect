@@ -36,3 +36,10 @@ If you encounter `no workspace set. Prompt the user to select a workspace`, this
 1.  Ask: "List my Render workspaces"
 2.  Then ask: "Set my Render workspace to [Name]"
 3.  Retry the command.
+
+**Git Push Failures:**
+If you "complete" a task but the code doesn't appear in the repo, or the branch is missing:
+**The Fix:**
+1.  **Explictly Run:** `git status` and `git branch -a` to verify your state.
+2.  **Force Push:** If `git push` fails silently, try `git push origin [branch-name]`.
+3.  **Fallback:** If all else fails, **output the full file content** in the chat so I can apply it manually.
