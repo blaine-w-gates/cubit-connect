@@ -28,3 +28,11 @@ Use this template when submitting checks, bugs, or feature requests to Jules.
 **Before writing any code, please provide:**
 1.  **Root Cause Analysis**: Explain *why* the issue is happening (not just *what* is failing).
 2.  **Proposed Plan**: A step-by-step plan for approval.
+
+## 5. Troubleshooting (Known Issues)
+**Render Workspace Error:**
+If you encounter `no workspace set. Prompt the user to select a workspace`, this is a safety feature of the Render integration.
+**The Fix:**
+1.  Ask: "List my Render workspaces"
+2.  Then ask: "Set my Render workspace to [Name]"
+3.  Retry the command.
