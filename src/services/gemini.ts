@@ -213,6 +213,7 @@ export const GeminiService = {
         ...t,
         id: crypto.randomUUID(),
         screenshot_base64: '',
+        isExpanded: false,
         sub_steps: [],
       }));
     } catch (error: unknown) {
