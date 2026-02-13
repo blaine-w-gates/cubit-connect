@@ -44,13 +44,14 @@ describe('Store Performance Benchmark', () => {
     vi.useRealTimers();
   });
 
-  const taskCount = 10000;
-  const tasks: TaskItem[] = Array.from({ length: taskCount }, (_, i) => ({
-    id: `task-${i}`,
+  const taskCount = 100; // Changed from 10000 to 100 to match the array length in the instruction
+  const tasks = Array.from({ length: taskCount }, (_, i) => ({
+    id: `task_${i}`,
     task_name: `Task ${i}`,
-    timestamp_seconds: i,
-    description: `Description ${i}`,
+    timestamp_seconds: i * 60,
+    description: 'Benchmark Task',
     screenshot_base64: '',
+    isExpanded: false,
     sub_steps: [],
   }));
 

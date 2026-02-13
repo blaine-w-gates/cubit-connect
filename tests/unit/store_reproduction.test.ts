@@ -31,9 +31,10 @@ describe('Store Double Save Reproduction', () => {
         id: '1',
         task_name: 'Task 1',
         timestamp_seconds: 0,
-        description: 'Test description',
+        description: 'Reproduction Task',
         sub_steps: [],
         screenshot_base64: '', // Required by schema default? It's optional in Zod but inferred type might require it if not strict
+        isExpanded: false,
       },
     ];
 
