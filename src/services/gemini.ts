@@ -56,53 +56,66 @@ export const GeminiService = {
     retries = 3,
     delay = 2000,
   ): Promise<T> {
-    // 1. Determine which model to start with
-    const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
+    let currentRetries = retries;
+    let currentDelay = delay;
 
-    // Log the start if it's the first attempt (heuristic)
-    if (retries === 3) {
-      // emitLog(`Starting generation with ${currentModel}...`, 'info');
-      // Commented out to reduce noise, we only log switches.
-    }
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      // 1. Determine which model to start with
+      const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
 
-    try {
-      return await fn(currentModel);
-    } catch (error: unknown) {
-      const err = error as Error;
-      const msg = err?.message?.toLowerCase() || '';
-
-      // 429 DETECTION & FALLBACK LOGIC
-      if (msg.includes('429') || msg.includes('quota') || msg.includes('resource_exhausted')) {
-        // Scenario A: We are on PRIMARY and hit a limit.
-        if (currentModel === PRIMARY_MODEL) {
-          primaryCooldownUntil = Date.now() + COOLDOWN_DURATION;
-          emitLog(
-            `⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`,
-            'warning',
-          );
-
-          // IMMEDIATE RETRY with Fallback (No backoff delay needed, just switch)
-          return this.retryWithBackoff(fn, retries, delay);
-        }
-
-        // Scenario B: We are already on FALLBACK and hit a limit.
-        if (currentModel === FALLBACK_MODEL) {
-          emitLog(`🔴 Project Quota Exceeded. Both models exhausted.`, 'error');
-          throw new Error('PROJECT_QUOTA_EXCEEDED: Please update your API Key.');
-        }
+      // Log the start if it's the first attempt (heuristic)
+      if (currentRetries === 3) {
+        // emitLog(`Starting generation with ${currentModel}...`, 'info');
+        // Commented out to reduce noise, we only log switches.
       }
 
-      // Standard Retry Logic for Network Blips (503, etc)
-      const isNetwork =
-        msg.includes('fetch failed') || msg.includes('network error') || msg.includes('503');
-      if (retries > 0 && isNetwork) {
-        if (process.env.NODE_ENV === 'development')
-          console.warn(`Gemini Retry (${retries} left): ${msg}`);
-        await new Promise((resolve) => setTimeout(resolve, delay));
-        return this.retryWithBackoff(fn, retries - 1, delay * 2);
-      }
+      try {
+        return await fn(currentModel);
+      } catch (error: unknown) {
+        const err = error as Error;
+        const msg = err?.message?.toLowerCase() || '';
 
-      throw error;
+        // 429 DETECTION & FALLBACK LOGIC
+        if (msg.includes('429') || msg.includes('quota') || msg.includes('resource_exhausted')) {
+          // Scenario A: We are on PRIMARY and hit a limit.
+          if (currentModel === PRIMARY_MODEL) {
+            primaryCooldownUntil = Date.now() + COOLDOWN_DURATION;
+            emitLog(
+              `⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`,
+              'warning',
+            );
+
+            // IMMEDIATE RETRY with Fallback (No backoff delay needed, just switch)
+            // Continue loop with same retries count
+            continue;
+          }
+
+          // Scenario B: We are already on FALLBACK and hit a limit.
+          if (currentModel === FALLBACK_MODEL) {
+            emitLog(`🔴 Project Quota Exceeded. Both models exhausted.`, 'error');
+            throw new Error('PROJECT_QUOTA_EXCEEDED: Please update your API Key.');
+          }
+        }
+
+        // Standard Retry Logic for Network Blips (503, etc)
+        const isNetwork =
+          msg.includes('fetch failed') || msg.includes('network error') || msg.includes('503');
+
+        if (currentRetries > 0 && isNetwork) {
+          if (process.env.NODE_ENV === 'development')
+            console.warn(`Gemini Retry (${currentRetries} left): ${msg}`);
+
+          await new Promise((resolve) => setTimeout(resolve, currentDelay));
+
+          currentRetries--;
+          currentDelay *= 2;
+          continue;
+        }
+
+        // If we get here, it's a fatal error or retries exhausted
+        throw error;
+      }
     }
   },
 
