@@ -9,15 +9,13 @@ interface TaskFeedProps {
 }
 
 export default function TaskFeed({ tasks, onCubit }: TaskFeedProps) {
-  // Virtualization requires fixed height or pure item rendering
-  // We will render the whole page height for the feed eventually,
-  // but for now let's give it a container.
+  // Virtualization now uses Window Scrolling for better UX (single scrollbar)
 
   return (
-    <div className="h-full w-full bg-transparent">
+    <div className="w-full bg-transparent">
       <Virtuoso
-        style={{ height: 'calc(100vh - 80px)' }} // Subtract header height approx
-        className="no-scrollbar" // Optional: custom scrollbar hiding if needed
+        useWindowScroll
+        overscan={400} // Render 400px extra to prevent white flashes
         data={tasks}
         itemContent={(index, task) => <TaskEditor task={task} onCubit={onCubit} />}
       />
