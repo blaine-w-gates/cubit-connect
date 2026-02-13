@@ -28,6 +28,7 @@ export const TaskItemSchema = z.object({
   timestamp_seconds: z.number(),
   description: z.string(),
   screenshot_base64: z.string().optional().default(''), // Handle legacy missing fields
+  isExpanded: z.boolean().optional().default(false), // Persistent UI state for auto-expansion
   sub_steps: z.array(CubitStepSchema).optional().default([]),
 });
 

@@ -46,6 +46,7 @@ export interface ProjectState {
   addMicroSteps: (taskId: string, stepId: string, microSteps: string[]) => Promise<void>;
   updateDeepStep: (taskId: string, stepId: string, newText: string) => Promise<void>;
   toggleStepCompletion: (taskId: string, stepId: string) => Promise<void>; // New Action
+  toggleTaskExpansion: (taskId: string) => Promise<void>; // New Persistence
   setTranscript: (text: string) => Promise<void>; // New action
   setScoutResults: (results: string[]) => Promise<void>;
   addToScoutHistory: (topic: string) => void;
@@ -98,6 +99,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const updated = [topic, ...filtered].slice(0, 5);
       return { scoutHistory: updated };
     }),
+
+  // Actions
+  toggleTaskExpansion: async () => { }, // Initial implementation (will be overwritten by real action)
 
   logs: [],
 

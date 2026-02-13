@@ -33,11 +33,9 @@ interface TaskEditorProps {
 }
 
 const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) {
-  const [expanded, setExpanded] = useState(false);
-
   // Performance: Use shallow selector to prevent stable re-renders
   // Optimized: Only return activeProcessingId if it matches THIS task or its sub-steps
-  const { updateTask, updateDeepStep, toggleStepCompletion, activeProcessingId } = useAppStore(
+  const { updateTask, updateDeepStep, toggleStepCompletion, toggleTaskExpansion, activeProcessingId } = useAppStore(
     useShallow((state) => {
       let relevantId: string | null = null;
       if (state.activeProcessingId === task.id) {
@@ -50,6 +48,7 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
         updateTask: state.updateTask,
         updateDeepStep: state.updateDeepStep,
         toggleStepCompletion: state.toggleStepCompletion,
+        toggleTaskExpansion: state.toggleTaskExpansion,
         activeProcessingId: relevantId,
       };
     }),
@@ -102,10 +101,10 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
           {/* Sub-steps Accordion Trigger */}
           {task.sub_steps && task.sub_steps.length > 0 && (
             <button
-              onClick={() => setExpanded(!expanded)}
+              onClick={() => toggleTaskExpansion(task.id)}
               className="mt-2 text-xs text-zinc-500 dark:text-zinc-500 flex items-center gap-1 hover:text-zinc-700 dark:hover:text-zinc-300"
             >
-              {expanded ? (
+              {task.isExpanded ? (
                 <ChevronDown className="w-3 h-3" />
               ) : (
                 <ChevronRight className="w-3 h-3" />
@@ -117,7 +116,7 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
       </div>
 
       {/* Accordion Body (Level 2: Sub-steps) */}
-      {expanded && task.sub_steps && (
+      {task.isExpanded && task.sub_steps && (
         <div className="mt-3 ml-2 sm:ml-4 bg-zinc-50 dark:bg-zinc-950/50 rounded-lg p-3 text-sm border-t border-zinc-100 dark:border-zinc-800 space-y-4 border border-zinc-200/50 dark:border-zinc-700/50">
           {task.sub_steps.map((step, idx) => (
             <div
@@ -132,11 +131,10 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                     aria-label={
                       step.isCompleted ? 'Mark step as incomplete' : 'Mark step as complete'
                     }
-                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                      step.isCompleted
-                        ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
-                        : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
-                    }`}
+                    className={`mt-0.5 flex-shrink-0 w-4 h-4 rounded-full border flex items-center justify-center transition-all ${step.isCompleted
+                      ? 'bg-zinc-900 dark:bg-zinc-100 border-zinc-900 dark:border-zinc-100'
+                      : 'border-zinc-400 hover:border-zinc-600 dark:border-zinc-500 dark:hover:border-zinc-300'
+                      }`}
                   >
                     {step.isCompleted && (
                       <Check className="w-2.5 h-2.5 text-white dark:text-zinc-900" />

@@ -78,7 +78,7 @@ export default function ResultsFeed() {
             text: text,
             sub_steps: [],
           }));
-          await updateTask(taskId, { sub_steps: objectSteps });
+          await updateTask(taskId, { sub_steps: objectSteps, isExpanded: true }); // Auto-expand
         }
       } catch (e: unknown) {
         const err = e as Error;

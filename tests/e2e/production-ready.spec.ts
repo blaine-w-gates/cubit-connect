@@ -87,6 +87,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
           timestamp_seconds: 0,
           description: 'Test Description',
           screenshot_base64: '',
+          isExpanded: false,
           sub_steps: [
             {
               id: 's1',
@@ -186,6 +187,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
           timestamp_seconds: 0,
           description: 'Description', // Description needed for button to be interactive usually
           screenshot_base64: '',
+          isExpanded: false,
         },
       ]);
     });
@@ -230,5 +232,50 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // If the mock returns the same structure (TaskItem array), `generateSubSteps` (which expects string[]) might fail parsing.
 
     // Let's rely on the "Thinking..." state verification for Electric UI test.
+  });
+
+  // TEST 5: Auto-Expansion & Persistence (The Fix)
+  test('UX: Steps auto-expand on creation and persist state', async ({ page }) => {
+    await page.goto('/engine');
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
+
+    // 1. Inject a task
+    await page.evaluate(async () => {
+      const store = (window as unknown as CustomWindow).__STORE__.getState();
+      await store.importTasks([
+        {
+          id: 'expand-test',
+          task_name: 'Expansion Test',
+          description: 'Desc',
+          timestamp_seconds: 0,
+          screenshot_base64: '', // Required
+          isExpanded: false, // Start closed
+          sub_steps: [],
+        },
+      ]);
+    });
+    await page.reload();
+
+    // 2. Mock Generation Response
+    await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
+      const json = {
+        candidates: [{ content: { parts: [{ text: JSON.stringify(['Step A', 'Step B']) }] } }],
+      };
+      await route.fulfill({ json });
+    });
+
+    // 3. Click Cubit -> Generate Steps
+    await page.getByRole('button', { name: 'Cubit' }).click();
+
+    // 4. Verify Auto-Expansion (Should see "Step A")
+    await expect(page.getByText('Step A')).toBeVisible();
+    await expect(page.getByText('Step B')).toBeVisible();
+
+    // 5. Verify Persistence after Reload
+    await page.reload();
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
+
+    // Should STILL be visible without clicking anything
+    await expect(page.getByText('Step A')).toBeVisible();
   });
 });
