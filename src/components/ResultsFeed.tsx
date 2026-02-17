@@ -45,18 +45,16 @@ export default function ResultsFeed() {
         if (stepId) {
           const parentTask = currentTasks.find((t) => t.id === taskId);
           if (parentTask && parentTask.sub_steps) {
-            const currentIndex = parentTask.sub_steps.findIndex((s) => s.id === stepId);
-            if (currentIndex !== -1) {
-              const prev = parentTask.sub_steps[currentIndex - 1];
-              const next = parentTask.sub_steps[currentIndex + 1];
+            // Helper: handle migration unions
+            const getText = (s: unknown) =>
+              typeof s === 'string' ? s : (s as { text: string }).text;
 
-              // Helper: handle migration unions
-              const getText = (s: unknown) =>
-                typeof s === 'string' ? s : (s as { text: string }).text;
-
-              if (prev) neighborContext += `User has ALREADY completed: "${getText(prev)}". `;
-              if (next) neighborContext += `User will SUBSEQUENTLY do: "${getText(next)}". `;
-            }
+            // Send ALL sibling steps so the AI understands the full recipe structure
+            const siblingDescriptions = parentTask.sub_steps.map((s, i) => {
+              const marker = s.id === stepId ? '→ [CURRENT STEP]' : `  Step ${i + 1}`;
+              return `${marker}: "${getText(s)}"`;
+            });
+            neighborContext = `Full recipe steps for "${parentTask.task_name}":\n${siblingDescriptions.join('\n')}`;
           }
         }
 

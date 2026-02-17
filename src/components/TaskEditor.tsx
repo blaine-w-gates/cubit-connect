@@ -155,7 +155,7 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                   onClick={() =>
                     onCubit(
                       task.id,
-                      `Context: ${task.description}. Step: ${step.text}. Break this step down into 4 micro-steps.`,
+                      `Task: ${task.task_name}. Context: ${task.description}. Step to elaborate: ${step.text}`,
                       step.id,
                     )
                   }
