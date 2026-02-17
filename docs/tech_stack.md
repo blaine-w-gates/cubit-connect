@@ -1,6 +1,10 @@
-- **Framework:** Next.js 16 (App Router)
-- **AI:** `@google/generative-ai` (Model: `gemini-2.5-flash-lite` or validated equivalent like `gemini-flash-latest` that maps to it)
-- **State:** Zustand + `idb-keyval`
-- **Styling:** Tailwind CSS 4 (Geist Font)
-- **Safety:** `.windsurfrules` enforced (Async Video, Rate Limiting).
+- **Framework:** Next.js 16 (App Router, Turbopack)
+- **AI:** `@google/generative-ai`
+  - Primary: `gemini-2.5-flash`
+  - Fallback: `gemini-2.5-flash-lite` (circuit breaker auto-switch on 429)
+- **State:** Zustand (`src/store/useAppStore.ts`) + `idb-keyval` (IndexedDB persistence)
+- **Schemas:** Zod (`src/schemas/storage.ts` for data, `src/schemas/gemini.ts` for API responses)
+- **Styling:** Tailwind CSS 4 (Geist Font). Light + Dark mode via `ThemeSelector.tsx`.
+- **Security:** API keys encrypted via `src/lib/crypto.ts`. Gemini responses validated via `src/lib/validation.ts`.
+- **IDE:** Google Antigravity.
 - **Docs:** `docs/` is the Source of Truth.
