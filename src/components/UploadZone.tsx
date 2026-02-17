@@ -162,7 +162,7 @@ export default function UploadZone({
       <div className="w-full max-w-2xl text-center space-y-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white">Cubit Connect</h1>
-          <p className="text-zinc-400 dark:text-zinc-500">
+          <p className="text-zinc-600 dark:text-zinc-500">
             AI-Powered Documentation & Knowledge Distillation. <br />
             Select your source material to begin.
           </p>
@@ -173,22 +173,20 @@ export default function UploadZone({
           <div className="bg-zinc-100 dark:bg-zinc-800 p-1 rounded-xl flex gap-1 border border-zinc-200 dark:border-zinc-700">
             <button
               onClick={() => setMode('video')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                mode === 'video'
+              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'video'
                   ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
-              }`}
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+                }`}
             >
               <Video className="w-4 h-4" />
               Video Mode
             </button>
             <button
               onClick={() => setMode('text')}
-              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${
-                mode === 'text'
+              className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'text'
                   ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
-              }`}
+                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+                }`}
             >
               <FileType className="w-4 h-4" />
               Text Mode
@@ -207,13 +205,12 @@ export default function UploadZone({
               onDrop={handleDropVideo}
               className={`
                                 relative group flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all
-                                ${
-                                  videoFile
-                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
-                                    : dragActive
-                                      ? 'border-zinc-900 bg-zinc-100 dark:bg-zinc-800 scale-[1.02]'
-                                      : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10'
-                                }
+                                ${videoFile
+                  ? 'border-green-500 bg-green-50 dark:bg-green-900/20'
+                  : dragActive
+                    ? 'border-zinc-900 bg-zinc-100 dark:bg-zinc-800 scale-[1.02]'
+                    : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10'
+                }
                             `}
             >
               <input type="file" accept="video/*" onChange={handleVideoChange} className="hidden" />
@@ -243,13 +240,12 @@ export default function UploadZone({
               onDrop={handleDropTranscript}
               className={`
                                 relative group flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all
-                                ${
-                                  transcriptContent
-                                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
-                                    : dragActive
-                                      ? 'border-zinc-900 bg-zinc-100 dark:bg-zinc-800 scale-[1.02]'
-                                      : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10'
-                                }
+                                ${transcriptContent
+                  ? 'border-purple-500 bg-purple-50 dark:bg-purple-900/20'
+                  : dragActive
+                    ? 'border-zinc-900 bg-zinc-100 dark:bg-zinc-800 scale-[1.02]'
+                    : 'bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 hover:border-purple-500 hover:bg-purple-50/50 dark:hover:bg-purple-900/10'
+                }
                             `}
             >
               <input type="file" accept=".vtt,.srt" onChange={handleVttChange} className="hidden" />
@@ -319,11 +315,10 @@ export default function UploadZone({
             disabled={!isReady}
             className={`
                         w-full py-4 rounded-xl font-bold text-lg shadow-xl transition-all
-                        ${
-                          isReady
-                            ? 'bg-zinc-900 hover:bg-black dark:bg-stone-200 dark:hover:bg-white dark:text-zinc-900 hover:scale-105 hover:shadow-xl text-white'
-                            : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed'
-                        }
+                        ${isReady
+                ? 'bg-zinc-900 hover:bg-black dark:bg-stone-200 dark:hover:bg-white dark:text-zinc-900 hover:scale-105 hover:shadow-xl text-white'
+                : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-400 dark:text-zinc-600 cursor-not-allowed'
+              }
                     `}
           >
             Start Analysis

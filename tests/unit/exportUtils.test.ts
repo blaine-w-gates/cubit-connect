@@ -25,6 +25,7 @@ describe('generateMarkdown', () => {
         timestamp_seconds: 0,
         description: 'Desc 1',
         screenshot_base64: '',
+        isExpanded: false,
         sub_steps: [],
       },
     ];
@@ -42,6 +43,7 @@ describe('generateMarkdown', () => {
         timestamp_seconds: 65, // 01:05
         description: '',
         screenshot_base64: '',
+        isExpanded: false,
         sub_steps: [],
       },
     ];
@@ -57,6 +59,7 @@ describe('generateMarkdown', () => {
         timestamp_seconds: 0,
         description: '',
         screenshot_base64: '',
+        isExpanded: false,
         sub_steps: [
           {
             id: 's1',

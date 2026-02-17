@@ -53,6 +53,7 @@ describe('TaskEditor Selector Optimization', () => {
     description: '',
     timestamp_seconds: 0,
     screenshot_base64: '',
+    isExpanded: false,
     sub_steps: [
       { id: 'step-1', text: 'Step 1', sub_steps: [] },
       { id: 'step-2', text: 'Step 2', sub_steps: [] },

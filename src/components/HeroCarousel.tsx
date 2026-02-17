@@ -76,12 +76,12 @@ export default function HeroCarousel() {
             {/* Content Section represents the cells */}
             <div className="space-y-8 font-mono">
               <div className="border-l-4 border-black pl-6">
-                <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">Benefit</p>
+                <p className="text-xs uppercase tracking-widest text-zinc-600 mb-2">Benefit</p>
                 <p className="text-lg leading-relaxed">{currentSlide.benefit}</p>
               </div>
 
               <div className="border-l-4 border-black pl-6 bg-zinc-100 py-4 pr-4">
-                <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">Advantage</p>
+                <p className="text-xs uppercase tracking-widest text-zinc-600 mb-2">Advantage</p>
                 <p className="text-lg font-bold leading-relaxed">{currentSlide.advantage}</p>
               </div>
             </div>

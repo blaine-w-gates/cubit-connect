@@ -255,8 +255,10 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       ]);
     });
     await page.reload();
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
-    // 2. Mock Generation Response
+    // Re-register route mock after reload (beforeEach mock is lost)
+    // generateSubSteps expects a string[] response, not task objects
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
       const json = {
         candidates: [{ content: { parts: [{ text: JSON.stringify(['Step A', 'Step B']) }] } }],
