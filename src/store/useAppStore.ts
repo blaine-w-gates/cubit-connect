@@ -101,7 +101,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }),
 
   // Actions
-  toggleTaskExpansion: async () => { }, // Initial implementation (will be overwritten by real action)
+  toggleTaskExpansion: async (taskId: string) => {
+    const { tasks } = get();
+    const newTasks = tasks.map((t) =>
+      t.id === taskId ? { ...t, isExpanded: !t.isExpanded } : t,
+    );
+    set({ tasks: newTasks });
+  },
 
   logs: [],
 

@@ -36,8 +36,8 @@ const formatStep = (step: CubitStep | string, depth: number, index: number): str
   let line = '';
   if (depth === 0) {
     // Level 1: Numbered Checkbox (e.g., "1. [ ] Step Name")
-    const mark = isCompleted ? 'x' : ' ';
-    line = `${index}. [${mark}] ${content}`;
+    // Always unchecked in exports — user wants a clean printable recipe
+    line = `${index}. [ ] ${content}`;
   } else {
     // Level 2+: Indented Bullet (e.g., "    - Sub-step")
     // Indent logic: 4 spaces per depth level to align with Markdown list nesting

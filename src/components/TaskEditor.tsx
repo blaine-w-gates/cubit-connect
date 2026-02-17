@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, Wand2, Check } from 'lucide-react';
+import { ChevronDown, ChevronRight, Wand2, Check, X } from 'lucide-react';
 
 // Safe internal Spinner to prevent Lucide import issues
 const Spinner = ({ className }: { className?: string }) => (
@@ -35,7 +35,7 @@ interface TaskEditorProps {
 const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) {
   // Performance: Use shallow selector to prevent stable re-renders
   // Optimized: Only return activeProcessingId if it matches THIS task or its sub-steps
-  const { updateTask, updateDeepStep, toggleStepCompletion, toggleTaskExpansion, activeProcessingId } = useAppStore(
+  const { updateTask, updateDeepStep, toggleStepCompletion, toggleTaskExpansion, deleteTask, activeProcessingId } = useAppStore(
     useShallow((state) => {
       let relevantId: string | null = null;
       if (state.activeProcessingId === task.id) {
@@ -49,13 +49,23 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
         updateDeepStep: state.updateDeepStep,
         toggleStepCompletion: state.toggleStepCompletion,
         toggleTaskExpansion: state.toggleTaskExpansion,
+        deleteTask: state.deleteTask,
         activeProcessingId: relevantId,
       };
     }),
   );
 
   return (
-    <div className="p-4 mb-3 mx-2 sm:mx-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl hover:shadow-md transition-all">
+    <div className="relative p-4 mb-3 mx-2 sm:mx-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl hover:shadow-md transition-all group/card">
+      {/* Delete X — top-right, discrete */}
+      <button
+        onClick={() => deleteTask(task.id)}
+        className="absolute top-2 right-2 w-6 h-6 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/card:opacity-100 focus:opacity-100 transition-all"
+        aria-label="Delete task"
+        title="Delete task"
+      >
+        <X className="w-3.5 h-3.5" />
+      </button>
       <div
         className={`flex gap-4 items-start rounded-lg p-2 transition-all ${activeProcessingId === task.id ? 'bg-purple-50 dark:bg-purple-900/20 animate-pulse' : ''}`}
       >
