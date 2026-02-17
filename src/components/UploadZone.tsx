@@ -162,7 +162,7 @@ export default function UploadZone({
       <div className="w-full max-w-2xl text-center space-y-8">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold text-zinc-900 dark:text-white">Cubit Connect</h1>
-          <p className="text-zinc-600 dark:text-zinc-500">
+          <p className="text-zinc-700 dark:text-zinc-500">
             AI-Powered Documentation & Knowledge Distillation. <br />
             Select your source material to begin.
           </p>
@@ -174,8 +174,8 @@ export default function UploadZone({
             <button
               onClick={() => setMode('video')}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'video'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                : 'text-zinc-700 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
               <Video className="w-4 h-4" />
@@ -184,8 +184,8 @@ export default function UploadZone({
             <button
               onClick={() => setMode('text')}
               className={`px-6 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 ${mode === 'text'
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200'
+                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                : 'text-zinc-700 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200'
                 }`}
             >
               <FileType className="w-4 h-4" />

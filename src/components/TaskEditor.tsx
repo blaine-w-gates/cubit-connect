@@ -56,23 +56,23 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
   );
 
   return (
-    <div className="relative p-4 mb-3 mx-2 sm:mx-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl hover:shadow-md transition-all group/card">
-      {/* Delete X — top-right, discrete */}
-      <button
-        onClick={() => deleteTask(task.id)}
-        className="absolute top-2 right-2 w-6 h-6 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/card:opacity-100 focus:opacity-100 transition-all"
-        aria-label="Delete task"
-        title="Delete task"
-      >
-        <X className="w-3.5 h-3.5" />
-      </button>
+    <div className="p-4 mb-3 mx-2 sm:mx-4 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-sm rounded-xl hover:shadow-md transition-all group/card">
       <div
         className={`flex gap-4 items-start rounded-lg p-2 transition-all ${activeProcessingId === task.id ? 'bg-purple-50 dark:bg-purple-900/20 animate-pulse' : ''}`}
       >
         {/* Content - Full Width (No Thumbnail) */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-1">
-            <div className="flex-1 pr-2 truncate">
+            <div className="flex items-center gap-1 flex-1 pr-2 min-w-0">
+              {/* Delete X — inline left of title, hover-reveal */}
+              <button
+                onClick={() => deleteTask(task.id)}
+                className="flex-shrink-0 w-5 h-5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover/card:opacity-100 focus:opacity-100 transition-all"
+                aria-label="Delete task"
+                title="Delete task"
+              >
+                <X className="w-3 h-3" />
+              </button>
               <EditableText
                 value={task.task_name}
                 onSave={(val) => updateTask(task.id, { task_name: val })}

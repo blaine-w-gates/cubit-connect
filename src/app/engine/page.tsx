@@ -79,12 +79,18 @@ export default function EnginePage() {
     }
   }, [confirmingReset]);
 
-  // Re-trigger processing if we gain the video handle and have pending tasks
+  // Re-trigger processing if video handle is restored (session resume only)
+  // NOTE: tasks removed from deps — the VideoInput component handles initial processing.
+  // Having tasks here caused double-processing because saveTasks() triggers this effect.
   useEffect(() => {
-    if (hasVideoHandle && tasks.some((t) => !t.screenshot_base64)) {
-      startProcessing();
+    if (hasVideoHandle) {
+      const pending = useAppStore.getState().tasks.filter((t) => !t.screenshot_base64);
+      if (pending.length > 0) {
+        startProcessing();
+      }
     }
-  }, [hasVideoHandle, tasks, startProcessing]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasVideoHandle, startProcessing]);
 
   // Prevent hydration mismatch
   if (!mounted) {
