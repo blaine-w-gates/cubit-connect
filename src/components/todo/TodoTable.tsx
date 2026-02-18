@@ -1,11 +1,26 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { X, Check } from 'lucide-react';
+import { X, Check, GripVertical } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
 import { toast } from 'sonner';
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    useSortable,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 // --- Module-level constants (Fix #14: hoisted out of component) ---
 const MODE_COLORS = {
@@ -124,6 +139,7 @@ export default function TodoTable() {
         setProcessingRowId,
         restoreTodoRow,
         toggleTodoRowCompletion,
+        reorderTodoRows,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
@@ -139,6 +155,7 @@ export default function TodoTable() {
             setProcessingRowId: s.setProcessingRowId,
             restoreTodoRow: s.restoreTodoRow,
             toggleTodoRowCompletion: s.toggleTodoRowCompletion,
+            reorderTodoRows: s.reorderTodoRows,
         })),
     );
 
@@ -299,6 +316,22 @@ export default function TodoTable() {
         swipeRef.current = null;
     };
 
+    // --- Drag-and-Drop ---
+    const sensors = useSensors(
+        useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(KeyboardSensor),
+    );
+
+    const handleDragEnd = useCallback((event: DragEndEvent) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
+        const oldIndex = todoRows.findIndex((r) => r.id === active.id);
+        const newIndex = todoRows.findIndex((r) => r.id === over.id);
+        if (oldIndex !== -1 && newIndex !== -1) {
+            reorderTodoRows(oldIndex, newIndex);
+        }
+    }, [todoRows, reorderTodoRows]);
+
     if (todoRows.length === 0) {
         return (
             <div className="border border-zinc-300 dark:border-stone-700 p-1 bg-[#FAFAFA] dark:bg-stone-950/50">
@@ -317,157 +350,234 @@ export default function TodoTable() {
 
     return (
         <div className="overflow-x-auto pb-20">
-            <div className="border border-zinc-300 dark:border-stone-700 rounded-xl overflow-hidden">
-                <table className="w-full table-fixed border-collapse">
-                    <thead>
-                        <tr>
-                            <th
-                                className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600 rounded-tl-xl
-                ${activeMode === 'cubit'
-                                        ? 'z-30 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
-                                        : 'z-10 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
-              `}
-                            >
-                                Task
-                            </th>
-                            {[1, 2, 3, 4].map((n) => (
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <div className="border border-zinc-300 dark:border-stone-700 rounded-xl overflow-hidden">
+                    <table className="w-full table-fixed border-collapse">
+                        <thead>
+                            <tr>
                                 <th
-                                    key={n}
-                                    className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600
+                                    className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600 rounded-tl-xl
+                ${activeMode === 'cubit'
+                                            ? 'z-30 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
+                                            : 'z-10 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
+              `}
+                                >
+                                    Task
+                                </th>
+                                {[1, 2, 3, 4].map((n) => (
+                                    <th
+                                        key={n}
+                                        className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600
                       ${n === 4 ? 'rounded-tr-xl' : ''}
                   ${activeMode === 'deepDive' ? 'relative bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
-                                            activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-700 dark:text-green-400' :
-                                                activeMode === 'dialRight' ? 'relative bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                                                    'text-zinc-500 dark:text-stone-400'
-                                        }
-                `}
-                                >
-                                    Step {n}
-                                </th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {todoRows.map((row) => {
-                            const isProcessing = processingRowId === row.id;
-
-                            return (
-                                <tr
-                                    key={row.id}
-                                    id={row.id}
-                                    onDoubleClick={() => handleDoubleClickEmptyRow(row)}
-                                    onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
-                                    onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
-                                    className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
-                   ${row.isCompleted ? 'bg-green-50/50 dark:bg-green-950/10' : ''}
-                   ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
-                 `}
-                                >
-                                    {/* Task Column — Sticky */}
-                                    <td
-                                        className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%] overflow-hidden
-                    ${isTaskActionTarget && mc
-                                                ? `z-20 relative cursor-pointer ${mc.bg}`
-                                                : 'z-10 bg-white dark:bg-[#1c1917]'}
-                  `}
-                                        // Click Interception Wrapper
-                                        onClick={(e) => {
-                                            if (window.getSelection()?.toString()) return; // Ignore selection
-
-                                            if (activeMode === 'cubit') {
-                                                if (!isProcessing && row.task.trim()) {
-                                                    e.stopPropagation();
-                                                    handleCubit(row.id, row.task);
-                                                }
-                                            } else if (activeMode !== null) {
-                                                // Cancel Mode (Reset to Neutral)
-                                                e.stopPropagation();
-                                                setActiveMode(null);
+                                                activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-700 dark:text-green-400' :
+                                                    activeMode === 'dialRight' ? 'relative bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                                                        'text-zinc-500 dark:text-stone-400'
                                             }
-                                        }}
+                `}
                                     >
-                                        <div className="flex items-start gap-2">
-                                            {/* Action Buttons — stacked vertically */}
-                                            <div className="flex flex-col items-center gap-1 flex-shrink-0 mt-0.5">
-                                                {/* Completion Toggle */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        toggleTodoRowCompletion(row.id);
-                                                    }}
-                                                    className={`w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
-                                                        ${row.isCompleted
-                                                            ? 'bg-green-500 border-green-500 text-white'
-                                                            : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
-                                                        }`}
-                                                    title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                                    aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                                >
-                                                    {row.isCompleted ? <Check className="w-3 h-3" /> : null}
-                                                </button>
-                                                {/* Delete Toggle */}
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleSwipeDelete(row.id);
-                                                    }}
-                                                    className="w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:border-red-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
-                                                    title="Delete row"
-                                                    aria-label="Delete row"
-                                                >
-                                                    <X className="w-3 h-3" />
-                                                </button>
-                                            </div>
-                                            <div className={`flex-1 min-w-0 break-words ${row.isCompleted ? 'line-through opacity-60' : ''}`}>
-                                                <EditableCell
-                                                    value={row.task}
-                                                    onSave={(val) => updateTodoCell(row.id, 'task', val)}
-                                                    placeholder="Type a task…"
-                                                    disabled={isModeActive || row.isCompleted}
-                                                    autoFocus={!row.task.trim()}
-                                                />
-                                            </div>
-                                        </div>
-                                    </td>
+                                        Step {n}
+                                    </th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <SortableContext items={todoRows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
+                            <tbody>
+                                {todoRows.map((row) => {
+                                    const isProcessing = processingRowId === row.id;
 
-                                    {/* Step Columns */}
-                                    {row.steps.map((step, si) => (
-                                        <td
-                                            key={si}
-                                            className={`px-3 py-3 align-top w-[20%]
-                      ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
-                    `}
-                                            onClick={(e) => {
-                                                if (window.getSelection()?.toString()) return; // Ignore selection
-
-                                                if (isStepActionTarget) {
-                                                    if (!isProcessing) {
+                                    return (
+                                        <SortableRow
+                                            key={row.id}
+                                            row={row}
+                                            isProcessing={isProcessing}
+                                            isCompleted={row.isCompleted}
+                                            activeMode={activeMode}
+                                            isModeActive={isModeActive}
+                                            isTaskActionTarget={isTaskActionTarget}
+                                            isStepActionTarget={isStepActionTarget}
+                                            mc={mc}
+                                            onDoubleClick={() => handleDoubleClickEmptyRow(row)}
+                                            onTouchStart={(e: React.TouchEvent) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
+                                            onTouchEnd={(e: React.TouchEvent) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+                                            onTaskClick={(e: React.MouseEvent) => {
+                                                if (window.getSelection()?.toString()) return;
+                                                if (activeMode === 'cubit') {
+                                                    if (!isProcessing && row.task.trim()) {
                                                         e.stopPropagation();
-                                                        handleStepClick(row, si);
+                                                        handleCubit(row.id, row.task);
                                                     }
                                                 } else if (activeMode !== null) {
-                                                    // Cancel Mode (Reset to Neutral)
                                                     e.stopPropagation();
                                                     setActiveMode(null);
                                                 }
                                             }}
-                                        >
-                                            <div className={`${row.isCompleted ? 'opacity-40' : ''}`}>
-                                                <EditableCell
-                                                    value={step}
-                                                    onSave={(val) => updateTodoCell(row.id, 'step', val, si)}
-                                                    placeholder={`Step ${si + 1}`}
-                                                    disabled={isModeActive} // Disable edit if ANY mode is active
-                                                />
-                                            </div>
-                                        </td>
-                                    ))}
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+                                            onToggleComplete={() => toggleTodoRowCompletion(row.id)}
+                                            onDelete={() => handleSwipeDelete(row.id)}
+                                            onTaskSave={(val) => updateTodoCell(row.id, 'task', val)}
+                                            onStepSave={(val, si) => updateTodoCell(row.id, 'step', val, si)}
+                                            onStepClick={(si) => {
+                                                if (isStepActionTarget && !isProcessing) {
+                                                    handleStepClick(row, si);
+                                                } else if (activeMode !== null) {
+                                                    setActiveMode(null);
+                                                }
+                                            }}
+                                        />
+                                    );
+                                })}
+                            </tbody>
+                        </SortableContext>
+                    </table>
+                </div>
+            </DndContext>
         </div>
+    );
+}
+
+// --- Sortable Row Component ---
+interface SortableRowProps {
+    row: { id: string; task: string; steps: [string, string, string, string]; isCompleted: boolean };
+    isProcessing: boolean;
+    isCompleted: boolean;
+    activeMode: string | null;
+    isModeActive: boolean;
+    isTaskActionTarget: boolean;
+    isStepActionTarget: boolean;
+    mc: { bg: string } | null;
+    onDoubleClick: () => void;
+    onTouchStart: (e: React.TouchEvent) => void;
+    onTouchEnd: (e: React.TouchEvent) => void;
+    onTaskClick: (e: React.MouseEvent) => void;
+    onToggleComplete: () => void;
+    onDelete: () => void;
+    onTaskSave: (val: string) => void;
+    onStepSave: (val: string, si: number) => void;
+    onStepClick: (si: number) => void;
+}
+
+function SortableRow({
+    row, isProcessing, isCompleted, activeMode: _activeMode, isModeActive,
+    isTaskActionTarget, isStepActionTarget, mc,
+    onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
+    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick,
+}: SortableRowProps) {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: row.id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.5 : 1,
+        zIndex: isDragging ? 50 : undefined,
+    };
+
+    return (
+        <tr
+            ref={setNodeRef}
+            style={style}
+            id={row.id}
+            onDoubleClick={onDoubleClick}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
+            className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
+                ${isCompleted ? 'bg-green-50/50 dark:bg-green-950/10' : ''}
+                ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
+            `}
+        >
+            {/* Task Column — Sticky */}
+            <td
+                className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%] overflow-hidden
+                    ${isTaskActionTarget && mc
+                        ? `z-20 relative cursor-pointer ${mc.bg}`
+                        : 'z-10 bg-white dark:bg-[#1c1917]'}
+                `}
+                onClick={onTaskClick}
+            >
+                <div className="flex items-start gap-2">
+                    {/* Action Buttons — stacked vertically */}
+                    <div className="flex flex-col items-center gap-1 flex-shrink-0 mt-0.5">
+                        {/* Drag Handle */}
+                        <button
+                            {...attributes}
+                            {...listeners}
+                            className="w-5 h-5 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-zinc-500 dark:hover:text-stone-400 cursor-grab active:cursor-grabbing transition-colors"
+                            title="Drag to reorder"
+                            aria-label="Drag to reorder"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <GripVertical className="w-3.5 h-3.5" />
+                        </button>
+                        {/* Completion Toggle */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onToggleComplete();
+                            }}
+                            className={`w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
+                                ${isCompleted
+                                    ? 'bg-green-500 border-green-500 text-white'
+                                    : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
+                                }`}
+                            title={isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                            aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                        >
+                            {isCompleted ? <Check className="w-3 h-3" /> : null}
+                        </button>
+                        {/* Delete Toggle */}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDelete();
+                            }}
+                            className="w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:border-red-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
+                            title="Delete row"
+                            aria-label="Delete row"
+                        >
+                            <X className="w-3 h-3" />
+                        </button>
+                    </div>
+                    <div className={`flex-1 min-w-0 break-words ${isCompleted ? 'line-through opacity-60' : ''}`}>
+                        <EditableCell
+                            value={row.task}
+                            onSave={onTaskSave}
+                            placeholder="Type a task…"
+                            disabled={isModeActive || isCompleted}
+                            autoFocus={!row.task.trim()}
+                        />
+                    </div>
+                </div>
+            </td>
+
+            {/* Step Columns */}
+            {row.steps.map((step, si) => (
+                <td
+                    key={si}
+                    className={`px-3 py-3 align-top w-[20%]
+                        ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
+                    `}
+                    onClick={(e) => {
+                        if (window.getSelection()?.toString()) return;
+                        e.stopPropagation();
+                        onStepClick(si);
+                    }}
+                >
+                    <div className={`${isCompleted ? 'opacity-40' : ''}`}>
+                        <EditableCell
+                            value={step}
+                            onSave={(val) => onStepSave(val, si)}
+                            placeholder={`Step ${si + 1}`}
+                            disabled={isModeActive}
+                        />
+                    </div>
+                </td>
+            ))}
+        </tr>
     );
 }
