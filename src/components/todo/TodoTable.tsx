@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { X, Check, Circle } from 'lucide-react';
+import { X, Check } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
@@ -322,10 +322,10 @@ export default function TodoTable() {
                     <thead>
                         <tr>
                             <th
-                                className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
+                                className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600 rounded-tl-xl
                 ${activeMode === 'cubit'
-                                        ? 'z-30 relative ring-2 ring-inset ring-cyan-400 bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
-                                        : 'z-10 border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
+                                        ? 'z-30 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
+                                        : 'z-10 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
               `}
                             >
                                 Task
@@ -333,11 +333,12 @@ export default function TodoTable() {
                             {[1, 2, 3, 4].map((n) => (
                                 <th
                                     key={n}
-                                    className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
-                  ${activeMode === 'deepDive' ? 'z-20 relative ring-2 ring-inset ring-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
-                                            activeMode === 'dialLeft' ? 'z-20 relative ring-2 ring-inset ring-green-400 bg-green-500/10 text-green-700 dark:text-green-400' :
-                                                activeMode === 'dialRight' ? 'z-20 relative ring-2 ring-inset ring-yellow-400 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                                                    'border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400'
+                                    className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600
+                      ${n === 4 ? 'rounded-tr-xl' : ''}
+                  ${activeMode === 'deepDive' ? 'relative bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
+                                            activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-700 dark:text-green-400' :
+                                                activeMode === 'dialRight' ? 'relative bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                                                    'text-zinc-500 dark:text-stone-400'
                                         }
                 `}
                                 >
@@ -385,35 +386,38 @@ export default function TodoTable() {
                                             }
                                         }}
                                     >
-                                        <div className="flex items-start gap-1.5">
-                                            {/* Completion Toggle */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    toggleTodoRowCompletion(row.id);
-                                                }}
-                                                className={`flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
-                                                ${row.isCompleted
-                                                        ? 'bg-green-500 border-green-500 text-white'
-                                                        : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
-                                                    }`}
-                                                title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                                aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                            >
-                                                {row.isCompleted ? <Check className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                                            </button>
-                                            {/* Delete Toggle — matches circle shape */}
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    handleSwipeDelete(row.id);
-                                                }}
-                                                className="flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 dark:hover:border-red-500 dark:hover:text-red-400 transition-all opacity-70 sm:opacity-0 sm:group-hover:opacity-70"
-                                                title="Delete row"
-                                                aria-label="Delete row"
-                                            >
-                                                <X className="w-3 h-3" />
-                                            </button>
+                                        <div className="flex items-start gap-2">
+                                            {/* Action Buttons — stacked vertically */}
+                                            <div className="flex flex-col items-center gap-1 flex-shrink-0 mt-0.5">
+                                                {/* Completion Toggle */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        toggleTodoRowCompletion(row.id);
+                                                    }}
+                                                    className={`w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
+                                                        ${row.isCompleted
+                                                            ? 'bg-green-500 border-green-500 text-white'
+                                                            : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
+                                                        }`}
+                                                    title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                                    aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                                >
+                                                    {row.isCompleted ? <Check className="w-3 h-3" /> : null}
+                                                </button>
+                                                {/* Delete Toggle */}
+                                                <button
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleSwipeDelete(row.id);
+                                                    }}
+                                                    className="w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:border-red-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
+                                                    title="Delete row"
+                                                    aria-label="Delete row"
+                                                >
+                                                    <X className="w-3 h-3" />
+                                                </button>
+                                            </div>
                                             <div className={`flex-1 min-w-0 break-words ${row.isCompleted ? 'line-through opacity-60' : ''}`}>
                                                 <EditableCell
                                                     value={row.task}
