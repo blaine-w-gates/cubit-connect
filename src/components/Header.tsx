@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { Key, Menu, X, Compass } from 'lucide-react';
+import { Key, Menu, X, Compass, ListTodo } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ExportControl from '@/components/ExportControl';
 import { useAppStore } from '@/store/useAppStore';
 import ThemeSelector from './ThemeSelector';
+import { usePathname, useRouter } from 'next/navigation';
 
 interface HeaderProps {
   onPrint?: () => void;
@@ -25,6 +26,11 @@ export default function Header({
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { setInputMode, setIsSettingsOpen } = useAppStore();
+  const pathname = usePathname();
+  const router = useRouter();
+  const isEnginePage = pathname === '/engine';
+  const isTodoPage = pathname === '/todo';
+  const badgeText = isTodoPage ? 'TABLE' : 'Engine';
 
   // Close mobile menu when clicking outside
   const menuRef = useRef<HTMLDivElement>(null);
@@ -45,7 +51,7 @@ export default function Header({
         <div className="font-bold text-base md:text-lg tracking-tight flex items-center gap-2 font-serif text-zinc-900 dark:text-white shrink-0">
           Cubit Connect
           <span className="text-xs bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 px-2 py-0.5 rounded-none font-mono hidden min-[360px]:inline-block">
-            Engine
+            {badgeText}
           </span>
           {!isOnline && (
             <span className="text-xs bg-red-100 text-red-700 border border-red-500 px-2 py-0.5 flex items-center gap-1 hidden sm:flex">
@@ -57,19 +63,49 @@ export default function Header({
         {/* DESKTOP */}
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {/* SCOUT BUTTON (Ghost Style) */}
+            {/* SCOUT BUTTON (Ghost Style) - Only on Engine page */}
+            {isEnginePage && (
+              <button
+                onClick={() => {
+                  setInputMode('scout');
+                  document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Scout</span>
+              </button>
+            )}
+
+            {isEnginePage && <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />}
+
+            {/* TO DO BUTTON */}
             <button
-              onClick={() => {
-                setInputMode('scout');
-                document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors"
+              onClick={() => router.push('/todo')}
+              className={`flex items-center gap-2 text-xs transition-colors ${isTodoPage
+                ? 'text-black dark:text-white font-bold'
+                : 'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                }`}
             >
-              <Compass className="w-4 h-4" />
-              <span>Scout</span>
+              <ListTodo className="w-4 h-4" />
+              <span>To Do</span>
             </button>
 
-            <div className="h-4 w-[1px] bg-zinc-200 mx-1" />
+            {/* ENGINE BUTTON - Only when NOT on engine page */}
+            {!isEnginePage && (
+              <>
+                <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
+                <button
+                  onClick={() => router.push('/engine')}
+                  className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors"
+                >
+                  <Compass className="w-4 h-4" />
+                  <span>Engine</span>
+                </button>
+              </>
+            )}
+
+            <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
 
             <button
               onClick={() => setIsSettingsOpen(true)}
@@ -78,12 +114,12 @@ export default function Header({
               <Key className="w-4 h-4" />
               <span className="hidden sm:inline">API Key</span>
             </button>
-            <div className="h-4 w-[1px] bg-zinc-200 mx-1" />
+            <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
           </div>
 
           <ExportControl onPrint={onPrint} variant="row" />
 
-          {mounted && tasksLength > 0 && <div className="h-4 w-[1px] bg-zinc-200 mx-1" />}
+          {mounted && tasksLength > 0 && <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />}
 
           {mounted && tasksLength > 0 && (
             <button
@@ -98,7 +134,7 @@ export default function Header({
           )}
 
           {/* Theme Toggle (Right Aligned) */}
-          <div className="h-4 w-[1px] bg-zinc-200 mx-1" />
+          <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
           <ThemeSelector />
         </div>
 
@@ -125,17 +161,44 @@ export default function Header({
               <div className="text-xs font-mono text-zinc-400 dark:text-stone-500 uppercase mb-2">
                 Tools
               </div>
+              {isEnginePage && (
+                <button
+                  onClick={() => {
+                    setInputMode('scout');
+                    document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+                >
+                  <Compass className="w-4 h-4" />
+                  Scout
+                </button>
+              )}
               <button
                 onClick={() => {
-                  setInputMode('scout');
-                  document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
+                  router.push('/todo');
                   setIsMobileMenuOpen(false);
                 }}
-                className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+                className={`w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 ${isTodoPage
+                  ? 'text-black dark:text-white'
+                  : 'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                  }`}
               >
-                <Compass className="w-4 h-4" />
-                Scout
+                <ListTodo className="w-4 h-4" />
+                To Do
               </button>
+              {!isEnginePage && (
+                <button
+                  onClick={() => {
+                    router.push('/engine');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+                >
+                  <Compass className="w-4 h-4" />
+                  Engine
+                </button>
+              )}
               <button
                 onClick={() => {
                   setIsSettingsOpen(true);

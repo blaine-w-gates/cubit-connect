@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { storageService, TaskItem, CubitStep } from '@/services/storage';
+import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 
@@ -58,6 +58,22 @@ export interface ProjectState {
   logs: LogEntry[];
   addLog: (message: string) => void;
   clearLogs: () => void;
+
+  // --- To-Do Page State ---
+  todoRows: TodoRow[];
+  priorityDials: PriorityDials;
+  activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null;
+  setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
+  addTodoRow: (task?: string) => void;
+  deleteTodoRow: (rowId: string) => void;
+  updateTodoCell: (rowId: string, field: 'task' | 'step', value: string, stepIdx?: number) => void;
+  moveTodoRowToBottom: (rowId: string) => void;
+  reorderTodoRows: (fromIdx: number, toIdx: number) => void;
+  setTodoSteps: (rowId: string, steps: [string, string, string, string]) => void;
+  insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => string;
+  setDialPriority: (side: 'left' | 'right', text: string) => void;
+  setDialFocus: (side: 'left' | 'right' | 'none') => void;
+  toggleTodoRowCompletion: (rowId: string) => void;
 }
 
 export interface LogEntry {
@@ -99,6 +115,102 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const updated = [topic, ...filtered].slice(0, 5);
       return { scoutHistory: updated };
     }),
+
+  // --- To-Do Page State ---
+  todoRows: [],
+  priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+  activeMode: null,
+  setActiveMode: (mode) => set({ activeMode: mode }),
+
+  addTodoRow: (task = '') => {
+    const newRow: TodoRow = {
+      id: crypto.randomUUID(),
+      task,
+      steps: ['', '', '', ''],
+      isCompleted: false,
+    };
+    set((state) => ({ todoRows: [newRow, ...state.todoRows] }));
+  },
+
+  deleteTodoRow: (rowId: string) => {
+    set((state) => ({ todoRows: state.todoRows.filter((r) => r.id !== rowId) }));
+  },
+
+  updateTodoCell: (rowId, field, value, stepIdx) => {
+    set((state) => ({
+      todoRows: state.todoRows.map((row) => {
+        if (row.id !== rowId) return row;
+        if (field === 'task') return { ...row, task: value };
+        if (field === 'step' && stepIdx !== undefined) {
+          const steps = [...row.steps] as [string, string, string, string];
+          steps[stepIdx] = value;
+          return { ...row, steps };
+        }
+        return row;
+      }),
+    }));
+  },
+
+  moveTodoRowToBottom: (rowId: string) => {
+    set((state) => {
+      const row = state.todoRows.find((r) => r.id === rowId);
+      if (!row) return state;
+      return { todoRows: [...state.todoRows.filter((r) => r.id !== rowId), row] };
+    });
+  },
+
+  reorderTodoRows: (fromIdx: number, toIdx: number) => {
+    set((state) => {
+      const rows = [...state.todoRows];
+      const [moved] = rows.splice(fromIdx, 1);
+      rows.splice(toIdx, 0, moved);
+      return { todoRows: rows };
+    });
+  },
+
+  setTodoSteps: (rowId: string, steps: [string, string, string, string]) => {
+    set((state) => ({
+      todoRows: state.todoRows.map((r) => (r.id === rowId ? { ...r, steps } : r)),
+    }));
+  },
+
+  insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => {
+    const newId = crypto.randomUUID();
+    const newRow: TodoRow = {
+      id: newId,
+      task,
+      steps: ['', '', '', ''],
+      isCompleted: false,
+      sourceStepId,
+    };
+    set((state) => {
+      const idx = state.todoRows.findIndex((r) => r.id === afterRowId);
+      const rows = [...state.todoRows];
+      rows.splice(idx + 1, 0, newRow);
+      return { todoRows: rows };
+    });
+    return newId;
+  },
+
+  setDialPriority: (side, text) => {
+    set((state) => ({
+      priorityDials: { ...state.priorityDials, [side]: text, focusedSide: side },
+    }));
+  },
+
+  setDialFocus: (side) => {
+    set((state) => ({
+      priorityDials: { ...state.priorityDials, focusedSide: side },
+    }));
+  },
+
+  toggleTodoRowCompletion: (rowId: string) => {
+    set((state) => ({
+      todoRows: state.todoRows.map((r) =>
+        r.id === rowId ? { ...r, isCompleted: !r.isCompleted } : r,
+      ),
+    }));
+  },
 
   // Actions
   toggleTaskExpansion: async (taskId: string) => {
@@ -183,6 +295,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutTopic: data.scoutTopic || '', // Restore or default
       scoutPlatform: data.scoutPlatform || 'instagram',
       scoutHistory: data.scoutHistory || [], // Restore or default
+      todoRows: data.todoRows || [],
+      priorityDials: data.priorityDials || { left: '', right: '', focusedSide: 'none' as const },
       isHydrated: true, // ✅ Hydration Complete
     });
 
@@ -372,11 +486,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       projectType: 'video',
       projectTitle: 'New Project',
       logs: [],
-      isProcessing: false, // ⚡️ Ensure we reset processing state
+      isProcessing: false,
       activeProcessingId: null,
       scoutTopic: '',
       scoutPlatform: 'instagram',
       inputMode: 'video',
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+      activeMode: null,
     });
   },
 
@@ -397,6 +514,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutTopic: '',
       scoutPlatform: 'instagram',
       inputMode: 'video',
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+      activeMode: null,
     });
   },
 
@@ -458,8 +578,8 @@ useAppStore.subscribe((state) => {
   if (saveTimeout) clearTimeout(saveTimeout);
 
   saveTimeout = setTimeout(async () => {
-    // Filter: Only save if there is meaningful data
-    if (state.tasks.length > 0 || state.transcript || state.projectTitle !== 'New Project') {
+    // Filter: Only save if hydration is complete (prevents overwriting with initial empty state)
+    if (state.isHydrated) {
       try {
         if (process.env.NODE_ENV === 'development') {
         }
@@ -473,6 +593,8 @@ useAppStore.subscribe((state) => {
           state.scoutTopic,
           state.scoutPlatform,
           state.scoutHistory,
+          state.todoRows,
+          state.priorityDials,
         );
       } catch (err) {
         console.error('Auto-Save Failed:', err);

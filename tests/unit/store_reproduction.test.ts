@@ -73,6 +73,8 @@ describe('Store Double Save Reproduction', () => {
       projectTitle: 'Legacy Project',
       scoutTopic: '',
       scoutPlatform: 'instagram',
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' },
       updatedAt: Date.now(),
     });
 

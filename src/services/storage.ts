@@ -4,7 +4,7 @@ import { ProjectDataSchema, StoredProjectData, TaskItem } from '@/schemas/storag
 const PROJECT_KEY = 'cubit_connect_project_v1';
 
 // Re-export types from schema to avoid duplication
-export type { StoredProjectData, TaskItem, CubitStep } from '@/schemas/storage';
+export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials } from '@/schemas/storage';
 
 export const storageService = {
   /**
@@ -14,7 +14,7 @@ export const storageService = {
   async getProject(): Promise<StoredProjectData> {
     try {
       const raw = await get(PROJECT_KEY);
-      if (!raw) return { tasks: [], updatedAt: Date.now() };
+      if (!raw) return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
 
       const result = ProjectDataSchema.safeParse(raw);
 
@@ -40,13 +40,13 @@ export const storageService = {
           } as StoredProjectData;
         }
 
-        return { tasks: [], updatedAt: Date.now() };
+        return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
       }
 
       return result.data;
     } catch (error) {
       console.error('Failed to load project from IndexedDB:', error);
-      return { tasks: [], updatedAt: Date.now() };
+      return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
     }
   },
 
@@ -63,6 +63,8 @@ export const storageService = {
     scoutTopic?: string,
     scoutPlatform?: string,
     scoutHistory?: string[],
+    todoRows?: import('@/schemas/storage').TodoRow[],
+    priorityDials?: import('@/schemas/storage').PriorityDials,
   ): Promise<void> {
     try {
       const payload: StoredProjectData = {
@@ -74,6 +76,8 @@ export const storageService = {
         scoutTopic,
         scoutPlatform,
         scoutHistory,
+        todoRows: todoRows || [],
+        priorityDials: priorityDials || { left: '', right: '', focusedSide: 'none' },
         updatedAt: Date.now(),
       };
       await set(PROJECT_KEY, payload);

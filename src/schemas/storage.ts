@@ -32,6 +32,21 @@ export const TaskItemSchema = z.object({
   sub_steps: z.array(CubitStepSchema).optional().default([]),
 });
 
+// --- To-Do Page Schemas ---
+export const TodoRowSchema = z.object({
+  id: z.string(),
+  task: z.string(),
+  steps: z.tuple([z.string(), z.string(), z.string(), z.string()]),  // Fixed 4-step grid
+  isCompleted: z.boolean().optional().default(false),
+  sourceStepId: z.string().optional(),  // Tracks Deep Dive origin (for future linking)
+});
+
+export const PriorityDialsSchema = z.object({
+  left: z.string(),
+  right: z.string(),
+  focusedSide: z.enum(['left', 'right', 'none']).optional().default('none'),
+});
+
 export const ProjectDataSchema = z.object({
   tasks: z.array(TaskItemSchema),
   transcript: z.string().optional(),
@@ -41,8 +56,13 @@ export const ProjectDataSchema = z.object({
   scoutTopic: z.string().optional(),
   scoutPlatform: z.string().optional(),
   scoutHistory: z.array(z.string()).optional(),
+  // To-Do page data (separate dataset)
+  todoRows: z.array(TodoRowSchema).optional().default([]),
+  priorityDials: PriorityDialsSchema.optional().default({ left: '', right: '', focusedSide: 'none' }),
   updatedAt: z.number(),
 });
 
+export type TodoRow = z.infer<typeof TodoRowSchema>;
+export type PriorityDials = z.infer<typeof PriorityDialsSchema>;
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 export type StoredProjectData = z.infer<typeof ProjectDataSchema>;
