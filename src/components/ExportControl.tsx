@@ -1,7 +1,8 @@
 import { Printer, FileText } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { toast } from 'sonner';
-import { generateMarkdown } from '@/utils/exportUtils';
+import { generateMarkdown, generateTodoMarkdown } from '@/utils/exportUtils';
+import { usePathname } from 'next/navigation';
 
 interface ExportControlProps {
   onPrint?: () => void;
@@ -9,13 +10,20 @@ interface ExportControlProps {
 }
 
 export default function ExportControl({ onPrint, variant = 'row' }: ExportControlProps) {
-  const { projectTitle, tasks } = useAppStore();
+  const { projectTitle, tasks, todoRows, priorityDials } = useAppStore();
+  const pathname = usePathname();
+  const isTodoPage = pathname === '/todo';
 
   const checkEmpty = () => {
+    if (isTodoPage) {
+      if (!todoRows || todoRows.length === 0) {
+        toast.warning('No Tasks Yet', { description: 'Add tasks to your board first.' });
+        return true;
+      }
+      return false;
+    }
     if (!tasks || tasks.length === 0) {
-      toast.warning('Project Empty', {
-        description: 'Start by uploading content.',
-      });
+      toast.warning('Project Empty', { description: 'Start by uploading content.' });
       return true;
     }
     return false;
@@ -29,15 +37,16 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
   const handleCopyMarkdown = async () => {
     if (checkEmpty()) return;
 
-    // Use unified utility logic for consistent markdown generation
-    const fullText = generateMarkdown(tasks, projectTitle || 'Project Export');
+    const fullText = isTodoPage
+      ? generateTodoMarkdown(todoRows, priorityDials, projectTitle || 'Task Board')
+      : generateMarkdown(tasks, projectTitle || 'Project Export');
 
     try {
       await navigator.clipboard.writeText(fullText);
-      toast.success('Markdown Copied', {
-        description: 'Report text has been copied to your clipboard.',
+      toast.success(isTodoPage ? 'Task Board Copied' : 'Markdown Copied', {
+        description: `${isTodoPage ? 'Task board' : 'Report'} text has been copied to your clipboard.`,
       });
-      useAppStore.getState().addLog('Markdown Copied to Clipboard');
+      useAppStore.getState().addLog(`${isTodoPage ? 'Todo' : 'Engine'} Markdown Copied to Clipboard`);
     } catch {
       toast.error('Copy Failed', { description: 'Could not access clipboard.' });
     }
@@ -52,14 +61,17 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
     <>
       {/* CONTROLS */}
       <div className={variant === 'row' ? 'flex items-center gap-4' : 'flex flex-col gap-1'}>
-        <button onClick={triggerPrint} className={btnClass} title="Export PDF">
-          <Printer className="w-4 h-4" />
-          <span className={variant === 'row' ? 'hidden sm:inline' : ''}>PDF</span>
-        </button>
+        {/* PDF — only on Engine (no PrintableReport for Todo yet) */}
+        {!isTodoPage && (
+          <button onClick={triggerPrint} className={btnClass} title="Export PDF">
+            <Printer className="w-4 h-4" />
+            <span className={variant === 'row' ? 'hidden sm:inline' : ''}>PDF</span>
+          </button>
+        )}
 
-        <button onClick={handleCopyMarkdown} className={btnClass} title="Copy Markdown">
+        <button onClick={handleCopyMarkdown} className={btnClass} title={isTodoPage ? 'Copy Task Board' : 'Copy Markdown'}>
           <FileText className="w-4 h-4" />
-          <span className={variant === 'row' ? 'hidden sm:inline' : ''}>Copy MD</span>
+          <span className={variant === 'row' ? 'hidden sm:inline' : ''}>{isTodoPage ? 'Copy Board' : 'Copy MD'}</span>
         </button>
       </div>
     </>

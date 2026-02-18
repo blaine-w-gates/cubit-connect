@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Check, Circle } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
@@ -123,6 +123,7 @@ export default function TodoTable() {
         setActiveMode,
         setProcessingRowId,
         restoreTodoRow,
+        toggleTodoRowCompletion,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
@@ -137,6 +138,7 @@ export default function TodoTable() {
             setActiveMode: s.setActiveMode,
             setProcessingRowId: s.setProcessingRowId,
             restoreTodoRow: s.restoreTodoRow,
+            toggleTodoRowCompletion: s.toggleTodoRowCompletion,
         })),
     );
 
@@ -355,9 +357,9 @@ export default function TodoTable() {
                                 onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
                                 onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
                                 className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
-                  ${row.isCompleted ? 'opacity-50 line-through' : ''}
-                  ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
-                `}
+                   ${row.isCompleted ? 'bg-green-50/50 dark:bg-green-950/10' : ''}
+                   ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
+                 `}
                             >
                                 {/* Task Column — Sticky */}
                                 <td
@@ -382,14 +384,34 @@ export default function TodoTable() {
                                         }
                                     }}
                                 >
-                                    <EditableCell
-                                        value={row.task}
-                                        onSave={(val) => updateTodoCell(row.id, 'task', val)}
-                                        placeholder="Type a task…"
-                                        disabled={isModeActive} // Disable edit if ANY mode is active
-                                        autoFocus={!row.task.trim()}
-                                        className="pr-6" // Reserve space for delete button
-                                    />
+                                    <div className="flex items-start gap-2">
+                                        {/* Completion Toggle */}
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                toggleTodoRowCompletion(row.id);
+                                            }}
+                                            className={`flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
+                                                 ${row.isCompleted
+                                                    ? 'bg-green-500 border-green-500 text-white scale-100'
+                                                    : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
+                                                }`}
+                                            title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                            aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                        >
+                                            {row.isCompleted ? <Check className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                                        </button>
+                                        <div className={`flex-1 ${row.isCompleted ? 'line-through opacity-60' : ''}`}>
+                                            <EditableCell
+                                                value={row.task}
+                                                onSave={(val) => updateTodoCell(row.id, 'task', val)}
+                                                placeholder="Type a task…"
+                                                disabled={isModeActive || row.isCompleted}
+                                                autoFocus={!row.task.trim()}
+                                                className="pr-6"
+                                            />
+                                        </div>
+                                    </div>
                                     {/* Delete button — Fix #11: visible on touch, hover on desktop */}
                                     <button
                                         onClick={(e) => {
@@ -426,12 +448,14 @@ export default function TodoTable() {
                                             }
                                         }}
                                     >
-                                        <EditableCell
-                                            value={step}
-                                            onSave={(val) => updateTodoCell(row.id, 'step', val, si)}
-                                            placeholder={`Step ${si + 1}`}
-                                            disabled={isModeActive} // Disable edit if ANY mode is active
-                                        />
+                                        <div className={`${row.isCompleted ? 'opacity-40' : ''}`}>
+                                            <EditableCell
+                                                value={step}
+                                                onSave={(val) => updateTodoCell(row.id, 'step', val, si)}
+                                                placeholder={`Step ${si + 1}`}
+                                                disabled={isModeActive} // Disable edit if ANY mode is active
+                                            />
+                                        </div>
                                     </td>
                                 ))}
                             </tr>
