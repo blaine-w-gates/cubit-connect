@@ -37,7 +37,7 @@ export default function PriorityDials() {
                     onClick={() => hasBoth && setDialFocus('left')}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('left'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
-            ${focusedSide === 'left'
+            ${focusedSide === 'left' && left.trim()
                             ? 'border-[3px] border-green-500 bg-green-50 dark:bg-green-950/30 shadow-md'
                             : 'border-2 border-green-400/50 dark:border-green-700/50 bg-white dark:bg-stone-900'
                         }
@@ -75,7 +75,7 @@ export default function PriorityDials() {
                     onClick={() => hasBoth && setDialFocus('right')}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('right'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
-            ${focusedSide === 'right'
+            ${focusedSide === 'right' && right.trim()
                             ? 'border-[3px] border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 shadow-md'
                             : 'border-2 border-yellow-400/50 dark:border-yellow-700/50 bg-white dark:bg-stone-900'
                         }

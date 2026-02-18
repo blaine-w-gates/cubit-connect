@@ -317,129 +317,66 @@ export default function TodoTable() {
 
     return (
         <div className="overflow-x-auto pb-20">
-            <table className="w-full table-fixed border-collapse">
-                <thead>
-                    <tr>
-                        <th
-                            className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
-                ${activeMode === 'cubit'
-                                    ? 'z-30 relative ring-2 ring-inset ring-cyan-400 bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
-                                    : 'z-10 border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
-              `}
-                        >
-                            Task
-                        </th>
-                        {[1, 2, 3, 4].map((n) => (
+            <div className="border border-zinc-300 dark:border-stone-700 rounded-xl overflow-hidden">
+                <table className="w-full table-fixed border-collapse">
+                    <thead>
+                        <tr>
                             <th
-                                key={n}
-                                className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
-                  ${activeMode === 'deepDive' ? 'z-20 relative ring-2 ring-inset ring-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
-                                        activeMode === 'dialLeft' ? 'z-20 relative ring-2 ring-inset ring-green-400 bg-green-500/10 text-green-700 dark:text-green-400' :
-                                            activeMode === 'dialRight' ? 'z-20 relative ring-2 ring-inset ring-yellow-400 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                                                'border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400'
-                                    }
-                `}
+                                className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
+                ${activeMode === 'cubit'
+                                        ? 'z-30 relative ring-2 ring-inset ring-cyan-400 bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
+                                        : 'z-10 border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
+              `}
                             >
-                                Step {n}
+                                Task
                             </th>
-                        ))}
-                    </tr>
-                </thead>
-                <tbody>
-                    {todoRows.map((row) => {
-                        const isProcessing = processingRowId === row.id;
+                            {[1, 2, 3, 4].map((n) => (
+                                <th
+                                    key={n}
+                                    className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%]
+                  ${activeMode === 'deepDive' ? 'z-20 relative ring-2 ring-inset ring-fuchsia-400 bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
+                                            activeMode === 'dialLeft' ? 'z-20 relative ring-2 ring-inset ring-green-400 bg-green-500/10 text-green-700 dark:text-green-400' :
+                                                activeMode === 'dialRight' ? 'z-20 relative ring-2 ring-inset ring-yellow-400 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
+                                                    'border-b border-zinc-300 dark:border-stone-600 text-zinc-500 dark:text-stone-400'
+                                        }
+                `}
+                                >
+                                    Step {n}
+                                </th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {todoRows.map((row) => {
+                            const isProcessing = processingRowId === row.id;
 
-                        return (
-                            <tr
-                                key={row.id}
-                                id={row.id}
-                                onDoubleClick={() => handleDoubleClickEmptyRow(row)}
-                                onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
-                                onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
-                                className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
+                            return (
+                                <tr
+                                    key={row.id}
+                                    id={row.id}
+                                    onDoubleClick={() => handleDoubleClickEmptyRow(row)}
+                                    onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
+                                    onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+                                    className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
                    ${row.isCompleted ? 'bg-green-50/50 dark:bg-green-950/10' : ''}
                    ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
                  `}
-                            >
-                                {/* Task Column — Sticky */}
-                                <td
-                                    className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%]
-                    ${isTaskActionTarget && mc
-                                            ? `z-20 relative cursor-pointer ${mc.bg}`
-                                            : 'z-10 bg-white dark:bg-[#1c1917]'}
-                  `}
-                                    // Click Interception Wrapper
-                                    onClick={(e) => {
-                                        if (window.getSelection()?.toString()) return; // Ignore selection
-
-                                        if (activeMode === 'cubit') {
-                                            if (!isProcessing && row.task.trim()) {
-                                                e.stopPropagation();
-                                                handleCubit(row.id, row.task);
-                                            }
-                                        } else if (activeMode !== null) {
-                                            // Cancel Mode (Reset to Neutral)
-                                            e.stopPropagation();
-                                            setActiveMode(null);
-                                        }
-                                    }}
                                 >
-                                    <div className="flex items-start gap-2">
-                                        {/* Completion Toggle */}
-                                        <button
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                toggleTodoRowCompletion(row.id);
-                                            }}
-                                            className={`flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
-                                                 ${row.isCompleted
-                                                    ? 'bg-green-500 border-green-500 text-white scale-100'
-                                                    : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
-                                                }`}
-                                            title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                            aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                                        >
-                                            {row.isCompleted ? <Check className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
-                                        </button>
-                                        <div className={`flex-1 ${row.isCompleted ? 'line-through opacity-60' : ''}`}>
-                                            <EditableCell
-                                                value={row.task}
-                                                onSave={(val) => updateTodoCell(row.id, 'task', val)}
-                                                placeholder="Type a task…"
-                                                disabled={isModeActive || row.isCompleted}
-                                                autoFocus={!row.task.trim()}
-                                                className="pr-6"
-                                            />
-                                        </div>
-                                    </div>
-                                    {/* Delete button — Fix #11: visible on touch, hover on desktop */}
-                                    <button
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Prevent row click
-                                            handleSwipeDelete(row.id);
-                                        }}
-                                        className="absolute right-0 top-3 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0 w-5 h-5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 z-20"
-                                        title="Delete row"
-                                        aria-label="Delete row"
-                                    >
-                                        <X className="w-4 h-4" />
-                                    </button>
-                                </td>
-
-                                {/* Step Columns */}
-                                {row.steps.map((step, si) => (
+                                    {/* Task Column — Sticky */}
                                     <td
-                                        key={si}
-                                        className={`px-3 py-3 align-top w-[20%]
-                      ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
-                    `}
+                                        className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%] overflow-hidden
+                    ${isTaskActionTarget && mc
+                                                ? `z-20 relative cursor-pointer ${mc.bg}`
+                                                : 'z-10 bg-white dark:bg-[#1c1917]'}
+                  `}
+                                        // Click Interception Wrapper
                                         onClick={(e) => {
                                             if (window.getSelection()?.toString()) return; // Ignore selection
 
-                                            if (isStepActionTarget) {
-                                                if (!isProcessing) {
+                                            if (activeMode === 'cubit') {
+                                                if (!isProcessing && row.task.trim()) {
                                                     e.stopPropagation();
-                                                    handleStepClick(row, si);
+                                                    handleCubit(row.id, row.task);
                                                 }
                                             } else if (activeMode !== null) {
                                                 // Cancel Mode (Reset to Neutral)
@@ -448,21 +385,85 @@ export default function TodoTable() {
                                             }
                                         }}
                                     >
-                                        <div className={`${row.isCompleted ? 'opacity-40' : ''}`}>
-                                            <EditableCell
-                                                value={step}
-                                                onSave={(val) => updateTodoCell(row.id, 'step', val, si)}
-                                                placeholder={`Step ${si + 1}`}
-                                                disabled={isModeActive} // Disable edit if ANY mode is active
-                                            />
+                                        <div className="flex items-start gap-1.5">
+                                            {/* Completion Toggle */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    toggleTodoRowCompletion(row.id);
+                                                }}
+                                                className={`flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
+                                                ${row.isCompleted
+                                                        ? 'bg-green-500 border-green-500 text-white'
+                                                        : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
+                                                    }`}
+                                                title={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                                aria-label={row.isCompleted ? 'Mark incomplete' : 'Mark complete'}
+                                            >
+                                                {row.isCompleted ? <Check className="w-3 h-3" /> : <Circle className="w-3 h-3" />}
+                                            </button>
+                                            {/* Delete Toggle — matches circle shape */}
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleSwipeDelete(row.id);
+                                                }}
+                                                className="flex-shrink-0 mt-0.5 w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 dark:hover:border-red-500 dark:hover:text-red-400 transition-all opacity-70 sm:opacity-0 sm:group-hover:opacity-70"
+                                                title="Delete row"
+                                                aria-label="Delete row"
+                                            >
+                                                <X className="w-3 h-3" />
+                                            </button>
+                                            <div className={`flex-1 min-w-0 break-words ${row.isCompleted ? 'line-through opacity-60' : ''}`}>
+                                                <EditableCell
+                                                    value={row.task}
+                                                    onSave={(val) => updateTodoCell(row.id, 'task', val)}
+                                                    placeholder="Type a task…"
+                                                    disabled={isModeActive || row.isCompleted}
+                                                    autoFocus={!row.task.trim()}
+                                                />
+                                            </div>
                                         </div>
                                     </td>
-                                ))}
-                            </tr>
-                        );
-                    })}
-                </tbody>
-            </table>
+
+                                    {/* Step Columns */}
+                                    {row.steps.map((step, si) => (
+                                        <td
+                                            key={si}
+                                            className={`px-3 py-3 align-top w-[20%]
+                      ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
+                    `}
+                                            onClick={(e) => {
+                                                if (window.getSelection()?.toString()) return; // Ignore selection
+
+                                                if (isStepActionTarget) {
+                                                    if (!isProcessing) {
+                                                        e.stopPropagation();
+                                                        handleStepClick(row, si);
+                                                    }
+                                                } else if (activeMode !== null) {
+                                                    // Cancel Mode (Reset to Neutral)
+                                                    e.stopPropagation();
+                                                    setActiveMode(null);
+                                                }
+                                            }}
+                                        >
+                                            <div className={`${row.isCompleted ? 'opacity-40' : ''}`}>
+                                                <EditableCell
+                                                    value={step}
+                                                    onSave={(val) => updateTodoCell(row.id, 'step', val, si)}
+                                                    placeholder={`Step ${si + 1}`}
+                                                    disabled={isModeActive} // Disable edit if ANY mode is active
+                                                />
+                                            </div>
+                                        </td>
+                                    ))}
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 }
