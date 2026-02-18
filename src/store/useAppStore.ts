@@ -64,6 +64,8 @@ export interface ProjectState {
   priorityDials: PriorityDials;
   activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null; // UI-only state — NOT persisted
   setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
+  processingRowId: string | null; // UI-only state — NOT persisted
+  setProcessingRowId: (rowId: string | null) => void;
   addTodoRow: (task?: string) => void;
   deleteTodoRow: (rowId: string) => void;
   updateTodoCell: (rowId: string, field: 'task' | 'step', value: string, stepIdx?: number) => void;
@@ -122,6 +124,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   priorityDials: { left: '', right: '', focusedSide: 'none' as const },
   activeMode: null,
   setActiveMode: (mode) => set({ activeMode: mode }),
+  processingRowId: null,
+  setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
 
   addTodoRow: (task = '') => {
     const newRow: TodoRow = {
@@ -248,6 +252,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   loadProject: async () => {
+    // Guard: Don't re-fetch if already hydrated (prevents redundant IDB reads on navigation)
+    if (get().isHydrated) return;
+
     const data = await storageService.getProject();
 
     // --- MIGRATION LAYER ---
@@ -505,6 +512,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       activeMode: null,
+      processingRowId: null,
     });
   },
 

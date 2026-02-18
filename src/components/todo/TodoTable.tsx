@@ -113,6 +113,7 @@ export default function TodoTable() {
     const {
         todoRows,
         activeMode,
+        processingRowId,
         updateTodoCell,
         deleteTodoRow,
         setTodoSteps,
@@ -120,11 +121,13 @@ export default function TodoTable() {
         setDialPriority,
         moveTodoRowToBottom,
         setActiveMode,
+        setProcessingRowId,
         restoreTodoRow,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
             activeMode: s.activeMode,
+            processingRowId: s.processingRowId,
             updateTodoCell: s.updateTodoCell,
             deleteTodoRow: s.deleteTodoRow,
             setTodoSteps: s.setTodoSteps,
@@ -132,6 +135,7 @@ export default function TodoTable() {
             setDialPriority: s.setDialPriority,
             moveTodoRowToBottom: s.moveTodoRowToBottom,
             setActiveMode: s.setActiveMode,
+            setProcessingRowId: s.setProcessingRowId,
             restoreTodoRow: s.restoreTodoRow,
         })),
     );
@@ -148,7 +152,6 @@ export default function TodoTable() {
     }, [setActiveMode]);
 
     const apiKey = useAppStore((s) => s.apiKey);
-    const [processingRowId, setProcessingRowId] = useState<string | null>(null);
     const undoTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Swipe state (Fix #9: added startY for vertical guard)
@@ -188,7 +191,7 @@ export default function TodoTable() {
         } finally {
             setProcessingRowId(null);
         }
-    }, [apiKey, setTodoSteps, setActiveMode]);
+    }, [apiKey, setTodoSteps, setActiveMode, setProcessingRowId]);
 
     const handleDeepDive = useCallback(async (rowId: string, stepText: string, row: typeof todoRows[0]) => {
         if (!apiKey) return;
@@ -228,7 +231,7 @@ export default function TodoTable() {
         } finally {
             setProcessingRowId(null);
         }
-    }, [apiKey, insertTodoRowAfter, setTodoSteps, setActiveMode]);
+    }, [apiKey, insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId]);
 
     // Fix #1 & #2: Each branch resets independently. No trailing setActiveMode(null).
     // Read activeMode from getState() to avoid stale closure.

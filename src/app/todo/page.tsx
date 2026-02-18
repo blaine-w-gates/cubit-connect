@@ -50,7 +50,32 @@ export default function TodoPage() {
                 tasksLength={0}
             />
 
-            {/* Main Content */}
+            {/* Loading Skeleton — shown while IndexedDB is loading */}
+            {!isHydrated && (
+                <div className="flex-1 w-full max-w-7xl mx-auto border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300">
+                    <div className="border border-black dark:border-stone-700 p-1 bg-[#FAFAFA] dark:bg-stone-950/50">
+                        <div className="border border-black dark:border-stone-700 border-dashed p-6 space-y-6 animate-pulse">
+                            {/* Skeleton: Priority Dials */}
+                            <div className="text-center">
+                                <div className="h-6 w-48 bg-zinc-200 dark:bg-stone-700 rounded mx-auto mb-4" />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="h-20 rounded-lg bg-green-100 dark:bg-green-950/20 border-2 border-green-300/30" />
+                                    <div className="h-20 rounded-lg bg-yellow-100 dark:bg-yellow-950/20 border-2 border-yellow-300/30" />
+                                </div>
+                            </div>
+                            {/* Skeleton: Table */}
+                            <div className="space-y-3 mt-8">
+                                <div className="h-8 bg-zinc-200 dark:bg-stone-700 rounded w-full" />
+                                <div className="h-12 bg-zinc-100 dark:bg-stone-800 rounded w-full" />
+                                <div className="h-12 bg-zinc-100 dark:bg-stone-800 rounded w-full" />
+                                <div className="h-12 bg-zinc-100 dark:bg-stone-800 rounded w-full" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Main Content — fades in once hydrated */}
             <FadeIn
                 when={isHydrated}
                 className="flex-1 w-full max-w-7xl mx-auto border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300"
