@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAppStore } from '@/store/useAppStore';
-import { TaskItem, storageService } from '@/services/storage';
+import { storageService } from '@/services/storage';
 
 // Mock storage service to avoid side effects
 vi.mock('@/services/storage', () => ({
@@ -37,6 +37,8 @@ describe('Store Performance Benchmark', () => {
     vi.useFakeTimers();
     // Reset store
     await useAppStore.getState().resetProject();
+    // Simulate hydration (auto-save only fires when isHydrated is true)
+    useAppStore.setState({ isHydrated: true });
     vi.clearAllMocks();
   });
 

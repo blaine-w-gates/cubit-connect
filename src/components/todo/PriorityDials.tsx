@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { X } from 'lucide-react';
@@ -16,6 +17,9 @@ export default function PriorityDials() {
     const { left, right, focusedSide } = priorityDials;
     const hasBoth = left.trim() !== '' && right.trim() !== '';
 
+    const leftRef = useRef<HTMLDivElement>(null);
+    const rightRef = useRef<HTMLDivElement>(null);
+
     return (
         <div className="border border-zinc-300 dark:border-stone-700 rounded-xl p-6 bg-zinc-50 dark:bg-stone-900/50">
             <h2 className="text-center font-serif text-xl font-bold mb-4 text-zinc-900 dark:text-stone-200">
@@ -24,9 +28,11 @@ export default function PriorityDials() {
             <div className="grid grid-cols-2 gap-4">
                 {/* Dial Left */}
                 <div
+                    ref={leftRef}
                     role="button"
                     tabIndex={0}
                     onClick={() => hasBoth && setDialFocus('left')}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('left'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
             ${focusedSide === 'left'
                             ? 'border-[3px] border-green-500 bg-green-50 dark:bg-green-950/30 shadow-md'
@@ -46,9 +52,12 @@ export default function PriorityDials() {
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setDialPriority('left', '');
+                                setDialFocus('none');
+                                leftRef.current?.focus();
                             }}
-                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
                             title="Clear Dial"
+                            aria-label="Clear left priority"
                         >
                             <X className="w-3 h-3" />
                         </button>
@@ -57,9 +66,11 @@ export default function PriorityDials() {
 
                 {/* Dial Right */}
                 <div
+                    ref={rightRef}
                     role="button"
                     tabIndex={0}
                     onClick={() => hasBoth && setDialFocus('right')}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('right'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
             ${focusedSide === 'right'
                             ? 'border-[3px] border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 shadow-md'
@@ -79,9 +90,12 @@ export default function PriorityDials() {
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setDialPriority('right', '');
+                                setDialFocus('none');
+                                rightRef.current?.focus();
                             }}
-                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-0 group-hover:opacity-100"
+                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
                             title="Clear Dial"
+                            aria-label="Clear right priority"
                         >
                             <X className="w-3 h-3" />
                         </button>

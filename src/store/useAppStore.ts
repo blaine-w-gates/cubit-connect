@@ -62,7 +62,7 @@ export interface ProjectState {
   // --- To-Do Page State ---
   todoRows: TodoRow[];
   priorityDials: PriorityDials;
-  activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null;
+  activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null; // UI-only state — NOT persisted
   setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
   addTodoRow: (task?: string) => void;
   deleteTodoRow: (rowId: string) => void;
@@ -74,6 +74,7 @@ export interface ProjectState {
   setDialPriority: (side: 'left' | 'right', text: string) => void;
   setDialFocus: (side: 'left' | 'right' | 'none') => void;
   toggleTodoRowCompletion: (rowId: string) => void;
+  restoreTodoRow: (row: TodoRow, index: number) => void;
 }
 
 export interface LogEntry {
@@ -194,7 +195,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   setDialPriority: (side, text) => {
     set((state) => ({
-      priorityDials: { ...state.priorityDials, [side]: text, focusedSide: side },
+      priorityDials: { ...state.priorityDials, [side]: text },
     }));
   },
 
@@ -210,6 +211,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         r.id === rowId ? { ...r, isCompleted: !r.isCompleted } : r,
       ),
     }));
+  },
+
+  restoreTodoRow: (row: TodoRow, index: number) => {
+    set((state) => {
+      const rows = [...state.todoRows];
+      // Clamp index to valid range
+      const safeIdx = Math.min(index, rows.length);
+      rows.splice(safeIdx, 0, row);
+      return { todoRows: rows };
+    });
   },
 
   // Actions
@@ -581,8 +592,6 @@ useAppStore.subscribe((state) => {
     // Filter: Only save if hydration is complete (prevents overwriting with initial empty state)
     if (state.isHydrated) {
       try {
-        if (process.env.NODE_ENV === 'development') {
-        }
         // Assuming storageService is imported at the top (Checked: It is)
         await storageService.saveProject(
           state.tasks,

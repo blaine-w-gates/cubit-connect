@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { useAppStore } from '../../src/store/useAppStore';
 import { storageService } from '../../src/services/storage';
-import { TaskItem } from '../../src/services/storage';
+import { TaskItem } from '../../src/schemas/storage';
 
 // Mock storageService
 vi.mock('../../src/services/storage', () => ({
@@ -17,6 +17,8 @@ describe('Store Double Save Reproduction', () => {
     vi.useFakeTimers();
     // Reset store state
     await useAppStore.getState().resetProject();
+    // Simulate hydration (auto-save only fires when isHydrated is true)
+    useAppStore.setState({ isHydrated: true });
     vi.clearAllMocks();
   });
 

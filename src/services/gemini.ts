@@ -59,7 +59,6 @@ export const GeminiService = {
     let currentRetries = retries;
     let currentDelay = delay;
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
       // 1. Determine which model to start with
       const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;

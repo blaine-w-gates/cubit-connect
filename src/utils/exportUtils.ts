@@ -19,7 +19,6 @@ const formatTime = (seconds: number) => {
 const formatStep = (step: CubitStep | string, depth: number, index: number): string => {
   let content = '';
   let children: (string | CubitStep)[] = [];
-  let isCompleted = false;
 
   // Robust Content Extraction
   if (typeof step === 'string') {
@@ -28,7 +27,6 @@ const formatStep = (step: CubitStep | string, depth: number, index: number): str
     // Explicitly check for 'text' property, fallback to safely stringified representation or placeholder
     content = step.text || 'Untitled Step';
     children = step.sub_steps || [];
-    isCompleted = step.isCompleted || false;
   } else {
     content = String(step);
   }

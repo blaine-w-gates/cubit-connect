@@ -24,6 +24,7 @@ export default function TodoPage() {
     // Hydrate on mount
     useEffect(() => {
         loadProject();
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setMounted(true);
     }, [loadProject]);
 

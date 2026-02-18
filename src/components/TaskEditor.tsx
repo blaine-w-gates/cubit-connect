@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { ChevronDown, ChevronRight, Wand2, Check, X } from 'lucide-react';
 
 // Safe internal Spinner to prevent Lucide import issues

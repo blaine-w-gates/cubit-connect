@@ -1,11 +1,31 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { X, Wand2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
 import { toast } from 'sonner';
+
+// --- Module-level constants (Fix #14: hoisted out of component) ---
+const MODE_COLORS = {
+    cubit: {
+        bg: 'bg-cyan-100 dark:bg-cyan-950/30',
+        ring: 'ring-cyan-400 dark:ring-cyan-500',
+    },
+    deepDive: {
+        bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-950/20',
+        ring: 'ring-fuchsia-400 dark:ring-fuchsia-500',
+    },
+    dialLeft: {
+        bg: 'bg-green-500/10 dark:bg-green-950/20',
+        ring: 'ring-green-400 dark:ring-green-500',
+    },
+    dialRight: {
+        bg: 'bg-yellow-500/10 dark:bg-yellow-950/20',
+        ring: 'ring-yellow-400 dark:ring-yellow-500',
+    },
+} as const;
 
 // Inline editable cell
 function EditableCell({
@@ -25,7 +45,13 @@ function EditableCell({
 }) {
     const [editing, setEditing] = useState(autoFocus);
     const [draft, setDraft] = useState(value);
-    const inputRef = useRef<HTMLTextAreaElement>(null);
+    const inputRef = useRef<HTMLTextAreaElement | null>(null);
+
+    // Fix #5: Sync draft when parent value changes externally (e.g., Cubit overwrites steps)
+    useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        if (!editing) setDraft(value);
+    }, [value, editing]);
 
     const commit = () => {
         setEditing(false);
@@ -43,7 +69,7 @@ function EditableCell({
     if (editing) {
         return (
             <textarea
-                ref={inputRef as any}
+                ref={inputRef}
                 autoFocus
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
@@ -55,7 +81,7 @@ function EditableCell({
                     }
                     if (e.key === 'Escape') { setDraft(value); setEditing(false); }
                 }}
-                className={`w-full bg-transparent border-b border-zinc-400 dark:border-stone-500 outline-none text-sm px-1 py-0.5 resize-none overflow-hidden ${className}`}
+                className={`w-full bg-transparent border-b border-zinc-400 dark:border-stone-500 outline-none text-sm px-1 py-0.5 resize-none max-h-[200px] overflow-y-auto ${className}`}
                 placeholder={placeholder}
                 rows={1}
             />
@@ -89,24 +115,24 @@ export default function TodoTable() {
         activeMode,
         updateTodoCell,
         deleteTodoRow,
-        toggleTodoRowCompletion,
         setTodoSteps,
         insertTodoRowAfter,
         setDialPriority,
         moveTodoRowToBottom,
         setActiveMode,
+        restoreTodoRow,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
             activeMode: s.activeMode,
             updateTodoCell: s.updateTodoCell,
             deleteTodoRow: s.deleteTodoRow,
-            toggleTodoRowCompletion: s.toggleTodoRowCompletion,
             setTodoSteps: s.setTodoSteps,
             insertTodoRowAfter: s.insertTodoRowAfter,
             setDialPriority: s.setDialPriority,
             moveTodoRowToBottom: s.moveTodoRowToBottom,
             setActiveMode: s.setActiveMode,
+            restoreTodoRow: s.restoreTodoRow,
         })),
     );
 
@@ -123,41 +149,12 @@ export default function TodoTable() {
 
     const apiKey = useAppStore((s) => s.apiKey);
     const [processingRowId, setProcessingRowId] = useState<string | null>(null);
-    const [undoRow, setUndoRow] = useState<{ row: typeof todoRows[0]; index: number } | null>(null);
     const undoTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Swipe state
-    const swipeRef = useRef<{ startX: number; rowId: string } | null>(null);
+    // Swipe state (Fix #9: added startY for vertical guard)
+    const swipeRef = useRef<{ startX: number; startY: number; rowId: string } | null>(null);
 
-    // Mode color configs
-    const modeColors: Record<string, { border: string; bg: string; ring: string; dimmed: string }> = {
-        cubit: {
-            border: 'border-cyan-400 dark:border-cyan-500',
-            bg: 'bg-cyan-100 dark:bg-cyan-950/30',
-            ring: 'ring-cyan-400 dark:ring-cyan-500',
-            dimmed: 'opacity-40 pointer-events-none',
-        },
-        deepDive: {
-            border: 'border-fuchsia-400 dark:border-fuchsia-500',
-            bg: 'bg-fuchsia-500/10 dark:bg-fuchsia-950/20',
-            ring: 'ring-fuchsia-400 dark:ring-fuchsia-500',
-            dimmed: 'opacity-40 pointer-events-none',
-        },
-        dialLeft: {
-            border: 'border-green-400 dark:border-green-500',
-            bg: 'bg-green-500/10 dark:bg-green-950/20',
-            ring: 'ring-green-400 dark:ring-green-500',
-            dimmed: 'opacity-40 pointer-events-none',
-        },
-        dialRight: {
-            border: 'border-yellow-400 dark:border-yellow-500',
-            bg: 'bg-yellow-500/10 dark:bg-yellow-950/20',
-            ring: 'ring-yellow-400 dark:ring-yellow-500',
-            dimmed: 'opacity-40 pointer-events-none',
-        },
-    };
-
-    const mc = activeMode ? modeColors[activeMode] : null;
+    const mc = activeMode ? MODE_COLORS[activeMode] : null;
     const isModeActive = activeMode !== null;
     const isTaskActionTarget = activeMode === 'cubit';
     const isStepActionTarget = ['deepDive', 'dialLeft', 'dialRight'].includes(activeMode || '');
@@ -200,6 +197,11 @@ export default function TodoTable() {
         // Create new row below with step as task
         const newRowId = insertTodoRowAfter(rowId, stepText);
 
+        // Auto-scroll to the new row after React renders it
+        setTimeout(() => {
+            document.getElementById(newRowId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+
         setProcessingRowId(newRowId);
         try {
             // Send sibling context
@@ -228,29 +230,32 @@ export default function TodoTable() {
         }
     }, [apiKey, insertTodoRowAfter, setTodoSteps, setActiveMode]);
 
+    // Fix #1 & #2: Each branch resets independently. No trailing setActiveMode(null).
+    // Read activeMode from getState() to avoid stale closure.
     const handleStepClick = useCallback((row: typeof todoRows[0], stepIdx: number) => {
         const stepText = row.steps[stepIdx];
         if (!stepText.trim()) return;
 
-        if (activeMode === 'deepDive') {
+        const currentMode = useAppStore.getState().activeMode;
+
+        if (currentMode === 'deepDive') {
             handleDeepDive(row.id, stepText, row);
-        } else if (activeMode === 'dialLeft') {
+            // handleDeepDive resets mode internally after async completion
+        } else if (currentMode === 'dialLeft') {
             setDialPriority('left', stepText);
-        } else if (activeMode === 'dialRight') {
+            setActiveMode(null); // Fire and Forget
+        } else if (currentMode === 'dialRight') {
             setDialPriority('right', stepText);
+            setActiveMode(null); // Fire and Forget
         }
+    }, [handleDeepDive, setDialPriority, setActiveMode]);
 
-        // Fire and Forget: Reset mode after action
-        setActiveMode(null);
-    }, [activeMode, handleDeepDive, setDialPriority, setActiveMode]);
-
+    // Fix #3: Uses store action `restoreTodoRow` instead of direct setState
     const handleSwipeDelete = useCallback((rowId: string) => {
         const idx = todoRows.findIndex((r) => r.id === rowId);
         const row = todoRows[idx];
         if (!row) return;
 
-        // Store for undo
-        setUndoRow({ row, index: idx });
         deleteTodoRow(rowId);
 
         // Clear previous timer
@@ -260,35 +265,30 @@ export default function TodoTable() {
             action: {
                 label: 'Undo',
                 onClick: () => {
-                    // Re-insert at original position
-                    useAppStore.getState().reorderTodoRows(0, 0); // trigger re-render
-                    // Actually insert back
-                    const currentRows = useAppStore.getState().todoRows;
-                    const restored = [...currentRows];
-                    restored.splice(idx, 0, row);
-                    useAppStore.setState({ todoRows: restored });
-                    setUndoRow(null);
+                    restoreTodoRow(row, idx);
                 },
             },
             duration: 5000,
         });
 
-        undoTimerRef.current = setTimeout(() => setUndoRow(null), 5000);
-    }, [todoRows, deleteTodoRow]);
+        undoTimerRef.current = setTimeout(() => { /* undo window expired */ }, 5000);
+    }, [todoRows, deleteTodoRow, restoreTodoRow]);
 
     const handleDoubleClickEmptyRow = useCallback((row: typeof todoRows[0]) => {
         const isEmpty = !row.task.trim() && row.steps.every((s) => !s.trim());
         if (isEmpty) moveTodoRowToBottom(row.id);
     }, [moveTodoRowToBottom]);
 
-    // --- Touch swipe ---
-    const handleTouchStart = (rowId: string, x: number) => {
-        swipeRef.current = { startX: x, rowId };
+    // --- Touch swipe (Fix #9: vertical scroll guard) ---
+    const handleTouchStart = (rowId: string, x: number, y: number) => {
+        swipeRef.current = { startX: x, startY: y, rowId };
     };
-    const handleTouchEnd = (x: number) => {
+    const handleTouchEnd = (x: number, y: number) => {
         if (!swipeRef.current) return;
         const dx = x - swipeRef.current.startX;
-        if (Math.abs(dx) > 100) {
+        const dy = y - swipeRef.current.startY;
+        // Only trigger if horizontal movement dominates vertical
+        if (Math.abs(dx) > 100 && Math.abs(dy) < Math.abs(dx)) {
             handleSwipeDelete(swipeRef.current.rowId);
         }
         swipeRef.current = null;
@@ -306,8 +306,6 @@ export default function TodoTable() {
             </div>
         );
     }
-
-
 
     return (
         <div className="overflow-x-auto pb-20">
@@ -346,17 +344,15 @@ export default function TodoTable() {
                         return (
                             <tr
                                 key={row.id}
+                                id={row.id}
                                 onDoubleClick={() => handleDoubleClickEmptyRow(row)}
-                                onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX)}
-                                onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX)}
+                                onTouchStart={(e) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
+                                onTouchEnd={(e) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
                                 className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
                   ${row.isCompleted ? 'opacity-50 line-through' : ''}
                   ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
                 `}
                             >
-                                {/* Delete button — visible on row hover */}
-
-
                                 {/* Task Column — Sticky */}
                                 <td
                                     className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%]
@@ -388,14 +384,15 @@ export default function TodoTable() {
                                         autoFocus={!row.task.trim()}
                                         className="pr-6" // Reserve space for delete button
                                     />
-                                    {/* Delete button — visible on row hover */}
+                                    {/* Delete button — Fix #11: visible on touch, hover on desktop */}
                                     <button
                                         onClick={(e) => {
                                             e.stopPropagation(); // Prevent row click
                                             handleSwipeDelete(row.id);
                                         }}
-                                        className="absolute right-0 top-3 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 w-5 h-5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 z-20"
+                                        className="absolute right-0 top-3 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex-shrink-0 w-5 h-5 min-w-[44px] min-h-[44px] flex items-center justify-center text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 z-20"
                                         title="Delete row"
+                                        aria-label="Delete row"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>

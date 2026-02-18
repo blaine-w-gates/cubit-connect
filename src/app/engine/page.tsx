@@ -89,7 +89,6 @@ export default function EnginePage() {
         startProcessing();
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasVideoHandle, startProcessing]);
 
   // Prevent hydration mismatch
