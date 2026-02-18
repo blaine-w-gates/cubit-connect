@@ -299,13 +299,16 @@ export default function TodoTable() {
 
     if (todoRows.length === 0) {
         return (
-            <div className="text-center py-16 border border-dashed border-zinc-300 dark:border-stone-700 rounded-xl">
-                <p className="text-zinc-500 dark:text-stone-500 font-serif text-lg italic">
-                    Nothing to do yet.
-                </p>
-                <p className="text-zinc-400 dark:text-stone-600 text-sm mt-2">
-                    Click <strong>+ Task</strong> below to begin.
-                </p>
+            <div className="border border-zinc-300 dark:border-stone-700 p-1 bg-[#FAFAFA] dark:bg-stone-950/50">
+                <div className="border border-zinc-300 dark:border-stone-700 border-dashed py-16 px-4 text-center">
+                    <h3 className="font-serif text-xl font-bold italic text-zinc-900 dark:text-stone-200 mb-2">
+                        Ready to get things done.
+                    </h3>
+                    <p className="text-zinc-500 dark:text-stone-500 text-sm max-w-md mx-auto">
+                        Add your first task below, then use <strong>Cubit</strong> to break it into steps
+                        and <strong>Deep Dive</strong> to go deeper.
+                    </p>
+                </div>
             </div>
         );
     }

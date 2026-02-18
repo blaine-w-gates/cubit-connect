@@ -18,8 +18,11 @@ export default function TodoPage() {
     const apiKey = useAppStore((state) => state.apiKey);
     const loadProject = useAppStore((state) => state.loadProject);
     const isHydrated = useAppStore((state) => state.isHydrated);
+    const todoRows = useAppStore((state) => state.todoRows);
+    const resetProject = useAppStore((state) => state.resetProject);
 
     const [mounted, setMounted] = useState(false);
+    const [confirmingReset, setConfirmingReset] = useState(false);
 
     // Hydrate on mount
     useEffect(() => {
@@ -35,19 +38,29 @@ export default function TodoPage() {
         }
     }, [mounted, apiKey, router]);
 
+    // Auto-reset confirmation
+    useEffect(() => {
+        if (confirmingReset) {
+            const timer = setTimeout(() => setConfirmingReset(false), 3000);
+            return () => clearTimeout(timer);
+        }
+    }, [confirmingReset]);
+
     if (!mounted) return null;
+
+    const activeTasks = todoRows.filter((r) => !r.isCompleted).length;
 
     return (
         <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
             <SettingsDialog />
 
-            {/* Header — same component, page-aware badge */}
+            {/* Header — fully wired with reset + task count */}
             <Header
-                confirmingReset={false}
-                setConfirmingReset={() => { }}
-                resetProject={() => { }}
+                confirmingReset={confirmingReset}
+                setConfirmingReset={setConfirmingReset}
+                resetProject={resetProject}
                 mounted={mounted}
-                tasksLength={0}
+                tasksLength={todoRows.length}
             />
 
             {/* Loading Skeleton — shown while IndexedDB is loading */}
@@ -80,6 +93,16 @@ export default function TodoPage() {
                 when={isHydrated}
                 className="flex-1 w-full max-w-7xl mx-auto border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300"
             >
+                {/* Section Heading — mirrors Engine's "Your Distilled Recipe:" */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-6">
+                    <h3 className="font-serif text-2xl font-bold italic">Your Task Board:</h3>
+                    {todoRows.length > 0 && (
+                        <span className="text-sm font-mono text-zinc-500 dark:text-stone-500">
+                            {activeTasks} active {activeTasks === 1 ? 'task' : 'tasks'} · {todoRows.length} total
+                        </span>
+                    )}
+                </div>
+
                 {/* Engine-style Double Border Container */}
                 <div className="border border-black dark:border-stone-700 p-1 bg-[#FAFAFA] dark:bg-stone-950/50 transition-colors">
                     <div className="border border-black dark:border-stone-700 border-dashed p-6">

@@ -22,9 +22,12 @@ export default function PriorityDials() {
 
     return (
         <div className="border border-zinc-300 dark:border-stone-700 rounded-xl p-6 bg-zinc-50 dark:bg-stone-900/50">
-            <h2 className="text-center font-serif text-xl font-bold mb-4 text-zinc-900 dark:text-stone-200">
+            <h2 className="text-center font-serif text-2xl font-bold italic mb-1 text-zinc-900 dark:text-stone-200">
                 Dial in Your Priorities
             </h2>
+            <p className="text-center text-sm text-zinc-500 dark:text-stone-500 mb-4">
+                Focus on what matters now
+            </p>
             <div className="grid grid-cols-2 gap-4">
                 {/* Dial Left */}
                 <div

@@ -54,7 +54,7 @@ export default function ActionBar() {
                         <button
                             key={key}
                             onClick={() => setActiveMode(activeMode === key ? null : key)}
-                            className={`flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all
+                            className={`flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold font-mono uppercase tracking-wide transition-all
                 ${isActive
                                     ? `${colors.active} scale-105`
                                     : `bg-zinc-100 dark:bg-stone-800 ${colors.text} hover:bg-zinc-200 dark:hover:bg-stone-700`
@@ -72,7 +72,7 @@ export default function ActionBar() {
                 <div className="h-6 w-[1px] bg-zinc-300 dark:bg-stone-600 mx-1" />
                 <button
                     onClick={() => addTodoRow()}
-                    className="flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 hover:bg-zinc-800 dark:hover:bg-stone-300 transition-all active:scale-95"
+                    className="flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold font-mono uppercase tracking-wide bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 hover:bg-zinc-800 dark:hover:bg-stone-300 transition-all active:scale-95"
                 >
                     <Plus className="w-4 h-4" />
                     <span>Task</span>

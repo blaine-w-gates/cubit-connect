@@ -30,7 +30,7 @@ export default function Header({
   const router = useRouter();
   const isEnginePage = pathname === '/engine';
   const isTodoPage = pathname === '/todo';
-  const badgeText = isTodoPage ? 'TABLE' : 'Engine';
+  const badgeText = isTodoPage ? 'Todo' : 'Engine';
 
   // Close mobile menu when clicking outside
   const menuRef = useRef<HTMLDivElement>(null);
