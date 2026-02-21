@@ -15,7 +15,7 @@ export default function TodoPage() {
     const router = useRouter();
 
     // Granular selectors
-    const apiKey = useAppStore((state) => state.apiKey);
+
     const loadProject = useAppStore((state) => state.loadProject);
     const isHydrated = useAppStore((state) => state.isHydrated);
     const todoRows = useAppStore((state) => state.todoRows);
@@ -31,12 +31,7 @@ export default function TodoPage() {
         setMounted(true);
     }, [loadProject]);
 
-    // Auth Guard: Redirect if no API key
-    useEffect(() => {
-        if (mounted && !apiKey) {
-            router.push('/');
-        }
-    }, [mounted, apiKey, router]);
+
 
     // Auto-reset confirmation
     useEffect(() => {

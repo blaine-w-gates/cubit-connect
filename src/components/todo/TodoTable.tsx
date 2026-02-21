@@ -170,7 +170,7 @@ export default function TodoTable() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [setActiveMode]);
 
-    const apiKey = useAppStore((s) => s.apiKey);
+
     const undoTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     // Swipe state (Fix #9: added startY for vertical guard)
@@ -184,7 +184,7 @@ export default function TodoTable() {
     // --- Handlers ---
 
     const handleCubit = useCallback(async (rowId: string, taskText: string) => {
-        if (!apiKey) return;
+
         if (!taskText.trim()) {
             toast.warning('Empty Task', { description: 'Type a task name before using Cubit.' });
             return;
@@ -192,7 +192,7 @@ export default function TodoTable() {
         setProcessingRowId(rowId);
         try {
             const rawSteps = await GeminiService.generateSubSteps(
-                apiKey,
+
                 `Task: "${taskText}". Generate exactly 4 actionable steps.`,
             );
             // Pad/truncate to exactly 4
@@ -210,10 +210,10 @@ export default function TodoTable() {
         } finally {
             setProcessingRowId(null);
         }
-    }, [apiKey, setTodoSteps, setActiveMode, setProcessingRowId]);
+    }, [setTodoSteps, setActiveMode, setProcessingRowId]);
 
     const handleDeepDive = useCallback(async (rowId: string, stepText: string, row: typeof todoRows[0]) => {
-        if (!apiKey) return;
+
         if (!stepText.trim()) return;
 
         // Create new row below with step as task
@@ -233,7 +233,7 @@ export default function TodoTable() {
                 .join('\n');
 
             const rawSteps = await GeminiService.generateSubSteps(
-                apiKey,
+
                 `Deep Dive into: "${stepText}".\nSibling steps from parent row:\n${siblingContext}\nGenerate exactly 4 detailed sub-steps.`,
             );
             const steps: [string, string, string, string] = [
@@ -250,7 +250,7 @@ export default function TodoTable() {
         } finally {
             setProcessingRowId(null);
         }
-    }, [apiKey, insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId]);
+    }, [insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId]);
 
     // Fix #1 & #2: Each branch resets independently. No trailing setActiveMode(null).
     // Read activeMode from getState() to avoid stale closure.

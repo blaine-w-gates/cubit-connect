@@ -18,8 +18,6 @@ const MODELS = [
   },
 ];
 
-const DEFAULT_KEY = '';
-
 interface ModelResult {
   status: 'idle' | 'loading' | 'success' | 'error';
   statusCode?: number;
@@ -29,21 +27,12 @@ interface ModelResult {
 }
 
 export default function SandboxPage() {
-  const [apiKey, setApiKey] = useState('');
   const [systemPrompt, setSystemPrompt] = useState('You are a concise diagnostic computer.');
   const [userPrompt, setUserPrompt] = useState('Identify yourself. State your model version.');
   const [results, setResults] = useState<Record<string, ModelResult>>({});
   const [scanResult, setScanResult] = useState<string>('');
 
   useEffect(() => {
-    const storedKey = localStorage.getItem('cubit_api_key');
-    if (storedKey) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setApiKey(storedKey);
-    } else {
-      setApiKey(DEFAULT_KEY);
-    }
-
     // Initialize results state
     const initialResults: Record<string, ModelResult> = {};
     MODELS.forEach((m) => {
@@ -69,19 +58,18 @@ export default function SandboxPage() {
   const testModel = async (modelId: string) => {
     const startTime = performance.now();
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${modelId}:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: userPrompt }] }],
-            system_instruction: { parts: [{ text: systemPrompt }] },
-          }),
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-      );
+        body: JSON.stringify({
+          action: 'sandboxGenerate',
+          modelName: modelId,
+          systemInstruction: systemPrompt,
+          contents: [{ parts: [{ text: userPrompt }] }],
+        }),
+      });
 
       const endTime = performance.now();
       const latency = Math.round(endTime - startTime);
@@ -101,7 +89,7 @@ export default function SandboxPage() {
         return;
       }
 
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || JSON.stringify(data, null, 2);
+      const text = data.responseText || JSON.stringify(data, null, 2);
 
       setResults((prev) => ({
         ...prev,
@@ -130,9 +118,11 @@ export default function SandboxPage() {
   const handleScan = async () => {
     setScanResult('Scanning network for available models...');
     try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
-      );
+      const response = await fetch('/api/gemini', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'listModels' })
+      });
       const data = await response.json();
       if (data.models) {
         const filtered = data.models
@@ -171,18 +161,6 @@ export default function SandboxPage() {
       <section className="mb-8 bg-zinc-900/50 p-6 rounded-lg border border-zinc-800">
         <div className="grid gap-6 md:grid-cols-2">
           <div className="space-y-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">
-                API Key
-              </label>
-              <input
-                type="password"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                className="w-full bg-zinc-950 border border-zinc-800 p-3 rounded text-sm focus:border-red-500 focus:outline-none transition-colors font-mono"
-                placeholder="Enter Gemini API Key"
-              />
-            </div>
             <div>
               <label className="block text-xs uppercase tracking-wider text-zinc-500 mb-2">
                 System Prompt

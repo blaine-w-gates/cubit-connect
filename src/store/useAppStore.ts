@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
-import { cryptoUtils } from '@/lib/crypto';
 
 export interface ProjectState {
   isHydrated: boolean; // New: Hydration Guard
@@ -13,7 +12,6 @@ export interface ProjectState {
   scoutHistory: string[]; // New: Scout feature persistence
   projectType: 'video' | 'text'; // New: MVP Text Mode
   projectTitle: string; // New: Title Persistence
-  apiKey: string | null;
 
   // Strike 17.5: Global Input Mode & Scout Persistence
   inputMode: 'video' | 'text' | 'scout';
@@ -32,7 +30,6 @@ export interface ProjectState {
   setIsSettingsOpen: (isOpen: boolean, variant?: 'default' | 'quota') => void;
 
   // Actions
-  setApiKey: (key: string) => void;
   setVideoHandleState: (hasHandle: boolean) => void;
   loadProject: () => Promise<void>;
   saveTask: (task: TaskItem) => Promise<void>;
@@ -85,7 +82,7 @@ export interface LogEntry {
   timestamp: string;
 }
 
-const STORAGE_KEY_API = 'cubit_api_key';
+
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
@@ -98,10 +95,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   scoutHistory: [],
   projectType: 'video', // Default
   projectTitle: 'New Project', // Default
-  apiKey:
-    typeof window !== 'undefined'
-      ? cryptoUtils.decrypt(localStorage.getItem(STORAGE_KEY_API) || '')
-      : null,
 
   // Strike 17.5: Defaults
   inputMode: 'video',
@@ -239,14 +232,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   logs: [],
 
   // Actions
-  setApiKey: (key: string) => {
-    const safeKey = cryptoUtils.cleanInput(key);
-    const encrypted = cryptoUtils.encrypt(safeKey);
-    localStorage.setItem(STORAGE_KEY_API, encrypted);
-    GeminiService.resetState();
-    set({ apiKey: safeKey });
-  },
-
   setVideoHandleState: (hasHandle: boolean) => {
     set({ hasVideoHandle: hasHandle });
   },
@@ -519,14 +504,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   fullLogout: async () => {
     // Factory Reset
     await storageService.clearProject();
-    localStorage.removeItem(STORAGE_KEY_API);
     set({
       tasks: [],
       transcript: null,
       scoutResults: [],
       scoutHistory: [],
       hasVideoHandle: false,
-      apiKey: null,
       projectType: 'video',
       projectTitle: 'New Project',
       logs: [],

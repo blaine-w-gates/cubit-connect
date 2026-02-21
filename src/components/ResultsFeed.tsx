@@ -20,14 +20,14 @@ export default function ResultsFeed() {
       // Access latest state without subscription
       const state = useAppStore.getState();
       const {
-        apiKey,
+
         transcript: fullTranscript,
         tasks: currentTasks,
         updateTask,
         addMicroSteps,
       } = state;
 
-      if (!apiKey) return;
+
       if (!isOnline) {
         toast.error('Offline Mode', { description: 'You are offline. AI features unavailable.' });
         return;
@@ -60,7 +60,7 @@ export default function ResultsFeed() {
 
         // Pass context + neighbors
         const rawSteps = await GeminiService.generateSubSteps(
-          apiKey,
+
           context,
           fullTranscript || undefined,
           neighborContext,

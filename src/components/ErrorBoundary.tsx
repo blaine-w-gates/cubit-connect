@@ -41,7 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     const key = this.state.newKey.trim();
     if (!key) return;
 
-    useAppStore.getState().setApiKey(key);
+    
 
     // 🛡️ DATA SAFETY: Force Save before Reload
     try {

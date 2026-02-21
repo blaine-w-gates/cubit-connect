@@ -28,11 +28,11 @@ interface VideoInputProps {
 }
 
 export default function VideoInput({ videoRef, startProcessing }: VideoInputProps) {
-  const { apiKey, setVideoHandleState, saveTasks, inputMode, setInputMode } =
+  const { setVideoHandleState, saveTasks, inputMode, setInputMode } =
     useAppStore(
       useShallow((state) => ({
-        apiKey: state.apiKey,
-        setApiKey: state.setApiKey,
+
+
         setVideoHandleState: state.setVideoHandleState,
         saveTasks: state.saveTasks,
         inputMode: state.inputMode,
@@ -77,18 +77,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         return;
       }
 
-      // 1. Ignition Check
-      if (!apiKey) {
-        toast.error('Ignition Key Required', {
-          description: 'Please enter your API Key to proceed.',
-          action: {
-            label: 'Enter Key',
-            onClick: () => useAppStore.getState().setIsSettingsOpen(true),
-          },
-        });
-        useAppStore.getState().setIsSettingsOpen(true);
-        return;
-      }
+
 
       if (!isOnline) {
         toast.error('Offline Mode', {
@@ -120,7 +109,6 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         // 4. Generate Tasks
         const projectType = useAppStore.getState().projectType;
         const newTasks = await GeminiService.analyzeTranscript(
-          apiKey,
           transcriptText,
           projectType,
           videoDuration,
@@ -170,7 +158,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         }
       }
     },
-    [apiKey, isOnline, saveTasks, startProcessing],
+    [isOnline, saveTasks, startProcessing],
   );
 
   // Scout State Removed -> Delegated to ScoutView.tsx
@@ -192,19 +180,31 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
     <div className="relative" id="ignition">
       {/* Standard Upload Zone */}
       {inputMode !== 'scout' && (
-        <UploadZone
-          onVideoSelected={handleVideoSelected}
-          onTranscriptParsed={handleTranscriptParsed}
-          footerContent={
-            <button
-              onClick={() => setInputMode('scout')}
-              className="text-xs font-mono text-zinc-700 hover:text-black hover:underline transition-colors flex items-center gap-2"
-            >
-              <Search className="w-3 h-3" />
-              Need inspiration? Scout for topics.
-            </button>
-          }
-        />
+        <div className="flex flex-col gap-4">
+          <UploadZone
+            onVideoSelected={handleVideoSelected}
+            onTranscriptParsed={handleTranscriptParsed}
+            footerContent={
+              <button
+                onClick={() => setInputMode('scout')}
+                className="text-xs font-mono text-zinc-700 hover:text-black hover:underline transition-colors flex items-center gap-2"
+              >
+                <Search className="w-3 h-3" />
+                Need inspiration? Scout for topics.
+              </button>
+            }
+          />
+          <div className="bg-amber-50/80 border border-amber-200/60 rounded-lg p-3 mx-auto w-full max-w-2xl">
+            <div className="flex items-start gap-2">
+              <span className="text-amber-500 mt-0.5 text-sm" aria-hidden="true">
+                👁️
+              </span>
+              <div className="text-xs text-amber-700/80 leading-relaxed">
+                <strong>Privacy Notice:</strong> Video transcripts are sent to Google Gemini for analysis. Please ensure your video does not contain sensitive personal, corporate, or financial information before analyzing.
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* The Scout Mode */}

@@ -20,7 +20,7 @@ export default function EnginePage() {
   const router = useRouter();
 
   // 🧠 PERFORMANCE: Granular Selectors
-  const apiKey = useAppStore((state) => state.apiKey);
+
   const tasks = useAppStore((state) => state.tasks);
   const loadProject = useAppStore((state) => state.loadProject);
   const resetProject = useAppStore((state) => state.resetProject);
@@ -58,12 +58,7 @@ export default function EnginePage() {
     setMounted(true);
   }, [loadProject]);
 
-  // Auth Guard: Redirect to Home if no API Key (and fully loaded)
-  useEffect(() => {
-    if (mounted && !apiKey) {
-      router.push('/');
-    }
-  }, [mounted, apiKey, router]);
+
 
   // Wrapper for Hard Reset (Clears Store + Remounts Input Components)
   const handleManualReset = async () => {
