@@ -188,19 +188,19 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
             footerContent={
               <button
                 onClick={() => setInputMode('scout')}
-                className="text-xs font-mono text-zinc-700 hover:text-black hover:underline transition-colors flex items-center gap-2"
+                className="text-xs font-mono text-zinc-500 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300 flex items-center gap-2"
               >
-                <Search className="w-3 h-3" />
+                <Search className="w-3 h-3 group-hover:animate-ping" />
                 Need inspiration? Scout for topics.
               </button>
             }
           />
-          <div className="bg-amber-50/80 border border-amber-200/60 rounded-lg p-3 mx-auto w-full max-w-2xl">
+          <div className="bg-amber-50/80 dark:bg-amber-950/30 border border-amber-200/60 dark:border-amber-700/50 rounded-lg p-3 mx-auto w-full max-w-2xl mt-4">
             <div className="flex items-start gap-2">
-              <span className="text-amber-500 mt-0.5 text-sm" aria-hidden="true">
+              <span className="text-amber-500 mt-0.5 text-sm drop-shadow-md" aria-hidden="true">
                 👁️
               </span>
-              <div className="text-xs text-amber-900 leading-relaxed">
+              <div className="text-xs text-amber-900 dark:text-amber-200/80 leading-relaxed">
                 <strong>Privacy Notice:</strong> Video transcripts are sent to Google Gemini for analysis. Please ensure your video does not contain sensitive personal, corporate, or financial information before analyzing.
               </div>
             </div>

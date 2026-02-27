@@ -11,10 +11,10 @@ export function Manifesto() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 animate-in fade-in duration-700 relative">
-      <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 mb-4 tracking-tight">
+      <h2 className="text-3xl md:text-4xl font-serif font-bold italic text-zinc-900 dark:text-stone-200 mb-4 tracking-tight">
         Learn, Create, Engage!
       </h2>
-      <p className="text-zinc-700 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
+      <p className="text-zinc-700 dark:text-stone-400 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
         You can copy posts, expand them into step-by-step plans. Use your recipes to engage with
         others, and make them your own posts.
       </p>
@@ -26,14 +26,14 @@ export function Manifesto() {
             setInputMode('scout');
             scrollToIgnition();
           }}
-          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-cyan-500/50 hover:bg-cyan-50 dark:hover:bg-cyan-950/20 hover:shadow-[0_0_15px_rgba(6,182,212,0.15)] transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors self-center">
+          <div className="p-3 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 rounded-full group-hover:bg-cyan-100 dark:group-hover:bg-cyan-900 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors self-center">
             <Compass className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 text-center">Scout</h3>
-            <p className="text-xs text-zinc-700 text-center">
+            <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Scout</h3>
+            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
               Find high-signal topics.
             </p>
           </div>
@@ -45,14 +45,14 @@ export function Manifesto() {
             setInputMode('video');
             scrollToIgnition();
           }}
-          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-fuchsia-500/50 hover:bg-fuchsia-50 dark:hover:bg-fuchsia-950/20 hover:shadow-[0_0_15px_rgba(217,70,239,0.15)] transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors self-center">
+          <div className="p-3 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 rounded-full group-hover:bg-fuchsia-100 dark:group-hover:bg-fuchsia-900 group-hover:text-fuchsia-600 dark:group-hover:text-fuchsia-400 transition-colors self-center">
             <Layers className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 text-center">Structure</h3>
-            <p className="text-xs text-zinc-700 text-center">
+            <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Structure</h3>
+            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
               Break complexity into steps.
             </p>
           </div>
@@ -65,14 +65,14 @@ export function Manifesto() {
               description: 'Upload a video or paste text to unlock this tool.',
             })
           }
-          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
+          className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-green-500/50 hover:bg-green-50 dark:hover:bg-green-950/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors self-center">
+          <div className="p-3 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 rounded-full group-hover:bg-green-100 dark:group-hover:bg-green-900 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors self-center">
             <Share2 className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 text-center">Export</h3>
-            <p className="text-xs text-zinc-700 text-center">
+            <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Export</h3>
+            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
               PDF & Markdown ready.
             </p>
           </div>
