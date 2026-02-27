@@ -277,13 +277,13 @@ export default function UploadZone({
               placeholder="Project Title (e.g. Sourdough Guide)"
               value={titleInput}
               onChange={(e) => setTitleInput(e.target.value)}
-              className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20"
+              className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20"
             />
             <textarea
               placeholder="Paste your text content here (Reddit thread, Blog post, Documentation)..."
               value={textInput}
               onChange={(e) => setTextInput(e.target.value)}
-              className="w-full h-48 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500/20 resize-none font-mono text-sm"
+              className="w-full h-48 bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded-xl p-4 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-600 focus:outline-none focus:border-fuchsia-500 focus:ring-1 focus:ring-fuchsia-500/20 resize-none font-mono text-sm"
             />
             <div className="text-xs text-zinc-500 text-right">{textInput.length} chars</div>
           </div>

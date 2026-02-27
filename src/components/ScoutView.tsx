@@ -166,7 +166,7 @@ export default function ScoutView() {
               <button
                 onClick={() => handleGenerate()}
                 disabled={isScouting || !scoutTopic.trim()}
-                className="w-full sm:w-auto bg-zinc-900 hover:bg-black dark:bg-zinc-700 dark:hover:bg-zinc-600 text-white px-8 py-3 sm:py-0 rounded-xl sm:rounded-l-none sm:rounded-r-xl font-mono text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all min-w-[120px]"
+                className="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 sm:py-0 rounded-xl sm:rounded-l-none sm:rounded-r-xl font-mono text-xs uppercase tracking-widest disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all min-w-[120px]"
               >
                 {isScouting ? <Spinner className="w-4 h-4 animate-spin" /> : 'SEARCH'}
               </button>
@@ -190,7 +190,7 @@ export default function ScoutView() {
                       className={`
                                                 relative px-4 py-2 rounded-lg text-xs font-semibold tracking-wide transition-all whitespace-nowrap
                                                 ${isActive
-                          ? 'bg-white dark:bg-zinc-700 text-black dark:text-zinc-50 shadow-sm'
+                          ? 'bg-cyan-50 dark:bg-cyan-950/40 text-cyan-700 dark:text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)]'
                           : 'text-zinc-400 dark:text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
                         }
                                             `}
