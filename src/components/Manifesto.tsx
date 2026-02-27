@@ -11,10 +11,10 @@ export function Manifesto() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full min-h-[60vh] text-center px-4 animate-in fade-in duration-700 relative">
-      <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 dark:text-zinc-50 mb-4 tracking-tight">
+      <h2 className="text-3xl md:text-4xl font-serif font-bold text-zinc-900 mb-4 tracking-tight">
         Learn, Create, Engage!
       </h2>
-      <p className="text-zinc-700 dark:text-zinc-300 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
+      <p className="text-zinc-700 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
         You can copy posts, expand them into step-by-step plans. Use your recipes to engage with
         others, and make them your own posts.
       </p>
@@ -28,12 +28,12 @@ export function Manifesto() {
           }}
           className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors self-center">
+          <div className="p-3 bg-blue-50 text-blue-600 rounded-full group-hover:bg-blue-100 dark:group-hover:bg-blue-900/50 transition-colors self-center">
             <Compass className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Scout</h3>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
+            <h3 className="font-bold text-zinc-900 text-center">Scout</h3>
+            <p className="text-xs text-zinc-700 text-center">
               Find high-signal topics.
             </p>
           </div>
@@ -47,12 +47,12 @@ export function Manifesto() {
           }}
           className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-purple-50 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors self-center">
+          <div className="p-3 bg-purple-50 text-purple-600 rounded-full group-hover:bg-purple-100 dark:group-hover:bg-purple-900/50 transition-colors self-center">
             <Layers className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Structure</h3>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
+            <h3 className="font-bold text-zinc-900 text-center">Structure</h3>
+            <p className="text-xs text-zinc-700 text-center">
               Break complexity into steps.
             </p>
           </div>
@@ -67,12 +67,12 @@ export function Manifesto() {
           }
           className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-zinc-200 dark:hover:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
-          <div className="p-3 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-full group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors self-center">
+          <div className="p-3 bg-emerald-50 text-emerald-600 rounded-full group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/50 transition-colors self-center">
             <Share2 className="w-6 h-6" />
           </div>
           <div className="space-y-1 w-full">
-            <h3 className="font-bold text-zinc-900 dark:text-zinc-50 text-center">Export</h3>
-            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
+            <h3 className="font-bold text-zinc-900 text-center">Export</h3>
+            <p className="text-xs text-zinc-700 text-center">
               PDF & Markdown ready.
             </p>
           </div>

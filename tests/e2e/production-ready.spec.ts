@@ -12,7 +12,7 @@ interface CustomWindow extends Window {
 test.describe.serial('The Reinforced 5: Production Integrity', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
-      localStorage.setItem('cubit_api_key', 'test-key');
+      localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
     });
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
       const json = {

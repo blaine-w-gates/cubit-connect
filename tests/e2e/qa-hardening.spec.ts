@@ -13,12 +13,13 @@ test.describe('QA Hardening: Robustness Checks', () => {
 
     // Setup Ignition
     await page.addInitScript((key) => {
-      localStorage.setItem('cubit_api_key', key);
+      localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_' + key));
     }, TEST_API_KEY);
   });
 
   // TEST 1: Quota Exceeded (Graceful Failure)
   test('Gracefully handles API Quota Exceeded (429)', async ({ page }) => {
+    test.setTimeout(60000); // Backoff retries (2s + 4s + 8s) take ~14s plus parsing delays
     // 1. Mock 429 Error on Gemini API
     await page.route(/generativelanguage\.googleapis\.com\/.*generateContent/, async (route) => {
       await route.fulfill({

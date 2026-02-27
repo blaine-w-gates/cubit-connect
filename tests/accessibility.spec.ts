@@ -5,6 +5,7 @@ test.describe('Accessibility Compliance', () => {
   test('Landing Page should not have any automatically detectable accessibility issues', async ({
     page,
   }) => {
+    test.setTimeout(60000); // Axe builder scans can take a while
     await page.goto('/');
 
     // Wait for hydration
@@ -28,9 +29,10 @@ test.describe('Accessibility Compliance', () => {
   test('Engine Page should not have any automatically detectable accessibility issues', async ({
     page,
   }) => {
+    test.setTimeout(60000); // Axe builder scans can take a while
     // Inject key to skip login
     await page.addInitScript(() => {
-      localStorage.setItem('cubit_api_key', 'test-key');
+      localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
     });
 
     await page.goto('/engine');

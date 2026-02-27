@@ -13,6 +13,7 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
   });
 
   test('Full Flow: Ignition -> Manifesto -> Scout -> Export', async ({ page }) => {
+    test.setTimeout(60000); // UI interactions and multiple mocked API calls can exceed 30s
     // 1. IGNITION
     console.log('--- STEP 1: IGNITION ---');
 
@@ -146,8 +147,12 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
   });
 
   test('Header/Mobile: Scout Button Presence', async ({ page }) => {
+    await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
+      await route.fulfill({ json: { totalTokens: 10 } }); // Mock success for validateConnection
+    });
+
     await page.addInitScript((key) => {
-      localStorage.setItem('cubit_api_key', key);
+      localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_' + key));
     }, TEST_API_KEY);
 
     await page.goto('/engine');

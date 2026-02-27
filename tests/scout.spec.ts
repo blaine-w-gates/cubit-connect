@@ -64,7 +64,7 @@ test.describe('Scout Feature', () => {
   test('Happy Path: Toggle Platforms', async ({ page }) => {
     // Inject key to skip login
     await page.addInitScript(() => {
-      localStorage.setItem('cubit_api_key', 'test-key');
+      localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
     });
 
     await page.goto('/engine');
