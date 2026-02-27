@@ -174,7 +174,7 @@ export default function UploadZone({
             <button
               onClick={() => setMode('video')}
               className={`px-6 py-2 rounded-lg text-sm font-bold tracking-wide transition-all flex items-center gap-2 ${mode === 'video'
-                ? 'bg-cyan-50 dark:bg-cyan-950/40 text-cyan-600 dark:text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.25)] border-transparent'
+                ? 'bg-fuchsia-50 dark:bg-fuchsia-950/40 text-fuchsia-600 dark:text-fuchsia-400 shadow-[0_0_12px_rgba(217,70,239,0.25)] border-transparent'
                 : 'text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200/50 dark:hover:bg-zinc-700/50'
                 }`}
             >
@@ -206,10 +206,10 @@ export default function UploadZone({
               className={`
                                 relative group flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300
                                 ${videoFile
-                  ? 'border-cyan-500 bg-cyan-50/50 dark:bg-cyan-900/20 shadow-[0_0_15px_rgba(6,182,212,0.15)]'
+                  ? 'border-fuchsia-500 bg-fuchsia-50/50 dark:bg-fuchsia-900/20 shadow-[0_0_15px_rgba(217,70,239,0.15)]'
                   : dragActive
-                    ? 'border-cyan-400 bg-zinc-100 dark:bg-zinc-800 scale-[1.02] shadow-[0_0_20px_rgba(6,182,212,0.2)]'
-                    : 'bg-white dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-700 hover:border-cyan-500/60 hover:bg-cyan-50/30 dark:hover:bg-cyan-900/10 hover:shadow-[0_0_15px_rgba(6,182,212,0.1)]'
+                    ? 'border-fuchsia-400 bg-zinc-100 dark:bg-zinc-800 scale-[1.02] shadow-[0_0_20px_rgba(217,70,239,0.2)]'
+                    : 'bg-white dark:bg-zinc-900/50 border-zinc-300 dark:border-zinc-700 hover:border-fuchsia-500/60 hover:bg-fuchsia-50/30 dark:hover:bg-fuchsia-900/10 hover:shadow-[0_0_15px_rgba(217,70,239,0.1)]'
                 }
                             `}
             >
@@ -218,7 +218,7 @@ export default function UploadZone({
                 <Video
                   className={
                     videoFile
-                      ? 'w-8 h-8 text-green-600'
+                      ? 'w-8 h-8 text-fuchsia-600'
                       : 'w-8 h-8 text-zinc-400 dark:text-zinc-500'
                   }
                 />
@@ -316,7 +316,7 @@ export default function UploadZone({
             className={`
                         w-full py-4 rounded-xl font-bold text-lg outline-none transition-all duration-300 relative overflow-hidden group
                         ${isReady
-                ? 'bg-gradient-to-r from-cyan-600 to-fuchsia-600 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)] hover:shadow-[0_0_25px_rgba(217,70,239,0.5)] hover:scale-[1.02]'
+                ? 'bg-gradient-to-r from-fuchsia-600 to-purple-600 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)] hover:shadow-[0_0_25px_rgba(217,70,239,0.5)] hover:scale-[1.02]'
                 : 'bg-zinc-100 dark:bg-zinc-800/80 text-zinc-400 dark:text-zinc-600 cursor-not-allowed shadow-none'
               }
                     `}

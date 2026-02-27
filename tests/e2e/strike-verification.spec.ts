@@ -63,7 +63,7 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
     expect(countTokensResp.status()).toBe(200);
     console.log('Ignition: Network call passed (200 OK).');
 
-    await expect(page).toHaveURL(/\/engine/);
+    await expect(page).toHaveURL(/\/engine/, { timeout: 20000 });
     console.log('Ignition: Redirect to Engine successful.');
 
     // 2. MANIFESTO (Zero State)

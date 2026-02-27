@@ -3,6 +3,7 @@ import { playAudit } from 'playwright-lighthouse';
 
 test.describe('Performance', () => {
   test('Lighthouse Audit', async ({ page, browserName }) => {
+    test.setTimeout(90000); // 90 seconds. Lighthouse can be slow.
     // Only run on Chromium because Lighthouse requires CDP
     test.skip(browserName !== 'chromium', 'Lighthouse only works on Chromium');
 

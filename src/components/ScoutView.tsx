@@ -143,7 +143,7 @@ export default function ScoutView() {
           <div className="flex justify-end w-full">
             <button
               onClick={() => setInputMode('video')}
-              className="text-[10px] text-zinc-400 hover:text-red-600 uppercase tracking-widest px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors font-medium bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-700 shadow-sm min-h-[40px] flex items-center justify-center"
+              className="text-[10px] text-zinc-400 hover:text-cyan-600 uppercase tracking-widest px-4 py-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/30 rounded-full transition-colors font-medium bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-700 shadow-sm min-h-[40px] flex items-center justify-center"
             >
               [ Close ]
             </button>
@@ -159,7 +159,7 @@ export default function ScoutView() {
                 maxLength={100}
                 onChange={(e) => setScoutTopic(e.target.value)}
                 placeholder="What do you want to learn? (e.g. Sourdough)"
-                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl sm:rounded-r-none sm:rounded-l-xl p-4 font-mono text-base sm:text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500/20 focus:z-10 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-800 dark:text-zinc-100"
+                className="w-full bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl sm:rounded-r-none sm:rounded-l-xl p-4 font-mono text-base sm:text-sm outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500/20 focus:z-10 transition-all placeholder:text-zinc-300 dark:placeholder:text-zinc-600 text-zinc-800 dark:text-zinc-100"
                 onKeyDown={(e) => e.key === 'Enter' && !isScouting && handleGenerate()}
                 autoFocus
               />

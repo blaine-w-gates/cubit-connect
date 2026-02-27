@@ -14,7 +14,7 @@ export function Manifesto() {
       <h2 className="text-3xl md:text-4xl font-serif font-bold italic text-zinc-900 dark:text-stone-200 mb-4 tracking-tight">
         Learn, Create, Engage!
       </h2>
-      <p className="text-zinc-700 dark:text-stone-400 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
+      <p className="text-zinc-800 dark:text-zinc-300 max-w-lg mb-12 text-base md:text-lg leading-relaxed">
         You can copy posts, expand them into step-by-step plans. Use your recipes to engage with
         others, and make them your own posts.
       </p>
@@ -33,7 +33,7 @@ export function Manifesto() {
           </div>
           <div className="space-y-1 w-full">
             <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Scout</h3>
-            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
               Find high-signal topics.
             </p>
           </div>
@@ -52,7 +52,7 @@ export function Manifesto() {
           </div>
           <div className="space-y-1 w-full">
             <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Structure</h3>
-            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
               Break complexity into steps.
             </p>
           </div>
@@ -72,7 +72,7 @@ export function Manifesto() {
           </div>
           <div className="space-y-1 w-full">
             <h3 className="font-bold text-zinc-900 dark:text-stone-200 text-center">Export</h3>
-            <p className="text-xs text-zinc-600 dark:text-stone-400 text-center">
+            <p className="text-xs text-zinc-700 dark:text-zinc-300 text-center">
               PDF & Markdown ready.
             </p>
           </div>
