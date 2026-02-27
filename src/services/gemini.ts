@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
 
@@ -125,32 +126,22 @@ export const GeminiService = {
     return Promise.race([promise.finally(() => clearTimeout(timeoutId)), timeoutPromise]);
   },
 
-  async validateConnection(): Promise<boolean> {
+  async validateConnection(apiKey: string): Promise<boolean> {
     try {
-      await this.countTokens('Test connection');
+      await this.countTokens(apiKey, 'Test connection');
       return true;
     } catch {
       throw new Error('Invalid API Key');
     }
   },
 
-  async countTokens(text: string): Promise<number> {
+  async countTokens(apiKey: string, text: string): Promise<number> {
     await this.enforceRateLimit();
-    const response = await fetch('/api/gemini', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'countTokens',
-        text,
-        modelName: PRIMARY_MODEL,
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error('Token count failed: ' + response.status);
-    }
-    const data = await response.json();
-    return data.totalTokens;
+    const genAI = new GoogleGenerativeAI(apiKey);
+    // Use Primary for token counting, fallback doesn't matter much here
+    const model = genAI.getGenerativeModel({ model: PRIMARY_MODEL });
+    const { totalTokens } = await model.countTokens(text);
+    return totalTokens;
   },
 
   // ---------------------------------------------------------------------------
@@ -158,11 +149,13 @@ export const GeminiService = {
   // ---------------------------------------------------------------------------
 
   async analyzeTranscript(
+    apiKey: string,
     transcript: string,
     mode: 'video' | 'text' = 'video',
     videoDuration?: number,
   ): Promise<TaskItem[]> {
     await this.enforceRateLimit();
+    const genAI = new GoogleGenerativeAI(apiKey);
 
     const promptRules =
       mode === 'text'
@@ -206,19 +199,11 @@ export const GeminiService = {
     try {
       // Pass a closure that accepts the modelName
       const result = await this.retryWithBackoff(async (modelName) => {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'generateContent', prompt, modelName })
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
         });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error || ('HTTP ' + response.status));
-        }
-
-        const data = await response.json();
-        return { response: { text: () => data.responseText } };
+        return this.withTimeout(model.generateContent(prompt));
       });
 
       const tasks = safeParseTasks(result.response.text());
@@ -240,8 +225,9 @@ export const GeminiService = {
     }
   },
 
-  async generateSearchQueries(topic: string): Promise<string[]> {
+  async generateSearchQueries(apiKey: string, topic: string): Promise<string[]> {
     await this.enforceRateLimit();
+    const genAI = new GoogleGenerativeAI(apiKey);
 
     const prompt = `
             Generate a "Mix Tape" of 10 high-signal search queries for the topic: "${topic}".
@@ -262,19 +248,11 @@ export const GeminiService = {
         `;
     try {
       const result = await this.retryWithBackoff(async (modelName) => {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'generateContent', prompt, modelName })
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
         });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error || ('HTTP ' + response.status));
-        }
-
-        const data = await response.json();
-        return { response: { text: () => data.responseText } };
+        return this.withTimeout(model.generateContent(prompt));
       });
       return safeParseSearchQueries(result.response.text());
     } catch (e: unknown) {
@@ -288,11 +266,13 @@ export const GeminiService = {
   },
 
   async generateSubSteps(
+    apiKey: string,
     instruction: string,
     transcript?: string,
     neighborContext?: string,
   ): Promise<string[]> {
     await this.enforceRateLimit();
+    const genAI = new GoogleGenerativeAI(apiKey);
 
     const prompt = `
             You are a mentor teaching a student how to execute a specific task.
@@ -319,19 +299,11 @@ export const GeminiService = {
         `;
     try {
       const result = await this.retryWithBackoff(async (modelName) => {
-        const response = await fetch('/api/gemini', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'generateContent', prompt, modelName })
+        const model = genAI.getGenerativeModel({
+          model: modelName,
+          generationConfig: { responseMimeType: 'application/json' },
         });
-
-        if (!response.ok) {
-          const errData = await response.json();
-          throw new Error(errData.error || ('HTTP ' + response.status));
-        }
-
-        const data = await response.json();
-        return { response: { text: () => data.responseText } };
+        return this.withTimeout(model.generateContent(prompt));
       });
       return safeParseSubSteps(result.response.text());
     } catch (e: unknown) {

@@ -60,7 +60,7 @@ export default function ResultsFeed() {
 
         // Pass context + neighbors
         const rawSteps = await GeminiService.generateSubSteps(
-
+          state.apiKey,
           context,
           fullTranscript || undefined,
           neighborContext,

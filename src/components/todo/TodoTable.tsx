@@ -192,7 +192,7 @@ export default function TodoTable() {
         setProcessingRowId(rowId);
         try {
             const rawSteps = await GeminiService.generateSubSteps(
-
+                useAppStore.getState().apiKey,
                 `Task: "${taskText}". Generate exactly 4 actionable steps.`,
             );
             // Pad/truncate to exactly 4
@@ -233,7 +233,7 @@ export default function TodoTable() {
                 .join('\n');
 
             const rawSteps = await GeminiService.generateSubSteps(
-
+                useAppStore.getState().apiKey,
                 `Deep Dive into: "${stepText}".\nSibling steps from parent row:\n${siblingContext}\nGenerate exactly 4 detailed sub-steps.`,
             );
             const steps: [string, string, string, string] = [

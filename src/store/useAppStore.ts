@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
+import { cryptoUtils } from '@/lib/crypto';
 
 // Book Tab color palette — cycles through these for new projects
 const TAB_COLORS = [
@@ -9,6 +10,8 @@ const TAB_COLORS = [
 ];
 
 export interface ProjectState {
+  apiKey: string;
+  setApiKey: (key: string) => void;
   isHydrated: boolean; // New: Hydration Guard
   hasVideoHandle: boolean;
   isProcessing: boolean;
@@ -102,8 +105,21 @@ export interface LogEntry {
 
 
 
+const STORAGE_KEY_API = 'cubit_api_key';
+
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
+  apiKey:
+    typeof window !== 'undefined'
+      ? cryptoUtils.decrypt(localStorage.getItem(STORAGE_KEY_API) || '')
+      : '',
+  setApiKey: (key: string) => {
+    const safeKey = cryptoUtils.cleanInput(key);
+    const encrypted = cryptoUtils.encrypt(safeKey);
+    localStorage.setItem(STORAGE_KEY_API, encrypted);
+    GeminiService.resetState();
+    set({ apiKey: safeKey });
+  },
   isHydrated: false,
   hasVideoHandle: false, // Default: Force re-selection on reload
   isProcessing: false,
@@ -738,6 +754,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   fullLogout: async () => {
     // Factory Reset
     await storageService.clearProject();
+    localStorage.removeItem(STORAGE_KEY_API);
     const defaultProject: TodoProject = {
       id: crypto.randomUUID(),
       name: 'My First Project',
@@ -764,6 +781,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       activeMode: null,
       nextProjectNumber: 2, // "My First Project" was #1
+      apiKey: '',
     });
   },
 

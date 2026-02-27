@@ -109,6 +109,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
         // 4. Generate Tasks
         const projectType = useAppStore.getState().projectType;
         const newTasks = await GeminiService.analyzeTranscript(
+          useAppStore.getState().apiKey,
           transcriptText,
           projectType,
           videoDuration,

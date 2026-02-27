@@ -53,7 +53,7 @@ export default function ScoutView() {
 
 
       // Omni-Mix: Generate 10 mixed results regardless of platform.
-      const results = await GeminiService.generateSearchQueries(cleanTopic);
+      const results = await GeminiService.generateSearchQueries(useAppStore.getState().apiKey, cleanTopic);
       addToScoutHistory(cleanTopic);
       setStoreResults(results);
     } catch (e: unknown) {
