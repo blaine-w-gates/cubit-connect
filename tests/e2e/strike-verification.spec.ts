@@ -49,8 +49,6 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
     });
 
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill(TEST_API_KEY);
-
     const countTokensPromise = page.waitForResponse(
       (resp) =>
         resp.url().includes('generativelanguage.googleapis.com') &&

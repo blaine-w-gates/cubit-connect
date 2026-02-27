@@ -61,24 +61,14 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     // await expect(page).toHaveURL(/\/$/);
 
     // Verify we see the Login Form (which implies we are conceptually 'out')
-    await expect(page.getByPlaceholder(/Enter API keys/i)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'START' })).toBeVisible();
   });
 
   // 2. The 'Clumsy User' Test (Crash Resilience)
   test('The Clumsy User: Bad Inputs', async ({ page }) => {
     await page.goto('/');
 
-    // Part A: Ignition
-    const ignitionInput = page.getByPlaceholder(/Enter API keys/i);
-    await ignitionInput.fill('   '); // Spaces
-    await page.getByRole('button', { name: 'START' }).click();
-
-    // Expect: No Crash, Stay on Landing
-    await expect(page.getByRole('heading', { name: 'Recipes for Life' })).toBeVisible();
-    await expect(page).toHaveURL('/');
-
-    // Now enter valid key to proceed to Part B
-    await ignitionInput.fill('valid-stress-key');
+    // Now proceed to Part B
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine');
 
@@ -124,7 +114,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in first
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('persistent-key-123');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -143,7 +132,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('redirect-trap-key');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -163,7 +151,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('mobile-key');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -181,7 +168,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('zombie-key');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -243,7 +229,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // 2. Ignite & Engine
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('deep-dive-key');
     await page.getByRole('button', { name: 'START' }).click();
     // Increase timeout significantly for mobile environments which are slower
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
@@ -300,7 +285,6 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // 2. Ignite & Engine
     await page.goto('/');
-    await page.getByPlaceholder(/Enter API keys/i).fill('overload-key');
     await page.getByRole('button', { name: 'START' }).click();
 
     // Wait for URL with timeout increase, or check for error if ignition fails
@@ -335,7 +319,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     // Playwright handles alerts via dialog event.
     page.once('dialog', (dialog) => {
       console.log(`Alert message: ${dialog.message()}`);
-      dialog.dismiss().catch(() => {});
+      dialog.dismiss().catch(() => { });
     });
 
     // Ensure app didn't crash (Heading still visible)
@@ -356,7 +340,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     // Or "Intentional Search" if updated? Using broad match based on file view earlier.
 
     // 2. Verify Z-Index Safety (Ignition is Clickable)
-    const ignition = page.getByPlaceholder(/Enter API keys/i);
+    const ignition = page.getByRole('button', { name: 'START' });
     await expect(ignition).toBeVisible();
     await ignition.click(); // Should not fail/be intercepted
     await expect(ignition).toBeFocused();

@@ -52,9 +52,7 @@ test.describe('The Pivot: Interactive Worksheet', () => {
     // 3. Visit Page & Ignite
     await page.goto('/');
 
-    // Enter Ignition Key (Landing Page)
-    const ignitionInput = page.getByPlaceholder(/Enter API keys/i);
-    await ignitionInput.fill('dummy-test-key');
+    // Ignite (Landing Page)
     await page.getByRole('button', { name: 'START' }).click();
 
     // Wait for Engine
