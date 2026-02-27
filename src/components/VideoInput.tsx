@@ -188,7 +188,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
             footerContent={
               <button
                 onClick={() => setInputMode('scout')}
-                className="text-xs font-mono text-zinc-500 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300 flex items-center gap-2"
+                className="text-xs font-mono text-zinc-600 dark:text-zinc-400 hover:text-cyan-600 dark:hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-300 flex items-center gap-2"
               >
                 <Search className="w-3 h-3 group-hover:animate-ping" />
                 Need inspiration? Scout for topics.
