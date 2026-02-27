@@ -55,6 +55,7 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
         resp.url().includes('countTokens'),
     );
 
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: /START/i }).click();
 
     const countTokensResp = await countTokensPromise;

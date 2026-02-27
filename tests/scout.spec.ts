@@ -35,6 +35,7 @@ test.describe('Scout Feature', () => {
     await expect(page.locator('h1').filter({ hasText: 'Recipes for Life' })).toBeVisible();
 
     // 2. Ignite (Login)
+    await page.getByPlaceholder(/Enter API key/i).fill('VALID_TEST_KEY');
     await page.getByRole('button', { name: 'START' }).click();
 
     // 3. Verify Engine Loaded

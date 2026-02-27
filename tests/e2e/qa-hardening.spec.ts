@@ -89,7 +89,7 @@ test.describe('QA Hardening: Robustness Checks', () => {
     // The error UI includes the Modal ("Usage Limit Reached") AND the Toast ("Quota Limit Reached").
     // We check for the Modal Header as a strong indicator of success.
 
-    await expect(page.getByText(/Usage Limit|Quota Limit/i)).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Usage Limit|Quota Limit/i })).toBeVisible();
   });
 
   // TEST 2: Missing Video Handle (Zombie Process Protection)

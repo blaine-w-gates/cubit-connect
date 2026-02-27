@@ -200,7 +200,7 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
               <span className="text-amber-500 mt-0.5 text-sm" aria-hidden="true">
                 👁️
               </span>
-              <div className="text-xs text-amber-700/80 leading-relaxed">
+              <div className="text-xs text-amber-900 leading-relaxed">
                 <strong>Privacy Notice:</strong> Video transcripts are sent to Google Gemini for analysis. Please ensure your video does not contain sensitive personal, corporate, or financial information before analyzing.
               </div>
             </div>

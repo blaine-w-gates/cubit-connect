@@ -69,6 +69,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     await page.goto('/');
 
     // Now proceed to Part B
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine');
 
@@ -114,6 +115,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in first
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -132,6 +134,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -151,6 +154,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -168,6 +172,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // Log in
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
@@ -229,6 +234,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // 2. Ignite & Engine
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     // Increase timeout significantly for mobile environments which are slower
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
@@ -285,6 +291,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     // 2. Ignite & Engine
     await page.goto('/');
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
 
     // Wait for URL with timeout increase, or check for error if ignition fails
@@ -328,9 +335,10 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
   // 9. The 'Carousel' Integrity (Phase 8 Check)
   test('The Carousel Integrity: Phase 8 Check', async ({ page }) => {
-    await page.goto('/');
-    await page.evaluate(() => localStorage.clear());
-    await page.reload(); // Ensure clean Landing
+    await page.goto('/'); // Get on the domain origin
+    await page.evaluate(() => localStorage.clear()); // Safe to clear now
+    await page.waitForTimeout(500); // Allow any inflight redirects to exhaust
+    await page.goto('/'); // Clean Landing
 
     // 1. Verify Carousel Text
     // Matches "Intentional Search" or similar keywords in HeroCarousel
@@ -340,9 +348,11 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     // Or "Intentional Search" if updated? Using broad match based on file view earlier.
 
     // 2. Verify Z-Index Safety (Ignition is Clickable)
+    await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     const ignition = page.getByRole('button', { name: 'START' });
     await expect(ignition).toBeVisible();
     await ignition.click(); // Should not fail/be intercepted
-    await expect(ignition).toBeFocused();
+    // Replaced toBeFocused with waitForURL since the page navigates away upon success.
+    await page.waitForURL('**/engine', { timeout: 10000, waitUntil: 'commit' });
   });
 });
