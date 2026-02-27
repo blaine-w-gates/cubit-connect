@@ -1,6 +1,12 @@
 import { create } from 'zustand';
-import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials } from '@/services/storage';
+import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
+
+// Book Tab color palette — cycles through these for new projects
+const TAB_COLORS = [
+  '#F87171', '#FB923C', '#FBBF24', '#A3E635', '#34D399',
+  '#22D3EE', '#818CF8', '#C084FC', '#F472B6', '#94A3B8',
+];
 
 export interface ProjectState {
   isHydrated: boolean; // New: Hydration Guard
@@ -56,13 +62,25 @@ export interface ProjectState {
   addLog: (message: string) => void;
   clearLogs: () => void;
 
-  // --- To-Do Page State ---
+  // --- To-Do Page State (Project-Scoped via Book Tabs) ---
+  todoProjects: TodoProject[];
+  activeProjectId: string | null;
+  nextProjectNumber: number; // monotonic — never decrements on delete
+  // Derived getters — resolve from active project (backwards-compatible with TodoTable/PriorityDials)
   todoRows: TodoRow[];
   priorityDials: PriorityDials;
   activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null; // UI-only state — NOT persisted
   setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
   processingRowId: string | null; // UI-only state — NOT persisted
   setProcessingRowId: (rowId: string | null) => void;
+  // Project management actions (Book Tabs)
+  addTodoProject: (name?: string) => void;
+  setActiveProject: (projectId: string) => void;
+  renameTodoProject: (projectId: string, name: string) => void;
+  deleteTodoProject: (projectId: string) => void;
+  changeProjectColor: (projectId: string, color: string) => void;
+  reorderTodoProjects: (fromIdx: number, toIdx: number) => void;
+  // Todo row actions (operate on active project)
   addTodoRow: (task?: string) => void;
   deleteTodoRow: (rowId: string) => void;
   updateTodoCell: (rowId: string, field: 'task' | 'step', value: string, stepIdx?: number) => void;
@@ -112,13 +130,100 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       return { scoutHistory: updated };
     }),
 
-  // --- To-Do Page State ---
+  // --- To-Do Page State (Project-Scoped) ---
+  todoProjects: [],
+  activeProjectId: null,
+  nextProjectNumber: 1, // starts at 1; only ever goes up
+  // Derived getters — resolved from active project
   todoRows: [],
   priorityDials: { left: '', right: '', focusedSide: 'none' as const },
   activeMode: null,
   setActiveMode: (mode) => set({ activeMode: mode }),
   processingRowId: null,
   setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
+
+  // --- Book Tab Project Actions ---
+  addTodoProject: (name?: string) => {
+    const { todoProjects, nextProjectNumber } = get();
+    // Name = slot position (current count + 1), Color = monotonic counter cycle
+    const colorIdx = (nextProjectNumber - 1) % TAB_COLORS.length;
+    const slotNumber = todoProjects.length + 1;
+    const newProject: TodoProject = {
+      id: crypto.randomUUID(),
+      name: name || `Project ${slotNumber}`,
+      color: TAB_COLORS[colorIdx],
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+      createdAt: Date.now(),
+    };
+    const updated = [...todoProjects, newProject];
+    set({
+      todoProjects: updated,
+      activeProjectId: newProject.id,
+      todoRows: newProject.todoRows,
+      priorityDials: newProject.priorityDials,
+      nextProjectNumber: nextProjectNumber + 1,
+    });
+  },
+
+  setActiveProject: (projectId: string) => {
+    const { todoProjects } = get();
+    const project = todoProjects.find((p) => p.id === projectId);
+    if (!project) return;
+    set({
+      activeProjectId: projectId,
+      todoRows: project.todoRows,
+      priorityDials: project.priorityDials,
+    });
+  },
+
+  renameTodoProject: (projectId: string, name: string) => {
+    set((state) => ({
+      todoProjects: state.todoProjects.map((p) =>
+        p.id === projectId ? { ...p, name } : p,
+      ),
+    }));
+  },
+
+  deleteTodoProject: (projectId: string) => {
+    const { todoProjects, activeProjectId } = get();
+    const filtered = todoProjects.filter((p) => p.id !== projectId);
+    // If deleting the active project, switch to first remaining or null
+    let newActiveId = activeProjectId;
+    let newRows: TodoRow[] = get().todoRows;
+    let newDials: PriorityDials = get().priorityDials;
+    if (activeProjectId === projectId) {
+      const next = filtered[0] || null;
+      newActiveId = next?.id || null;
+      newRows = next?.todoRows || [];
+      newDials = next?.priorityDials || { left: '', right: '', focusedSide: 'none' as const };
+    }
+    set({
+      todoProjects: filtered,
+      activeProjectId: newActiveId,
+      todoRows: newRows,
+      priorityDials: newDials,
+    });
+  },
+
+  reorderTodoProjects: (fromIdx: number, toIdx: number) => {
+    set((state) => {
+      const projects = [...state.todoProjects];
+      const [moved] = projects.splice(fromIdx, 1);
+      projects.splice(toIdx, 0, moved);
+      return { todoProjects: projects };
+    });
+  },
+
+  changeProjectColor: (projectId: string, color: string) => {
+    set((state) => ({
+      todoProjects: state.todoProjects.map((p) =>
+        p.id === projectId ? { ...p, color } : p
+      ),
+    }));
+  },
+
+  // Helper pattern: all row mutations update both todoRows AND the matching project in todoProjects
 
   addTodoRow: (task = '') => {
     const newRow: TodoRow = {
@@ -127,16 +232,32 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       steps: ['', '', '', ''],
       isCompleted: false,
     };
-    set((state) => ({ todoRows: [newRow, ...state.todoRows] }));
+    set((state) => {
+      const newRows = [newRow, ...state.todoRows];
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
   },
 
   deleteTodoRow: (rowId: string) => {
-    set((state) => ({ todoRows: state.todoRows.filter((r) => r.id !== rowId) }));
+    set((state) => {
+      const newRows = state.todoRows.filter((r) => r.id !== rowId);
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
   },
 
   updateTodoCell: (rowId, field, value, stepIdx) => {
-    set((state) => ({
-      todoRows: state.todoRows.map((row) => {
+    set((state) => {
+      const newRows = state.todoRows.map((row) => {
         if (row.id !== rowId) return row;
         if (field === 'task') return { ...row, task: value };
         if (field === 'step' && stepIdx !== undefined) {
@@ -145,15 +266,27 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           return { ...row, steps };
         }
         return row;
-      }),
-    }));
+      });
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
   },
 
   moveTodoRowToBottom: (rowId: string) => {
     set((state) => {
       const row = state.todoRows.find((r) => r.id === rowId);
       if (!row) return state;
-      return { todoRows: [...state.todoRows.filter((r) => r.id !== rowId), row] };
+      const newRows = [...state.todoRows.filter((r) => r.id !== rowId), row];
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
     });
   },
 
@@ -162,14 +295,25 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const rows = [...state.todoRows];
       const [moved] = rows.splice(fromIdx, 1);
       rows.splice(toIdx, 0, moved);
-      return { todoRows: rows };
+      return {
+        todoRows: rows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
+        ),
+      };
     });
   },
 
   setTodoSteps: (rowId: string, steps: [string, string, string, string]) => {
-    set((state) => ({
-      todoRows: state.todoRows.map((r) => (r.id === rowId ? { ...r, steps } : r)),
-    }));
+    set((state) => {
+      const newRows = state.todoRows.map((r) => (r.id === rowId ? { ...r, steps } : r));
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
   },
 
   insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => {
@@ -185,38 +329,65 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const idx = state.todoRows.findIndex((r) => r.id === afterRowId);
       const rows = [...state.todoRows];
       rows.splice(idx + 1, 0, newRow);
-      return { todoRows: rows };
+      return {
+        todoRows: rows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
+        ),
+      };
     });
     return newId;
   },
 
   setDialPriority: (side, text) => {
-    set((state) => ({
-      priorityDials: { ...state.priorityDials, [side]: text },
-    }));
+    set((state) => {
+      const newDials = { ...state.priorityDials, [side]: text };
+      return {
+        priorityDials: newDials,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, priorityDials: newDials } : p,
+        ),
+      };
+    });
   },
 
   setDialFocus: (side) => {
-    set((state) => ({
-      priorityDials: { ...state.priorityDials, focusedSide: side },
-    }));
+    set((state) => {
+      const newDials = { ...state.priorityDials, focusedSide: side };
+      return {
+        priorityDials: newDials,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, priorityDials: newDials } : p,
+        ),
+      };
+    });
   },
 
   toggleTodoRowCompletion: (rowId: string) => {
-    set((state) => ({
-      todoRows: state.todoRows.map((r) =>
+    set((state) => {
+      const newRows = state.todoRows.map((r) =>
         r.id === rowId ? { ...r, isCompleted: !r.isCompleted } : r,
-      ),
-    }));
+      );
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
   },
 
   restoreTodoRow: (row: TodoRow, index: number) => {
     set((state) => {
       const rows = [...state.todoRows];
-      // Clamp index to valid range
       const safeIdx = Math.min(index, rows.length);
       rows.splice(safeIdx, 0, row);
-      return { todoRows: rows };
+      return {
+        todoRows: rows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
+        ),
+      };
     });
   },
 
@@ -289,17 +460,69 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
     // -----------------------
 
+    // --- BOOK TABS MIGRATION ---
+    // If old flat todoRows exist but no todoProjects, wrap them into a default project
+    let todoProjects = data.todoProjects || [];
+    let activeProjectId = data.activeProjectId || null;
+
+    if (
+      todoProjects.length === 0 &&
+      data.todoRows &&
+      data.todoRows.length > 0
+    ) {
+      const defaultProject: TodoProject = {
+        id: crypto.randomUUID(),
+        name: 'My First Project',
+        color: '#22D3EE',
+        todoRows: data.todoRows,
+        priorityDials: data.priorityDials || { left: '', right: '', focusedSide: 'none' as const },
+        createdAt: Date.now(),
+      };
+      todoProjects = [defaultProject];
+      activeProjectId = defaultProject.id;
+      if (process.env.NODE_ENV === 'development')
+        console.warn('Migrated flat todoRows into default TodoProject (Book Tabs).');
+    }
+
+    // If no projects exist at all, create an empty default
+    if (todoProjects.length === 0) {
+      const emptyProject: TodoProject = {
+        id: crypto.randomUUID(),
+        name: 'My First Project',
+        color: '#22D3EE',
+        todoRows: [],
+        priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+        createdAt: Date.now(),
+      };
+      todoProjects = [emptyProject];
+      activeProjectId = emptyProject.id;
+    }
+
+    // Ensure activeProjectId points to a valid project
+    if (!activeProjectId || !todoProjects.find((p) => p.id === activeProjectId)) {
+      activeProjectId = todoProjects[0].id;
+    }
+
+    const activeProject = todoProjects.find((p) => p.id === activeProjectId)!;
+    // -----------------------
+
     set({
       tasks: migratedTasks,
       transcript: data.transcript || null,
       scoutResults: data.scoutResults || [],
       projectType: data.projectType || 'video',
       projectTitle: data.projectTitle || 'New Project',
-      scoutTopic: data.scoutTopic || '', // Restore or default
+      scoutTopic: data.scoutTopic || '',
       scoutPlatform: data.scoutPlatform || 'instagram',
-      scoutHistory: data.scoutHistory || [], // Restore or default
-      todoRows: data.todoRows || [],
-      priorityDials: data.priorityDials || { left: '', right: '', focusedSide: 'none' as const },
+      scoutHistory: data.scoutHistory || [],
+      todoProjects,
+      activeProjectId,
+      todoRows: activeProject.todoRows,
+      priorityDials: activeProject.priorityDials,
+      // Seed the counter so new projects always have unique names & colors.
+      // Using length + 1 means existing projects occupy slots 1..N,
+      // and the next new project gets slot N+1.
+      nextProjectNumber: todoProjects.length + 1,
       isHydrated: true, // ✅ Hydration Complete
     });
 
@@ -480,6 +703,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   resetProject: async () => {
     // Smart Reset: Clear data but KEEP API Key
     await storageService.clearProject();
+    const defaultProject: TodoProject = {
+      id: crypto.randomUUID(),
+      name: 'My First Project',
+      color: '#22D3EE',
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+      createdAt: Date.now(),
+    };
     set({
       tasks: [],
       transcript: null,
@@ -494,16 +725,27 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutTopic: '',
       scoutPlatform: 'instagram',
       inputMode: 'video',
+      todoProjects: [defaultProject],
+      activeProjectId: defaultProject.id,
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       activeMode: null,
       processingRowId: null,
+      nextProjectNumber: 2, // "My First Project" was #1
     });
   },
 
   fullLogout: async () => {
     // Factory Reset
     await storageService.clearProject();
+    const defaultProject: TodoProject = {
+      id: crypto.randomUUID(),
+      name: 'My First Project',
+      color: '#22D3EE',
+      todoRows: [],
+      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+      createdAt: Date.now(),
+    };
     set({
       tasks: [],
       transcript: null,
@@ -516,9 +758,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutTopic: '',
       scoutPlatform: 'instagram',
       inputMode: 'video',
+      todoProjects: [defaultProject],
+      activeProjectId: defaultProject.id,
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       activeMode: null,
+      nextProjectNumber: 2, // "My First Project" was #1
     });
   },
 
@@ -583,7 +828,6 @@ useAppStore.subscribe((state) => {
     // Filter: Only save if hydration is complete (prevents overwriting with initial empty state)
     if (state.isHydrated) {
       try {
-        // Assuming storageService is imported at the top (Checked: It is)
         await storageService.saveProject(
           state.tasks,
           state.transcript || undefined,
@@ -593,8 +837,8 @@ useAppStore.subscribe((state) => {
           state.scoutTopic,
           state.scoutPlatform,
           state.scoutHistory,
-          state.todoRows,
-          state.priorityDials,
+          state.todoProjects,
+          state.activeProjectId || undefined,
         );
       } catch (err) {
         console.error('Auto-Save Failed:', err);

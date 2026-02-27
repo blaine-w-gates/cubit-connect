@@ -4,28 +4,29 @@ import { ProjectDataSchema, StoredProjectData, TaskItem } from '@/schemas/storag
 const PROJECT_KEY = 'cubit_connect_project_v1';
 
 // Re-export types from schema to avoid duplication
-export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials } from '@/schemas/storage';
+export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/schemas/storage';
 
 export const storageService = {
   /**
    * Loads the entire project state from IndexedDB.
-   * Returns empty task list if nothing found.
+   * Returns empty state if nothing found.
    */
   async getProject(): Promise<StoredProjectData> {
     try {
       const raw = await get(PROJECT_KEY);
-      if (!raw) return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
+      if (!raw) return {
+        tasks: [],
+        todoRows: [],
+        priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+        todoProjects: [],
+        updatedAt: Date.now(),
+      };
 
       const result = ProjectDataSchema.safeParse(raw);
 
       if (!result.success) {
         console.error('CRITICAL: Storage Schema Validation Failed', result.error);
         // 🛡️ MIGRATION / FALLBACK STRATEGY
-        // If it fails, we shouldn't just wipe their data silently.
-        // But for "Clean Enterprise" v1.0, treating corruption as "Start Over" is acceptable
-        // provided we don't crash the UI.
-        // ideally we might try to salvage 'tasks' if they exist.
-
         // Attempt Partial Salvage for tasks if possible
         if (
           raw &&
@@ -35,18 +36,33 @@ export const storageService = {
         ) {
           console.warn('Attempting legacy salvage of tasks...');
           return {
-            tasks: (raw as { tasks: TaskItem[] }).tasks, // Hope for the best
+            tasks: (raw as { tasks: TaskItem[] }).tasks,
+            todoRows: [],
+            priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+            todoProjects: [],
             updatedAt: Date.now(),
           } as StoredProjectData;
         }
 
-        return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
+        return {
+          tasks: [],
+          todoRows: [],
+          priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+          todoProjects: [],
+          updatedAt: Date.now(),
+        };
       }
 
       return result.data;
     } catch (error) {
       console.error('Failed to load project from IndexedDB:', error);
-      return { tasks: [], todoRows: [], priorityDials: { left: '', right: '', focusedSide: 'none' as const }, updatedAt: Date.now() };
+      return {
+        tasks: [],
+        todoRows: [],
+        priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+        todoProjects: [],
+        updatedAt: Date.now(),
+      };
     }
   },
 
@@ -63,8 +79,8 @@ export const storageService = {
     scoutTopic?: string,
     scoutPlatform?: string,
     scoutHistory?: string[],
-    todoRows?: import('@/schemas/storage').TodoRow[],
-    priorityDials?: import('@/schemas/storage').PriorityDials,
+    todoProjects?: import('@/schemas/storage').TodoProject[],
+    activeProjectId?: string,
   ): Promise<void> {
     try {
       const payload: StoredProjectData = {
@@ -76,8 +92,12 @@ export const storageService = {
         scoutTopic,
         scoutPlatform,
         scoutHistory,
-        todoRows: todoRows || [],
-        priorityDials: priorityDials || { left: '', right: '', focusedSide: 'none' },
+        // Legacy fields kept empty (migration has already run)
+        todoRows: [],
+        priorityDials: { left: '', right: '', focusedSide: 'none' },
+        // New project-scoped data
+        todoProjects: todoProjects || [],
+        activeProjectId,
         updatedAt: Date.now(),
       };
       await set(PROJECT_KEY, payload);
@@ -103,3 +123,4 @@ export const storageService = {
     }
   },
 };
+

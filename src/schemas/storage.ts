@@ -47,6 +47,17 @@ export const PriorityDialsSchema = z.object({
   focusedSide: z.enum(['left', 'right', 'none']).optional().default('none'),
 });
 
+// --- Todo Project Schema (Book Tab) ---
+// Each project has its own todoRows + priorityDials, identified by a color-coded tab.
+export const TodoProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  color: z.string(),                        // Hex color for the tab
+  todoRows: z.array(TodoRowSchema).default([]),
+  priorityDials: PriorityDialsSchema.default({ left: '', right: '', focusedSide: 'none' }),
+  createdAt: z.number(),
+});
+
 export const ProjectDataSchema = z.object({
   tasks: z.array(TaskItemSchema),
   transcript: z.string().optional(),
@@ -56,13 +67,17 @@ export const ProjectDataSchema = z.object({
   scoutTopic: z.string().optional(),
   scoutPlatform: z.string().optional(),
   scoutHistory: z.array(z.string()).optional(),
-  // To-Do page data (separate dataset)
+  // LEGACY: Flat todoRows/priorityDials (kept for migration from old format)
   todoRows: z.array(TodoRowSchema).optional().default([]),
   priorityDials: PriorityDialsSchema.optional().default({ left: '', right: '', focusedSide: 'none' }),
+  // NEW: Project-scoped todo data (Book Tabs)
+  todoProjects: z.array(TodoProjectSchema).optional().default([]),
+  activeProjectId: z.string().optional(),
   updatedAt: z.number(),
 });
 
 export type TodoRow = z.infer<typeof TodoRowSchema>;
 export type PriorityDials = z.infer<typeof PriorityDialsSchema>;
+export type TodoProject = z.infer<typeof TodoProjectSchema>;
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 export type StoredProjectData = z.infer<typeof ProjectDataSchema>;

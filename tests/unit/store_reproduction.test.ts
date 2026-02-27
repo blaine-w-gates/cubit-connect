@@ -77,6 +77,7 @@ describe('Store Double Save Reproduction', () => {
       scoutPlatform: 'instagram',
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' },
+      todoProjects: [],
       updatedAt: Date.now(),
     });
 

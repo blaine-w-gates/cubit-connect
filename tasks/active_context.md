@@ -59,8 +59,8 @@ This file tracks the active plan and phase of the Cubit Connect project.
 - [x] E2E tests (Playwright) + Unit tests (Vitest).
 - [x] Security hardening (`npm audit` fixes).
 - [x] Markdown Export.
-- [ ] Toast Notifications (replace `alert()`).
-- [ ] Drag-and-Drop task reordering.
+- [x] Toast Notifications (replace `alert()`).
+- [x] Drag-and-Drop task reordering.
 - [ ] Offline Indicator (sticky banner).
-- [ ] Pre-commit Hooks (`husky`).
+- [x] Pre-commit Hooks (`husky`).
 - [ ] Centralized AI Prompts (`src/prompts/`).
