@@ -36,7 +36,7 @@ jobs:
     name: Playwright Tests
     runs-on: ubuntu-latest
     env:
-      GEMINI_API_KEY: 'mock_key_for_ci_build_and_test'
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
