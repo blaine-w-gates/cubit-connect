@@ -3,6 +3,9 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   productionBrowserSourceMaps: false, // Security: Do not expose React component structure in production
   output: 'standalone', // Enables Node.js server for Render instead of static export
+  images: {
+    unoptimized: true, // CRITICAL: Next/Image doesn't work with 'export' without this
+  },
   async headers() {
     return [
       {

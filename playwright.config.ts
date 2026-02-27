@@ -39,7 +39,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: 'npm run dev',
+    command: 'npx serve -s out',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
     stdout: 'ignore',
