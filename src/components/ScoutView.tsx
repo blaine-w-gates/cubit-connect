@@ -138,19 +138,19 @@ export default function ScoutView() {
           </p>
         </div>
 
-        <div className="relative p-1 md:p-8 md:border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-white/50 dark:bg-zinc-900/50 space-y-6">
+        <div className="p-3 md:p-8 md:border border-dashed border-zinc-200 dark:border-zinc-800 rounded-3xl bg-white/50 dark:bg-zinc-900/50 flex flex-col gap-4">
           {/* Header Row: Close Button */}
-          <div className="absolute top-3 right-3 z-50">
+          <div className="flex justify-end w-full">
             <button
               onClick={() => setInputMode('video')}
-              className="text-[10px] text-zinc-400 hover:text-red-600 uppercase tracking-widest px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors font-medium bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-700 shadow-sm min-h-[44px] flex items-center justify-center"
+              className="text-[10px] text-zinc-400 hover:text-red-600 uppercase tracking-widest px-4 py-2 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-full transition-colors font-medium bg-white/80 dark:bg-zinc-800/80 backdrop-blur-sm border border-zinc-100 dark:border-zinc-700 shadow-sm min-h-[40px] flex items-center justify-center"
             >
               [ Close ]
             </button>
           </div>
 
-          {/* Input Area - Added pt-10 to clear the absolute close button */}
-          <div className="flex flex-col gap-4 w-full max-w-xl mx-auto pt-10">
+          {/* Input Area */}
+          <div className="flex flex-col gap-4 w-full max-w-xl mx-auto">
             {/* 1. The Topic Input */}
             <div className="flex flex-col sm:flex-row gap-2 w-full shadow-sm">
               <input
@@ -173,8 +173,8 @@ export default function ScoutView() {
             </div>
 
             {/* 2. The Platform Slider */}
-            <div className="w-full overflow-x-auto pb-2 scrollbar-none [mask-image:linear-gradient(to_right,black_85%,transparent_100%)]">
-              <div className="flex gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-800/50 rounded-xl mx-auto w-max md:w-full justify-between">
+            <div className="w-full pb-2">
+              <div className="flex flex-wrap justify-center sm:justify-between gap-1 p-1 bg-zinc-100/80 dark:bg-zinc-800/50 rounded-xl mx-auto w-full">
                 {platforms.map((p) => {
                   const isActive = scoutPlatform === p || (p === 'Instagram' && !scoutPlatform); // Default
                   return (
