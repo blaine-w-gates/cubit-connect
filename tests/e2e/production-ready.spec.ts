@@ -233,14 +233,29 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // Let's rely on the "Thinking..." state verification for Electric UI test.
   });
 
-  // TEST 5: Auto-Expansion & Persistence (The Fix)
-  // FIXME: This test is chronically flaky in CI — route mocks are lost after page.reload()
-  // and re-registration timing varies across browsers.
-  test.fixme('UX: Steps auto-expand on creation and persist state', async ({ page }) => {
+  // TEST 5: Auto-Expansion & Persistence
+  test('UX: Steps auto-expand on creation and persist state', async ({ page }) => {
+    // Forward browser console logs to terminal to diagnose silent click failure
+    page.on('console', msg => console.log(`BROWSER CONSOLE: ${msg.type().toUpperCase()} - ${msg.text()}`));
+
+    // Register route mock BEFORE goto — Playwright routes persist across reloads (LIFO),
+    // so this overrides the beforeEach mock and survives all reloads within this test.
+    // generateSubSteps expects a string[] response, not the task objects from beforeEach.
+    await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
+      const json = {
+        candidates: [{ content: { parts: [{ text: JSON.stringify(['Step A', 'Step B', 'Step C', 'Step D']) }] } }],
+      };
+      await new Promise((res) => setTimeout(res, 500)); // Delay for 'Thinking...' assertion
+      await route.fulfill({ json });
+    });
+
+    // Large viewport ensures Virtuoso (useWindowScroll) renders task items
+    await page.setViewportSize({ width: 1280, height: 800 });
     await page.goto('/engine');
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
-    // 1. Inject a task
+    // 1. Inject a task with text project type (avoids video-handle banner after reload)
+    //    and explicitly flush to IDB (bypass debounced auto-save).
     await page.evaluate(async () => {
       const store = (window as unknown as CustomWindow).__STORE__.getState();
       await store.importTasks([
@@ -249,36 +264,85 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
           task_name: 'Expansion Test',
           description: 'Desc',
           timestamp_seconds: 0,
-          screenshot_base64: '', // Required
-          isExpanded: false, // Start closed
+          screenshot_base64: '',
+          isExpanded: false,
           sub_steps: [],
         },
       ]);
+      (window as unknown as CustomWindow).__STORE__.setState({ projectType: 'text' });
+
+      // Explicitly flush to IDB via raw IndexedDB API.
+      // idb-keyval uses database 'keyval-store' with object store 'keyval'.
+      const state = (window as unknown as CustomWindow).__STORE__.getState();
+      const payload = {
+        tasks: state.tasks,
+        transcript: state.transcript || undefined,
+        scoutResults: state.scoutResults,
+        projectType: state.projectType,
+        projectTitle: state.projectTitle,
+        scoutTopic: state.scoutTopic,
+        scoutPlatform: state.scoutPlatform,
+        scoutHistory: state.scoutHistory,
+        todoRows: [],
+        priorityDials: { left: '', right: '', focusedSide: 'none' },
+        todoProjects: state.todoProjects || [],
+        activeProjectId: state.activeProjectId || undefined,
+        updatedAt: Date.now(),
+      };
+      await new Promise<void>((resolve, reject) => {
+        const req = indexedDB.open('keyval-store');
+        req.onsuccess = () => {
+          const db = req.result;
+          const tx = db.transaction('keyval', 'readwrite');
+          tx.objectStore('keyval').put(payload, 'cubit_connect_project_v1');
+          tx.oncomplete = () => resolve();
+          tx.onerror = () => reject(tx.error);
+        };
+        req.onerror = () => reject(req.error);
+      });
     });
+
+    // 2. Reload to verify task persisted in IDB
     await page.reload();
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
+    await page.waitForFunction(
+      () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
+    );
 
-    // Re-register route mock after reload (beforeEach mock is lost)
-    // generateSubSteps expects a string[] response, not task objects
-    await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
-      const json = {
-        candidates: [{ content: { parts: [{ text: JSON.stringify(['Step A', 'Step B']) }] } }],
-      };
-      await route.fulfill({ json });
-    });
+    // Scroll the recipe section into view — Virtuoso (useWindowScroll) only renders
+    // items near the browser's scroll position. Without this, the UploadZone fills
+    // the viewport and task cards are never rendered by Virtuoso.
+    const recipeHeading = page.getByRole('heading', { name: 'Your Distilled Recipe:' });
+    await recipeHeading.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Allow Virtuoso to render after scroll
 
     // 3. Click Cubit -> Generate Steps
-    await page.getByRole('button', { name: 'Cubit' }).click();
+    const cubitBtn = page.getByRole('button', { name: 'Generate sub-steps' }).first();
+    await expect(cubitBtn).toBeVisible({ timeout: 10000 });
+    await cubitBtn.click();
 
-    // 4. Verify Auto-Expansion (Should see "Step A")
-    await expect(page.getByText('Step A')).toBeVisible();
-    await expect(page.getByText('Step B')).toBeVisible();
+    // Wait for processing to start (confirms click registered)
+    await expect(page.getByText('Thinking...')).toBeVisible({ timeout: 5000 });
 
-    // 5. Verify Persistence after Reload
+    // 4. Verify Auto-Expansion (Steps should appear without manual expand)
+    // Extended timeout: mock API has to respond + Virtuoso must render + isExpanded must trigger
+    // Use .first() because PrintableReport renders a hidden table also containing these texts.
+    await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 15000 });
+    await expect(page.getByText('Step B').first()).toBeVisible({ timeout: 5000 });
+
+    // 5. Wait for auto-save debounce (500ms) + IDB write, then reload
+    await page.waitForTimeout(2000);
     await page.reload();
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
+    await page.waitForFunction(
+      () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
+    );
+
+    // Scroll recipe section into view again after reload
+    await page.getByRole('heading', { name: 'Your Distilled Recipe:' }).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500);
 
     // Should STILL be visible without clicking anything
-    await expect(page.getByText('Step A')).toBeVisible();
+    await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 10000 });
   });
 });
