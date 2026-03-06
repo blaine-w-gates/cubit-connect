@@ -27,7 +27,6 @@ describe('Store Double Save Reproduction', () => {
   });
 
   it('importTasks triggers only ONE save (Subscription only)', async () => {
-    // FIX: Match TaskItemSchema structure
     const tasks: TaskItem[] = [
       {
         id: '1',
@@ -35,7 +34,7 @@ describe('Store Double Save Reproduction', () => {
         timestamp_seconds: 0,
         description: 'Reproduction Task',
         sub_steps: [],
-        screenshot_base64: '', // Required by schema default? It's optional in Zod but inferred type might require it if not strict
+        screenshot_base64: '',
         isExpanded: false,
       },
     ];
@@ -58,7 +57,7 @@ describe('Store Double Save Reproduction', () => {
     const legacyTasks = [
       {
         id: '1',
-        task_name: 'Legacy Task', // FIX: 'text' -> 'task_name'
+        task_name: 'Legacy Task',
         timestamp_seconds: 0,
         description: 'Legacy Desc',
         sub_steps: ['Legacy Step 1'], // String array triggers migration
@@ -69,7 +68,7 @@ describe('Store Double Save Reproduction', () => {
     vi.mocked(storageService.getProject).mockResolvedValue({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       tasks: legacyTasks as any,
-      transcript: undefined, // FIX: 'null' -> 'undefined'
+      transcript: undefined,
       scoutResults: [],
       projectType: 'video',
       projectTitle: 'Legacy Project',

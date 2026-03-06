@@ -76,7 +76,6 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // Wait for hydration to prevent race condition with loadProject
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
-    // FIX: Use async actions to ensure persistence, direct setState does not trigger IDB save
     await page.evaluate(async () => {
       const store = (window as unknown as CustomWindow).__STORE__.getState();
       await store.setProjectTitle('Serialization Test');
