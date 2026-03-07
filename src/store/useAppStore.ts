@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/services/storage';
+import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 
@@ -94,6 +94,7 @@ export interface ProjectState {
   setDialPriority: (side: 'left' | 'right', text: string) => void;
   setDialFocus: (side: 'left' | 'right' | 'none') => void;
   toggleTodoRowCompletion: (rowId: string) => void;
+  completeStepsUpTo: (rowId: string, maxStepIdx: number) => void;
   restoreTodoRow: (row: TodoRow, index: number) => void;
 }
 
@@ -242,10 +243,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // Helper pattern: all row mutations update both todoRows AND the matching project in todoProjects
 
   addTodoRow: (task = '') => {
+    const emptyStep = { text: '', isCompleted: false };
     const newRow: TodoRow = {
       id: crypto.randomUUID(),
       task,
-      steps: ['', '', '', ''],
+      steps: [{ ...emptyStep }, { ...emptyStep }, { ...emptyStep }, { ...emptyStep }],
       isCompleted: false,
     };
     set((state) => {
@@ -277,8 +279,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         if (row.id !== rowId) return row;
         if (field === 'task') return { ...row, task: value };
         if (field === 'step' && stepIdx !== undefined) {
-          const steps = [...row.steps] as [string, string, string, string];
-          steps[stepIdx] = value;
+          const steps = [...row.steps] as [TodoStep, TodoStep, TodoStep, TodoStep];
+          steps[stepIdx] = { ...steps[stepIdx], text: value };
           return { ...row, steps };
         }
         return row;
@@ -322,7 +324,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   setTodoSteps: (rowId: string, steps: [string, string, string, string]) => {
     set((state) => {
-      const newRows = state.todoRows.map((r) => (r.id === rowId ? { ...r, steps } : r));
+      const newRows = state.todoRows.map((r) => {
+        if (r.id !== rowId) return r;
+        const newSteps = steps.map((text, i) => ({
+          text,
+          isCompleted: r.steps[i]?.isCompleted || false
+        })) as [TodoStep, TodoStep, TodoStep, TodoStep];
+        return { ...r, steps: newSteps };
+      });
       return {
         todoRows: newRows,
         todoProjects: state.todoProjects.map((p) =>
@@ -334,10 +343,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => {
     const newId = crypto.randomUUID();
+    const emptyStep = { text: '', isCompleted: false };
     const newRow: TodoRow = {
       id: newId,
       task,
-      steps: ['', '', '', ''],
+      steps: [{ ...emptyStep }, { ...emptyStep }, { ...emptyStep }, { ...emptyStep }],
       isCompleted: false,
       sourceStepId,
     };
@@ -384,6 +394,31 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const newRows = state.todoRows.map((r) =>
         r.id === rowId ? { ...r, isCompleted: !r.isCompleted } : r,
       );
+      return {
+        todoRows: newRows,
+        todoProjects: state.todoProjects.map((p) =>
+          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
+        ),
+      };
+    });
+  },
+
+  completeStepsUpTo: (rowId: string, maxStepIdx: number) => {
+    set((state) => {
+      const newRows = state.todoRows.map((r) => {
+        if (r.id !== rowId) return r;
+        const newSteps = r.steps.map((step, idx) => ({
+          ...step,
+          isCompleted: idx <= maxStepIdx && step.text.trim().length > 0,
+        })) as [TodoStep, TodoStep, TodoStep, TodoStep];
+
+        // Auto-complete the row if all populated steps are checked
+        const populatedCount = newSteps.filter(s => s.text.trim()).length;
+        const completeCount = newSteps.filter(s => s.isCompleted && s.text.trim()).length;
+        const rowCompleted = populatedCount > 0 && populatedCount === completeCount;
+
+        return { ...r, steps: newSteps, isCompleted: rowCompleted };
+      });
       return {
         todoRows: newRows,
         todoProjects: state.todoProjects.map((p) =>

@@ -4,7 +4,7 @@ import { ProjectDataSchema, StoredProjectData, TaskItem } from '@/schemas/storag
 const PROJECT_KEY = 'cubit_connect_project_v1';
 
 // Re-export types from schema to avoid duplication
-export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/schemas/storage';
+export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep } from '@/schemas/storage';
 
 export const storageService = {
   /**

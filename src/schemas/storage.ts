@@ -33,10 +33,15 @@ export const TaskItemSchema = z.object({
 });
 
 // --- To-Do Page Schemas ---
+export const TodoStepSchema = z.object({
+  text: z.string(),
+  isCompleted: z.boolean().default(false),
+});
+
 export const TodoRowSchema = z.object({
   id: z.string(),
   task: z.string(),
-  steps: z.tuple([z.string(), z.string(), z.string(), z.string()]),  // Fixed 4-step grid
+  steps: z.tuple([TodoStepSchema, TodoStepSchema, TodoStepSchema, TodoStepSchema]),  // Fixed 4-step grid
   isCompleted: z.boolean().optional().default(false),
   sourceStepId: z.string().optional(),  // Tracks Deep Dive origin (for future linking)
 });
@@ -76,6 +81,7 @@ export const ProjectDataSchema = z.object({
   updatedAt: z.number(),
 });
 
+export type TodoStep = z.infer<typeof TodoStepSchema>;
 export type TodoRow = z.infer<typeof TodoRowSchema>;
 export type PriorityDials = z.infer<typeof PriorityDialsSchema>;
 export type TodoProject = z.infer<typeof TodoProjectSchema>;

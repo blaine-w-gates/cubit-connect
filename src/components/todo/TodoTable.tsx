@@ -5,7 +5,9 @@ import { X, Check, GripVertical } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
+import { TodoStep } from '@/services/storage';
 import { toast } from 'sonner';
+import { motion } from 'framer-motion';
 import {
     DndContext,
     closestCenter,
@@ -14,13 +16,39 @@ import {
     useSensor,
     useSensors,
     type DragEndEvent,
+    useDraggable,
+    useDroppable,
+    DragOverlay,
 } from '@dnd-kit/core';
+import { restrictToHorizontalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import {
     SortableContext,
     useSortable,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+
+// Helper to parse Google API/Gemini errors safely
+function parseGeminiError(err: Error): string {
+    const msg = err.message || '';
+    if (msg.includes('API_KEY_INVALID') || msg.includes('API key expired') || msg.includes('API key not valid')) {
+        return "Your Gemini API key is invalid or expired. Please update it in Settings.";
+    }
+    try {
+        if (msg.includes('{')) {
+            const firstBrace = msg.indexOf('{');
+            const jsonStr = msg.slice(firstBrace);
+            const parsed = JSON.parse(jsonStr);
+            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].error?.message) {
+                return parsed[0].error.message;
+            }
+            if (parsed.error && parsed.error.message) return parsed.error.message;
+        }
+    } catch {
+        // Fallback to original error string
+    }
+    return msg;
+}
 
 // --- Module-level constants (Fix #14: hoisted out of component) ---
 const MODE_COLORS = {
@@ -124,40 +152,155 @@ function EditableCell({
     );
 }
 
+// --- Circular Progress Ring (Command Column) ---
+function CircularProgress({ percentage, isCompleted }: { percentage: number; isCompleted: boolean }) {
+    const radius = 14;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (percentage / 100) * circumference;
+
+    if (isCompleted) {
+        return (
+            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md shadow-green-500/20 text-white transition-all">
+                <Check className="w-4 h-4" strokeWidth={3} />
+            </div>
+        );
+    }
+
+    return (
+        <div className="relative w-8 h-8 flex items-center justify-center group">
+            {/* Background Track */}
+            <svg className="absolute inset-0 w-full h-full transform -rotate-90">
+                <circle
+                    cx="16" cy="16" r={radius}
+                    className="stroke-zinc-200 dark:stroke-stone-700 transition-colors"
+                    strokeWidth="3" fill="none"
+                />
+                {/* Progress Fill */}
+                <circle
+                    cx="16" cy="16" r={radius}
+                    className="stroke-cyan-500 dark:stroke-cyan-400 transition-all duration-500 ease-out"
+                    strokeWidth="3" fill="none"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={strokeDashoffset}
+                    strokeLinecap="round"
+                />
+            </svg>
+            {/* Inner Percentage */}
+            <span className="text-[9px] font-bold font-mono text-zinc-500 dark:text-stone-400">
+                {Math.round(percentage)}
+            </span>
+        </div>
+    );
+}
+
+// --- Particle Burst Animation ---
+function ParticleBurst() {
+    return (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center overflow-visible z-50">
+            {Array.from({ length: 8 }).map((_, i) => {
+                const angle = (i * 360) / 8;
+                const rad = (angle * Math.PI) / 180;
+                const tx = Math.cos(rad) * 40;
+                const ty = Math.sin(rad) * 40;
+                return (
+                    <motion.div
+                        key={i}
+                        className="absolute w-2 h-2 rounded-full bg-indigo-500 shadow-sm shadow-indigo-500/50"
+                        initial={{ scale: 1, x: 0, y: 0, opacity: 1 }}
+                        animate={{
+                            scale: 0,
+                            x: tx,
+                            y: ty,
+                            opacity: 0,
+                        }}
+                        transition={{ duration: 0.6, ease: "easeOut" }}
+                    />
+                );
+            })}
+        </div>
+    );
+}
+
+// --- Rabbit Draggable ---
+function RabbitDraggable({ rowId, disabled, onClick, variant = 'command' }: { rowId: string, disabled: boolean, onClick?: () => void, variant?: 'command' | 'step' }) {
+    const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
+        id: `rabbit-${rowId}`,
+        data: { type: 'rabbit', rowId },
+        disabled,
+    });
+
+    if (isDragging) {
+        return <div ref={setNodeRef} className="opacity-0 w-8 h-8" />;
+    }
+
+    const isCommand = variant === 'command';
+
+    return (
+        <button
+            ref={setNodeRef}
+            {...listeners}
+            {...attributes}
+            onClick={(e) => {
+                if (onClick && !isDragging) {
+                    e.stopPropagation();
+                    onClick();
+                }
+            }}
+            aria-label="Advance to next step"
+            className={`flex items-center justify-center transition-all ${disabled ? 'hidden' : ''} cursor-grab active:cursor-grabbing z-30 hover:scale-[1.15] drop-shadow-sm ${isCommand ? 'w-6 h-6' : 'w-full h-full'}`}
+            style={{ touchAction: 'none' }}
+        >
+            <span className={`transform -scale-x-100 relative ${isCommand ? 'text-sm' : 'text-6xl'}`}>🐇</span>
+        </button>
+    );
+}
+
 export default function TodoTable() {
     const {
         todoRows,
+        activeProjectId,
         activeMode,
         processingRowId,
-        updateTodoCell,
+        priorityDials,
+        setActiveMode,
+        setProcessingRowId,
+        toggleTodoRowCompletion,
         deleteTodoRow,
+        restoreTodoRow,
+        updateTodoCell,
+        moveTodoRowToBottom,
+        reorderTodoRows,
         setTodoSteps,
         insertTodoRowAfter,
         setDialPriority,
-        moveTodoRowToBottom,
-        setActiveMode,
-        setProcessingRowId,
-        restoreTodoRow,
-        toggleTodoRowCompletion,
-        reorderTodoRows,
+        completeStepsUpTo,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
+            activeProjectId: s.activeProjectId,
             activeMode: s.activeMode,
             processingRowId: s.processingRowId,
-            updateTodoCell: s.updateTodoCell,
+            priorityDials: s.priorityDials,
+            setActiveMode: s.setActiveMode,
+            setProcessingRowId: s.setProcessingRowId,
+            toggleTodoRowCompletion: s.toggleTodoRowCompletion,
             deleteTodoRow: s.deleteTodoRow,
+            restoreTodoRow: s.restoreTodoRow,
+            updateTodoCell: s.updateTodoCell,
+            moveTodoRowToBottom: s.moveTodoRowToBottom,
+            reorderTodoRows: s.reorderTodoRows,
             setTodoSteps: s.setTodoSteps,
             insertTodoRowAfter: s.insertTodoRowAfter,
             setDialPriority: s.setDialPriority,
-            moveTodoRowToBottom: s.moveTodoRowToBottom,
-            setActiveMode: s.setActiveMode,
-            setProcessingRowId: s.setProcessingRowId,
-            restoreTodoRow: s.restoreTodoRow,
-            toggleTodoRowCompletion: s.toggleTodoRowCompletion,
-            reorderTodoRows: s.reorderTodoRows,
+            completeStepsUpTo: s.completeStepsUpTo,
         })),
     );
+
+    // Track active drag for the overlay portal
+    const [activeRabbitId, setActiveRabbitId] = useState<string | null>(null);
+    const [activeRowId, setActiveRowId] = useState<string | null>(null);
+    const [explosionTargetId, setExplosionTargetId] = useState<string | null>(null);
+    const archiveTimersRef = useRef<Record<string, NodeJS.Timeout>>({});
 
     // Global Escape Key Listener (Safety Valve)
     useEffect(() => {
@@ -206,7 +349,18 @@ export default function TodoTable() {
             setActiveMode(null); // Reset to Neutral
         } catch (e) {
             const err = e as Error;
-            toast.error('Cubit Failed', { description: err.message });
+            const parsedMsg = parseGeminiError(err);
+            if (parsedMsg.includes('API key')) {
+                toast.error('Cubit Failed', {
+                    description: parsedMsg,
+                    action: {
+                        label: 'Update Key',
+                        onClick: () => useAppStore.getState().setIsSettingsOpen(true)
+                    }
+                });
+            } else {
+                toast.error('Cubit Failed', { description: parsedMsg });
+            }
         } finally {
             setProcessingRowId(null);
         }
@@ -228,8 +382,8 @@ export default function TodoTable() {
         try {
             // Send sibling context
             const siblingContext = row.steps
-                .filter((s) => s.trim())
-                .map((s, i) => `Step ${i + 1}: "${s}"`)
+                .filter((s) => s.text.trim())
+                .map((s, i) => `Step ${i + 1}: "${s.text}"`)
                 .join('\n');
 
             const rawSteps = await GeminiService.generateSubSteps(
@@ -246,7 +400,18 @@ export default function TodoTable() {
             setActiveMode(null); // Reset to Neutral
         } catch (e) {
             const err = e as Error;
-            toast.error('Deep Dive Failed', { description: err.message });
+            const parsedMsg = parseGeminiError(err);
+            if (parsedMsg.includes('API key')) {
+                toast.error('Deep Dive Failed', {
+                    description: parsedMsg,
+                    action: {
+                        label: 'Update Key',
+                        onClick: () => useAppStore.getState().setIsSettingsOpen(true)
+                    }
+                });
+            } else {
+                toast.error('Deep Dive Failed', { description: parsedMsg });
+            }
         } finally {
             setProcessingRowId(null);
         }
@@ -255,7 +420,7 @@ export default function TodoTable() {
     // Fix #1 & #2: Each branch resets independently. No trailing setActiveMode(null).
     // Read activeMode from getState() to avoid stale closure.
     const handleStepClick = useCallback((row: typeof todoRows[0], stepIdx: number) => {
-        const stepText = row.steps[stepIdx];
+        const stepText = row.steps[stepIdx].text;
         if (!stepText.trim()) return;
 
         const currentMode = useAppStore.getState().activeMode;
@@ -280,6 +445,12 @@ export default function TodoTable() {
 
         deleteTodoRow(rowId);
 
+        // Fix #13: Clear auto-archive timer to prevent memory leaks throwing unmounted component crashes
+        if (archiveTimersRef.current[rowId]) {
+            clearTimeout(archiveTimersRef.current[rowId]);
+            delete archiveTimersRef.current[rowId];
+        }
+
         // Clear previous timer
         if (undoTimerRef.current) clearTimeout(undoTimerRef.current);
 
@@ -297,7 +468,7 @@ export default function TodoTable() {
     }, [todoRows, deleteTodoRow, restoreTodoRow]);
 
     const handleDoubleClickEmptyRow = useCallback((row: typeof todoRows[0]) => {
-        const isEmpty = !row.task.trim() && row.steps.every((s) => !s.trim());
+        const isEmpty = !row.task.trim() && row.steps.every((s) => !s.text.trim());
         if (isEmpty) moveTodoRowToBottom(row.id);
     }, [moveTodoRowToBottom]);
 
@@ -322,15 +493,77 @@ export default function TodoTable() {
         useSensor(KeyboardSensor),
     );
 
+    const handleDragStart = useCallback((event: any) => {
+        if (event.active.data.current?.type === 'rabbit') {
+            setActiveRabbitId(event.active.id);
+        } else {
+            setActiveRowId(event.active.id as string);
+        }
+    }, []);
+
+    const handleDragCancel = useCallback(() => {
+        setActiveRabbitId(null);
+        setActiveRowId(null);
+    }, []);
+
     const handleDragEnd = useCallback((event: DragEndEvent) => {
+        setActiveRabbitId(null);
+        setActiveRowId(null);
         const { active, over } = event;
-        if (!over || active.id === over.id) return;
+        if (!over) return;
+
+        // Rabbit Drag Logic
+        if (active.data.current?.type === 'rabbit') {
+            const rowId = active.data.current.rowId;
+            const dropData = over.data.current;
+
+            // Note: If dropped in the void or on an invalid target, the rabbit simply snaps back
+            if (dropData?.type === 'step') {
+                const stepIdx = dropData.stepIdx;
+                const row = todoRows.find(r => r.id === rowId);
+                const prevIdx = row ? row.steps.findLastIndex(s => s.isCompleted && s.text.trim()) : -1;
+
+                completeStepsUpTo(rowId, stepIdx);
+
+                // Fix #10 & #18: Forward feedback (Explosion + A11y), Backward feedback (Toast)
+                if (stepIdx < prevIdx) {
+                    toast('Progress Reverted', { icon: '⏪' });
+                } else if (stepIdx > prevIdx || prevIdx === -1) {
+                    // Trigger explosion burst
+                    setExplosionTargetId(`step-${rowId}-${stepIdx}`);
+                    setTimeout(() => setExplosionTargetId(null), 800);
+                    // Screen Reader fallback for successful progress
+                    toast.success(`Completed Step ${stepIdx + 1}`, { className: 'sr-only' });
+                }
+
+                // Auto-archive if 100%
+                if (row) {
+                    const lastPopulatedIdx = row.steps.findLastIndex(s => s.text.trim());
+                    if (lastPopulatedIdx !== -1 && stepIdx >= lastPopulatedIdx) {
+                        archiveTimersRef.current[rowId] = setTimeout(() => {
+                            useAppStore.getState().moveTodoRowToBottom(rowId);
+                        }, 1500);
+                    }
+                }
+            } else if (dropData?.type === 'reset') {
+                completeStepsUpTo(rowId, -1);
+                // Clear the auto-archive timer if dragging to reset zone
+                if (archiveTimersRef.current[rowId]) {
+                    clearTimeout(archiveTimersRef.current[rowId]);
+                    delete archiveTimersRef.current[rowId];
+                }
+            }
+            return;
+        }
+
+        // Row Reorder Logic
+        if (active.id === over.id) return;
         const oldIndex = todoRows.findIndex((r) => r.id === active.id);
         const newIndex = todoRows.findIndex((r) => r.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
             reorderTodoRows(oldIndex, newIndex);
         }
-    }, [todoRows, reorderTodoRows]);
+    }, [todoRows, reorderTodoRows, completeStepsUpTo]);
 
     if (todoRows.length === 0) {
         return (
@@ -350,15 +583,25 @@ export default function TodoTable() {
 
     return (
         <div className="overflow-x-auto pb-20">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragCancel={handleDragCancel}
+                modifiers={activeRabbitId ? [restrictToHorizontalAxis, restrictToWindowEdges] : []}
+            >
                 <div className="border border-zinc-300 dark:border-stone-700 rounded-xl overflow-hidden">
-                    <table className="w-full table-fixed border-collapse">
+                    <table className="w-full min-w-[900px] table-fixed border-collapse">
                         <thead>
                             <tr>
+                                {/* Command Column Header */}
+                                <th className="sticky left-0 w-[48px] min-w-[48px] z-30 border-b border-zinc-300 dark:border-stone-600 bg-zinc-100 dark:bg-stone-800 rounded-tl-xl"></th>
+
                                 <th
-                                    className={`sticky left-0 text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600 rounded-tl-xl
+                                    className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[30%] border-b border-zinc-300 dark:border-stone-600
                 ${activeMode === 'cubit'
-                                            ? 'z-30 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
+                                            ? 'z-10 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
                                             : 'z-10 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
               `}
                                 >
@@ -367,7 +610,7 @@ export default function TodoTable() {
                                 {[1, 2, 3, 4].map((n) => (
                                     <th
                                         key={n}
-                                        className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[20%] border-b border-zinc-300 dark:border-stone-600
+                                        className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[17.5%] border-b border-zinc-300 dark:border-stone-600
                       ${n === 4 ? 'rounded-tr-xl' : ''}
                   ${activeMode === 'deepDive' ? 'relative bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
                                                 activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-700 dark:text-green-400' :
@@ -423,6 +666,28 @@ export default function TodoTable() {
                                                     setActiveMode(null);
                                                 }
                                             }}
+                                            onRabbitAdvance={(rowId, currentStepIdx) => {
+                                                const nextIdx = row.steps.findIndex((s, i) => i > currentStepIdx && s.text.trim());
+                                                let targetIdx = nextIdx;
+                                                if (nextIdx !== -1) {
+                                                    completeStepsUpTo(rowId, nextIdx);
+                                                    setExplosionTargetId(`step-${rowId}-${nextIdx}`);
+                                                    setTimeout(() => setExplosionTargetId(null), 800);
+                                                } else {
+                                                    targetIdx = -1; // Loop back to 0
+                                                    completeStepsUpTo(rowId, -1);
+                                                }
+                                                // Check for 100%
+                                                const populatedSteps = row.steps.filter(s => s.text.trim());
+                                                const lastPopulatedIdx = row.steps.findLastIndex(s => s.text.trim());
+                                                if (populatedSteps.length > 0 && targetIdx >= lastPopulatedIdx) {
+                                                    archiveTimersRef.current[rowId] = setTimeout(() => {
+                                                        useAppStore.getState().moveTodoRowToBottom(rowId);
+                                                    }, 1500);
+                                                }
+                                            }}
+                                            explosionTargetId={explosionTargetId}
+                                            isRabbitDragging={activeRabbitId !== null}
                                         />
                                     );
                                 })}
@@ -430,6 +695,42 @@ export default function TodoTable() {
                         </SortableContext>
                     </table>
                 </div>
+
+                {/* Portal for rendering Rabbit visibly above overflow-hidden bounds */}
+                <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
+                    {activeRabbitId ? (
+                        <div className="flex items-center justify-center z-40 -translate-y-12 sm:translate-y-0 drop-shadow-2xl">
+                            <span className="text-sm transform -scale-x-100 relative">🐇</span>
+                        </div>
+                    ) : activeRowId && todoRows.find((r) => r.id === activeRowId) ? (
+                        <table className="w-full min-w-[900px] table-fixed border-collapse bg-white dark:bg-[#1c1917] shadow-xl rounded-xl">
+                            <tbody>
+                                <SortableRow
+                                    row={todoRows.find((r) => r.id === activeRowId)!}
+                                    isProcessing={processingRowId === activeRowId}
+                                    isCompleted={todoRows.find((r) => r.id === activeRowId)!.isCompleted}
+                                    activeMode={activeMode}
+                                    isModeActive={isModeActive}
+                                    isTaskActionTarget={isTaskActionTarget}
+                                    isStepActionTarget={isStepActionTarget}
+                                    mc={mc}
+                                    onDoubleClick={() => { }}
+                                    onTouchStart={() => { }}
+                                    onTouchEnd={() => { }}
+                                    onTaskClick={() => { }}
+                                    onToggleComplete={() => { }}
+                                    onDelete={() => { }}
+                                    onTaskSave={() => { }}
+                                    onStepSave={() => { }}
+                                    onStepClick={() => { }}
+                                    onRabbitAdvance={() => { }}
+                                    explosionTargetId={null}
+                                    isRabbitDragging={false}
+                                />
+                            </tbody>
+                        </table>
+                    ) : null}
+                </DragOverlay>
             </DndContext>
         </div>
     );
@@ -437,7 +738,7 @@ export default function TodoTable() {
 
 // --- Sortable Row Component ---
 interface SortableRowProps {
-    row: { id: string; task: string; steps: [string, string, string, string]; isCompleted: boolean };
+    row: { id: string; task: string; steps: [TodoStep, TodoStep, TodoStep, TodoStep]; isCompleted: boolean };
     isProcessing: boolean;
     isCompleted: boolean;
     activeMode: string | null;
@@ -454,13 +755,67 @@ interface SortableRowProps {
     onTaskSave: (val: string) => void;
     onStepSave: (val: string, si: number) => void;
     onStepClick: (si: number) => void;
+    onRabbitAdvance: (rowId: string, currentStepIdx: number) => void;
+    explosionTargetId: string | null;
+    isRabbitDragging: boolean;
+}
+
+// --- Droppable Step Cell Component ---
+function StepCellNode({
+    row, step, si, isCompleted, isModeActive, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging
+}: {
+    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean
+}) {
+    const isPopulated = step.text.trim().length > 0;
+
+    const id = `step-${row.id}-${si}`;
+    const { setNodeRef, isOver } = useDroppable({
+        id,
+        data: { type: 'step', rowId: row.id, stepIdx: si },
+        disabled: isModeActive || !isPopulated, // Missing steps reject drops
+    });
+
+    return (
+        <td
+            ref={setNodeRef}
+            className={`px-3 py-3 align-top w-[17.5%] relative transition-colors
+                ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
+                ${isRabbitDragging && isPopulated && !isOver ? 'shadow-[inset_0_0_0_2px_rgba(99,102,241,0.2)]' : ''}
+                ${isOver ? 'bg-indigo-50 dark:bg-indigo-950/30 shadow-[inset_0_0_0_2px_rgba(99,102,241,0.5)]' : ''}
+            `}
+            onClick={(e) => {
+                if (window.getSelection()?.toString()) return;
+                e.stopPropagation();
+                onStepClick(si);
+            }}
+        >
+            <div className={`transition-opacity duration-200 ${currentStepIdx === si ? 'opacity-0' : 'opacity-100'} ${isCompleted ? 'opacity-40 line-through' : ''}`}>
+                <EditableCell
+                    value={step.text}
+                    onSave={(val) => onStepSave(val, si)}
+                    placeholder={`Step ${si + 1}`}
+                    disabled={isModeActive}
+                    className="text-zinc-700 dark:text-stone-300"
+                />
+            </div>
+            {/* Conditional Rabbit placement inside the Step Cell */}
+            {currentStepIdx === si && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <RabbitDraggable rowId={row.id} disabled={isModeActive} onClick={onRabbitAdvance} variant="step" />
+                </div>
+            )}
+
+            {/* Particle Burst Explosion */}
+            {explosionTargetId === id && <ParticleBurst />}
+        </td>
+    );
 }
 
 function SortableRow({
     row, isProcessing, isCompleted, activeMode: _activeMode, isModeActive,
     isTaskActionTarget, isStepActionTarget, mc,
     onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
-    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick,
+    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging
 }: SortableRowProps) {
     const {
         attributes,
@@ -478,6 +833,23 @@ function SortableRow({
         zIndex: isDragging ? 50 : undefined,
     };
 
+    // --- Calculate Completion Percentage ---
+    // Fix #2: Strict mathematical progression based on 4 columns.
+    // If currentStepIdx = -1, progress is 0. If 0, 25%. If 1, 50%. If 2, 75%. If 3, 100%.
+    const currentStepIdx = row.steps.findLastIndex(s => s.isCompleted && s.text.trim());
+    const progress = (currentStepIdx + 1) * 25;
+
+    // The entire row gets a subtle green tint if 100%. Active Modes override it.
+    const isRow100Percent = progress === 100;
+    const bgClass = isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50'
+        : isModeActive ? '' // Strict Mode Hierarchy overrides green
+            : isRow100Percent ? 'bg-green-50/50 dark:bg-green-950/10' : '';
+
+    const { setNodeRef: setResetNodeRef } = useDroppable({
+        id: `reset-zone-${row.id}`,
+        data: { type: 'reset', rowId: row.id }
+    });
+
     return (
         <tr
             ref={setNodeRef}
@@ -486,97 +858,96 @@ function SortableRow({
             onDoubleClick={onDoubleClick}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
-            className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative
-                ${isCompleted ? 'bg-green-50/50 dark:bg-green-950/10' : ''}
-                ${isProcessing ? 'animate-pulse bg-zinc-50 dark:bg-stone-900/50' : ''}
-            `}
+            className={`group border-b border-zinc-200 dark:border-stone-800 transition-all relative ${bgClass}`}
         >
-            {/* Task Column — Sticky */}
+            {/* Command Column — 1/6 (Sticky Left) */}
             <td
-                className={`sticky left-0 px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[20%] overflow-hidden
-                    ${isTaskActionTarget && mc
-                        ? `z-20 relative cursor-pointer ${mc.bg}`
-                        : 'z-10 bg-white dark:bg-[#1c1917]'}
-                `}
-                onClick={onTaskClick}
+                ref={setResetNodeRef}
+                className={`sticky left-0 w-[44px] min-w-[44px] z-20 border-r border-zinc-200 dark:border-stone-700 p-1
+                ${isRow100Percent && !isModeActive ? 'bg-green-50/80 dark:bg-[#162A1D]' : 'bg-white dark:bg-[#1c1917]'}`}
+                aria-label="Reset task progress"
             >
-                <div className="flex items-start gap-2">
-                    {/* Action Buttons — stacked vertically */}
-                    <div className="flex flex-col items-center gap-1 flex-shrink-0 mt-0.5">
-                        {/* Drag Handle */}
+                <div className="flex flex-col items-center justify-center gap-2 h-full">
+                    {/* Ring and Rabbit Container */}
+                    <div className="relative w-[32px] h-[32px] flex items-center justify-center">
+                        <button onClick={onToggleComplete} className="absolute inset-0 focus:outline-none rounded-full ring-2 ring-transparent focus-visible:ring-cyan-500 transition-all flex items-center justify-center" aria-label="Toggle Complete">
+                            <CircularProgress percentage={progress} isCompleted={isCompleted || isRow100Percent} />
+                        </button>
+
+                        {/* Render rabbit securely centered over the SVG ring if 0% progress */}
+                        {currentStepIdx === -1 && (
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                <div className="pointer-events-auto mt-[1px]">
+                                    <RabbitDraggable rowId={row.id} disabled={isModeActive} onClick={() => onRabbitAdvance(row.id, currentStepIdx)} variant="command" />
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Sub-actions container (appears on hover or if dragging) */}
+                    <div className={`flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ${isDragging ? 'opacity-100' : ''}`}>
                         <button
                             {...attributes}
                             {...listeners}
-                            className="w-5 h-5 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-zinc-500 dark:hover:text-stone-400 cursor-grab active:cursor-grabbing transition-colors"
+                            className="w-6 h-6 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-zinc-500 dark:hover:text-stone-400 cursor-grab active:cursor-grabbing transition-colors"
                             title="Drag to reorder"
                             aria-label="Drag to reorder"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <GripVertical className="w-3.5 h-3.5" />
+                            <GripVertical className="w-4 h-4" />
                         </button>
-                        {/* Completion Toggle */}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onToggleComplete();
-                            }}
-                            className={`w-5 h-5 flex items-center justify-center rounded-full border-2 transition-all
-                                ${isCompleted
-                                    ? 'bg-green-500 border-green-500 text-white'
-                                    : 'border-zinc-300 dark:border-stone-600 text-transparent hover:border-green-400 dark:hover:border-green-500'
-                                }`}
-                            title={isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                            aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
-                        >
-                            {isCompleted ? <Check className="w-3 h-3" /> : null}
-                        </button>
-                        {/* Delete Toggle */}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete();
                             }}
-                            className="w-5 h-5 flex items-center justify-center rounded-full border-2 border-zinc-300 dark:border-stone-600 text-zinc-400 dark:text-stone-500 hover:border-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:border-red-500 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
-                            title="Delete row"
-                            aria-label="Delete row"
+                            className="w-6 h-6 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
+                            title="Delete task"
+                            aria-label="Delete task"
                         >
-                            <X className="w-3 h-3" />
+                            <X className="w-4 h-4" />
                         </button>
-                    </div>
-                    <div className={`flex-1 min-w-0 break-words ${isCompleted ? 'line-through opacity-60' : ''}`}>
-                        <EditableCell
-                            value={row.task}
-                            onSave={onTaskSave}
-                            placeholder="Type a task…"
-                            disabled={isModeActive || isCompleted}
-                            autoFocus={!row.task.trim()}
-                        />
                     </div>
                 </div>
             </td>
 
-            {/* Step Columns */}
+            {/* Task Column — 2/6 (Not sticky anymore to allow scrolling room) */}
+            <td
+                className={`px-3 py-3 align-top border-r border-zinc-200 dark:border-stone-700 w-[32%]
+                    ${isTaskActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
+                `}
+                onClick={onTaskClick}
+            >
+                <div className={`pr-4 flex-1 min-w-0 break-words ${isCompleted || isRow100Percent ? 'line-through opacity-60' : ''}`}>
+                    <EditableCell
+                        value={row.task}
+                        onSave={onTaskSave}
+                        placeholder="Type a task…"
+                        disabled={isModeActive}
+                        autoFocus={!row.task.trim()}
+                        className="text-zinc-700 dark:text-stone-300"
+                    />
+                </div>
+            </td>
+
+            {/* Step Columns — 3-6/6 */}
             {row.steps.map((step, si) => (
-                <td
+                <StepCellNode
                     key={si}
-                    className={`px-3 py-3 align-top w-[20%]
-                        ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
-                    `}
-                    onClick={(e) => {
-                        if (window.getSelection()?.toString()) return;
-                        e.stopPropagation();
-                        onStepClick(si);
-                    }}
-                >
-                    <div className={`${isCompleted ? 'opacity-40' : ''}`}>
-                        <EditableCell
-                            value={step}
-                            onSave={(val) => onStepSave(val, si)}
-                            placeholder={`Step ${si + 1}`}
-                            disabled={isModeActive}
-                        />
-                    </div>
-                </td>
+                    row={row}
+                    step={step}
+                    si={si}
+                    isCompleted={isCompleted || isRow100Percent}
+                    isModeActive={isModeActive}
+                    isStepActionTarget={isStepActionTarget}
+                    mc={mc}
+                    onStepSave={onStepSave}
+                    onStepClick={onStepClick}
+                    currentStepIdx={currentStepIdx}
+                    onRabbitAdvance={() => onRabbitAdvance(row.id, currentStepIdx)}
+                    explosionTargetId={explosionTargetId}
+                    isRabbitDragging={isRabbitDragging}
+                />
             ))}
         </tr>
     );
