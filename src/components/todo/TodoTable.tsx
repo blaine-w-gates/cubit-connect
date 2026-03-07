@@ -699,7 +699,7 @@ export default function TodoTable() {
                 {/* Portal for rendering Rabbit visibly above overflow-hidden bounds */}
                 <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
                     {activeRabbitId ? (
-                        <div className="flex items-center justify-center z-40 -translate-y-12 sm:translate-y-0 drop-shadow-2xl">
+                        <div className="flex items-center justify-center z-40 drop-shadow-2xl">
                             <span className="text-sm transform -scale-x-100 relative">🐇</span>
                         </div>
                     ) : activeRowId && todoRows.find((r) => r.id === activeRowId) ? (
