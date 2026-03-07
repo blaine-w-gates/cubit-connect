@@ -19,6 +19,7 @@ import {
     useDraggable,
     useDroppable,
     DragOverlay,
+    useDndContext,
 } from '@dnd-kit/core';
 import { restrictToHorizontalAxis, restrictToWindowEdges } from '@dnd-kit/modifiers';
 import {
@@ -229,10 +230,6 @@ function RabbitDraggable({ rowId, disabled, onClick, variant = 'command' }: { ro
         disabled,
     });
 
-    if (isDragging) {
-        return <div ref={setNodeRef} className="opacity-0 w-8 h-8" />;
-    }
-
     const isCommand = variant === 'command';
 
     return (
@@ -247,11 +244,28 @@ function RabbitDraggable({ rowId, disabled, onClick, variant = 'command' }: { ro
                 }
             }}
             aria-label="Advance to next step"
-            className={`flex items-center justify-center transition-all ${disabled ? 'hidden' : ''} cursor-grab active:cursor-grabbing z-30 hover:scale-[1.15] drop-shadow-sm ${isCommand ? 'w-6 h-6' : 'w-full h-full'}`}
+            className={`flex items-center justify-center transition-all ${disabled ? 'hidden' : ''} ${isDragging ? 'opacity-0' : 'opacity-100'} cursor-grab active:cursor-grabbing z-30 hover:scale-[1.15] drop-shadow-sm ${isCommand ? 'w-6 h-6' : 'w-full h-full'}`}
             style={{ touchAction: 'none' }}
         >
             <span className={`transform -scale-x-100 relative ${isCommand ? 'text-sm' : 'text-6xl'}`}>🐇</span>
         </button>
+    );
+}
+
+function RabbitOverlayWrapper() {
+    const { active, activeNodeRect } = useDndContext();
+    if (!active || active.data.current?.type !== 'rabbit') return null;
+
+    return (
+        <div
+            className="flex items-center justify-center z-40 drop-shadow-2xl"
+            style={{
+                width: activeNodeRect?.width ? `${activeNodeRect.width}px` : 'auto',
+                height: activeNodeRect?.height ? `${activeNodeRect.height}px` : 'auto',
+            }}
+        >
+            <span className="text-sm transform -scale-x-100 relative">🐇</span>
+        </div>
     );
 }
 
@@ -699,9 +713,7 @@ export default function TodoTable() {
                 {/* Portal for rendering Rabbit visibly above overflow-hidden bounds */}
                 <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
                     {activeRabbitId ? (
-                        <div className="flex items-center justify-center z-40 drop-shadow-2xl">
-                            <span className="text-sm transform -scale-x-100 relative">🐇</span>
-                        </div>
+                        <RabbitOverlayWrapper />
                     ) : activeRowId && todoRows.find((r) => r.id === activeRowId) ? (
                         <table className="w-full min-w-[900px] table-fixed border-collapse bg-white dark:bg-[#1c1917] shadow-xl rounded-xl">
                             <tbody>
