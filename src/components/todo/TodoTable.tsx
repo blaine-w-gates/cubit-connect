@@ -155,32 +155,32 @@ function EditableCell({
 
 // --- Circular Progress Ring (Command Column) ---
 function CircularProgress({ percentage, isCompleted }: { percentage: number; isCompleted: boolean }) {
-    const radius = 14;
+    const radius = 12;
     const circumference = 2 * Math.PI * radius;
     const strokeDashoffset = circumference - (percentage / 100) * circumference;
 
     if (isCompleted) {
         return (
-            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center shadow-md shadow-green-500/20 text-white transition-all">
+            <div className="w-7 h-7 rounded-full bg-green-500 flex items-center justify-center shadow-md shadow-green-500/20 text-white transition-all">
                 <Check className="w-4 h-4" strokeWidth={3} />
             </div>
         );
     }
 
     return (
-        <div className="relative w-8 h-8 flex items-center justify-center group">
+        <div className="relative w-7 h-7 flex items-center justify-center group">
             {/* Background Track */}
             <svg className="absolute inset-0 w-full h-full transform -rotate-90">
                 <circle
-                    cx="16" cy="16" r={radius}
+                    cx="14" cy="14" r={radius}
                     className="stroke-zinc-200 dark:stroke-stone-700 transition-colors"
-                    strokeWidth="3" fill="none"
+                    strokeWidth="2.5" fill="none"
                 />
                 {/* Progress Fill */}
                 <circle
-                    cx="16" cy="16" r={radius}
+                    cx="14" cy="14" r={radius}
                     className="stroke-cyan-500 dark:stroke-cyan-400 transition-all duration-500 ease-out"
-                    strokeWidth="3" fill="none"
+                    strokeWidth="2.5" fill="none"
                     strokeDasharray={circumference}
                     strokeDashoffset={strokeDashoffset}
                     strokeLinecap="round"
@@ -244,10 +244,10 @@ function RabbitDraggable({ rowId, disabled, onClick, variant = 'command' }: { ro
                 }
             }}
             aria-label="Advance to next step"
-            className={`flex items-center justify-center transition-all ${disabled ? 'hidden' : ''} ${isDragging ? 'opacity-0' : 'opacity-100'} cursor-grab active:cursor-grabbing z-30 hover:scale-[1.15] drop-shadow-sm ${isCommand ? 'w-6 h-6' : 'w-full h-full'}`}
+            className={`flex items-center justify-center transition-all ${disabled ? 'hidden' : ''} ${isDragging ? 'opacity-0' : 'opacity-100'} cursor-grab active:cursor-grabbing z-30 hover:scale-[1.15] drop-shadow-sm ${isCommand ? 'w-7 h-7' : 'w-full h-full'}`}
             style={{ touchAction: 'none' }}
         >
-            <span className={`transform -scale-x-100 relative ${isCommand ? 'text-sm' : 'text-6xl'}`}>🐇</span>
+            <span className={`transform -scale-x-100 relative ${isCommand ? 'text-lg' : 'text-6xl'}`}>🐇</span>
         </button>
     );
 }
@@ -264,7 +264,7 @@ function RabbitOverlayWrapper() {
                 height: activeNodeRect?.height ? `${activeNodeRect.height}px` : 'auto',
             }}
         >
-            <span className="text-sm transform -scale-x-100 relative">🐇</span>
+            <span className="text-lg transform -scale-x-100 relative">🐇</span>
         </div>
     );
 }
@@ -901,23 +901,23 @@ function SortableRow({
                         <button
                             {...attributes}
                             {...listeners}
-                            className="w-6 h-6 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-zinc-500 dark:hover:text-stone-400 cursor-grab active:cursor-grabbing transition-colors"
+                            className="w-7 h-7 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-zinc-500 dark:hover:text-stone-400 cursor-grab active:cursor-grabbing transition-colors"
                             title="Drag to reorder"
                             aria-label="Drag to reorder"
                             onClick={(e) => e.stopPropagation()}
                         >
-                            <GripVertical className="w-4 h-4" />
+                            <GripVertical className="w-5 h-5" />
                         </button>
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onDelete();
                             }}
-                            className="w-6 h-6 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
+                            className="w-7 h-7 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-red-500 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-950/20 transition-all"
                             title="Delete task"
                             aria-label="Delete task"
                         >
-                            <X className="w-4 h-4" />
+                            <X className="w-5 h-5" />
                         </button>
                     </div>
                 </div>
