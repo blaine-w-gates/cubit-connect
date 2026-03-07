@@ -133,9 +133,15 @@ export const generateTodoMarkdown = (
   if (completedTasks.length > 0) {
     md += `---\n\n### ✅ Completed\n\n`;
     completedTasks.forEach((row) => {
-      md += `- [x] ~~${row.task || 'Untitled Task'}~~\n`;
+      md += `### ~~${row.task || 'Untitled Task'}~~\n\n`;
+      row.steps.forEach((step, si) => {
+        if (step.text.trim()) {
+          const checkbox = step.isCompleted ? '[x]' : '[ ]';
+          md += `- ${checkbox} **Step ${si + 1}:** ~~${step.text}~~\n`;
+        }
+      });
+      md += `\n`;
     });
-    md += `\n`;
   }
 
   return md;
