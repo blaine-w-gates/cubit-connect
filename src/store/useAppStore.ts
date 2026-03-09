@@ -835,8 +835,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
             todoProjects: updatedProjects,
             tasks: sharedTasks,
             activeProjectId: actProj?.id || null, // Ensure UI shifts if tab deleted
-            todoRows: activeProject ? activeProject.todoRows : [],
-            priorityDials: activeProject ? activeProject.priorityDials : { left: '', right: '', focusedSide: 'none' },
+            todoRows: actProj ? actProj.todoRows : [],
+            priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
           });
         }, 50); // 50ms render throttle
       }, 100); // Close the _crdtRenderDebounce setTimeout
