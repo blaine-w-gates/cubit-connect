@@ -1,5 +1,5 @@
 import * as Y from 'yjs';
-import { encryptUpdate, decryptUpdate } from './cryptoSync';
+import { encryptUpdate, decryptUpdate } from '../lib/cryptoSync';
 
 export const MSG_UPDATE = 3;
 export const MSG_REQUEST_CACHE = 4;

@@ -13,7 +13,7 @@ import {
   bindTodoRowToYMap,
   bindCubitStepToYMap,
   applyUpdateToYText,
-} from '@/lib/yjsHelpers';
+} from '../lib/yjsHelpers';
 import { NetworkSync } from '@/lib/networkSync';
 
 // --- headless Yjs Core ---
@@ -571,7 +571,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     try {
       if (!networkSync) {
         // 1. Salted Single-Secret UX (Routing Security)
-        const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
+        // Turbopack strictly requires relative paths for dynamic imports in some configurations
+        const { deriveRoomId, deriveSyncKey } = await import('../lib/cryptoSync');
         const roomIdHash = await deriveRoomId(passphrase);
         const syncKey = await deriveSyncKey(passphrase);
 

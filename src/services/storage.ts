@@ -19,6 +19,7 @@ export const storageService = {
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' as const },
         todoProjects: [],
+        yjsState: undefined,
         updatedAt: Date.now(),
       };
 
@@ -40,6 +41,7 @@ export const storageService = {
             todoRows: [],
             priorityDials: { left: '', right: '', focusedSide: 'none' as const },
             todoProjects: [],
+            yjsState: undefined,
             updatedAt: Date.now(),
           } as StoredProjectData;
         }
@@ -49,6 +51,7 @@ export const storageService = {
           todoRows: [],
           priorityDials: { left: '', right: '', focusedSide: 'none' as const },
           todoProjects: [],
+          yjsState: undefined,
           updatedAt: Date.now(),
         };
       }
@@ -61,6 +64,7 @@ export const storageService = {
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' as const },
         todoProjects: [],
+        yjsState: undefined,
         updatedAt: Date.now(),
       };
     }
@@ -81,6 +85,7 @@ export const storageService = {
     scoutHistory?: string[],
     todoProjects?: import('@/schemas/storage').TodoProject[],
     activeProjectId?: string,
+    yjsState?: Uint8Array,
   ): Promise<void> {
     try {
       const payload: StoredProjectData = {
@@ -98,6 +103,7 @@ export const storageService = {
         // New project-scoped data
         todoProjects: todoProjects || [],
         activeProjectId,
+        yjsState,
         updatedAt: Date.now(),
       };
       await set(PROJECT_KEY, payload);
