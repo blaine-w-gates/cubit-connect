@@ -1,7 +1,28 @@
 import { create } from 'zustand';
-import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep } from '@/services/storage';
+import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep, StoredProjectData } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
+import * as Y from 'yjs';
+import {
+  bindTodoProjectToYMap,
+  extractTodoProjectFromYMap,
+  bindTaskItemToYMap,
+  extractTaskItemFromYMap,
+  sortYMapList,
+  generateOrderKey,
+  bindTodoRowToYMap,
+  bindCubitStepToYMap,
+  applyUpdateToYText,
+} from '@/lib/yjsHelpers';
+import { NetworkSync } from '@/lib/networkSync';
+
+// --- headless Yjs Core ---
+// Required for E2EE environments so devices deeply-offline don't lose tombstones
+export const ydoc = new Y.Doc({ gc: false });
+
+export const yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
+export const yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
+// -------------------------
 
 // Book Tab color palette — cycles through these for new projects
 const TAB_COLORS = [
@@ -37,6 +58,10 @@ export interface ProjectState {
   isSettingsOpen: boolean;
   settingsVariant: 'default' | 'quota';
   setIsSettingsOpen: (isOpen: boolean, variant?: 'default' | 'quota') => void;
+
+  // New Sync Modal State
+  isSyncModalOpen: boolean;
+  setIsSyncModalOpen: (isOpen: boolean) => void;
 
   // Actions
   setVideoHandleState: (hasHandle: boolean) => void;
@@ -96,6 +121,13 @@ export interface ProjectState {
   toggleTodoRowCompletion: (rowId: string) => void;
   completeStepsUpTo: (rowId: string, maxStepIdx: number) => void;
   restoreTodoRow: (row: TodoRow, index: number) => void;
+
+
+  // --- Network Sync Actions & State ---
+  syncStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
+  roomFingerprint: string | null;
+  connectToSyncServer: (passphrase: string) => Promise<void>;
+  disconnectSyncServer: () => void;
 }
 
 export interface LogEntry {
@@ -107,6 +139,14 @@ export interface LogEntry {
 
 
 const STORAGE_KEY_API = 'cubit_api_key';
+
+// MIGRATION MUTEX: Prevents React.StrictMode from double-booting legacy JSON into Yjs
+let isMigrating = false;
+
+// E2EE WEBSOCKET MANAGER
+let networkSync: NetworkSync | null = null;
+const SYNC_SERVER_URL = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-connect.onrender.com';
+let idleCheckpointTimer: NodeJS.Timeout | null = null;
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
@@ -159,26 +199,35 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   processingRowId: null,
   setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
 
+  // --- Network Sync Actions & State ---
+  syncStatus: 'disconnected',
+  roomFingerprint: null,
+
   // --- Book Tab Project Actions ---
   addTodoProject: (name?: string) => {
     const { todoProjects, nextProjectNumber } = get();
     // Name = slot position (current count + 1), Color = monotonic counter cycle
     const colorIdx = (nextProjectNumber - 1) % TAB_COLORS.length;
     const slotNumber = todoProjects.length + 1;
+    const newId = crypto.randomUUID();
     const newProject: TodoProject = {
-      id: crypto.randomUUID(),
+      id: newId,
       name: name || `Project ${slotNumber}`,
       color: TAB_COLORS[colorIdx],
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       createdAt: Date.now(),
+      orderKey: generateOrderKey(todoProjects.length > 0 ? todoProjects[todoProjects.length - 1].orderKey : undefined),
     };
-    const updated = [...todoProjects, newProject];
+
+    // Mutate Yjs Data Structure
+    ydoc.transact(() => {
+      yProjectsMap.set(newId, bindTodoProjectToYMap(newProject));
+    });
+
+    // Update the local pointers for UI interaction
     set({
-      todoProjects: updated,
-      activeProjectId: newProject.id,
-      todoRows: newProject.todoRows,
-      priorityDials: newProject.priorityDials,
+      activeProjectId: newId,
       nextProjectNumber: nextProjectNumber + 1,
     });
   },
@@ -195,153 +244,207 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   renameTodoProject: (projectId: string, name: string) => {
-    set((state) => ({
-      todoProjects: state.todoProjects.map((p) =>
-        p.id === projectId ? { ...p, name } : p,
-      ),
-    }));
+    const yProj = yProjectsMap.get(projectId);
+    if (!yProj) return;
+    ydoc.transact(() => {
+      yProj.set('name', new Y.Text(name));
+    });
   },
 
   deleteTodoProject: (projectId: string) => {
     const { todoProjects, activeProjectId } = get();
-    const filtered = todoProjects.filter((p) => p.id !== projectId);
-    // If deleting the active project, switch to first remaining or null
-    let newActiveId = activeProjectId;
-    let newRows: TodoRow[] = get().todoRows;
-    let newDials: PriorityDials = get().priorityDials;
-    if (activeProjectId === projectId) {
-      const next = filtered[0] || null;
-      newActiveId = next?.id || null;
-      newRows = next?.todoRows || [];
-      newDials = next?.priorityDials || { left: '', right: '', focusedSide: 'none' as const };
-    }
-    set({
-      todoProjects: filtered,
-      activeProjectId: newActiveId,
-      todoRows: newRows,
-      priorityDials: newDials,
+    // Explicit Tombstones prevent orphaned items when offline architectures collide
+    ydoc.transact(() => {
+      const yProj = yProjectsMap.get(projectId);
+      if (yProj) yProj.set('isDeleted', true);
     });
+
+    // Update active project locally if we deleted the open tab
+    if (activeProjectId === projectId) {
+      const filtered = todoProjects.filter((p) => p.id !== projectId);
+      const next = filtered[0] || null;
+      set({
+        activeProjectId: next?.id || null,
+        todoRows: next?.todoRows || [],
+        priorityDials: next?.priorityDials || { left: '', right: '', focusedSide: 'none' as const },
+      });
+    }
   },
 
   reorderTodoProjects: (fromIdx: number, toIdx: number) => {
-    set((state) => {
-      const projects = [...state.todoProjects];
-      const [moved] = projects.splice(fromIdx, 1);
-      projects.splice(toIdx, 0, moved);
-      return { todoProjects: projects };
-    });
+    const { todoProjects } = get();
+    if (fromIdx < 0 || fromIdx >= todoProjects.length || toIdx < 0 || toIdx >= todoProjects.length) return;
+
+    // Calculate new fractional index
+    const movedProject = todoProjects[fromIdx];
+    const prevProj = toIdx === 0 ? undefined : (fromIdx < toIdx ? todoProjects[toIdx] : todoProjects[toIdx - 1]);
+    const nextProj = toIdx === todoProjects.length - 1 ? undefined : (fromIdx > toIdx ? todoProjects[toIdx] : todoProjects[toIdx + 1]);
+
+    const newOrderKey = generateOrderKey(prevProj?.orderKey, nextProj?.orderKey);
+
+    const yProj = yProjectsMap.get(movedProject.id);
+    if (yProj) {
+      yProj.set('orderKey', newOrderKey); // Emits change, triggers React sort
+    }
   },
 
   changeProjectColor: (projectId: string, color: string) => {
-    set((state) => ({
-      todoProjects: state.todoProjects.map((p) =>
-        p.id === projectId ? { ...p, color } : p
-      ),
-    }));
+    const yProj = yProjectsMap.get(projectId);
+    if (yProj) {
+      yProj.set('color', color);
+    }
   },
 
   // Helper pattern: all row mutations update both todoRows AND the matching project in todoProjects
 
   addTodoRow: (task = '') => {
+    const { activeProjectId, todoRows } = get();
+    if (!activeProjectId) return;
+
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const emptyStep = { text: '', isCompleted: false };
+
+    // Sort ordering: put new item at the top (before the first item)
+    const prevFirstKey = todoRows.length > 0 ? todoRows[0].orderKey : undefined;
+    const orderKey = generateOrderKey(undefined, prevFirstKey);
+
     const newRow: TodoRow = {
       id: crypto.randomUUID(),
       task,
       steps: [{ ...emptyStep }, { ...emptyStep }, { ...emptyStep }, { ...emptyStep }],
       isCompleted: false,
+      orderKey,
     };
-    set((state) => {
-      const newRows = [newRow, ...state.todoRows];
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+
+    ydoc.transact(() => {
+      yRows.set(newRow.id, bindTodoRowToYMap(newRow, orderKey));
     });
   },
 
   deleteTodoRow: (rowId: string) => {
-    set((state) => {
-      const newRows = state.todoRows.filter((r) => r.id !== rowId);
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    ydoc.transact(() => {
+      const yRow = yRows.get(rowId);
+      if (yRow) yRow.set('isDeleted', true);
     });
   },
 
   updateTodoCell: (rowId, field, value, stepIdx) => {
-    set((state) => {
-      const newRows = state.todoRows.map((row) => {
-        if (row.id !== rowId) return row;
-        if (field === 'task') return { ...row, task: value };
-        if (field === 'step' && stepIdx !== undefined) {
-          const steps = [...row.steps] as [TodoStep, TodoStep, TodoStep, TodoStep];
-          steps[stepIdx] = { ...steps[stepIdx], text: value };
-          return { ...row, steps };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const yRow = yRows.get(rowId);
+    if (!yRow) return;
+
+    ydoc.transact(() => {
+      if (field === 'task') {
+        const yText = yRow.get('task') as Y.Text;
+        applyUpdateToYText(yText, value);
+      } else if (field === 'step' && stepIdx !== undefined) {
+        const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
+        const yStep = ySteps.get(stepIdx);
+        if (yStep) {
+          const yStepText = yStep.get('text') as Y.Text;
+          applyUpdateToYText(yStepText, value);
         }
-        return row;
-      });
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+      }
     });
   },
 
   moveTodoRowToBottom: (rowId: string) => {
-    set((state) => {
-      const row = state.todoRows.find((r) => r.id === rowId);
-      if (!row) return state;
-      const newRows = [...state.todoRows.filter((r) => r.id !== rowId), row];
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+    const { activeProjectId, todoRows } = get();
+    if (!activeProjectId || todoRows.length === 0) return;
+
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const yRow = yRows.get(rowId);
+    if (!yRow) return;
+
+    // Fractional Indexing: To move to bottom, we generate a key *after* the current last item
+    // Wait, if IT is the last item, do nothing
+    if (todoRows[todoRows.length - 1].id === rowId) return;
+
+    const lastKey = todoRows[todoRows.length - 1].orderKey;
+    const newOrderKey = generateOrderKey(lastKey, undefined);
+
+    ydoc.transact(() => {
+      yRow.set('orderKey', newOrderKey);
     });
   },
 
   reorderTodoRows: (fromIdx: number, toIdx: number) => {
-    set((state) => {
-      const rows = [...state.todoRows];
-      const [moved] = rows.splice(fromIdx, 1);
-      rows.splice(toIdx, 0, moved);
-      return {
-        todoRows: rows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
-        ),
-      };
+    const { activeProjectId, todoRows } = get();
+    if (!activeProjectId) return;
+    if (fromIdx < 0 || fromIdx >= todoRows.length || toIdx < 0 || toIdx >= todoRows.length) return;
+
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const movedRow = todoRows[fromIdx];
+    const yRow = yRows.get(movedRow.id);
+    if (!yRow) return;
+
+    // Calculate new fractional index
+    const prevRow = toIdx === 0 ? undefined : (fromIdx < toIdx ? todoRows[toIdx] : todoRows[toIdx - 1]);
+    const nextRow = toIdx === todoRows.length - 1 ? undefined : (fromIdx > toIdx ? todoRows[toIdx] : todoRows[toIdx + 1]);
+
+    const newOrderKey = generateOrderKey(prevRow?.orderKey, nextRow?.orderKey);
+
+    ydoc.transact(() => {
+      yRow.set('orderKey', newOrderKey);
     });
   },
 
   setTodoSteps: (rowId: string, steps: [string, string, string, string]) => {
-    set((state) => {
-      const newRows = state.todoRows.map((r) => {
-        if (r.id !== rowId) return r;
-        const newSteps = steps.map((text, i) => ({
-          text,
-          isCompleted: r.steps[i]?.isCompleted || false
-        })) as [TodoStep, TodoStep, TodoStep, TodoStep];
-        return { ...r, steps: newSteps };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const yRow = yRows.get(rowId);
+    if (!yRow) return;
+
+    ydoc.transact(() => {
+      const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
+      steps.forEach((text, i) => {
+        const yStep = ySteps.get(i);
+        if (yStep) {
+          const yStepText = yStep.get('text') as Y.Text;
+          applyUpdateToYText(yStepText, text);
+        }
       });
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
     });
   },
 
   insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => {
+    const { activeProjectId, todoRows } = get();
+    if (!activeProjectId) return '';
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return '';
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+
+    // Find index to calculate order key
+    const idx = todoRows.findIndex((r) => r.id === afterRowId);
+    const prevKey = idx >= 0 ? todoRows[idx].orderKey : undefined;
+    const nextKey = idx >= 0 && idx < todoRows.length - 1 ? todoRows[idx + 1].orderKey : undefined;
+    const orderKey = generateOrderKey(prevKey, nextKey);
+
     const newId = crypto.randomUUID();
     const emptyStep = { text: '', isCompleted: false };
     const newRow: TodoRow = {
@@ -350,105 +453,160 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       steps: [{ ...emptyStep }, { ...emptyStep }, { ...emptyStep }, { ...emptyStep }],
       isCompleted: false,
       sourceStepId,
+      orderKey,
     };
-    set((state) => {
-      const idx = state.todoRows.findIndex((r) => r.id === afterRowId);
-      const rows = [...state.todoRows];
-      rows.splice(idx + 1, 0, newRow);
-      return {
-        todoRows: rows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
-        ),
-      };
+
+    ydoc.transact(() => {
+      yRows.set(newId, bindTodoRowToYMap(newRow, orderKey));
     });
+
     return newId;
   },
 
   setDialPriority: (side, text) => {
-    set((state) => {
-      const newDials = { ...state.priorityDials, [side]: text };
-      return {
-        priorityDials: newDials,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, priorityDials: newDials } : p,
-        ),
-      };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yDials = yProj.get('priorityDials') as Y.Map<any>;
+    if (!yDials) return;
+
+    ydoc.transact(() => {
+      const yText = yDials.get(side) as Y.Text;
+      applyUpdateToYText(yText, text);
     });
   },
 
   setDialFocus: (side) => {
-    set((state) => {
-      const newDials = { ...state.priorityDials, focusedSide: side };
-      return {
-        priorityDials: newDials,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, priorityDials: newDials } : p,
-        ),
-      };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yDials = yProj.get('priorityDials') as Y.Map<any>;
+    if (!yDials) return;
+
+    ydoc.transact(() => {
+      yDials.set('focusedSide', side);
     });
   },
 
   toggleTodoRowCompletion: (rowId: string) => {
-    set((state) => {
-      const newRows = state.todoRows.map((r) =>
-        r.id === rowId ? { ...r, isCompleted: !r.isCompleted } : r,
-      );
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const yRow = yRows.get(rowId);
+    if (!yRow) return;
+
+    ydoc.transact(() => {
+      yRow.set('isCompleted', !yRow.get('isCompleted'));
     });
   },
 
   completeStepsUpTo: (rowId: string, maxStepIdx: number) => {
-    set((state) => {
-      const newRows = state.todoRows.map((r) => {
-        if (r.id !== rowId) return r;
-        const newSteps = r.steps.map((step, idx) => ({
-          ...step,
-          isCompleted: idx <= maxStepIdx && step.text.trim().length > 0,
-        })) as [TodoStep, TodoStep, TodoStep, TodoStep];
+    const { activeProjectId } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
 
-        // Auto-complete the row if all populated steps are checked
-        const populatedCount = newSteps.filter(s => s.text.trim()).length;
-        const completeCount = newSteps.filter(s => s.isCompleted && s.text.trim()).length;
-        const rowCompleted = populatedCount > 0 && populatedCount === completeCount;
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+    const yRow = yRows.get(rowId);
+    if (!yRow) return;
 
-        return { ...r, steps: newSteps, isCompleted: rowCompleted };
-      });
-      return {
-        todoRows: newRows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: newRows } : p,
-        ),
-      };
+    ydoc.transact(() => {
+      const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
+      let populatedCount = 0;
+      let completeCount = 0;
+
+      for (let i = 0; i < ySteps.length; i++) {
+        const yStep = ySteps.get(i);
+        const textLen = (yStep.get('text') as Y.Text).length;
+        if (textLen > 0) {
+          populatedCount++;
+          const shouldComplete = i <= maxStepIdx;
+          yStep.set('isCompleted', shouldComplete);
+          if (shouldComplete) completeCount++;
+        } else {
+          yStep.set('isCompleted', false);
+        }
+      }
+
+      const rowCompleted = populatedCount > 0 && populatedCount === completeCount;
+      yRow.set('isCompleted', rowCompleted);
     });
   },
 
   restoreTodoRow: (row: TodoRow, index: number) => {
-    set((state) => {
-      const rows = [...state.todoRows];
-      const safeIdx = Math.min(index, rows.length);
-      rows.splice(safeIdx, 0, row);
-      return {
-        todoRows: rows,
-        todoProjects: state.todoProjects.map((p) =>
-          p.id === state.activeProjectId ? { ...p, todoRows: rows } : p,
-        ),
-      };
+    const { activeProjectId, todoRows } = get();
+    if (!activeProjectId) return;
+    const yProj = yProjectsMap.get(activeProjectId);
+    if (!yProj) return;
+
+    const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
+
+    const prevKey = index > 0 && index <= todoRows.length ? todoRows[index - 1].orderKey : undefined;
+    const nextKey = index < todoRows.length ? todoRows[index].orderKey : undefined;
+    const orderKey = generateOrderKey(prevKey, nextKey);
+
+    ydoc.transact(() => {
+      yRows.set(row.id, bindTodoRowToYMap({ ...row, orderKey }, orderKey));
     });
+  },
+
+  // --- Network Sync Actions ---
+  connectToSyncServer: async (passphrase: string) => {
+    const { isHydrated } = get();
+    // Architectural Mandate: Genesis Hydration Lock
+    if (!isHydrated) {
+      console.warn("E2EE Sync Blocked: Cannot connect to relay before local IndexedDB establishes genesis state.");
+      return;
+    }
+
+    set({ syncStatus: 'connecting', roomFingerprint: null });
+
+    try {
+      if (!networkSync) {
+        // 1. Salted Single-Secret UX (Routing Security)
+        const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
+        const roomIdHash = await deriveRoomId(passphrase);
+        const syncKey = await deriveSyncKey(passphrase);
+
+        // 2. The Fingerprint for UI Verification (Solitary Universe Trap)
+        const roomFingerprint = roomIdHash.slice(0, 4).toUpperCase();
+        set({ roomFingerprint });
+
+        networkSync = new NetworkSync(ydoc, SYNC_SERVER_URL, roomIdHash, (status) => {
+          set({ syncStatus: status });
+        });
+
+        // UI Race Condition Patch: Await the onopen Promise directly
+        await networkSync.connect(syncKey);
+      }
+    } catch (err) {
+      console.error("Failed to connect to E2EE Relay:", err);
+      set({ syncStatus: 'error', roomFingerprint: null });
+    }
+  },
+
+  disconnectSyncServer: () => {
+    if (networkSync) {
+      networkSync.disconnect();
+      networkSync = null;
+    }
+    set({ syncStatus: 'disconnected', roomFingerprint: null });
   },
 
   // Actions
   toggleTaskExpansion: async (taskId: string) => {
-    const { tasks } = get();
-    const newTasks = tasks.map((t) =>
-      t.id === taskId ? { ...t, isExpanded: !t.isExpanded } : t,
-    );
-    set({ tasks: newTasks });
+    const yTask = yTasksMap.get(taskId);
+    if (!yTask) return;
+    ydoc.transact(() => {
+      yTask.set('isExpanded', !yTask.get('isExpanded'));
+    });
   },
 
   logs: [],
@@ -557,8 +715,43 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const activeProject = todoProjects.find((p) => p.id === activeProjectId)!;
     // -----------------------
 
+    // ==========================================
+    // 🧬 THE GENESIS BOOT & YJS SYNCHRONIZATION 
+    // ==========================================
+    if (data.yjsState && data.yjsState instanceof Uint8Array) {
+      // 1. BINARY PERSISTENCE: The Highest Authority
+      // If we have a binary history, we decode it. It overwrites ALL legacy JSON logic.
+      Y.applyUpdate(ydoc, data.yjsState);
+      if (process.env.NODE_ENV === 'development') console.log('✅ Y.Doc Booted from Binary IDB History');
+
+      // We still need to map the Yjs state back to the Zustand arrays for the first render
+      todoProjects = Array.from(yProjectsMap.values()).map(extractTodoProjectFromYMap);
+      migratedTasks.length = 0; // Clear legacy, Yjs is truth
+      migratedTasks.push(...Array.from(yTasksMap.values()).map(extractTaskItemFromYMap));
+
+    } else if (!isMigrating) {
+      // 2. THE GENESIS BOOT (Legacy JSON -> Yjs)
+      isMigrating = true;
+      if (process.env.NODE_ENV === 'development') console.warn('🧬 Executing Genesis Boot: Migrating JSON to Y.Doc');
+
+      ydoc.transact(() => {
+        // Map legacy Tasks
+        migratedTasks.forEach((task) => {
+          yTasksMap.set(task.id, bindTaskItemToYMap(task as TaskItem));
+        });
+
+        // Map legacy Projects
+        todoProjects.forEach((proj, i) => {
+          const orderKey = proj.orderKey || generateOrderKey(i === 0 ? undefined : (todoProjects[i - 1].orderKey || undefined));
+          const yProj = bindTodoProjectToYMap({ ...proj, orderKey });
+          yProjectsMap.set(proj.id, yProj);
+        });
+      });
+      console.log('🧬 Genesis Boot Complete.');
+    }
+
     set({
-      tasks: migratedTasks,
+      tasks: migratedTasks as TaskItem[],
       transcript: data.transcript || null,
       scoutResults: data.scoutResults || [],
       projectType: data.projectType || 'video',
@@ -571,138 +764,226 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoRows: activeProject.todoRows,
       priorityDials: activeProject.priorityDials,
       // Seed the counter so new projects always have unique names & colors.
-      // Using length + 1 means existing projects occupy slots 1..N,
-      // and the next new project gets slot N+1.
       nextProjectNumber: todoProjects.length + 1,
       isHydrated: true, // ✅ Hydration Complete
     });
 
-    // Manual save removed here (Optimization)
-  },
+    // ---------------------------------------------------------------------------
+    // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
+    // ---------------------------------------------------------------------------
+
+    // MICRO-CACHES: These WeakMaps/Maps ensure we only generate new Object references
+    // if the underlying Y.Map JSON actually changed. This is our "React Re-Render Armor".
+    const taskCache = new Map<string, { json: string, parsed: TaskItem }>();
+    const projectCache = new Map<string, { json: string, parsed: TodoProject }>();
+
+    ydoc.on('update', (update: Uint8Array, origin: any) => {
+      // THE ECHO STORM PREVENTION (Outbound Broadcast)
+      if (origin !== 'network' && networkSync) {
+        // BAND 1: Instantly broadcast tiny live diffs
+        networkSync.broadcastUpdate(update);
+
+        // BAND 2: The Deep Idle Checkpoint (30 seconds)
+        // Reset the inactivity timer every time the user types.
+        if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
+        idleCheckpointTimer = setTimeout(() => {
+          console.log("Deep Idle Reached: Generating 1MB+ E2EE Checkpoint...");
+          const fullState = Y.encodeStateAsUpdate(ydoc);
+          networkSync?.broadcastCheckpoint(fullState);
+        }, 30000);
+      }
+
+      // --- THE CATCH-UP RENDER THROTTLE ---
+      // When the WebSocket sends 1 Checkpoint + 100 Live Diffs, this event fires 101 times in 10ms.
+      // If we call set() every time, React freezes. We debounce the actual Zustand update.
+      if ((window as any)._crdtRenderDebounce) {
+        clearTimeout((window as any)._crdtRenderDebounce);
+      }
+
+      (window as any)._crdtRenderDebounce = setTimeout(() => {
+        // 1. Extract raw lists but filter out tombstones immediately
+        const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+        const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+
+        // 2. Map through cache for Structural Sharing
+        const sharedProjects = rawYProjects.map(yProj => {
+          const parsed = extractTodoProjectFromYMap(yProj);
+          const json = JSON.stringify(parsed);
+          const cached = projectCache.get(parsed.id);
+          if (cached && cached.json === json) return cached.parsed;
+          projectCache.set(parsed.id, { json, parsed });
+          return parsed;
+        });
+
+        const sharedTasks = rawYTasks.map(yTask => {
+          const parsed = extractTaskItemFromYMap(yTask);
+          const json = JSON.stringify(parsed);
+          const cached = taskCache.get(parsed.id);
+          if (cached && cached.json === json) return cached.parsed;
+          taskCache.set(parsed.id, { json, parsed });
+          return parsed;
+        });
+
+        const updatedProjects = sortYMapList(sharedProjects);
+
+        const currentActiveId = get().activeProjectId;
+        const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0]; // Fallback to 0 if active was deleted
+
+        setTimeout(() => {
+          set({
+            todoProjects: updatedProjects,
+            tasks: sharedTasks,
+            activeProjectId: actProj?.id || null, // Ensure UI shifts if tab deleted
+            todoRows: activeProject ? activeProject.todoRows : [],
+            priorityDials: activeProject ? activeProject.priorityDials : { left: '', right: '', focusedSide: 'none' },
+          });
+        }, 50); // 50ms render throttle
+      }, 100); // Close the _crdtRenderDebounce setTimeout
+    }); // Close the ydoc.on callback
+  }, // Close the connectToSyncServer function call
+
+  // ---------------------------------------------------------------------------
 
   saveTask: async (task: TaskItem) => {
-    const { tasks } = get();
-    const newTasks = [...tasks, task];
-
-    // Update local state immediately (Optimistic UI)
-    set({ tasks: newTasks });
-
-    // Persist to IDB
+    ydoc.transact(() => {
+      yTasksMap.set(task.id, bindTaskItemToYMap(task));
+    });
   },
 
   saveTasks: async (newTasksList: TaskItem[]) => {
-    const { tasks } = get();
-    const updatedTasks = [...tasks, ...newTasksList];
-    set({ tasks: updatedTasks });
+    ydoc.transact(() => {
+      newTasksList.forEach(task => {
+        yTasksMap.set(task.id, bindTaskItemToYMap(task));
+      });
+    });
   },
 
   updateTask: async (taskId: string, updates: Partial<TaskItem>) => {
-    const { tasks } = get();
-    const newTasks = tasks.map((t) => (t.id === taskId ? { ...t, ...updates } : t));
+    const yTask = yTasksMap.get(taskId);
+    if (!yTask) return;
 
-    set({ tasks: newTasks });
+    ydoc.transact(() => {
+      if (updates.task_name !== undefined) {
+        applyUpdateToYText(yTask.get('task_name') as Y.Text, updates.task_name);
+      }
+      if (updates.description !== undefined) {
+        applyUpdateToYText(yTask.get('description') as Y.Text, updates.description);
+      }
+      if (updates.timestamp_seconds !== undefined) {
+        yTask.set('timestamp_seconds', updates.timestamp_seconds);
+      }
+      if (updates.screenshot_base64 !== undefined) {
+        yTask.set('screenshot_base64', updates.screenshot_base64);
+      }
+      if (updates.isExpanded !== undefined) {
+        yTask.set('isExpanded', updates.isExpanded);
+      }
+    });
   },
 
   deleteTask: async (taskId: string) => {
-    const { tasks } = get();
-    const newTasks = tasks.filter((t) => t.id !== taskId);
-
-    set({ tasks: newTasks });
+    ydoc.transact(() => {
+      const yTaskObj = yTasksMap.get(taskId);
+      if (yTaskObj) yTaskObj.set('isDeleted', true);
+    });
   },
 
   // New Action: Specifically for adding Level 3 Micro-steps
   addMicroSteps: async (taskId: string, stepId: string, microSteps: string[]) => {
-    const { tasks } = get();
-    const newTasks = tasks.map((task) => {
-      if (task.id !== taskId) return task;
+    const yTask = yTasksMap.get(taskId);
+    if (!yTask) return;
 
-      // Found Task, now find Sub-step
-      const newSubSteps = task.sub_steps?.map((step) => {
-        if (step.id !== stepId) return step;
+    ydoc.transact(() => {
+      const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
-        // Found Step, add micro-steps (As Objects now)
-        const newMicroSteps: CubitStep[] = microSteps.map((text) => ({
-          id: crypto.randomUUID(),
-          text: text,
-          sub_steps: [],
-        }));
-        return { ...step, sub_steps: newMicroSteps };
-      });
+      // Helper to find the Y.Map step recursively
+      const findStep = (array: Y.Array<Y.Map<any>>, targetId: string): Y.Map<any> | null => {
+        for (let i = 0; i < array.length; i++) {
+          const s = array.get(i);
+          if (Array.isArray(s)) return findStep(s[0].get('sub_steps'), targetId); // Handle Y.Array nested in Y.Array edgecase
 
-      return { ...task, sub_steps: newSubSteps };
+          if (s.get('id') === targetId) return s;
+          const childSub = s.get('sub_steps') as Y.Array<Y.Map<any>>;
+          if (childSub && childSub.length > 0) {
+            const found = findStep(childSub, targetId);
+            if (found) return found;
+          }
+        }
+        return null;
+      };
+
+      const targetYStep = findStep(ySubList, stepId);
+      if (targetYStep) {
+        let childArray = targetYStep.get('sub_steps') as Y.Array<Y.Map<any>>;
+        if (!childArray) {
+          childArray = new Y.Array();
+          targetYStep.set('sub_steps', childArray);
+        }
+        microSteps.forEach(text => {
+          const fallback: CubitStep = { id: crypto.randomUUID(), text, sub_steps: [] };
+          childArray.push([bindCubitStepToYMap(fallback)]); // Requires array bracket wrapper for Yjs pushing Map
+        });
+      }
     });
-
-    set({ tasks: newTasks });
   },
 
   // New Action: Update text of any step (Level 2 or 3)
   updateDeepStep: async (taskId: string, stepId: string, newText: string) => {
-    const { tasks } = get();
+    const yTask = yTasksMap.get(taskId);
+    if (!yTask) return;
 
-    // Recursive helper to find and update nested steps
-    const updateRecursive = (steps: CubitStep[]): CubitStep[] => {
-      return steps.map((step) => {
-        // Match found? Update text.
-        if (step.id === stepId) {
-          return { ...step, text: newText };
-        }
+    ydoc.transact(() => {
+      const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
-        // Has children? Recurse.
-        if (step.sub_steps && Array.isArray(step.sub_steps)) {
-          // Check if children are strings (legacy/micro) or objects
-          // If they are strings, we can't recurse easily with IDs.
-          const firstChild = step.sub_steps[0];
-          if (typeof firstChild !== 'string') {
-            // Recurse to Level 3
-            return { ...step, sub_steps: updateRecursive(step.sub_steps as CubitStep[]) };
+      const updateStepTextRec = (array: Y.Array<Y.Map<any>>): boolean => {
+        for (let i = 0; i < array.length; i++) {
+          const s = array.get(i);
+          if (Array.isArray(s)) { if (updateStepTextRec(s[0].get('sub_steps'))) return true; } // Safety
+          else if (s.get('id') === stepId) {
+            const yNodeText = s.get('text') as Y.Text;
+            applyUpdateToYText(yNodeText, newText);
+            return true;
+          } else {
+            const childSub = s.get('sub_steps') as Y.Array<Y.Map<any>>;
+            if (childSub && childSub.length > 0) {
+              if (updateStepTextRec(childSub)) return true;
+            }
           }
-          // Legacy Fallback (Should be caught by migration)
-          return step;
         }
+        return false;
+      };
 
-        return step;
-      });
-    };
-
-    const newTasks = tasks.map((task) => {
-      if (task.id !== taskId) return task;
-      if (!task.sub_steps) return task;
-      return { ...task, sub_steps: updateRecursive(task.sub_steps) };
+      updateStepTextRec(ySubList);
     });
-
-    set({ tasks: newTasks });
   },
 
   // New Action: Toggle Checkbox (Level 2 or 3)
   toggleStepCompletion: async (taskId: string, stepId: string) => {
-    const { tasks } = get();
+    const yTask = yTasksMap.get(taskId);
+    if (!yTask) return;
 
-    // Recursive helper
-    const toggleRecursive = (steps: CubitStep[]): CubitStep[] => {
-      return steps.map((step) => {
-        // Match found? Toggle.
-        if (step.id === stepId) {
-          return { ...step, isCompleted: !step.isCompleted };
-        }
+    ydoc.transact(() => {
+      const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
-        // Has children? Recurse.
-        if (step.sub_steps && Array.isArray(step.sub_steps)) {
-          const firstChild = step.sub_steps[0];
-          if (typeof firstChild !== 'string') {
-            return { ...step, sub_steps: toggleRecursive(step.sub_steps as CubitStep[]) };
+      const toggleStepRec = (array: Y.Array<Y.Map<any>>): boolean => {
+        for (let i = 0; i < array.length; i++) {
+          const s = array.get(i);
+          if (Array.isArray(s)) { if (toggleStepRec(s[0].get('sub_steps'))) return true; } // Safety
+          else if (s.get('id') === stepId) {
+            s.set('isCompleted', !s.get('isCompleted'));
+            return true;
+          } else {
+            const childSub = s.get('sub_steps') as Y.Array<Y.Map<any>>;
+            if (childSub && childSub.length > 0) {
+              if (toggleStepRec(childSub)) return true;
+            }
           }
         }
-        return step;
-      });
-    };
+        return false;
+      };
 
-    const newTasks = tasks.map((task) => {
-      if (task.id !== taskId) return task;
-      if (!task.sub_steps) return task;
-      return { ...task, sub_steps: toggleRecursive(task.sub_steps) };
+      toggleStepRec(ySubList);
     });
-
-    set({ tasks: newTasks });
   },
 
   setTranscript: async (text: string) => {
@@ -750,7 +1031,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutPlatform: 'instagram',
     });
   },
-
   resetProject: async () => {
     // Smart Reset: Clear data but KEEP API Key
     await storageService.clearProject();
@@ -841,6 +1121,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setIsSettingsOpen: (isOpen: boolean, variant: 'default' | 'quota' = 'default') =>
     set({ isSettingsOpen: isOpen, settingsVariant: variant }),
 
+  isSyncModalOpen: false,
+  setIsSyncModalOpen: (isOpen: boolean) => set({ isSyncModalOpen: isOpen }),
+
   addLog: (message: string) => {
     set((state) => {
       const lastLog = state.logs[state.logs.length - 1];
@@ -881,6 +1164,10 @@ useAppStore.subscribe((state) => {
     // Filter: Only save if hydration is complete (prevents overwriting with initial empty state)
     if (state.isHydrated) {
       try {
+        // [TECH DEBT]: We are saving the full binary string on every keystroke debounce.
+        // For Chunk 3, this guarantees safety. In the future, we need incremental compaction.
+        const yjsState = Y.encodeStateAsUpdate(ydoc);
+
         await storageService.saveProject(
           state.tasks,
           state.transcript || undefined,
@@ -892,6 +1179,7 @@ useAppStore.subscribe((state) => {
           state.scoutHistory,
           state.todoProjects,
           state.activeProjectId || undefined,
+          yjsState,
         );
       } catch (err) {
         console.error('Auto-Save Failed:', err);
