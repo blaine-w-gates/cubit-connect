@@ -44,6 +44,7 @@ export const TodoRowSchema = z.object({
   steps: z.tuple([TodoStepSchema, TodoStepSchema, TodoStepSchema, TodoStepSchema]),  // Fixed 4-step grid
   isCompleted: z.boolean().optional().default(false),
   sourceStepId: z.string().optional(),  // Tracks Deep Dive origin (for future linking)
+  orderKey: z.string().optional(), // Used for Y.Map Fractional Indexing sorting
 });
 
 export const PriorityDialsSchema = z.object({
@@ -61,6 +62,7 @@ export const TodoProjectSchema = z.object({
   todoRows: z.array(TodoRowSchema).default([]),
   priorityDials: PriorityDialsSchema.default({ left: '', right: '', focusedSide: 'none' }),
   createdAt: z.number(),
+  orderKey: z.string().optional(), // Used for Y.Map Fractional Indexing sorting
 });
 
 export const ProjectDataSchema = z.object({
@@ -78,6 +80,7 @@ export const ProjectDataSchema = z.object({
   // NEW: Project-scoped todo data (Book Tabs)
   todoProjects: z.array(TodoProjectSchema).optional().default([]),
   activeProjectId: z.string().optional(),
+  yjsState: z.custom<Uint8Array>((val) => val instanceof Uint8Array || (val && typeof (val as any).byteLength === 'number')).optional(),
   updatedAt: z.number(),
 });
 

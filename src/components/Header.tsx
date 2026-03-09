@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Key, Menu, X, Compass, ListTodo } from 'lucide-react';
+import { Key, Menu, X, Compass, ListTodo, Network } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ExportControl from '@/components/ExportControl';
 import { useAppStore } from '@/store/useAppStore';
@@ -25,7 +25,7 @@ export default function Header({
 }: HeaderProps) {
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { setInputMode, setIsSettingsOpen } = useAppStore();
+  const { setInputMode, setIsSettingsOpen, syncStatus, setIsSyncModalOpen } = useAppStore();
   const pathname = usePathname();
   const router = useRouter();
   const isEnginePage = pathname === '/engine';
@@ -113,6 +113,20 @@ export default function Header({
             >
               <Key className="w-4 h-4" />
               <span className="hidden sm:inline">API Key</span>
+            </button>
+            <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
+
+            {/* SYNC BUTTON */}
+            <button
+              onClick={() => setIsSyncModalOpen(true)}
+              className={`flex items-center gap-2 text-xs transition-colors ${syncStatus === 'connected' ? 'text-emerald-500' :
+                  syncStatus === 'connecting' ? 'text-amber-500 animate-pulse' :
+                    syncStatus === 'error' ? 'text-red-500' :
+                      'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                }`}
+            >
+              <Network className="w-4 h-4" />
+              <span className="hidden sm:inline">Sync</span>
             </button>
             <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
           </div>
@@ -208,6 +222,20 @@ export default function Header({
               >
                 <Key className="w-4 h-4" />
                 API Key
+              </button>
+              <button
+                onClick={() => {
+                  setIsSyncModalOpen(true);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 ${syncStatus === 'connected' ? 'text-emerald-500' :
+                    syncStatus === 'connecting' ? 'text-amber-500 animate-pulse' :
+                      syncStatus === 'error' ? 'text-red-500' :
+                        'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                  }`}
+              >
+                <Network className="w-4 h-4" />
+                Sync Status
               </button>
             </div>
             <div className="pb-4 border-b border-zinc-100 dark:border-stone-800">

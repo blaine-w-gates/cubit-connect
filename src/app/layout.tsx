@@ -45,6 +45,8 @@ import { GlobalErrorListener } from '@/components/GlobalErrorListener';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from 'next-themes';
 
+import SyncSetupModal from '@/components/SyncSetupModal';
+
 // ... existing imports ...
 
 export default function RootLayout({
@@ -61,6 +63,7 @@ export default function RootLayout({
         <ErrorBoundary>
           <GlobalErrorListener />
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+            <SyncSetupModal />
             {children}
             <Toaster richColors position="bottom-right" />
           </ThemeProvider>

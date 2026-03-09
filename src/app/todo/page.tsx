@@ -11,6 +11,7 @@ import PriorityDials from '@/components/todo/PriorityDials';
 import TodoTable from '@/components/todo/TodoTable';
 import ActionBar from '@/components/todo/ActionBar';
 import BookTabSidebar from '@/components/todo/BookTabSidebar';
+import { Network, ShieldCheck, Loader2 } from 'lucide-react';
 
 export default function TodoPage() {
     const router = useRouter();
@@ -21,6 +22,8 @@ export default function TodoPage() {
     const isHydrated = useAppStore((state) => state.isHydrated);
     const todoRows = useAppStore((state) => state.todoRows);
     const resetProject = useAppStore((state) => state.resetProject);
+    const syncStatus = useAppStore((state) => state.syncStatus);
+    const setIsSyncModalOpen = useAppStore((state) => state.setIsSyncModalOpen);
 
     const [mounted, setMounted] = useState(false);
     const [confirmingReset, setConfirmingReset] = useState(false);
@@ -95,8 +98,35 @@ export default function TodoPage() {
                     className="flex-1 border-x border-black dark:border-[#292524] bg-white dark:bg-[#1c1917] shadow-xl min-h-screen my-8 md:p-12 p-4 transition-colors duration-300"
                 >
                     {/* Section Heading — mirrors Engine's "Your Distilled Recipe:" */}
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-6">
-                        <h3 className="font-serif text-2xl font-bold italic">Your Task Board:</h3>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+                        <div className="flex items-center gap-3">
+                            <h3 className="font-serif text-2xl font-bold italic">Your Task Board:</h3>
+                            {syncStatus === 'connected' ? (
+                                <button
+                                    onClick={() => setIsSyncModalOpen(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-full border border-emerald-200 dark:border-emerald-800 transition-colors hover:bg-emerald-200 dark:hover:bg-emerald-900/50"
+                                >
+                                    <ShieldCheck className="w-3.5 h-3.5" />
+                                    Live Sync Active
+                                </button>
+                            ) : syncStatus === 'connecting' ? (
+                                <button
+                                    onClick={() => setIsSyncModalOpen(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-xs font-bold rounded-full border border-amber-200 dark:border-amber-800 transition-colors"
+                                >
+                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                    Connecting...
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={() => setIsSyncModalOpen(true)}
+                                    className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 text-xs font-bold rounded-full border border-blue-200 dark:border-blue-800 transition-colors hover:bg-blue-100 dark:hover:bg-blue-900/40 shadow-sm"
+                                >
+                                    <Network className="w-3.5 h-3.5" />
+                                    Enable E2EE Sync
+                                </button>
+                            )}
+                        </div>
                         {todoRows.length > 0 && (
                             <span className="text-sm font-mono text-zinc-500 dark:text-stone-500">
                                 {activeTasks} active {activeTasks === 1 ? 'task' : 'tasks'} · {todoRows.length} total
