@@ -1,0 +1,13 @@
+{
+    "name": "cubit-sync-server",
+    "version": "1.0.0",
+    "description": "Zero-Knowledge E2EE Sync Server for Cubit Connect",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "dependencies": {
+        "ioredis": "^5.5.0",
+        "ws": "^8.18.0"
+    }
+}
