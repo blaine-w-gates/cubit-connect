@@ -1071,6 +1071,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // Factory Reset
     await storageService.clearProject();
     localStorage.removeItem(STORAGE_KEY_API);
+
+    // Physically obliterate CRDT memory to prevent test bleeding and data leakage
+    ydoc.transact(() => {
+      Array.from(yProjectsMap.keys()).forEach(k => yProjectsMap.delete(k));
+      Array.from(yTasksMap.keys()).forEach(k => yTasksMap.delete(k));
+    });
+
     const defaultProject: TodoProject = {
       id: crypto.randomUUID(),
       name: 'My First Project',
@@ -1078,7 +1085,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       createdAt: Date.now(),
+      orderKey: generateOrderKey(),
     };
+
+    ydoc.transact(() => {
+      yProjectsMap.set(defaultProject.id, bindTodoProjectToYMap(defaultProject));
+    });
     set({
       tasks: [],
       transcript: null,
@@ -1102,10 +1114,19 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   importTasks: async (newTasks: TaskItem[]) => {
-    // Logic: Import usually implies replacing data. But transcript might be missing in import.
-    // Let's assume keep existing transcript for now unless we import full project.
-    set({ tasks: newTasks });
-    // Manual save removed (Optimization)
+    ydoc.transact(() => {
+      // Mark existing tasks as deleted to mirror the old "replacement" behavior, 
+      // generating tombstones to protect offline sync peers.
+      Array.from(yTasksMap.keys()).forEach(k => {
+        const yTask = yTasksMap.get(k);
+        if (yTask) yTask.set('isDeleted', true);
+      });
+
+      // Insert the imported tasks
+      newTasks.forEach(task => {
+        yTasksMap.set(task.id, bindTaskItemToYMap(task));
+      });
+    });
   },
 
   setProcessing: (isProcessing: boolean) => {

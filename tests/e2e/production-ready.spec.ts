@@ -100,6 +100,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
 
     await page.waitForTimeout(1000); // Allow IDB to flush
     await page.reload();
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
     await page.waitForFunction(
       () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,

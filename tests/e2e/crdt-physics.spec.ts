@@ -8,14 +8,26 @@ const getStore = async (page: any) => {
 test.describe('CRDT Physics & Performance Verification', () => {
     test.beforeEach(async ({ page }) => {
         await page.goto('/todo');
+        // Wait for page to initialize before wiping
+        await page.waitForFunction(() => (window as any).__STORE__.getState().isHydrated);
+
         // Clear storage to prevent cross-test contamination
         await page.evaluate(async () => {
             localStorage.clear();
             const store = (window as any).__STORE__.getState();
             await store.fullLogout();
+            // Wait for React to apply the logout
+        });
+        await page.waitForTimeout(200);
+
+        await page.evaluate(async () => {
+            const store = (window as any).__STORE__.getState();
             // Add a default project to be safe
             if (store.todoProjects.length === 0) store.addTodoProject('Test Project');
         });
+
+        // Let the CRDT observer debounce settle before tests begin
+        await page.waitForTimeout(200);
     });
 
     // TEST 1: The "CPU Throttle" Typing Test (Checking the Stringify Trap)
@@ -27,8 +39,8 @@ test.describe('CRDT Physics & Performance Verification', () => {
         });
 
         // 2. Find the textarea for the task title or step
-        // The `<textarea>` or `input` might be a contentEditable or normal text field. 
-        // We will target the first visible textarea.
+        // We must wait for the exact moment the CRDT Observer drops the new row into the React DOM
+        await page.waitForTimeout(200);
         const textareas = page.locator('textarea');
         await textareas.first().waitFor({ state: 'visible' });
 
@@ -58,6 +70,8 @@ test.describe('CRDT Physics & Performance Verification', () => {
             store.addTodoRow('The quick brown fox jumps.');
         });
 
+        // Wait for CRDT debounce
+        await page.waitForTimeout(200);
         const textareas = page.locator('textarea');
         await textareas.first().waitFor();
 
@@ -93,6 +107,9 @@ test.describe('CRDT Physics & Performance Verification', () => {
             store.addTodoProject("Project A");
         });
 
+        // Wait for CRDT debounce
+        await page.waitForTimeout(200);
+
         const projectId = await page.evaluate(() => {
             const store = (window as any).__STORE__.getState();
             const proj = store.todoProjects.find((p: any) => p.name === 'Project A');
@@ -111,6 +128,8 @@ test.describe('CRDT Physics & Performance Verification', () => {
             const store = (window as any).__STORE__.getState();
             store.deleteTodoProject(id);
         }, projectId);
+
+        await page.waitForTimeout(200);
 
         state = await getStore(page);
         // UI rows should be entirely missing from the view (no orphans)
@@ -132,6 +151,7 @@ test.describe('CRDT Physics & Performance Verification', () => {
 
         // Hard refresh
         await page.reload();
+        await page.waitForFunction(() => (window as any).__STORE__.getState().isHydrated);
 
         // Verify
         await page.waitForFunction((text) => {
