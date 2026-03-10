@@ -74,6 +74,7 @@ export const ProjectDataSchema = z.object({
   scoutTopic: z.string().optional(),
   scoutPlatform: z.string().optional(),
   scoutHistory: z.array(z.string()).optional(),
+  inputMode: z.enum(['video', 'text', 'scout']).optional(),
   // LEGACY: Flat todoRows/priorityDials (kept for migration from old format)
   todoRows: z.array(TodoRowSchema).optional().default([]),
   priorityDials: PriorityDialsSchema.optional().default({ left: '', right: '', focusedSide: 'none' }),

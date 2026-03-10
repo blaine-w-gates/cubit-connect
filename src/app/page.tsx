@@ -20,7 +20,11 @@ export default function LandingPage() {
   useEffect(() => {
     // Use the STORE_KEY defined in useAppStore (cubit_api_key)
     if (typeof window !== 'undefined' && localStorage.getItem('cubit_api_key')) {
-      router.push('/engine');
+      if (window.location.pathname === '/todo') {
+        router.push('/todo');
+      } else {
+        router.push('/engine');
+      }
     }
   }, [router]);
 

@@ -272,6 +272,9 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       ]);
       (window as unknown as CustomWindow).__STORE__.setState({ projectType: 'text' });
 
+      // Wait for the Yjs Observer Throttle to flush into the React State
+      await new Promise(r => setTimeout(r, 200));
+
       // Explicitly flush to IDB via raw IndexedDB API.
       // idb-keyval uses database 'keyval-store' with object store 'keyval'.
       const state = (window as unknown as CustomWindow).__STORE__.getState();

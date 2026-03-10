@@ -41,7 +41,7 @@ export default class ErrorBoundary extends Component<Props, State> {
     const key = this.state.newKey.trim();
     if (!key) return;
 
-    
+
 
     // 🛡️ DATA SAFETY: Force Save before Reload
     try {
@@ -53,6 +53,10 @@ export default class ErrorBoundary extends Component<Props, State> {
           state.scoutResults,
           state.projectType,
           state.projectTitle,
+          state.scoutTopic,
+          state.scoutPlatform,
+          state.scoutHistory,
+          state.inputMode,
         );
       }
     } catch (e) {

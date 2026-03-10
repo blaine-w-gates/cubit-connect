@@ -83,6 +83,7 @@ export const storageService = {
     scoutTopic?: string,
     scoutPlatform?: string,
     scoutHistory?: string[],
+    inputMode?: 'video' | 'text' | 'scout',
     todoProjects?: import('@/schemas/storage').TodoProject[],
     activeProjectId?: string,
     yjsState?: Uint8Array,
@@ -97,6 +98,7 @@ export const storageService = {
         scoutTopic,
         scoutPlatform,
         scoutHistory,
+        inputMode,
         // Legacy fields kept empty (migration has already run)
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' },

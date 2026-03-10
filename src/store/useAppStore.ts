@@ -22,6 +22,8 @@ export const ydoc = new Y.Doc({ gc: false });
 
 export const yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
 export const yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
+export const yMetaMap = ydoc.getMap<any>('meta');
+export const yTranscript = ydoc.getText('transcript');
 // -------------------------
 
 // Book Tab color palette — cycles through these for new projects
@@ -173,17 +175,24 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // Strike 17.5: Defaults
   inputMode: 'video',
-  setInputMode: (mode) => set({ inputMode: mode }),
+  setInputMode: (mode) => {
+    set({ inputMode: mode });
+  },
   scoutTopic: '',
-  setScoutTopic: (topic) => set({ scoutTopic: topic }),
+  setScoutTopic: (topic) => {
+    set({ scoutTopic: topic });
+  },
   scoutPlatform: 'instagram',
-  setScoutPlatform: (platform) => set({ scoutPlatform: platform }),
+  setScoutPlatform: (platform) => {
+    set({ scoutPlatform: platform });
+  },
   addToScoutHistory: (topic: string) =>
     set((state) => {
       const current = state.scoutHistory;
       if (!topic.trim()) return state;
       const filtered = current.filter((t) => t !== topic);
       const updated = [topic, ...filtered].slice(0, 5);
+      ydoc.transact(() => { yMetaMap.set('scoutHistory', JSON.stringify(updated)); }, 'local');
       return { scoutHistory: updated };
     }),
 
@@ -302,7 +311,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (!activeProjectId) return;
 
     const yProj = yProjectsMap.get(activeProjectId);
-    if (!yProj) return;
+    if (!yProj) {
+      console.error('❌ addTodoRow: yProj not found for activeProjectId', activeProjectId);
+      return;
+    }
 
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const emptyStep = { text: '', isCompleted: false };
@@ -320,6 +332,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     };
 
     ydoc.transact(() => {
+      console.log('✅ addTodoRow: Transacting Yjs set for row', newRow.id);
       yRows.set(newRow.id, bindTodoRowToYMap(newRow, orderKey));
     });
   },
@@ -572,7 +585,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!networkSync) {
         // 1. Salted Single-Secret UX (Routing Security)
         // Turbopack strictly requires relative paths for dynamic imports in some configurations
-        const { deriveRoomId, deriveSyncKey } = await import('../lib/cryptoSync');
+        const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
         const roomIdHash = await deriveRoomId(passphrase);
         const syncKey = await deriveSyncKey(passphrase);
 
@@ -747,9 +760,28 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           const yProj = bindTodoProjectToYMap({ ...proj, orderKey });
           yProjectsMap.set(proj.id, yProj);
         });
+
+        // Map primitive scalar Document State over to the CRDT
+        if (data.projectType) yMetaMap.set('projectType', data.projectType);
+        if (data.projectTitle) yMetaMap.set('projectTitle', data.projectTitle);
+        if (data.scoutResults && data.scoutResults.length > 0) yMetaMap.set('scoutResults', JSON.stringify(data.scoutResults));
+        if (data.scoutHistory && data.scoutHistory.length > 0) yMetaMap.set('scoutHistory', JSON.stringify(data.scoutHistory));
+        if (data.transcript) applyUpdateToYText(yTranscript, data.transcript);
       });
       console.log('🧬 Genesis Boot Complete.');
     }
+
+    // --- Scalar Document State Hydration ---
+    if (yMetaMap.has('projectType')) data.projectType = yMetaMap.get('projectType');
+    if (yMetaMap.has('projectTitle')) data.projectTitle = yMetaMap.get('projectTitle');
+    if (yMetaMap.has('scoutResults')) {
+      try { data.scoutResults = JSON.parse(yMetaMap.get('scoutResults')); } catch { }
+    }
+    if (yMetaMap.has('scoutHistory')) {
+      try { data.scoutHistory = JSON.parse(yMetaMap.get('scoutHistory')); } catch { }
+    }
+    const safeTranscript = yTranscript.toString();
+    if (safeTranscript !== "") data.transcript = safeTranscript;
 
     set({
       tasks: migratedTasks as TaskItem[],
@@ -826,19 +858,62 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         });
 
         const updatedProjects = sortYMapList(sharedProjects);
+        console.log('🔄 Observer Render Throttle [Yjs -> React]:', updatedProjects.length, 'projects mapped.');
 
         const currentActiveId = get().activeProjectId;
         const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0]; // Fallback to 0 if active was deleted
 
-        setTimeout(() => {
+        // --- Document State Render Engine ---
+        let transcript = get().transcript;
+        const textFromCRDT = yTranscript.toString();
+        // Null mapping to preserve empty states (Upload flow)
+        transcript = textFromCRDT === "" ? null : textFromCRDT;
+
+        let projectType = get().projectType;
+        if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
+
+        let projectTitle = get().projectTitle;
+        if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
+
+        // Note: active view mode variables (inputMode, scoutPlatform) are explicitly stripped from CRDT to prevent Poltergeist UX hijacks.
+
+        // Re-Render Armor Cache logic
+        let scoutResults = get().scoutResults;
+        if (yMetaMap.has('scoutResults')) {
+          const raw = yMetaMap.get('scoutResults');
+          if (raw) {
+            // Engineer Guardrail: Only swap memory reference if JSON is fundamentally different
+            if (JSON.stringify(scoutResults) !== raw) {
+              try { scoutResults = JSON.parse(raw); } catch { }
+            }
+          }
+        }
+
+        let scoutHistory = get().scoutHistory;
+        if (yMetaMap.has('scoutHistory')) {
+          const raw = yMetaMap.get('scoutHistory');
+          if (raw) {
+            // Engineer Guardrail: Prevent DOM redraws while typing on keys
+            if (JSON.stringify(scoutHistory) !== raw) {
+              try { scoutHistory = JSON.parse(raw); } catch { }
+            }
+          }
+        }
+
+        requestAnimationFrame(() => {
           set({
             todoProjects: updatedProjects,
             tasks: sharedTasks,
             activeProjectId: actProj?.id || null, // Ensure UI shifts if tab deleted
             todoRows: actProj ? actProj.todoRows : [],
             priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
+            transcript,
+            projectType,
+            projectTitle,
+            scoutResults,
+            scoutHistory,
           });
-        }, 50); // 50ms render throttle
+        }); // Native display refresh rate
       }, 100); // Close the _crdtRenderDebounce setTimeout
     }); // Close the ydoc.on callback
   }, // Close the connectToSyncServer function call
@@ -988,24 +1063,33 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   setTranscript: async (text: string) => {
+    ydoc.transact(() => { applyUpdateToYText(yTranscript, text || ''); }, 'local');
     set({ transcript: text });
   },
 
   setScoutResults: async (results: string[]) => {
+    ydoc.transact(() => { yMetaMap.set('scoutResults', JSON.stringify(results)); }, 'local');
     set({ scoutResults: results });
   },
 
   setProjectType: async (type: 'video' | 'text') => {
+    ydoc.transact(() => { yMetaMap.set('projectType', type); }, 'local');
     set({ projectType: type });
   },
 
   setProjectTitle: async (title: string) => {
+    ydoc.transact(() => { yMetaMap.set('projectTitle', title); }, 'local');
     set({ projectTitle: title });
   },
 
   // Atomic Action for Text Mode Initialization
   startTextProject: async (title: string, text: string) => {
     const type = 'text';
+    ydoc.transact(() => {
+      yMetaMap.set('projectType', type);
+      yMetaMap.set('projectTitle', title);
+      applyUpdateToYText(yTranscript, text || '');
+    }, 'local');
     set({
       projectType: type,
       projectTitle: title,
@@ -1017,6 +1101,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // Clears content but KEEPS processing state to prevent Manifesto flash
   startNewAnalysis: async (type: 'video' | 'text', title: string) => {
     await storageService.clearProject();
+
+    // The Ghost Data Teardown:
+    ydoc.transact(() => {
+      yMetaMap.clear();
+      yTranscript.delete(0, yTranscript.length);
+
+      // Tombstone all active tasks and projects to prevent Zombie Resurrection
+      Array.from(yTasksMap.values()).forEach(t => t.set('isDeleted', true));
+      Array.from(yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
+    });
+
     set({
       tasks: [],
       transcript: null,
@@ -1035,6 +1130,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   resetProject: async () => {
     // Smart Reset: Clear data but KEEP API Key
     await storageService.clearProject();
+
+    // The Ghost Data Teardown:
+    ydoc.transact(() => {
+      yMetaMap.clear();
+      yTranscript.delete(0, yTranscript.length);
+
+      // Tombstone all active tasks and projects to prevent Zombie Resurrection
+      Array.from(yTasksMap.values()).forEach(t => t.set('isDeleted', true));
+      Array.from(yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
+    });
+
     const defaultProject: TodoProject = {
       id: crypto.randomUUID(),
       name: 'My First Project',
@@ -1068,49 +1174,21 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   fullLogout: async () => {
+    // The "Logout Nuke" Data Vector Fix: 
+    // We MUST sever the network connection BEFORE destroying local CRDT states 
+    // to prevent broadcasting an encrypted tombstone massacre to the P2P cloud.
+    if (networkSync) {
+      networkSync.disconnect();
+      networkSync = null;
+    }
+
     // Factory Reset
     await storageService.clearProject();
     localStorage.removeItem(STORAGE_KEY_API);
 
-    // Physically obliterate CRDT memory to prevent test bleeding and data leakage
-    ydoc.transact(() => {
-      Array.from(yProjectsMap.keys()).forEach(k => yProjectsMap.delete(k));
-      Array.from(yTasksMap.keys()).forEach(k => yTasksMap.delete(k));
-    });
-
-    const defaultProject: TodoProject = {
-      id: crypto.randomUUID(),
-      name: 'My First Project',
-      color: '#22D3EE',
-      todoRows: [],
-      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-      createdAt: Date.now(),
-      orderKey: generateOrderKey(),
-    };
-
-    ydoc.transact(() => {
-      yProjectsMap.set(defaultProject.id, bindTodoProjectToYMap(defaultProject));
-    });
-    set({
-      tasks: [],
-      transcript: null,
-      scoutResults: [],
-      scoutHistory: [],
-      hasVideoHandle: false,
-      projectType: 'video',
-      projectTitle: 'New Project',
-      logs: [],
-      scoutTopic: '',
-      scoutPlatform: 'instagram',
-      inputMode: 'video',
-      todoProjects: [defaultProject],
-      activeProjectId: defaultProject.id,
-      todoRows: [],
-      priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-      activeMode: null,
-      nextProjectNumber: 2, // "My First Project" was #1
-      apiKey: '',
-    });
+    // Hard physics wipe: Instead of mathematically manipulating ydoc, 
+    // we forcibly nuke the memory thread to guarantee Zero Knowledge deletion.
+    window.location.reload();
   },
 
   importTasks: async (newTasks: TaskItem[]) => {
@@ -1199,6 +1277,7 @@ useAppStore.subscribe((state) => {
           state.scoutTopic,
           state.scoutPlatform,
           state.scoutHistory,
+          state.inputMode,
           state.todoProjects,
           state.activeProjectId || undefined,
           yjsState,

@@ -31,13 +31,13 @@ export default function SyncSetupModal() {
         e.preventDefault();
         setError('');
 
-        if (!passphrase || passphrase.length < 8) {
+        if (!passphrase || passphrase.trim().length < 8) {
             setError('Passphrase must be at least 8 characters long.');
             return;
         }
 
         try {
-            await connectToSyncServer(passphrase);
+            await connectToSyncServer(passphrase.trim());
         } catch (err) {
             setError('Failed to establish secure connection.');
         }

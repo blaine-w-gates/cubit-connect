@@ -1,10 +1,11 @@
 import * as Y from 'yjs';
-import { encryptUpdate, decryptUpdate } from '../lib/cryptoSync';
+import { encryptUpdate, decryptUpdate } from '@/lib/cryptoSync';
 
 export const MSG_UPDATE = 3;
 export const MSG_REQUEST_CACHE = 4;
 export const MSG_CHECKPOINT = 5;
 export const MSG_ROOM_EMPTY = 6;
+export const MSG_HEARTBEAT = 7;
 
 /**
  * NetworkSync
@@ -28,6 +29,16 @@ export class NetworkSync {
     // We must ignore live diffs from peers while the massive initial checkpoint is still downloading/parsing.
     private catchUpLock: boolean = true;
     private connectionTimeout: ReturnType<typeof setTimeout> | null = null;
+    private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+    private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
+    private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
+
+    private clearHeartbeat() {
+        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+        if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout);
+        this.heartbeatInterval = null;
+        this.heartbeatTimeout = null;
+    }
 
     private intentionalDisconnect: boolean = false;
     private reconnectAttempts: number = 0;
@@ -51,6 +62,11 @@ export class NetworkSync {
     async connect(derivedKey: CryptoKey): Promise<void> {
         return new Promise((resolve, reject) => {
             if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return resolve();
+
+            // ENGINEER GUARDRAIL: Purge native background backoff loop before manual resurrection
+            if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
+            this.clearHeartbeat();
+
             this.key = derivedKey;
             this.intentionalDisconnect = false;
 
@@ -74,6 +90,19 @@ export class NetworkSync {
                 this.onStatusChange('connected');
                 console.log('🔗 E2EE WebSocket connected. Requesting Cache...');
 
+                // THE APPLICATION-LEVEL HEARTBEAT (Bypassing ws.ping limits)
+                this.heartbeatInterval = setInterval(() => {
+                    if (this.ws?.readyState === WebSocket.OPEN) {
+                        this.ws.send(new Uint8Array([MSG_HEARTBEAT]));
+
+                        // Kill connection if no echo returned in 5s
+                        this.heartbeatTimeout = setTimeout(() => {
+                            console.warn("💀 Heartbeat dropped. Emulating TCP sever.");
+                            this.ws?.close();
+                        }, 5000);
+                    }
+                }, 30000);
+
                 // The "Catch-Up" Protocol (Dual-Band): Download Last Checkpoint + Last 100 Diffs
                 const payload = new Uint8Array([MSG_REQUEST_CACHE]);
                 // Request Cache packet does not need encryption, it just triggers the server playback
@@ -86,6 +115,13 @@ export class NetworkSync {
 
                 try {
                     const encryptedPayload = new Uint8Array(event.data);
+
+                    // Native Unencrypted Heartbeat Intercept
+                    if (encryptedPayload.length === 1 && encryptedPayload[0] === MSG_HEARTBEAT) {
+                        if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout);
+                        return;
+                    }
+
                     const decrypted = await decryptUpdate(encryptedPayload, this.key!);
 
                     if (decrypted.length === 0) return;
@@ -155,6 +191,8 @@ export class NetworkSync {
 
             this.ws.onclose = () => {
                 console.log("🔌 WebSocket Sync Closed.");
+                this.clearHeartbeat();
+
                 if (this.intentionalDisconnect) {
                     this.onStatusChange('disconnected');
                 } else if (this.key) {
@@ -179,7 +217,7 @@ export class NetworkSync {
                     // THE ZOMBIE RECONNECT (UI BLINDNESS)
                     this.onStatusChange('connecting');
 
-                    setTimeout(() => {
+                    this.reconnectTimeout = setTimeout(() => {
                         if (this.key && !this.intentionalDisconnect) {
                             // THE UNHANDLED PROMISE REJECTION
                             this.connect(this.key).catch(err => {
@@ -197,7 +235,13 @@ export class NetworkSync {
     }
 
     private handleVisibilityChange = () => {
-        if (document.visibilityState === 'hidden' && this.ws?.readyState === WebSocket.OPEN && this.pendingDiffs.length > 0) {
+        if (document.visibilityState === 'visible') {
+            if ((!this.ws || this.ws.readyState !== WebSocket.OPEN) && !this.intentionalDisconnect && this.key) {
+                console.log('📱 OS Wake-Up: Foreground resurrection sequence initiating...');
+                this.connect(this.key);
+            }
+        }
+        else if (document.visibilityState === 'hidden' && this.ws?.readyState === WebSocket.OPEN && this.pendingDiffs.length > 0) {
             console.log(`OS Suspending: Synchronously flushing ${this.pendingDiffs.length} tiny live diffs to TCP buffer...`);
             // SYNCHRONOUS TCP DUMP: No `await`, no `Crypto.subtle`. Bypasses the Web Crypto Promise Trap.
             try {
@@ -256,9 +300,15 @@ export class NetworkSync {
     disconnect() {
         this.intentionalDisconnect = true;
         document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+        this.clearHeartbeat();
+
         if (this.connectionTimeout) {
             clearTimeout(this.connectionTimeout);
             this.connectionTimeout = null;
+        }
+        if (this.reconnectTimeout) {
+            clearTimeout(this.reconnectTimeout);
+            this.reconnectTimeout = null;
         }
         if (this.ws) {
             this.ws.close();

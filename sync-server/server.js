@@ -21,7 +21,8 @@ const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
 // Protocol Identifiers
 const MSG_UPDATE = 3;
-const MSG_REQUEST_CACHE = 4;
+const MSG_REQUEST_CACHE = 4; // This was 4
+const MSG_HEARTBEAT = 7; // Added
 const MSG_CHECKPOINT = 5;
 const MSG_ROOM_EMPTY = 6;
 
@@ -134,6 +135,13 @@ async function startServer() {
                     .expire(checkpointKey, 86400 * 7) // 7-Day Expiry
                     .exec()
                     .catch(err => console.error(`Error saving checkpoint for ${roomId}:`, err));
+            }
+            else if (messageType === MSG_HEARTBEAT) {
+                // MoE Rider: Strictly echo the heartbeat directly back to the originating socket
+                // DO NOT broadcast this to the entire room to save bandwidth and battery.
+                if (ws.readyState === WebSocket.OPEN) {
+                    ws.send(payload);
+                }
             }
         });
 
