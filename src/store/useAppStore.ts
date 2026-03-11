@@ -954,6 +954,18 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (updates.isExpanded !== undefined) {
         yTask.set('isExpanded', updates.isExpanded);
       }
+      if (updates.sub_steps !== undefined) {
+        let ySubSteps = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
+        if (!ySubSteps) {
+          ySubSteps = new Y.Array<Y.Map<any>>();
+          yTask.set('sub_steps', ySubSteps);
+        } else {
+          ySubSteps.delete(0, ySubSteps.length);
+        }
+        updates.sub_steps.forEach(step => {
+          ySubSteps.push([bindCubitStepToYMap(step)]);
+        });
+      }
     });
   },
 

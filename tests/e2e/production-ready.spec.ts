@@ -243,11 +243,32 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // so this overrides the beforeEach mock and survives all reloads within this test.
     // generateSubSteps expects a string[] response, not the task objects from beforeEach.
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
+      if (route.request().method() === 'OPTIONS') {
+        await route.fulfill({
+          status: 200,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': '*',
+          }
+        });
+        return;
+      }
+
       const json = {
-        candidates: [{ content: { parts: [{ text: JSON.stringify(['Step A', 'Step B', 'Step C', 'Step D']) }] } }],
+        candidates: [
+          {
+            content: { parts: [{ text: JSON.stringify(['Step A', 'Step B', 'Step C', 'Step D']) }] },
+            finishReason: 'STOP',
+            role: 'model'
+          }
+        ]
       };
       await new Promise((res) => setTimeout(res, 500)); // Delay for 'Thinking...' assertion
-      await route.fulfill({ json });
+      await route.fulfill({
+        json,
+        headers: { 'Access-Control-Allow-Origin': '*' }
+      });
     });
 
     // Large viewport ensures Virtuoso (useWindowScroll) renders task items
@@ -271,11 +292,13 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
         },
       ]);
       (window as unknown as CustomWindow).__STORE__.setState({ projectType: 'text' });
+    });
 
-      // Wait for the Yjs Observer Throttle to flush into the React State
-      await new Promise(r => setTimeout(r, 200));
+    // 2. Deterministically wait for rAF flush in headless browsers using Playwright native polling
+    await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__.getState().tasks.length > 0);
 
-      // Explicitly flush to IDB via raw IndexedDB API.
+    // 3. Explicitly flush to IDB via raw IndexedDB API.
+    await page.evaluate(async () => {
       // idb-keyval uses database 'keyval-store' with object store 'keyval'.
       const state = (window as unknown as CustomWindow).__STORE__.getState();
       const payload = {
@@ -329,9 +352,20 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await expect(page.getByText('Thinking...')).toBeVisible({ timeout: 5000 });
 
     // 4. Verify Auto-Expansion (Steps should appear without manual expand)
-    // Extended timeout: mock API has to respond + Virtuoso must render + isExpanded must trigger
-    // Use .first() because PrintableReport renders a hidden table also containing these texts.
-    await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 15000 });
+    // Wait for CRDT observer to flush sub_steps into Zustand store
+    await page.waitForFunction(
+      () => {
+        const tasks = (window as unknown as CustomWindow).__STORE__?.getState().tasks;
+        return tasks?.[0]?.sub_steps?.length > 0;
+      },
+      { timeout: 15000 },
+    );
+
+    // Scroll recipe section into view — Virtuoso only renders near scroll position
+    await page.getByRole('heading', { name: 'Your Distilled Recipe:' }).scrollIntoViewIfNeeded();
+    await page.waitForTimeout(500); // Allow Virtuoso to render after scroll
+
+    await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Step B').first()).toBeVisible({ timeout: 5000 });
 
     // 5. Wait for auto-save debounce (500ms) + IDB write, then reload
