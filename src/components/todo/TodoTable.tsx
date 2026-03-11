@@ -369,7 +369,6 @@ export default function TodoTable() {
                 rawSteps[3] || '',
             ];
             setTodoSteps(rowId, steps);
-            setActiveMode(null); // Reset to Neutral
         } catch (e) {
             const err = e as Error;
             const parsedMsg = parseGeminiError(err);
@@ -385,6 +384,7 @@ export default function TodoTable() {
                 toast.error('Cubit Failed', { description: parsedMsg });
             }
         } finally {
+            setActiveMode(null);
             setProcessingRowId(null);
         }
     }, [setTodoSteps, setActiveMode, setProcessingRowId]);
@@ -420,7 +420,6 @@ export default function TodoTable() {
                 rawSteps[3] || '',
             ];
             setTodoSteps(newRowId, steps);
-            setActiveMode(null); // Reset to Neutral
         } catch (e) {
             const err = e as Error;
             const parsedMsg = parseGeminiError(err);
@@ -436,6 +435,7 @@ export default function TodoTable() {
                 toast.error('Deep Dive Failed', { description: parsedMsg });
             }
         } finally {
+            setActiveMode(null);
             setProcessingRowId(null);
         }
     }, [insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId]);
