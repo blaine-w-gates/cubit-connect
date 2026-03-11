@@ -102,6 +102,15 @@ function EditableCell({
         if (draft !== value) onSave(draft);
     };
 
+    // Auto-save draft after 800ms of typing pause (Seamless Collaborative Feel)
+    useEffect(() => {
+        if (!editing || draft === value) return;
+        const timer = setTimeout(() => {
+            onSave(draft);
+        }, 800);
+        return () => clearTimeout(timer);
+    }, [draft, editing, onSave, value]);
+
     // Auto-resize textarea
     useEffect(() => {
         if (editing && inputRef.current) {

@@ -125,13 +125,9 @@ export class NetworkSync {
                     }
 
                     if (messageType === MSG_ROOM_EMPTY) {
-                        // The Dumb Relay indicates the room is brand new.
-                        // Seed the room by uploading our entire local database so other devices can sync.
                         console.log('🌱 Room is empty. Uploading Genesis Checkpoint...');
                         const fullState = Y.encodeStateAsUpdate(this.ydoc);
                         this.broadcastCheckpoint(fullState);
-
-                        // Release the Genesis Lock since we are the first!
                         this.catchUpLock = false;
                         return;
                     } 
@@ -171,17 +167,19 @@ export class NetworkSync {
                         }
 
                     } else if (messageType === MSG_UPDATE) {
+                        console.log(`📥 [INBOUND] Received live P2P Diff (${encryptedPayload.length} bytes)`);
                         // BAND 1: Live Peer Diffs
                         // SYNCHRONICITY TRAP: If a peer types while we are downloading the checkpoint,
                         // applying their diff *before* the checkpoint mathematically corrupts the vector clock.
                         if (this.catchUpLock) {
-                            console.warn('⏳ Dropping live diff because Genesis Catch-Up is still locking.');
+                            console.warn('⏳ [INBOUND] Dropping live diff because Genesis Catch-Up is still locking.');
                             return;
                         }
 
                         this.ydoc.transact(() => {
                             Y.applyUpdate(this.ydoc, yjsData);
                         }, 'network');
+                        console.log(`🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!`);
                     }
                 } catch (err) {
                     console.warn("🛡️ E2EE Payload Rejected (Possible wrong password or corrupted packet):", err);
@@ -272,6 +270,8 @@ export class NetworkSync {
             const payload = new Uint8Array(ciphertext.length + 1);
             payload[0] = MSG_UPDATE;
             payload.set(ciphertext, 1);
+
+            console.log(`📡 [OUTBOUND] Sending live P2P Diff (${payload.length} bytes)`);
 
             // Push the fully encrypted, tiny byte-array into the emergency OS buffer queue
             this.pendingDiffs.push(payload);
