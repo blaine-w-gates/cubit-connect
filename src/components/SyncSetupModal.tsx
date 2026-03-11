@@ -17,6 +17,25 @@ export default function SyncSetupModal() {
     const [passphrase, setPassphrase] = useState('');
     const [error, setError] = useState('');
 
+    // Passphrase Strength Calculation
+    const getStrength = (p: string): { score: number; label: string; color: string } => {
+        if (p.length === 0) return { score: 0, label: '', color: 'bg-zinc-200 dark:bg-stone-700' };
+        let score = 0;
+        if (p.length >= 12) score++;
+        if (p.length >= 16) score++;
+        if (/[A-Z]/.test(p) && /[a-z]/.test(p)) score++;
+        if (/[0-9]/.test(p)) score++;
+        if (/[^A-Za-z0-9]/.test(p)) score++;
+        if (p.length >= 20) score++;
+
+        if (score <= 1) return { score: 1, label: 'Weak', color: 'bg-red-500' };
+        if (score <= 2) return { score: 2, label: 'Fair', color: 'bg-amber-500' };
+        if (score <= 4) return { score: 3, label: 'Strong', color: 'bg-emerald-500' };
+        return { score: 4, label: 'Fortress', color: 'bg-blue-500' };
+    };
+
+    const strength = getStrength(passphrase);
+
     // Reset form when modal opens
     useEffect(() => {
         if (isSyncModalOpen) {
@@ -31,8 +50,8 @@ export default function SyncSetupModal() {
         e.preventDefault();
         setError('');
 
-        if (!passphrase || passphrase.trim().length < 8) {
-            setError('Passphrase must be at least 8 characters long.');
+        if (!passphrase || passphrase.trim().length < 12) {
+            setError('Passphrase must be at least 12 characters. This is your encryption key — make it strong.');
             return;
         }
 
@@ -137,7 +156,32 @@ export default function SyncSetupModal() {
                                         <ShieldAlert className="w-4 h-4" /> {error}
                                     </p>
                                 )}
+                                {passphrase.length > 0 && (
+                                    <div className="mt-3 space-y-1.5">
+                                        <div className="flex gap-1">
+                                            {[1, 2, 3, 4].map(i => (
+                                                <div
+                                                    key={i}
+                                                    className={`h-1.5 flex-1 rounded-full transition-all duration-300 ${
+                                                        i <= strength.score ? strength.color : 'bg-zinc-200 dark:bg-stone-700'
+                                                    }`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <p className={`text-xs font-medium ${
+                                            strength.score <= 1 ? 'text-red-500' :
+                                            strength.score <= 2 ? 'text-amber-500' :
+                                            strength.score <= 3 ? 'text-emerald-500' : 'text-blue-500'
+                                        }`}>
+                                            {strength.label} {passphrase.length < 12 && `— ${12 - passphrase.length} more characters needed`}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
+
+                            <p className="text-xs text-zinc-400 dark:text-stone-500 leading-relaxed">
+                                Your passphrase is your <strong>encryption key</strong>. Anyone with the same passphrase can join your room and read your data. Use something long and unique — treat it like a crypto wallet seed phrase.
+                            </p>
 
                             <button
                                 type="submit"
