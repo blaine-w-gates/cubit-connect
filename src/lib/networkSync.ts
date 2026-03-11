@@ -116,18 +116,13 @@ export class NetworkSync {
                 try {
                     const encryptedPayload = new Uint8Array(event.data);
 
-                    // Native Unencrypted Heartbeat Intercept
-                    if (encryptedPayload.length === 1 && encryptedPayload[0] === MSG_HEARTBEAT) {
+                    // Extract Unencrypted Native Header
+                    const messageType = encryptedPayload[0];
+
+                    if (messageType === MSG_HEARTBEAT) {
                         if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout);
                         return;
                     }
-
-                    const decrypted = await decryptUpdate(encryptedPayload, this.key!);
-
-                    if (decrypted.length === 0) return;
-
-                    const messageType = decrypted[0];
-                    const yjsData = decrypted.slice(1);
 
                     if (messageType === MSG_ROOM_EMPTY) {
                         // The Dumb Relay indicates the room is brand new.
@@ -138,7 +133,15 @@ export class NetworkSync {
 
                         // Release the Genesis Lock since we are the first!
                         this.catchUpLock = false;
-                    } else if (messageType === MSG_CHECKPOINT) {
+                        return;
+                    } 
+                    
+                    // IF WE REACH HERE, IT'S ENCRYPTED DATA
+                    const decrypted = await decryptUpdate(encryptedPayload.slice(1), this.key!);
+                    if (decrypted.length === 0) return;
+                    const yjsData = decrypted;
+
+                    if (messageType === MSG_CHECKPOINT) {
                         // BAND 2: The Genesis Checkpoint
 
                         // THE CHECKPOINT STORM PREVENTION:
@@ -261,15 +264,18 @@ export class NetworkSync {
     async broadcastUpdate(update: Uint8Array) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
 
-        const payload = new Uint8Array(update.length + 1);
-        payload[0] = MSG_UPDATE;
-        payload.set(update, 1);
-
         try {
-            const ciphertext = await encryptUpdate(payload, this.key);
+            // Encrypt the Yjs Update directly
+            const ciphertext = await encryptUpdate(update, this.key);
+            
+            // Prepend UNENCRYPTED routing byte so the Dumb Relay can parse it
+            const payload = new Uint8Array(ciphertext.length + 1);
+            payload[0] = MSG_UPDATE;
+            payload.set(ciphertext, 1);
+
             // Push the fully encrypted, tiny byte-array into the emergency OS buffer queue
-            this.pendingDiffs.push(ciphertext);
-            this.ws.send(ciphertext);
+            this.pendingDiffs.push(payload);
+            this.ws.send(payload);
         } catch (e) {
             console.error("Encryption failed before sending P2P diff:", e);
         }
@@ -281,13 +287,16 @@ export class NetworkSync {
     async broadcastCheckpoint(fullUpdate: Uint8Array) {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
 
-        const payload = new Uint8Array(fullUpdate.length + 1);
-        payload[0] = MSG_CHECKPOINT;
-        payload.set(fullUpdate, 1);
-
         try {
-            const ciphertext = await encryptUpdate(payload, this.key);
-            this.ws.send(ciphertext);
+            // Encrypt the Yjs Update directly
+            const ciphertext = await encryptUpdate(fullUpdate, this.key);
+
+            // Prepend UNENCRYPTED routing byte so the Dumb Relay can parse it
+            const payload = new Uint8Array(ciphertext.length + 1);
+            payload[0] = MSG_CHECKPOINT;
+            payload.set(ciphertext, 1);
+
+            this.ws.send(payload);
 
             // The massive Checkpoint contains all prior history mathematically. 
             // We can safely garbage-collect the pending tiny diffs queue.
