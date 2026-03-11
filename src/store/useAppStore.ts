@@ -147,7 +147,7 @@ let isMigrating = false;
 
 // E2EE WEBSOCKET MANAGER
 let networkSync: NetworkSync | null = null;
-const SYNC_SERVER_URL = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-connect.onrender.com';
+const SYNC_SERVER_URL = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 
 export const useAppStore = create<ProjectState>((set, get) => ({
