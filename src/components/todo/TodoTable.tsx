@@ -284,6 +284,7 @@ export default function TodoTable() {
         activeProjectId,
         activeMode,
         processingRowId,
+        lastAddedRowId,
         priorityDials,
         setActiveMode,
         setProcessingRowId,
@@ -303,6 +304,7 @@ export default function TodoTable() {
             activeProjectId: s.activeProjectId,
             activeMode: s.activeMode,
             processingRowId: s.processingRowId,
+            lastAddedRowId: s.lastAddedRowId,
             priorityDials: s.priorityDials,
             setActiveMode: s.setActiveMode,
             setProcessingRowId: s.setProcessingRowId,
@@ -666,6 +668,7 @@ export default function TodoTable() {
                                             onDoubleClick={() => handleDoubleClickEmptyRow(row)}
                                             onTouchStart={(e: React.TouchEvent) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
                                             onTouchEnd={(e: React.TouchEvent) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+                                            lastAddedRowId={lastAddedRowId}
                                             onTaskClick={(e: React.MouseEvent) => {
                                                 if (window.getSelection()?.toString()) return;
                                                 if (activeMode === 'cubit') {
@@ -738,6 +741,7 @@ export default function TodoTable() {
                                     onDoubleClick={() => { }}
                                     onTouchStart={() => { }}
                                     onTouchEnd={() => { }}
+                                    lastAddedRowId={lastAddedRowId}
                                     onTaskClick={() => { }}
                                     onToggleComplete={() => { }}
                                     onDelete={() => { }}
@@ -779,6 +783,7 @@ interface SortableRowProps {
     onRabbitAdvance: (rowId: string, currentStepIdx: number) => void;
     explosionTargetId: string | null;
     isRabbitDragging: boolean;
+    lastAddedRowId: string | null;
 }
 
 // --- Droppable Step Cell Component ---
@@ -836,7 +841,7 @@ function SortableRow({
     row, isProcessing, isCompleted, activeMode: _activeMode, isModeActive,
     isTaskActionTarget, isStepActionTarget, mc,
     onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
-    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging
+    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId
 }: SortableRowProps) {
     const {
         attributes,
@@ -945,7 +950,7 @@ function SortableRow({
                         onSave={onTaskSave}
                         placeholder="Type a task…"
                         disabled={isModeActive}
-                        autoFocus={!row.task.trim()}
+                        autoFocus={row.id === lastAddedRowId}
                         className="text-zinc-700 dark:text-stone-300"
                     />
                 </div>

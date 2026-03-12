@@ -103,6 +103,8 @@ export interface ProjectState {
   setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
   processingRowId: string | null; // UI-only state — NOT persisted
   setProcessingRowId: (rowId: string | null) => void;
+  lastAddedRowId: string | null; // UI-only local state: safely auto-focuses new tasks without network collisions
+  setLastAddedRowId: (rowId: string | null) => void;
   // Project management actions (Book Tabs)
   addTodoProject: (name?: string) => void;
   setActiveProject: (projectId: string) => void;
@@ -207,6 +209,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setActiveMode: (mode) => set({ activeMode: mode }),
   processingRowId: null,
   setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
+  lastAddedRowId: null,
+  setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
 
   // --- Network Sync Actions & State ---
   syncStatus: 'disconnected',
@@ -322,9 +326,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // Sort ordering: put new item at the top (before the first item)
     const prevFirstKey = todoRows.length > 0 ? todoRows[0].orderKey : undefined;
     const orderKey = generateOrderKey(undefined, prevFirstKey);
+    const newRowId = crypto.randomUUID();
 
     const newRow: TodoRow = {
-      id: crypto.randomUUID(),
+      id: newRowId,
       task,
       steps: [{ ...emptyStep }, { ...emptyStep }, { ...emptyStep }, { ...emptyStep }],
       isCompleted: false,
@@ -335,6 +340,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       console.log('✅ addTodoRow: Transacting Yjs set for row', newRow.id);
       yRows.set(newRow.id, bindTodoRowToYMap(newRow, orderKey));
     });
+
+    // Safely auto-focus the new row locally
+    set({ lastAddedRowId: newRowId });
   },
 
   deleteTodoRow: (rowId: string) => {
@@ -473,6 +481,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       yRows.set(newId, bindTodoRowToYMap(newRow, orderKey));
     });
 
+    set({ lastAddedRowId: newId });
     return newId;
   },
 
