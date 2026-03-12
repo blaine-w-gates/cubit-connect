@@ -107,6 +107,21 @@ export class NetworkSync {
                 const payload = new Uint8Array([MSG_REQUEST_CACHE]);
                 // Request Cache packet does not need encryption, it just triggers the server playback
                 this.ws?.send(payload);
+
+                // --- DEADLOCK WATCHDOG (The "Founder" Resolution) ---
+                // If we are the FIRST peer in an empty room, the server might not send a Checkpoint.
+                // We deploy a 2.5s watchdog to automatically unlock and assume "Founder" status.
+                setTimeout(() => {
+                    if (this.catchUpLock && this.ws?.readyState === WebSocket.OPEN) {
+                        console.log('⚡ [SYNC] Watchdog Timeout: No checkpoint received. Assuming Founder status. Unlocking Live Diffs.');
+                        this.catchUpLock = false;
+                        
+                        // Seed the empty server with our Genesis Checkpoint
+                        const fullState = Y.encodeStateAsUpdate(this.ydoc);
+                        this.broadcastCheckpoint(fullState);
+                    }
+                }, 2500);
+
                 resolve();
             };
 
