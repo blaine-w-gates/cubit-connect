@@ -116,7 +116,12 @@ export const storageService = {
       console.error('Failed to save project to IndexedDB:', error);
       const err = error as Error;
       if (err?.name === 'QuotaExceededError') {
-        alert('⚠️ Storage Full! Please EXPORT a backup immediately.');
+        if (typeof window !== 'undefined') {
+          import('@/store/useAppStore').then(({ useAppStore }) => {
+            useAppStore.getState().setIsSettingsOpen(true);
+          });
+        }
+        alert('⚠️ Storage full! Open Settings to export and clear data.');
       }
       throw error;
     }
@@ -218,5 +223,28 @@ export const storageService = {
     return allKeys
       .map(k => String(k))
       .filter(k => k.startsWith('cubit_'));
+  },
+
+  /**
+   * Estimate storage usage and quota for this origin.
+   * Returns null if Storage API is unavailable (e.g. non-secure context).
+   */
+  async getStorageEstimate(): Promise<{ usage: number; quota: number } | null> {
+    if (typeof navigator === 'undefined' || !navigator.storage?.estimate) return null;
+    try {
+      const { usage = 0, quota = 0 } = await navigator.storage.estimate();
+      return { usage, quota };
+    } catch {
+      return null;
+    }
+  },
+
+  /**
+   * Returns true if storage usage is above 80% of quota (warn user).
+   */
+  async isStorageNearLimit(): Promise<boolean> {
+    const est = await this.getStorageEstimate();
+    if (!est || est.quota <= 0) return false;
+    return est.usage / est.quota >= 0.8;
   },
 };

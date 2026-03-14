@@ -18,12 +18,12 @@ multi-device sync E2E tests. Session 3 implemented Epic 1 (Workspace
 Infrastructure): device identity, schema metadata, namespaced IndexedDB
 storage, legacy data migration, and workspace selector UI. Session 3b
 implemented Y.Doc isolation and disconnect/reconnect UX (Epic 2.1–2.2).
-Session 4 added 3 stress test scenarios (Epic 2.3), error boundary with Yjs
-recovery (Epic 3.1), and fixed accessibility contrast violations (Epic 3.2).
+Session 4 added stress tests (2.3), error boundary (3.1), a11y contrast (3.2).
+Session 5 added storage quota monitoring (2.4), y-indexeddb evaluation (2.5),
+nested interactive a11y fix (3.3).
 
 Current focus:
-- Storage quota monitoring + incremental IDB persistence (Epic 2.4–2.5).
-- Mobile nav + nested interactive a11y fix (Epic 3.3–3.4).
+- Mobile nav improvements (Epic 3.4).
 - NOT building team/subscription features yet.
 
 ### Milestone Targets

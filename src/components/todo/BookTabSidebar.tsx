@@ -129,15 +129,14 @@ function SortableProjectTab({
 
     return (
         <div>
-            {/* Tab row */}
+            {/* Tab row — listitem with sibling buttons (no nested interactives) */}
             <div
                 ref={setNodeRef}
                 style={style}
                 {...attributes}
                 {...listeners}
-                onClick={() => { if (!isEditing && !isColorOpen) onProjectClick(project.id); }}
-                onDoubleClick={() => { if (!isEditing) onStartEditing(project.id, project.name); }}
-                className={`group relative flex items-center gap-2 px-2 py-2 rounded-md cursor-pointer
+                role="listitem"
+                className={`group relative flex items-center gap-2 px-2 py-2 rounded-md
                     transition-all text-sm select-none
                     ${isActive
                         ? 'bg-white dark:bg-stone-800 shadow-sm border-l-4'
@@ -145,11 +144,11 @@ function SortableProjectTab({
                     }
                 `}
             >
-                {/* Color dot — single tap opens accordion */}
+                {/* Color dot — sibling button, not nested */}
                 <button
                     type="button"
                     onClick={(e) => {
-                        e.stopPropagation(); // Don't switch project
+                        e.stopPropagation();
                         onColorDotTap(project.id);
                     }}
                     className={`w-4 h-4 rounded-full flex-shrink-0 transition-all duration-150
@@ -158,10 +157,10 @@ function SortableProjectTab({
                     `}
                     style={{ backgroundColor: project.color }}
                     title="Tap to change color"
-                    aria-label="Change project color"
+                    aria-label={`Change color for ${project.name}`}
                 />
 
-                {/* Tab name or rename input */}
+                {/* Select/rename — primary action as its own button */}
                 {isEditing ? (
                     <input
                         autoFocus
@@ -174,19 +173,27 @@ function SortableProjectTab({
                         }}
                         className="flex-1 min-w-0 bg-transparent border-b border-zinc-400 dark:border-stone-500 outline-none text-sm px-0.5"
                         onClick={(e) => e.stopPropagation()}
+                        aria-label="Rename project"
                     />
                 ) : (
-                    <span className={`flex-1 min-w-0 break-words ${isActive
-                        ? 'font-semibold text-zinc-900 dark:text-stone-100'
-                        : 'text-zinc-600 dark:text-stone-400'}`}
+                    <button
+                        type="button"
+                        onClick={() => { if (!isColorOpen) onProjectClick(project.id); }}
+                        onDoubleClick={() => onStartEditing(project.id, project.name)}
+                        className={`flex-1 min-w-0 text-left break-words bg-transparent border-none cursor-pointer p-0 ${isActive
+                            ? 'font-semibold text-zinc-900 dark:text-stone-100'
+                            : 'text-zinc-600 dark:text-stone-400'
+                        }`}
+                        aria-label={`Select project ${project.name}`}
                     >
                         {project.name}
-                    </span>
+                    </button>
                 )}
 
-                {/* Delete */}
+                {/* Delete — sibling button */}
                 {canDelete && !isEditing && (
                     <button
+                        type="button"
                         onClick={(e) => { e.stopPropagation(); onProjectDelete(project.id); }}
                         className="opacity-0 group-hover:opacity-100 hover-reveal text-zinc-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 transition-all flex-shrink-0"
                         title="Delete project"

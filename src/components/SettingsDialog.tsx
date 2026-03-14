@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { GeminiService } from '@/services/gemini';
-import { LogOut } from 'lucide-react';
+import { storageService } from '@/services/storage';
+import { LogOut, HardDrive, Download } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+
+function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 const Spinner = ({ className }: { className?: string }) => (
   <svg
@@ -31,11 +38,17 @@ export default function SettingsDialog() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
+  const [storageEst, setStorageEst] = useState<{ usage: number; quota: number } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    storageService.getStorageEstimate().then(setStorageEst);
+  }, [open]);
 
   // Sync input with store when opening, if needed.
   // But usually we want to keep input clear for security or show masked.
@@ -132,6 +145,27 @@ export default function SettingsDialog() {
             Google AI Studio
           </a>
         </p>
+
+        {/* Storage Section */}
+        {storageEst && storageEst.quota > 0 && (
+          <div className="mb-6 pt-6 border-t border-zinc-200 dark:border-stone-700">
+            <div className="flex items-center gap-2 text-zinc-700 dark:text-stone-300 mb-2">
+              <HardDrive className="w-4 h-4" />
+              <span className="text-sm font-medium">Local Storage</span>
+            </div>
+            <p className={`text-sm mb-3 ${storageEst.usage / storageEst.quota >= 0.8 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-zinc-600 dark:text-stone-400'}`}>
+              {formatBytes(storageEst.usage)} of {formatBytes(storageEst.quota)} used
+              {storageEst.usage / storageEst.quota >= 0.8 && ' — approaching limit'}
+            </p>
+            <button
+              onClick={() => useAppStore.getState().exportAndClearData()}
+              className="w-full py-2.5 px-4 font-semibold rounded-lg border border-zinc-200 dark:border-stone-700 text-zinc-700 dark:text-stone-300 hover:bg-zinc-50 dark:hover:bg-stone-800 transition-colors flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Export & Clear Data
+            </button>
+          </div>
+        )}
 
         {/* Disconnect Section */}
         {apiKey && (

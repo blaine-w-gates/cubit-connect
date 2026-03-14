@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { getSafeFilename, generateMarkdown } from '@/utils/exportUtils';
+import { getSafeFilename, generateMarkdown, generateAllProjectsMarkdown } from '@/utils/exportUtils';
 import { TaskItem } from '@/services/storage';
+import type { TodoProject } from '@/schemas/storage';
 
 describe('getSafeFilename', () => {
   it('should replace special characters with underscores', () => {
@@ -79,5 +80,29 @@ describe('generateMarkdown', () => {
     expect(md).toContain('1. [ ] L1');
     expect(md).toContain('    - L2');
     expect(md).toContain('        - L3');
+  });
+});
+
+describe('generateAllProjectsMarkdown', () => {
+  it('returns placeholder for empty projects', () => {
+    const md = generateAllProjectsMarkdown([]);
+    expect(md).toContain('No projects');
+  });
+
+  it('includes project names as section titles', () => {
+    const emptyStep = { text: '', isCompleted: false };
+    const projects: TodoProject[] = [
+      {
+        id: 'p1',
+        name: 'Project A',
+        color: '#22D3EE',
+        todoRows: [{ id: 'r1', task: 'Task 1', steps: [{ text: 'Step 1', isCompleted: false }, emptyStep, emptyStep, emptyStep], isCompleted: false }],
+        priorityDials: { left: '', right: '', focusedSide: 'none' },
+        createdAt: Date.now(),
+      },
+    ];
+    const md = generateAllProjectsMarkdown(projects);
+    expect(md).toContain('# Project A');
+    expect(md).toContain('Task 1');
   });
 });

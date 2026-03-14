@@ -94,7 +94,7 @@ export const downloadMarkdown = (tasks: TaskItem[], title: string = 'cubit-expor
 };
 
 // --- Todo Page Export ---
-import { TodoRow, PriorityDials } from '@/schemas/storage';
+import type { TodoRow, PriorityDials, TodoProject } from '@/schemas/storage';
 
 export const generateTodoMarkdown = (
   todoRows: TodoRow[],
@@ -145,4 +145,26 @@ export const generateTodoMarkdown = (
   }
 
   return md;
+};
+
+// --- Export all todo projects (for storage clear backup) ---
+export const generateAllProjectsMarkdown = (projects: TodoProject[]): string => {
+  if (projects.length === 0) return '# Cubit Connect Export\n\nNo projects.\n';
+  return projects
+    .map((p) => generateTodoMarkdown(p.todoRows || [], p.priorityDials || { left: '', right: '', focusedSide: 'none' }, p.name))
+    .join('\n\n---\n\n');
+};
+
+export const downloadAllProjectsMarkdown = (projects: TodoProject[], filenameBase = 'cubit-backup') => {
+  const md = generateAllProjectsMarkdown(projects);
+  const filename = `${getSafeFilename(filenameBase)}-${Date.now()}.md`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 };

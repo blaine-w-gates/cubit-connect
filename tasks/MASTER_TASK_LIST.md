@@ -109,21 +109,15 @@ across 2–3 personal devices.
 - All pass on Chrome; Safari rapid-creates is flaky due to WebKit relay latency
 - Wrong passphrase isolation already covered by existing test
 
-### 2.4 Storage quota monitoring
-- Track approximate IDB usage per namespace
-- Warn user when approaching browser storage limits
-- Offer "Export and clear old data" option
-- **Files**: `src/services/storage.ts`, `src/components/SyncSetupModal.tsx` or settings
-- **Effort**: Small (2 hrs)
-- **Test tier**: quick
+### 2.4 Storage quota monitoring ✅
+- Added `getStorageEstimate()` and `isStorageNearLimit()` to storageService (navigator.storage.estimate)
+- Settings dialog shows "Local Storage" section with usage/quota and "Export & Clear Data" button
+- QuotaExceededError on save now opens Settings and alerts user
+- Added `exportAndClearData()` store action and `downloadAllProjectsMarkdown()` for backup before clear
 
-### 2.5 Incremental IDB persistence
-- Currently saves full `Y.encodeStateAsUpdate(ydoc)` every 500ms
-- Evaluate `y-indexeddb` provider for incremental updates
-- If adopted: replace custom persistence; if not: document why
-- **Files**: `src/store/useAppStore.ts`, possibly `src/services/storage.ts`
-- **Effort**: Medium (3 hrs)
-- **Test tier**: quick + sync
+### 2.5 Incremental IDB persistence ✅ (evaluated, deferred)
+- Documented in `docs/adr-002-y-indexeddb-evaluation.md`
+- Decision: Defer adoption. Current full-state save works for typical use; revisit when doc size or performance becomes an issue.
 
 ---
 
@@ -146,12 +140,9 @@ without surprises, and prepare the foundation for team features.
 - ActionBar Dial Right inactive: `text-yellow-600` → `text-yellow-700` (ratio 4.64 on bg-zinc-100)
 - PriorityDials labels already used `text-green-700`/`text-yellow-700` — no change needed
 
-### 3.3 Fix nested interactive control (a11y)
-- Project card has `role="button"` with a nested color-change button
-- Restructure so screen readers can announce both actions
-- **Files**: `src/components/todo/ProjectCard.tsx` or equivalent
-- **Effort**: Small (30 min)
-- **Test tier**: full
+### 3.3 Fix nested interactive control (a11y) ✅
+- Restructured project tab in BookTabSidebar: `role="listitem"` with three sibling buttons (color, select, delete)
+- Select/rename is now a dedicated button; no nested interactives
 
 ### 3.4 Mobile navigation improvements
 - Hamburger menu close-on-navigate
@@ -221,7 +212,7 @@ documented here so implementation decisions in Epics 1–3 don't conflict.
 | **3** | Epic 1 | Device identity + schema + namespace + migration + workspace UI ✅ | Complete |
 | **3b** | Epic 2 (2.1–2.2) | Y.Doc isolation + disconnect/reconnect UX ✅ | Complete |
 | **4** | Epic 2 (2.3) + Epic 3 (3.1–3.2) | Stress tests + error boundary + a11y fixes ✅ | Complete |
-| **5** | Epic 2 (2.4–2.5) | Storage quota + incremental persistence | 4–6 hrs |
-| **6** | Epic 3 (3.3–3.4) | Nested interactive fix + mobile nav | 3–4 hrs |
+| **5** | Epic 2 (2.4–2.5) + Epic 3 (3.3) | Storage quota + y-indexeddb eval + nested a11y ✅ | Complete |
+| **6** | Epic 3 (3.4) | Mobile nav improvements | 3–4 hrs |
 | **7** | Epic 3 | Ownership tracking + observer optimization + stabilization | 4–6 hrs |
 | **8** | Epic 4 | Team architecture ADRs + manager route scaffold | 4–6 hrs |

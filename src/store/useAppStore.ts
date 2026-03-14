@@ -91,6 +91,7 @@ export interface ProjectState {
   updateTask: (taskId: string, updates: Partial<TaskItem>) => Promise<void>;
   deleteTask: (taskId: string) => Promise<void>;
   resetProject: () => Promise<void>;
+  exportAndClearData: () => Promise<void>;
   fullLogout: () => Promise<void>;
   importTasks: (tasks: TaskItem[]) => Promise<void>;
   setProcessing: (isProcessing: boolean) => void;
@@ -1333,6 +1334,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       processingRowId: null,
       nextProjectNumber: 2, // "My First Project" was #1
     });
+  },
+
+  exportAndClearData: async () => {
+    const { todoProjects, resetProject } = get();
+    const { downloadAllProjectsMarkdown } = await import('@/utils/exportUtils');
+    downloadAllProjectsMarkdown(todoProjects, 'cubit-backup');
+    await resetProject();
   },
 
   fullLogout: async () => {
