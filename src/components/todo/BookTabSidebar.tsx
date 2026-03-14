@@ -336,7 +336,7 @@ export default function BookTabSidebar() {
 
                         {/* Header */}
                         <div className="flex items-center justify-between px-3 py-3 border-b border-zinc-200 dark:border-stone-700">
-                            <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-stone-400">
+                            <span className="text-xs font-mono uppercase tracking-widest text-zinc-600 dark:text-stone-400">
                                 Projects
                             </span>
                             <button
@@ -413,7 +413,7 @@ export default function BookTabSidebar() {
 
                         {/* Footer */}
                         <div className="px-3 py-2 border-t border-zinc-200 dark:border-stone-700">
-                            <span className="text-[10px] font-mono text-zinc-500 dark:text-stone-400">
+                            <span className="text-[10px] font-mono text-zinc-600 dark:text-stone-400">
                                 {todoProjects.length} {todoProjects.length === 1 ? 'project' : 'projects'}
                             </span>
                         </div>

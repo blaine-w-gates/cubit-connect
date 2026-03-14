@@ -506,4 +506,182 @@ test.describe('Multi-device sync e2e', () => {
       await d3.context.close();
     }
   });
+
+  test('Rapid project creates across 3 devices converge', async ({ browser }) => {
+    test.setTimeout(180000);
+    const room = `sync-room-${Date.now()}-rapid`;
+
+    const d1 = await setupDevice(browser);
+    const d2 = await setupDevice(browser);
+    const d3 = await setupDevice(browser);
+
+    try {
+      await connectDevice(d1.page, room);
+      await connectDevice(d2.page, room);
+      await connectDevice(d3.page, room);
+
+      const devices = [d1, d2, d3];
+      const names: string[] = [];
+      for (let i = 0; i < 5; i++) {
+        const name = `Rapid-${i}-${Date.now()}`;
+        names.push(name);
+        const device = devices[i % 3];
+        await device.page.evaluate((n) => {
+          (window as any).__STORE__.getState().addTodoProject(n);
+        }, name);
+        await device.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
+      }
+
+      // Multiple rounds of flush + reconnect to ensure relay propagation
+      for (let round = 0; round < 2; round++) {
+        for (const d of devices) {
+          await d.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
+        }
+        for (const d of devices) {
+          await reconnectAndCatchUp(d.page, room);
+        }
+      }
+
+      for (const name of names) {
+        await waitForProject(d1.page, name, 30000);
+        await waitForProject(d2.page, name, 30000);
+        await waitForProject(d3.page, name, 30000);
+      }
+    } finally {
+      await d1.context.close();
+      await d2.context.close();
+      await d3.context.close();
+    }
+  });
+
+  test('Rapid typing on same task from 2 devices converges', async ({ browser }) => {
+    test.setTimeout(90000);
+    const room = `sync-room-${Date.now()}-typing`;
+    const projectName = `Typing Project-${Date.now()}`;
+    const taskName = `Concurrent Edit-${Date.now()}`;
+
+    const a = await setupDevice(browser);
+    const b = await setupDevice(browser);
+
+    try {
+      await connectDevice(a.page, room);
+      await connectDevice(b.page, room);
+
+      await a.page.evaluate((name) => {
+        (window as any).__STORE__.getState().addTodoProject(name);
+      }, projectName);
+      await waitForProject(b.page, projectName, 10000);
+
+      const projectId = await getProjectIdByName(a.page, projectName);
+      await a.page.evaluate((id) => (window as any).__STORE__.getState().setActiveProject(id), projectId);
+      await b.page.evaluate((id) => (window as any).__STORE__.getState().setActiveProject(id), projectId);
+
+      await a.page.evaluate((task) => {
+        (window as any).__STORE__.getState().addTodoRow(task);
+      }, taskName);
+
+      await b.page.waitForFunction(
+        (task) => (window as any).__STORE__.getState().todoRows.some((r: any) => r.task === task),
+        taskName,
+        { timeout: 10000 },
+      );
+
+      const rowId = await getRowIdByTaskContains(a.page, taskName);
+
+      // Both devices rapidly type into step 0 simultaneously
+      for (let i = 0; i < 10; i++) {
+        await a.page.evaluate(
+          ({ id, text }) => (window as any).__STORE__.getState().updateTodoCell(id, 'step', text, 0),
+          { id: rowId, text: `A-iter-${i}` },
+        );
+        await b.page.evaluate(
+          ({ id, text }) => (window as any).__STORE__.getState().updateTodoCell(id, 'step', text, 1),
+          { id: rowId, text: `B-iter-${i}` },
+        );
+      }
+
+      await a.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
+      await b.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
+      await reconnectAndCatchUp(a.page, room);
+      await reconnectAndCatchUp(b.page, room);
+
+      // Both devices should converge to the same final state
+      const [snapA, snapB] = await Promise.all([
+        a.page.evaluate(({ id }) => {
+          const store = (window as any).__STORE__.getState();
+          for (const p of store.todoProjects) {
+            const row = p.todoRows?.find((r: any) => r.id === id);
+            if (row) return { s0: row.steps?.[0]?.text || '', s1: row.steps?.[1]?.text || '' };
+          }
+          return null;
+        }, { id: rowId }),
+        b.page.evaluate(({ id }) => {
+          const store = (window as any).__STORE__.getState();
+          for (const p of store.todoProjects) {
+            const row = p.todoRows?.find((r: any) => r.id === id);
+            if (row) return { s0: row.steps?.[0]?.text || '', s1: row.steps?.[1]?.text || '' };
+          }
+          return null;
+        }, { id: rowId }),
+      ]);
+
+      expect(snapA).toBeTruthy();
+      expect(snapB).toBeTruthy();
+      expect(snapA).toEqual(snapB);
+      expect((snapA as any).s0).toContain('A-iter');
+      expect((snapA as any).s1).toContain('B-iter');
+    } finally {
+      await a.context.close();
+      await b.context.close();
+    }
+  });
+
+  test('Disconnect/reconnect cycle preserves data integrity', async ({ browser }) => {
+    test.setTimeout(120000);
+    const room = `sync-room-${Date.now()}-cycle`;
+    const projectName = `Cycle Project-${Date.now()}`;
+
+    const a = await setupDevice(browser);
+    const b = await setupDevice(browser);
+
+    try {
+      await connectDevice(a.page, room);
+      await connectDevice(b.page, room);
+
+      await a.page.evaluate((name) => {
+        (window as any).__STORE__.getState().addTodoProject(name);
+      }, projectName);
+      await waitForProject(b.page, projectName, 10000);
+
+      const projectId = await getProjectIdByName(a.page, projectName);
+      await a.page.evaluate((id) => (window as any).__STORE__.getState().setActiveProject(id), projectId);
+
+      // 3 rapid disconnect/reconnect cycles with edits in between
+      for (let cycle = 0; cycle < 3; cycle++) {
+        await a.page.evaluate(() => (window as any).__STORE__.getState().disconnectSyncServer());
+        await a.page.waitForFunction(() => (window as any).__STORE__.getState().syncStatus === 'disconnected');
+
+        await a.page.evaluate((task) => {
+          (window as any).__STORE__.getState().addTodoRow(task);
+        }, `Cycle-${cycle}-Task-${Date.now()}`);
+
+        await connectDevice(a.page, room);
+        await a.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
+      }
+
+      await reconnectAndCatchUp(b.page, room);
+
+      // B should see all 3 tasks created during disconnect cycles
+      const bTaskCount = await b.page.evaluate((pid) => {
+        const store = (window as any).__STORE__.getState();
+        const project = store.todoProjects.find((p: any) => p.id === pid);
+        return project?.todoRows?.length || 0;
+      }, projectId);
+
+      expect(bTaskCount).toBeGreaterThanOrEqual(3);
+    } finally {
+      await a.context.close();
+      await b.context.close();
+    }
+  });
 });

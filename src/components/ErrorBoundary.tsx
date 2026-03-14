@@ -1,146 +1,98 @@
 'use client';
 
-import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, Key, RefreshCcw, Trash2 } from 'lucide-react';
-import { useAppStore } from '@/store/useAppStore';
-import { storageService } from '@/services/storage';
+import React from 'react';
+import { AlertTriangle, RotateCcw, Trash2 } from 'lucide-react';
 
-interface Props {
-  children: ReactNode;
-}
-
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
-  error: Error | unknown;
-  newKey: string;
+  error: Error | null;
 }
 
-export default class ErrorBoundary extends Component<Props, State> {
-  public state: State = {
-    hasError: false,
-    error: null,
-    newKey: '',
-  };
-
-  public static getDerivedStateFromError(error: unknown): State {
-    return { hasError: true, error, newKey: '' };
+export default class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, error: null };
   }
 
-  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Cubit System Failure:', error, errorInfo);
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
+    return { hasError: true, error };
   }
 
-  private getErrorMessage(): string {
-    const e = this.state.error;
-    if (e instanceof Error) return e.message;
-    if (typeof e === 'string') return e;
-    return 'Unknown System Error';
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('ErrorBoundary caught:', error, info.componentStack);
   }
 
-  handleSaveKey = async () => {
-    const key = this.state.newKey.trim();
-    if (!key) return;
-
-
-
-    // 🛡️ DATA SAFETY: Force Save before Reload
-    try {
-      const state = useAppStore.getState();
-      if (state.tasks.length > 0 || state.transcript) {
-        await storageService.saveProject(
-          state.tasks,
-          state.transcript || undefined,
-          state.scoutResults,
-          state.projectType,
-          state.projectTitle,
-          state.scoutTopic,
-          state.scoutPlatform,
-          state.scoutHistory,
-          state.inputMode,
-        );
-      }
-    } catch (e) {
-      console.error('Safety Save Failed:', e);
-    }
-
-    this.setState({ hasError: false, error: null });
+  handleReload = () => {
     window.location.reload();
   };
 
-  handleHardReset = async () => {
-    if (confirm('This will wipe all local data and reset the app. Are you sure?')) {
-      await useAppStore.getState().fullLogout();
+  handleResetData = async () => {
+    try {
+      const { useAppStore } = await import('@/store/useAppStore');
+      await useAppStore.getState().resetProject();
+      this.setState({ hasError: false, error: null });
+    } catch {
       window.location.reload();
     }
   };
 
-  public render() {
-    if (this.state.hasError) {
-      const rawMsg = this.getErrorMessage();
-      const msg = rawMsg.toLowerCase();
-      const isQuota = msg.includes('quota') || msg.includes('429') || msg.includes('limit');
+  render() {
+    if (!this.state.hasError) {
+      return this.props.children;
+    }
 
-      return (
-        <div className="min-h-screen w-full flex flex-col items-center justify-center bg-zinc-50 text-zinc-900 p-6">
-          <div className="max-w-md w-full bg-white border border-zinc-200 shadow-xl rounded-xl p-8">
-            <div
-              className={`w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 ${isQuota ? 'bg-purple-50 text-purple-600' : 'bg-red-50 text-red-600'}`}
-            >
-              {isQuota ? <Key className="w-6 h-6" /> : <AlertTriangle className="w-6 h-6" />}
-            </div>
-            <h1 className="text-xl font-bold text-center mb-2">
-              {isQuota ? 'API Limit Reached' : 'System Error'}
-            </h1>
-            <p className="text-zinc-500 text-sm text-center mb-6 leading-relaxed">
-              {isQuota
-                ? 'You have hit the free tier limit (~20 requests/day). To continue immediately, please enter your own Google Gemini API Key below.'
-                : 'The application encountered a critical error. Your data is safe in local storage.'}
+    const isYjsError = this.state.error?.message?.includes('Y') ||
+      this.state.error?.message?.includes('yjs') ||
+      this.state.error?.message?.includes('CRDT') ||
+      this.state.error?.message?.includes('applyUpdate');
+
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#FAFAFA] dark:bg-stone-950 p-6">
+        <div className="max-w-md w-full bg-white dark:bg-stone-900 rounded-2xl shadow-xl border border-zinc-200 dark:border-stone-800 p-8 text-center space-y-6">
+          <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center">
+            <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+          </div>
+
+          <div>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-stone-100">
+              Something went wrong
+            </h2>
+            <p className="text-sm text-zinc-600 dark:text-stone-400 mt-2">
+              {isYjsError
+                ? 'A data synchronization error occurred. Your data may be corrupted. Try reloading, or reset local data if the problem persists.'
+                : 'An unexpected error occurred. Try reloading the page.'}
             </p>
-            {isQuota ? (
-              <div className="space-y-3">
-                <input
-                  type="password"
-                  placeholder="Paste API Key (AIza...)"
-                  className="w-full px-4 py-2 border border-zinc-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-600"
-                  value={this.state.newKey}
-                  onChange={(e) => this.setState({ newKey: e.target.value })}
-                />
-                <button
-                  onClick={this.handleSaveKey}
-                  disabled={!this.state.newKey}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
-                >
-                  Save & Resume
-                </button>
-                <p className="text-xs text-center text-zinc-400 mt-2">
-                  Keys are stored locally on your device.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="bg-red-50 border border-red-100 p-3 rounded text-xs font-mono text-red-700 overflow-auto max-h-32 break-all">
-                  {rawMsg}
-                </div>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="w-full flex items-center justify-center gap-2 bg-zinc-900 hover:bg-black text-white py-2.5 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <RefreshCcw className="w-4 h-4" />
-                  Reload Application
-                </button>
-                <button
-                  onClick={this.handleHardReset}
-                  className="w-full flex items-center justify-center gap-2 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm font-medium transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  Hard Reset (Clear Data)
-                </button>
-              </div>
-            )}
+          </div>
+
+          {this.state.error && (
+            <div className="bg-zinc-50 dark:bg-stone-800/50 rounded-lg p-3 text-left">
+              <p className="text-xs font-mono text-zinc-500 dark:text-stone-400 break-all">
+                {this.state.error.message}
+              </p>
+            </div>
+          )}
+
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={this.handleReload}
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 font-semibold rounded-xl hover:bg-zinc-800 dark:hover:bg-stone-300 transition-colors"
+            >
+              <RotateCcw className="w-4 h-4" />
+              Reload Page
+            </button>
+            <button
+              onClick={this.handleResetData}
+              className="flex items-center justify-center gap-2 w-full py-3 px-4 border border-red-200 dark:border-red-900/50 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/10 font-semibold rounded-xl hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+            >
+              <Trash2 className="w-4 h-4" />
+              Reset Local Data
+            </button>
           </div>
         </div>
-      );
-    }
-    return this.props.children;
+      </div>
+    );
   }
 }

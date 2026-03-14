@@ -34,12 +34,12 @@ export default function ActionBar() {
         green: {
             active: 'bg-green-500 text-white shadow-lg shadow-green-500/30',
             ring: 'ring-2 ring-green-400/50',
-            text: 'text-green-600 dark:text-green-400',
+            text: 'text-green-700 dark:text-green-400',
         },
         yellow: {
             active: 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30',
             ring: 'ring-2 ring-yellow-400/50',
-            text: 'text-yellow-600 dark:text-yellow-400',
+            text: 'text-yellow-700 dark:text-yellow-400',
         },
     };
 

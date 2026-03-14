@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 
 import Header from '@/components/Header';
 import SettingsDialog from '@/components/SettingsDialog';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import { FadeIn } from '@/components/ui/FadeIn';
 import PriorityDials from '@/components/todo/PriorityDials';
 import TodoTable from '@/components/todo/TodoTable';
@@ -49,6 +50,7 @@ export default function TodoPage() {
     const activeTasks = todoRows.filter((r) => !r.isCompleted).length;
 
     return (
+        <ErrorBoundary>
         <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
             <SettingsDialog />
 
@@ -156,5 +158,6 @@ export default function TodoPage() {
                 </FadeIn>
             </div>
         </main>
+        </ErrorBoundary>
     );
 }
