@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/useAppStore';
 import { toast } from 'sonner';
 import { generateMarkdown, generateTodoMarkdown } from '@/utils/exportUtils';
 import { usePathname } from 'next/navigation';
+import { copyToClipboardSafe } from '@/lib/clipboardUtils';
 
 interface ExportControlProps {
   onPrint?: () => void;
@@ -41,14 +42,12 @@ export default function ExportControl({ onPrint, variant = 'row' }: ExportContro
       ? generateTodoMarkdown(todoRows, priorityDials, projectTitle || 'Task Board')
       : generateMarkdown(tasks, projectTitle || 'Project Export');
 
-    try {
-      await navigator.clipboard.writeText(fullText);
+    const success = await copyToClipboardSafe(fullText);
+    if (success) {
       toast.success(isTodoPage ? 'Task Board Copied' : 'Markdown Copied', {
         description: `${isTodoPage ? 'Task board' : 'Report'} text has been copied to your clipboard.`,
       });
       useAppStore.getState().addLog(`${isTodoPage ? 'Todo' : 'Engine'} Markdown Copied to Clipboard`);
-    } catch {
-      toast.error('Copy Failed', { description: 'Could not access clipboard.' });
     }
   };
 

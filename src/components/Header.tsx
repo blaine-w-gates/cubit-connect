@@ -32,16 +32,20 @@ export default function Header({
   const isTodoPage = pathname === '/todo';
   const badgeText = isTodoPage ? 'Todo' : 'Engine';
 
-  // Close mobile menu when clicking outside
+  // Close mobile menu when clicking/touching outside
   const menuRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleClickOutside(event: MouseEvent | TouchEvent) {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
       }
     }
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
   }, []);
 
   return (

@@ -50,7 +50,7 @@ export default function HeroCarousel() {
       {/* Start/Stop Control (A11y) */}
       <button
         onClick={() => setIsPaused(!isPaused)}
-        className="absolute top-4 right-4 z-10 text-[10px] font-mono border border-black px-2 py-1 uppercase tracking-widest hover:bg-black hover:text-white transition-colors"
+        className="absolute top-4 right-4 z-10 text-[10px] font-mono border border-black px-3 py-2 min-h-[44px] min-w-[44px] uppercase tracking-widest hover:bg-black hover:text-white active:bg-black active:text-white transition-colors flex items-center justify-center"
         aria-label={isPaused ? 'Resume Carousel' : 'Pause Carousel'}
       >
         {isPaused ? 'PLAY' : 'PAUSE'}
@@ -89,12 +89,14 @@ export default function HeroCarousel() {
         </motion.div>
       </AnimatePresence>
 
-      {/* Pagination Indicators */}
-      <div className="absolute bottom-10 flex gap-2">
+      {/* Pagination Indicators (tappable for touch devices) */}
+      <div className="absolute bottom-10 flex gap-3">
         {SLIDES.map((_, idx) => (
-          <div
+          <button
             key={idx}
-            className={`w-2 h-2 rounded-full transition-colors ${idx === index ? 'bg-black' : 'bg-zinc-300'}`}
+            onClick={() => setIndex(idx)}
+            className={`w-3 h-3 rounded-full transition-colors min-w-[12px] min-h-[12px] p-1 ${idx === index ? 'bg-black' : 'bg-zinc-300'}`}
+            aria-label={`Go to slide ${idx + 1}`}
           />
         ))}
       </div>

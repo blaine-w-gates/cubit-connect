@@ -34,22 +34,29 @@ test.describe('CRDT Physics & Performance Verification', () => {
             return store.getState().isHydrated;
         });
 
-        // Clear storage to prevent cross-test contamination
+        // Clear storage to prevent cross-test contamination.
+        // fullLogout() clears the API key which can trigger a redirect on some browsers (Firefox).
+        // We re-inject the key and re-navigate to /todo to ensure a clean, stable state.
         await page.evaluate(async () => {
-            localStorage.clear();
             const store = (window as any).__STORE__.getState();
             await store.fullLogout();
-            // Wait for React to apply the logout
         });
         await page.waitForTimeout(200);
 
+        await page.addInitScript(() => {
+            localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_crdt-physics-test'));
+        });
+        await page.goto('/todo');
+        await page.waitForFunction(() => {
+            const store = (window as any).__STORE__;
+            return store?.getState()?.isHydrated;
+        });
+
         await page.evaluate(async () => {
             const store = (window as any).__STORE__.getState();
-            // Add a default project to be safe
             if (store.todoProjects.length === 0) store.addTodoProject('Test Project');
         });
 
-        // Let the CRDT observer debounce settle before tests begin
         await page.waitForTimeout(200);
     });
 
@@ -70,12 +77,22 @@ test.describe('CRDT Physics & Performance Verification', () => {
             return store.todoRows.some((r: any) => r.task === 'Performance Test Row');
         });
 
-        // Our new InlineEditableText UI requires a double-click to transition into a textarea if it has text
+        // InlineEditableText requires double-click to enter edit mode.
+        // On tiny viewports (iPhone SE, Galaxy S21), scroll the element to the
+        // center of the viewport to avoid clipping by the fixed bottom action bar.
         const rowText = page.getByText('Performance Test Row', { exact: false });
+        await rowText.first().evaluate((el: HTMLElement) => {
+            el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        });
+        await page.waitForTimeout(300);
         await rowText.first().dblclick({ force: true });
 
         const textareas = page.locator('textarea');
-        await textareas.first().waitFor({ state: 'visible' });
+        await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
+        await textareas.first().evaluate((el: HTMLElement) => {
+            el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        });
+        await page.waitForTimeout(100);
 
         // 3. Measure typing speed
         const paragraph = "This is a massive paragraph meant to trigger the O(N) observer loop rapidly across multiple keystrokes to ensure our structural sharing cache handles the load.";
@@ -110,10 +127,18 @@ test.describe('CRDT Physics & Performance Verification', () => {
         });
 
         const rowText = page.getByText('The quick brown fox jumps.', { exact: false });
+        await rowText.first().evaluate((el: HTMLElement) => {
+            el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        });
+        await page.waitForTimeout(300);
         await rowText.first().dblclick({ force: true });
 
         const textareas = page.locator('textarea');
-        await textareas.first().waitFor({ state: 'visible' });
+        await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
+        await textareas.first().evaluate((el: HTMLElement) => {
+            el.scrollIntoView({ block: 'center', behavior: 'instant' });
+        });
+        await page.waitForTimeout(100);
 
         // Focus the textarea
         await textareas.first().focus();

@@ -58,7 +58,7 @@ export default function PriorityDials() {
                                 setDialFocus('none');
                                 leftRef.current?.focus();
                             }}
-                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
+                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 hover-reveal"
                             title="Clear Dial"
                             aria-label="Clear left priority"
                         >
@@ -96,7 +96,7 @@ export default function PriorityDials() {
                                 setDialFocus('none');
                                 rightRef.current?.focus();
                             }}
-                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100"
+                            className="absolute top-2 right-2 text-zinc-400 hover:text-red-500 transition-colors p-1 opacity-70 sm:opacity-0 sm:group-hover:opacity-100 hover-reveal"
                             title="Clear Dial"
                             aria-label="Clear right priority"
                         >

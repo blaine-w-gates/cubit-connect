@@ -32,6 +32,7 @@ export class NetworkSync {
     private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
     private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
+    private visibilityListenerBound: boolean = false;
 
     private clearHeartbeat() {
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
@@ -245,8 +246,11 @@ export class NetworkSync {
             };
 
             // The iOS Safari 'Swipe Up' Fix
-            // Synchronously flushes OS-Buffer BEFORE browser kills the thread
-            document.addEventListener('visibilitychange', this.handleVisibilityChange);
+            // Register exactly once to prevent listener stacking across reconnects
+            if (!this.visibilityListenerBound) {
+                document.addEventListener('visibilitychange', this.handleVisibilityChange);
+                this.visibilityListenerBound = true;
+            }
         });
     }
 
@@ -254,7 +258,9 @@ export class NetworkSync {
         if (document.visibilityState === 'visible') {
             if ((!this.ws || this.ws.readyState !== WebSocket.OPEN) && !this.intentionalDisconnect && this.key) {
                 console.log('📱 OS Wake-Up: Foreground resurrection sequence initiating...');
-                this.connect(this.key);
+                this.connect(this.key).catch((err) => {
+                    console.warn('Foreground reconnect failed:', err);
+                });
             }
         }
         else if (document.visibilityState === 'hidden' && this.ws?.readyState === WebSocket.OPEN && this.pendingDiffs.length > 0) {
@@ -324,6 +330,7 @@ export class NetworkSync {
     disconnect() {
         this.intentionalDisconnect = true;
         document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+        this.visibilityListenerBound = false;
         this.clearHeartbeat();
 
         if (this.connectionTimeout) {

@@ -187,7 +187,7 @@ function SortableProjectTab({
                 {canDelete && !isEditing && (
                     <button
                         onClick={(e) => { e.stopPropagation(); onProjectDelete(project.id); }}
-                        className="opacity-0 group-hover:opacity-100 text-zinc-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 transition-all flex-shrink-0"
+                        className="opacity-0 group-hover:opacity-100 hover-reveal text-zinc-400 hover:text-red-500 dark:text-stone-500 dark:hover:text-red-400 transition-all flex-shrink-0"
                         title="Delete project"
                         aria-label={`Delete project ${project.name}`}
                     >

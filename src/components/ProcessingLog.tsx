@@ -31,7 +31,7 @@ export default function ProcessingLog() {
   // if (logs.length === 0 && !isProcessing) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-stone-900 border-t border-zinc-200 dark:border-stone-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] font-sans transition-colors">
+    <div className="fixed bottom-0 left-0 right-0 z-50 bg-white dark:bg-stone-900 border-t border-zinc-200 dark:border-stone-800 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)] font-sans transition-colors safe-bottom">
       {/* Header / Toggle Bar */}
       <button
         onClick={() => setIsOpen(!isOpen)}

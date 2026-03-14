@@ -62,36 +62,41 @@ export default function SettingsDialog() {
   const isQuotaMode = settingsVariant === 'quota';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      onClick={() => onOpenChange(false)}
+    >
       <div
-        className={`w-full max-w-md bg-white border rounded-xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 ${isQuotaMode ? 'border-red-200 ring-4 ring-red-50' : 'border-zinc-200'
+        className={`w-full max-w-md bg-white dark:bg-stone-900 border rounded-xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto ${isQuotaMode ? 'border-red-200 dark:border-red-900 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-zinc-200 dark:border-stone-700'
           }`}
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 transition-colors"
+          className="absolute top-4 right-4 text-zinc-400 hover:text-zinc-900 dark:hover:text-stone-200 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+          aria-label="Close settings"
         >
           ✕
         </button>
 
         {isQuotaMode ? (
           <div className="mb-6">
-            <div className="flex items-center gap-2 text-red-600 mb-2">
+            <div className="flex items-center gap-2 text-red-600 dark:text-red-400 mb-2">
               <span className="text-lg">🔴</span>
               <h2 className="text-xl font-bold">Usage Limit Reached</h2>
             </div>
-            <p className="text-sm text-zinc-600 leading-relaxed">
+            <p className="text-sm text-zinc-600 dark:text-stone-400 leading-relaxed">
               The free tier for this Google Cloud Project is exhausted.
               <br />
               <br />
-              To continue, you must create a <strong className="text-zinc-900">
+              To continue, you must create a <strong className="text-zinc-900 dark:text-stone-100">
                 NEW Project
               </strong>{' '}
               in Google AI Studio and generate a new key.
             </p>
           </div>
         ) : (
-          <h2 className="text-xl font-bold text-zinc-900 mb-4">Switch Out Your API Key</h2>
+            <h2 className="text-xl font-bold text-zinc-900 dark:text-stone-100 mb-4">Switch Out Your API Key</h2>
         )}
 
         <input
@@ -99,7 +104,7 @@ export default function SettingsDialog() {
           value={inputKey}
           onChange={(e) => setInputKey(e.target.value)}
           placeholder="AIzaSy..."
-          className="w-full bg-white border border-zinc-300 rounded-lg px-4 py-3 text-base sm:text-sm text-zinc-900 mb-4 focus:ring-2 focus:ring-zinc-900 focus:outline-none"
+          className="w-full bg-white dark:bg-stone-800 border border-zinc-300 dark:border-stone-600 rounded-lg px-4 py-3 text-base sm:text-sm text-zinc-900 dark:text-stone-100 mb-4 focus:ring-2 focus:ring-zinc-900 dark:focus:ring-stone-400 focus:outline-none"
         />
         {error && (
           <div className="text-red-500 text-sm mb-4 font-medium flex items-center gap-2">
@@ -117,7 +122,7 @@ export default function SettingsDialog() {
         >
           {isValidating ? <Spinner className="animate-spin w-5 h-5" /> : 'Save Key'}
         </button>
-        <p className="mt-4 text-xs text-zinc-500 text-center mb-6">
+        <p className="mt-4 text-xs text-zinc-500 dark:text-stone-400 text-center mb-6">
           Get a key from{' '}
           <a
             href="https://aistudio.google.com/app/apikey"
@@ -130,7 +135,7 @@ export default function SettingsDialog() {
 
         {/* Disconnect Section */}
         {apiKey && (
-          <div className="pt-6 border-t border-zinc-200">
+          <div className="pt-6 border-t border-zinc-200 dark:border-stone-700">
             <button
               onClick={() => {
                 if (confirmDisconnect) {

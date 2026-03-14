@@ -13,6 +13,7 @@ import {
     closestCenter,
     KeyboardSensor,
     PointerSensor,
+    TouchSensor,
     useSensor,
     useSensors,
     type DragEndEvent,
@@ -515,6 +516,7 @@ export default function TodoTable() {
     // --- Drag-and-Drop ---
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
         useSensor(KeyboardSensor),
     );
 
@@ -910,8 +912,8 @@ function SortableRow({
                         )}
                     </div>
 
-                    {/* Sub-actions container (appears on hover or if dragging) */}
-                    <div className={`flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity ${isDragging ? 'opacity-100' : ''}`}>
+                    {/* Sub-actions container (appears on hover, drag, or touch devices) */}
+                    <div className={`flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 hover-reveal transition-opacity ${isDragging ? 'opacity-100' : ''}`}>
                         <button
                             {...attributes}
                             {...listeners}

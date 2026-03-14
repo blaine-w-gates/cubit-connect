@@ -31,7 +31,52 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
+  min-height: 100dvh;
   @apply antialiased;
+}
+
+/* Safe-area insets for notched/home-indicator devices (iPad, iPhone) */
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.safe-top {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+/* Reveal hover-only elements on touch devices (iPad, phones, all browsers) */
+@media (hover: none) and (pointer: coarse) {
+  .hover-reveal {
+    opacity: 1 !important;
+  }
+}
+
+/* Prevent accidental double-tap zoom on interactive elements (all mobile browsers) */
+button, a, [role="button"], input, select, textarea {
+  touch-action: manipulation;
+}
+
+/* Firefox scrollbar styling (cross-browser parity with tailwind-scrollbar) */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #d4d4d8 transparent;
+}
+.dark * {
+  scrollbar-color: #44403c transparent;
+}
+
+/* Prevent iOS/Android momentum-scroll rubber-band on fixed overlays */
+.scroll-lock {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
+
+/* Prevent text size inflation on landscape rotation (all mobile browsers) */
+html {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 ::selection {

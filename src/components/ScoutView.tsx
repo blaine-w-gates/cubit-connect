@@ -23,6 +23,7 @@ const Spinner = ({ className }: { className?: string }) => (
 
 import { toast } from 'sonner';
 import { GeminiService } from '@/services/gemini';
+import { copyToClipboardSafe } from '@/lib/clipboardUtils';
 
 export default function ScoutView() {
   const { scoutTopic, setScoutTopic, scoutPlatform, setScoutPlatform, setInputMode } =
@@ -107,14 +108,12 @@ export default function ScoutView() {
         url = `https://www.facebook.com/search/top?q=${encodeURIComponent(query)}`;
         break;
       case 'Copy Only':
-        navigator.clipboard.writeText(query);
-        // We need visual feedback.
-        // Let's implement a quick local "copied" state for this index?
-        // For MVP, lets just alert or assume user saw it.
-        // "Show 'Check' icon state" - implied per item.
-        // We'll add a temporary "copiedId" state.
-        setCopiedId(idx);
-        setTimeout(() => setCopiedId(null), 1500);
+        copyToClipboardSafe(query).then((ok) => {
+          if (ok) {
+            setCopiedId(idx);
+            setTimeout(() => setCopiedId(null), 1500);
+          }
+        });
         return;
     }
 
@@ -245,7 +244,7 @@ export default function ScoutView() {
                       {copiedId === idx ? (
                         <Check className="w-3 h-3 text-green-600" />
                       ) : (
-                        <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowRight className="w-3 h-3 opacity-0 group-hover:opacity-100 hover-reveal transition-opacity" />
                       )}
                     </button>
                   );
