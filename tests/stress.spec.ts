@@ -65,9 +65,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   });
 
   // 2. The 'Clumsy User' Test (Crash Resilience)
-  test('The Clumsy User: Bad Inputs', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Clumsy User: Bad Inputs', async ({ page }) => {
 
     await page.goto('/');
 
@@ -112,28 +110,23 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   });
 
   // 3. The 'Amnesia' Test (Persistence)
-  test('The Amnesia: Persistence Check', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Amnesia: Persistence Check', async ({ page }) => {
+    test.setTimeout(60000);
 
-    // Log in first
     await page.goto('/');
     await page.getByPlaceholder(/Enter API key/i).fill('TEST_API_KEY');
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
-    // Reload
     await page.reload();
 
-    // Expect: Stay on Engine (Key Persisted)
-    await expect(page).toHaveURL(/.*engine/);
-    await expect(page.getByText('Engine', { exact: true })).toBeVisible();
+    await expect(page).toHaveURL(/.*engine/, { timeout: 15000 });
+    // Verify engine loaded — use heading since "Engine" badge hides on viewports < 360px
+    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
   });
 
   // 4. The 'Back Button' Trap (UX Loop)
-  test('The Back Button: Redirect Loop', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Back Button: Redirect Loop', async ({ page }) => {
 
     // Log in
     await page.goto('/');
@@ -149,9 +142,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   });
 
   // 5. The 'Mobile Squish' (Responsive Layout)
-  test('The Mobile Squish: Layout Integrity', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Mobile Squish: Layout Integrity', async ({ page }) => {
 
     await page.setViewportSize({ width: 375, height: 667 }); // iPhone SE size
 
@@ -169,9 +160,7 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   });
 
   // 6. The 'Zombie' Reset (State Safety)
-  test('The Zombie Reset: State Cleared', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Zombie Reset: State Cleared', async ({ page }) => {
 
     // Log in
     await page.goto('/');
@@ -200,9 +189,8 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   // --- EXPANSION PACK (Architect's Verdict) ---
 
   // 7. The 'Deep Dive' (Recursive UI)
-  test('The Deep Dive: Recursive UI', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Deep Dive: Recursive UI', async ({ page }) => {
+    test.setTimeout(60000);
 
     // 1. Mock Recursive Response
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
@@ -261,24 +249,23 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
 
     await page.getByRole('button', { name: 'Start Analysis' }).click();
 
-    // 4. Verify Recursive Render
+    // 4. Wait for tasks in store and for results section to render
+    await page.waitForFunction(
+      () => (window as any).__STORE__?.getState().tasks?.length > 0,
+      { timeout: 15000 },
+    );
+    // Allow React to re-render after store update
+    await page.waitForTimeout(1000);
+
+    // Scroll past the upload zone to the results area
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+    await page.waitForTimeout(500);
+
     await expect(page.getByText('Root Task').first()).toBeVisible({ timeout: 10000 });
-    // We expect to see "Cubit" button or the sub-step text if expanded by default?
-    // Logic: ResultsFeed uses TaskItem. sub_steps are usually accordion or nested.
-    // Let's check for the text "I am a sub-step" OR check for an expander.
-    // Assuming default behavior might be collapsed?
-    // Actually, previous ResultFeed logic renders sub_steps.
-    // Let's just assert the TEXT exists in the DOM.
-    // Wait, if it's "Cubit" architecture, it might require clicking a "Cubit" button.
-    // Let's look for "Cubit" button.
-    // Or better, just check that the Main Task rendered.
-    await expect(page.getByText('Root Task').first()).toBeVisible();
   });
 
   // 8. The 'Overload' (API Failure)
-  test('The Overload: API 503 Handling', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Overload: API 503 Handling', async ({ page }) => {
 
     // 1. Mock 503
     // 1. Mock 503 - Conditional

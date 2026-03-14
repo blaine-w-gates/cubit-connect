@@ -37,8 +37,8 @@ test.describe('Accessibility Compliance', () => {
 
     await page.goto('/engine');
 
-    // Wait for engine load
-    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
+    // Wait for engine load — extended timeout for parallel CI runs
+    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible({ timeout: 15000 });
 
     const accessibilityScanResults = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])

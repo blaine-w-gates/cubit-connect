@@ -1,11 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('The Pivot: Interactive Worksheet', () => {
-  test.beforeEach(async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts in beforeEach
-    if (browserName === 'webkit') test.fixme();
-
-    // Debug Console
+  test.beforeEach(async ({ page }) => {
     page.on('console', (msg) => console.log(`[Browser Console]: ${msg.text()}`));
     // 1. Mock Gemini API
     // We intercept the Google Generative Language API call to return a deterministic "Recipe"
@@ -60,12 +56,10 @@ test.describe('The Pivot: Interactive Worksheet', () => {
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
   });
 
-  test('Visual Integrity: Manifesto Grid', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('Visual Integrity: Manifesto Grid', async ({ page }) => {
 
-    // Verify we are on Engine Page by checking the Header Badge
-    await expect(page.getByText('Engine', { exact: true })).toBeVisible();
+    // Verify we are on Engine Page — use heading which is always visible
+    // (The "Engine" badge hides on viewports < 360px via min-[360px]:inline-block)
     await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
 
     // Also check if VideoInput is present (Empty State)
@@ -81,9 +75,7 @@ test.describe('The Pivot: Interactive Worksheet', () => {
     await expect(systemLog).toBeAttached();
   });
 
-  test('The Gate: Signature & Unlocking', async ({ page, browserName }) => {
-    // Skip Mobile Safari due to persistent CI environment timeouts
-    test.fixme(browserName === 'webkit', 'Mobile Safari times out on navigation in CI');
+  test('The Gate: Signature & Unlocking', async ({ page }) => {
 
     // 1. Upload Video & VTT to trigger Analysis (Engine Flow)
     const buffer = Buffer.from('dummy video');
