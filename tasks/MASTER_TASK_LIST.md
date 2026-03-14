@@ -83,27 +83,23 @@ workspace isolation.
 
 ---
 
-## Epic 2: Personal-Multi Stabilization (Weeks 2–4)
+## Epic 2: Personal-Multi Stabilization (Weeks 2–4) — PARTIALLY COMPLETE (Session 3b)
 
 Goal: Make the personalMulti sync experience reliable enough for daily use
 across 2–3 personal devices.
 
-### 2.1 Scope personalUno Y.Doc isolation
-- When workspace is `personalUno`, Y.Doc is standalone — never attached to NetworkSync
-- When workspace is `personalMulti`, Y.Doc attaches to NetworkSync with passphrase
-- Switching workspaces disposes current observers, re-inits from target namespace
-- **Files**: `src/store/useAppStore.ts`
-- **Effort**: Medium (3 hrs)
-- **Test tier**: sync
+### 2.1 Scope personalUno Y.Doc isolation ✅
+- Y.Doc is now mutable (`let` not `const`); `resetYDoc()` creates a fresh instance
+- `switchWorkspace()` calls `resetYDoc()` before loading new namespace
+- personalUno Y.Doc is never attached to NetworkSync (switchWorkspace disconnects)
+- Reconnecting to same room preserves offline edits (no Y.Doc reset)
 
-### 2.2 Robust disconnect/reconnect UX
-- Visual state machine: Disconnected → Connecting → Connected → Reconnecting
-- "Offline" banner when network is lost (not just WebSocket close)
-- Preserve data in IDB namespace on disconnect (already works, formalize tests)
-- "Switch room" flow: disconnect old → connect new → load new namespace
-- **Files**: `src/store/useAppStore.ts`, `src/components/SyncSetupModal.tsx`
-- **Effort**: Medium (3 hrs)
-- **Test tier**: sync
+### 2.2 Robust disconnect/reconnect UX ✅
+- `connectToSyncServer()` auto-switches workspace to personalMulti with roomIdHash
+- Disconnect preserves data in IDB namespace; user stays in personalMulti (offline)
+- Manual switch back to personalUno via WorkspaceSelector
+- Todo page shows "Local Only" badge in personalUno, sync badges in personalMulti
+- WorkspaceSelector shows WifiOff icon when personalMulti is active but disconnected
 
 ### 2.3 Encryption and stress tests
 - Verify data on the wire is encrypted (not readable without passphrase)
@@ -227,7 +223,8 @@ documented here so implementation decisions in Epics 1–3 don't conflict.
 | Session | Epic | Focus | Estimated Time |
 |---------|------|-------|---------------|
 | **3** | Epic 1 | Device identity + schema + namespace + migration + workspace UI ✅ | Complete |
-| **4** | Epic 2 | Y.Doc isolation + disconnect UX + stress tests | 6–8 hrs |
+| **3b** | Epic 2 (2.1–2.2) | Y.Doc isolation + disconnect/reconnect UX ✅ | Complete |
+| **4** | Epic 2 (2.3–2.5) | Stress tests + storage quota + incremental persistence | 6–8 hrs |
 | **5** | Epic 2 | Encryption/stress tests + storage quota + incremental persistence | 4–6 hrs |
 | **6** | Epic 3 | Error boundary + a11y fixes + mobile nav | 4–6 hrs |
 | **7** | Epic 3 | Ownership tracking + observer optimization + stabilization | 4–6 hrs |

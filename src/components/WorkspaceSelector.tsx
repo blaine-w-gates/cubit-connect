@@ -2,7 +2,7 @@
 
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
-import { Monitor, Globe, ShieldCheck } from 'lucide-react';
+import { Monitor, Globe, ShieldCheck, WifiOff } from 'lucide-react';
 import type { WorkspaceType } from '@/lib/identity';
 
 const TABS: { type: WorkspaceType; label: string; icon: typeof Monitor }[] = [
@@ -31,13 +31,16 @@ export default function WorkspaceSelector() {
         const isActive = activeWorkspaceType === type;
         const isMulti = type === 'personalMulti';
         const isSynced = isMulti && syncStatus === 'connected';
+        const isMultiActive = isMulti && isActive;
 
         return (
           <button
             key={type}
             onClick={() => {
-              if (isMulti && syncStatus !== 'connected') {
-                setIsSyncModalOpen(true);
+              if (isMulti) {
+                if (syncStatus !== 'connected') {
+                  setIsSyncModalOpen(true);
+                }
                 return;
               }
               if (!isActive) {
@@ -56,6 +59,8 @@ export default function WorkspaceSelector() {
           >
             {isSynced ? (
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+            ) : isMultiActive && syncStatus === 'disconnected' ? (
+              <WifiOff className="w-3.5 h-3.5 text-amber-500" />
             ) : (
               <Icon className="w-3.5 h-3.5" />
             )}

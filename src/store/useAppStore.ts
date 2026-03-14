@@ -17,14 +17,31 @@ import {
 import { NetworkSync } from '@/lib/networkSync';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
-// --- headless Yjs Core ---
-// Required for E2EE environments so devices deeply-offline don't lose tombstones
-export const ydoc = new Y.Doc({ gc: false });
+// --- Mutable Yjs Core (swapped on workspace switch) ---
+// gc: false required for E2EE so deeply-offline devices don't lose tombstones
+let ydoc = new Y.Doc({ gc: false });
+let yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
+let yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
+let yMetaMap = ydoc.getMap<any>('meta');
+let yTranscript = ydoc.getText('transcript');
 
-export const yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
-export const yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
-export const yMetaMap = ydoc.getMap<any>('meta');
-export const yTranscript = ydoc.getText('transcript');
+// Exported getter so Playwright tests can reach the active doc
+export function getYDoc() { return ydoc; }
+
+/**
+ * Destroy the current Y.Doc and create a fresh one.
+ * Called during workspace switching to guarantee data isolation.
+ * personalUno data never bleeds into a personalMulti sync channel.
+ */
+function resetYDoc(): Y.Doc {
+  ydoc.destroy();
+  ydoc = new Y.Doc({ gc: false });
+  yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
+  yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
+  yMetaMap = ydoc.getMap<any>('meta');
+  yTranscript = ydoc.getText('transcript');
+  return ydoc;
+}
 // -------------------------
 
 // Book Tab color palette — cycles through these for new projects
@@ -235,14 +252,27 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       return;
     }
 
+    // 1. If switching TO personalUno, disconnect sync (uno data never leaves browser)
+    if (workspaceType === 'personalUno' && networkSync) {
+      if (idleCheckpointTimer) { clearTimeout(idleCheckpointTimer); idleCheckpointTimer = null; }
+      networkSync.disconnect();
+      networkSync = null;
+      set({ syncStatus: 'disconnected', roomFingerprint: null });
+    }
+
+    // 2. Create a fresh Y.Doc so no data from the old workspace leaks
+    resetYDoc();
+    isMigrating = false;
+    loadProjectInFlight = null;
+
+    // 3. Flip workspace pointers and mark un-hydrated so loadProject re-runs
     set({
       activeWorkspaceType: workspaceType,
       activeWorkspaceId: wsId,
       isHydrated: false,
     });
 
-    isMigrating = false;
-
+    // 4. Reload from the target namespace's IndexedDB
     const { loadProject } = get();
     await loadProject();
   },
@@ -621,7 +651,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // --- Network Sync Actions ---
   connectToSyncServer: async (passphrase: string) => {
     const { isHydrated } = get();
-    // Architectural Mandate: Genesis Hydration Lock
     if (!isHydrated) {
       console.warn("E2EE Sync Blocked: Cannot connect to relay before local IndexedDB establishes genesis state.");
       return;
@@ -630,8 +659,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ syncStatus: 'connecting', roomFingerprint: null });
 
     try {
-      // BUG-2 fix: always reset existing network client so users can reconnect
-      // with a new passphrase without requiring a manual disconnect first.
       if (networkSync) {
         networkSync.disconnect();
         networkSync = null;
@@ -641,15 +668,33 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         idleCheckpointTimer = null;
       }
 
-      // 1. Salted Single-Secret UX (Routing Security)
-      // Turbopack strictly requires relative paths for dynamic imports in some configurations
       const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
       const roomIdHash = await deriveRoomId(passphrase);
       const syncKey = await deriveSyncKey(passphrase);
 
-      // 2. The Fingerprint for UI Verification (Solitary Universe Trap)
       const roomFingerprint = roomIdHash.slice(0, 4).toUpperCase();
       set({ roomFingerprint });
+
+      // ADR-001: Switch to personalMulti workspace scoped by this room.
+      // Skip reset if we're reconnecting to the same room (preserves offline edits).
+      const currentWsType = get().activeWorkspaceType;
+      const currentWsId = get().activeWorkspaceId;
+      const isSameRoom = currentWsType === 'personalMulti' && currentWsId === roomIdHash;
+
+      if (!isSameRoom) {
+        resetYDoc();
+        isMigrating = false;
+        loadProjectInFlight = null;
+
+        set({
+          activeWorkspaceType: 'personalMulti',
+          activeWorkspaceId: roomIdHash,
+          isHydrated: false,
+        });
+
+        const { loadProject } = get();
+        await loadProject();
+      }
 
       networkSync = new NetworkSync(
         ydoc,
@@ -663,10 +708,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         },
       );
 
-      // UI Race Condition Patch: Await the onopen Promise directly
       await networkSync.connect(syncKey);
 
-      // Initial successful connect counts as a sync event for UX timestamping.
       set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
     } catch (err) {
       console.error("Failed to connect to E2EE Relay:", err);
@@ -675,7 +718,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   disconnectSyncServer: () => {
-    // BUG-1 fix: stop idle checkpoint timer on explicit disconnect.
     if (idleCheckpointTimer) {
       clearTimeout(idleCheckpointTimer);
       idleCheckpointTimer = null;
@@ -684,6 +726,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       networkSync.disconnect();
       networkSync = null;
     }
+    // Stay in personalMulti (offline); data persists in IDB namespace.
+    // User can manually switch back to personalUno via WorkspaceSelector.
     set({ syncStatus: 'disconnected', roomFingerprint: null });
   },
 
