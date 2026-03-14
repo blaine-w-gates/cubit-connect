@@ -51,6 +51,49 @@ Y.Doc (gc: false)
 - Auto-save to IndexedDB: 500ms debounce after any store change
 - Store exposes `__STORE__` on window for Playwright test access
 
+## Workspace-Scoped Data Model (ADR-001)
+
+See `.cursor/rules/adr-001-workspace-model.md` for the full decision record.
+
+### Workspace Types
+| Workspace | Storage | Sync | In Scope |
+|-----------|---------|------|----------|
+| `personalUno` | IndexedDB (browser-local) | None | Now |
+| `personalMulti` | IndexedDB + E2EE relay | Yjs over WebSocket | Now |
+| `teamWorkspace` | Server DB (future) | Server-authoritative | Deferred |
+
+### Project Scope Metadata (added to every project)
+```typescript
+interface WorkspaceMetadata {
+  workspaceType: 'personalUno' | 'personalMulti' | 'teamWorkspace';
+  workspaceId: string;
+  ownerId: string;
+  teamId?: string;
+  objectiveId?: string;
+}
+```
+
+### Identity Model
+| Concept | Storage | Notes |
+|---------|---------|-------|
+| `deviceId` | localStorage | `crypto.randomUUID()` on first visit |
+| `deviceLabel` | localStorage | User-editable device name |
+| `workspaceId` (uno) | localStorage | Isolates uno namespace in IDB |
+| `workspaceId` (multi) | Derived from passphrase | Same as `roomId` |
+
+### IndexedDB Namespaces
+- `cubit_uno_{workspaceId}` — personal local projects
+- `cubit_multi_{roomIdHash}` — synced project cache
+- `cubit_team_{teamId}` — team cache (future)
+
+Migration: existing `cubit_connect_project_v1` → `cubit_uno_{id}` on first load.
+
+### Data Isolation Rules
+1. `personalUno` data NEVER leaves the browser.
+2. `personalMulti` data is E2EE; relay sees only ciphertext.
+3. `workspaceType` is immutable after creation; sharing = explicit copy.
+4. UI filters projects by active workspace.
+
 ## Pages
 | Route | Purpose |
 |-------|---------|

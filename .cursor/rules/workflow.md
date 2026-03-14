@@ -32,11 +32,14 @@ structured workflow modes (plan → engineer → review → test → ship).
 - Verify `safe-area-inset-*` on fixed-position elements
 
 ### 4. TEST Mode (verification)
-- Run `npx playwright test --project="Desktop Chrome" --ignore-snapshots`
-- For cross-browser: run each of the 13 device presets individually
-- All 481 tests must pass with 0 skipped
+- Pick the right tier for the change:
+  - `npm run test:quick` — unit + CRDT on Chrome (~2 min) — logic/store/schema changes
+  - `npm run test:sync` — sync E2E on Chrome + Safari (~5 min) — sync/network changes
+  - `npm run test:full` — all 13 devices (~30 min) — UI/layout changes or before release
+- All tests must pass with 0 skipped on the chosen tier
 - New features require new E2E tests
 - Performance-sensitive code needs the CRDT typing benchmark
+- Always rebuild (`npx next build`) before Playwright after store/runtime changes
 
 ### 5. SHIP Mode (commit and push)
 - Run `npx next build` to verify production build
@@ -47,8 +50,10 @@ structured workflow modes (plan → engineer → review → test → ship).
 
 ## Testing Infrastructure
 - **13 Playwright device presets**: Desktop Chrome/Firefox/Safari/Edge, iPad Safari (portrait + landscape), iPad Pro Safari (portrait + landscape), Galaxy Tab, Mobile Safari, Mobile Safari Mini, Mobile Chrome, Galaxy S21
-- **Test files**: `tests/` (root-level E2E), `tests/e2e/` (CRDT, production, QA, strikes), `tests/performance/` (Lighthouse)
-- **Global timeout**: 60s per test
+- **Vitest unit tests**: `tests/unit/` (6 files — validation, storage, selectors, rate limits, export, store)
+- **Test files**: `tests/` (root-level E2E), `tests/e2e/` (CRDT, production, QA, strikes, sync), `tests/performance/` (Lighthouse)
+- **Test tiers**: See `.cursor/rules/testing.md` for the tier table and decision guide
+- **Global timeout**: 60s per test (120s for tablets/mobile)
 - **Web server**: `npx serve -s out` on localhost:3000
 
 ## Sync System Rules
@@ -64,7 +69,7 @@ structured workflow modes (plan → engineer → review → test → ship).
 - Store: single file `src/store/useAppStore.ts` (Zustand + Yjs)
 - Sync: `src/lib/networkSync.ts`, `src/lib/cryptoSync.ts`, `src/lib/yjsHelpers.ts`
 - Storage: `src/services/storage.ts`, `src/schemas/storage.ts`
-- Tests: `tests/` (Playwright E2E), `src/tests/` (Vitest unit)
+- Tests: `tests/` (Playwright E2E), `tests/unit/` (Vitest unit), `tests/e2e/sync.spec.ts` (sync E2E)
 
 ## Communication Style
 - The project owner is a designer, not a programmer

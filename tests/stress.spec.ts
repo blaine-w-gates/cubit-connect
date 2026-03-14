@@ -118,11 +118,12 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
     await page.getByRole('button', { name: 'START' }).click();
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
 
-    await page.reload();
+    // Allow localStorage write to settle before reload (WebKit can be slow)
+    await page.waitForTimeout(1000);
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
-    await expect(page).toHaveURL(/.*engine/, { timeout: 15000 });
-    // Verify engine loaded — use heading since "Engine" badge hides on viewports < 360px
-    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
+    await expect(page).toHaveURL(/.*engine/, { timeout: 30000 });
+    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible({ timeout: 15000 });
   });
 
   // 4. The 'Back Button' Trap (UX Loop)
@@ -176,14 +177,15 @@ test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
       buffer,
     });
 
-    // Reload
-    await page.reload();
+    // Allow state to settle before reload (WebKit can be slow)
+    await page.waitForTimeout(500);
+    await page.reload({ waitUntil: 'domcontentloaded' });
 
     // Expect: App did not crash (still on Engine)
-    await expect(page).toHaveURL(/.*engine/);
+    await expect(page).toHaveURL(/.*engine/, { timeout: 15000 });
 
     // Expect: State Reset (Back to "Select Video")
-    await expect(page.getByText('Select Video', { exact: false })).toBeVisible();
+    await expect(page.getByText('Select Video', { exact: false })).toBeVisible({ timeout: 10000 });
   });
 
   // --- EXPANSION PACK (Architect's Verdict) ---

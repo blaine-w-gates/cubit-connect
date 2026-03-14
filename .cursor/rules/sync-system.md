@@ -39,67 +39,127 @@ Device A ←→ WebSocket Relay (Render) ←→ Device B
 
 ## Known Bugs (as of March 2026)
 
-### BUG-1: idleCheckpointTimer not cleared on disconnect
+### BUG-1: idleCheckpointTimer not cleared on disconnect — FIXED (Session 2)
 - **File**: `src/store/useAppStore.ts`
-- **Impact**: Timer fires after disconnect, calls `broadcastCheckpoint` on null
-- **Fix**: Clear timer in `disconnectSyncServer()`
+- **Fix applied**: Timer cleared in `disconnectSyncServer()` and `fullLogout()`.
 
-### BUG-2: Cannot reconnect with different passphrase
-- **File**: `src/store/useAppStore.ts`, `connectToSyncServer`
-- **Impact**: `if (!networkSync)` guard prevents reconnect; user must disconnect first
-- **Fix**: Auto-disconnect before connecting with new passphrase
-
-### BUG-3: No per-project sharing model
-- **Impact**: ALL projects are shared in one room; no personal vs shared distinction
-- **Required**: Project-level sync scoping for team feature
-
-### BUG-4: No device identity
-- **Impact**: Cannot track which device made changes, no authority transfer
-- **Required**: Device UUID, display name, and role (owner/editor/viewer)
-
-### BUG-5: Single loadProject guard may race
+### BUG-2: Cannot reconnect with different passphrase — FIXED (Session 2)
 - **File**: `src/store/useAppStore.ts`
-- **Impact**: Two rapid navigations could both enter loadProject before `isHydrated`
-- **Fix**: Use a mutex/lock pattern
+- **Fix applied**: `connectToSyncServer()` auto-disconnects existing connection first.
+
+### BUG-3: No per-project sharing model — OPEN (addressed by ADR-001)
+- **Impact**: ALL projects are shared in one room; no personal vs shared distinction.
+- **Plan**: Workspace-scoped data model separates personalUno (local) from
+  personalMulti (synced). See `.cursor/rules/adr-001-workspace-model.md`.
+
+### BUG-4: No device identity — OPEN (deferred to implementation phase)
+- **Impact**: Cannot track which device made changes, no authority transfer.
+- **Plan**: Generate persistent `deviceId` via `crypto.randomUUID()` on first visit;
+  store in localStorage. Implementation scheduled for workspace migration epic.
+
+### BUG-5: Single loadProject guard may race — FIXED (Session 2)
+- **File**: `src/store/useAppStore.ts`
+- **Fix applied**: Single-flight mutex (`loadProjectInFlight`) prevents concurrent loads.
+
+## Sync vs Local Storage Boundaries
+
+### What Syncs (personalMulti workspace)
+
+| Data | Mechanism | Notes |
+|------|-----------|-------|
+| All projects in `yProjectsMap` | Yjs CRDT over E2EE relay | Includes todoRows, steps, dials |
+| All tasks in `yTasksMap` | Yjs CRDT over E2EE relay | Video/engine tasks |
+| Metadata in `yMetaMap` | Yjs CRDT over E2EE relay | projectType, scoutHistory |
+| Transcript in `yTranscript` | Yjs CRDT over E2EE relay | Y.Text with character-level merge |
+
+### What NEVER Syncs (stays browser-local)
+
+| Data | Storage | Reason |
+|------|---------|--------|
+| API key (`cubit_api_key`) | localStorage | Per-device credential |
+| Device ID (`cubit_device_id`) | localStorage | Per-browser identity |
+| Device label (`cubit_device_label`) | localStorage | User preference |
+| UI state (activeMode, processingRowId, lastAddedRowId) | Zustand (memory) | Ephemeral UI |
+| personalUno projects | IndexedDB (namespaced) | By design: private to one browser |
+| Log entries | Zustand (memory) | Debug-only, not persisted across sessions |
+
+### Source of Truth by Workspace Type
+
+| Workspace | Source of Truth | Fallback |
+|-----------|----------------|----------|
+| `personalUno` | Local IndexedDB | None (data exists only here) |
+| `personalMulti` (online) | Yjs CRDT state (merged across devices) | Local IndexedDB cache |
+| `personalMulti` (offline) | Local IndexedDB (diverged) | Auto-merges on reconnect via Yjs |
+| `teamWorkspace` (future) | Server database | Local cache for offline reads |
 
 ## Offline Behavior
 
-### Current State
+### Current State (after Session 2 fixes)
 - Local edits persist to IndexedDB (500ms debounced auto-save)
-- Full Yjs state blob saved, not incremental
-- On reconnect, Yjs CRDT auto-merges (no explicit conflict resolution)
-- No visual indicator of "you have unsynced changes"
+- Full Yjs state blob saved as `Y.encodeStateAsUpdate(ydoc)`
+- On reconnect, Yjs CRDT auto-merges (no explicit conflict resolution needed)
+- `lastSyncedAt` timestamp shown in SyncSetupModal
+- `hasUnsyncedChanges` badge shown when local edits haven't been confirmed by relay
+- `flushSyncNow()` available for forcing immediate checkpoint broadcast
 
-### Gaps
-- No offline queue or pending-changes tracker
-- No "last synced at" timestamp shown to user
-- No detection of diverged state after long offline period
+### Disconnect Scenarios
+
+| Scenario | What Happens | User Sees |
+|----------|-------------|-----------|
+| Network drops mid-session | WebSocket `onclose` fires; exponential backoff reconnect starts | Status badge turns yellow → "Reconnecting..." |
+| User clicks Disconnect | `disconnectSyncServer()` called; `idleCheckpointTimer` cleared; data stays in IDB | Status shows "Disconnected"; data remains accessible locally |
+| Browser tab closed while connected | WebSocket closes; relay detects absence via heartbeat timeout | On next visit: data loaded from IDB; user can reconnect |
+| Browser tab closed while offline | Last auto-saved IDB state is preserved | On next visit: data loaded from IDB; unsynced changes flagged |
+| Switch to different passphrase | Old room disconnected cleanly → new room connected | Seamless transition; old data in its IDB namespace |
+| Long offline (>7 days) | Redis cache may have expired; but Yjs state vector merge still works if any peer has full state | Full CRDT merge on reconnect; may be slow for large docs |
+
+### Conflict Policy
+
+Yjs CRDTs resolve all conflicts automatically using the following rules:
+- `Y.Map` (projects, rows): last-writer-wins per key
+- `Y.Text` (project names, transcript): character-level interleaving; concurrent
+  inserts at the same position may produce non-deterministic ordering (known
+  Safari text duplication issue — see README.md lessons learned)
+- `Y.Array` (sub_steps): position-aware; concurrent inserts at different
+  positions merge cleanly; same-position inserts interleave
+
+There is no manual conflict resolution UI and none is planned for personal modes.
+
+### Gaps Remaining
+- No offline queue (Yjs handles this implicitly via state vector merge)
 - No y-indexeddb provider (custom full-state persistence instead)
+- No incremental IDB persistence (full state blob on every save)
+- No storage quota monitoring or cleanup
+- No "repair mode" UX for irrecoverably diverged state
 
-## What's Needed for Multi-Device Team Sync
+## Roadmap for Multi-Device Sync
 
-### Phase 1: Fix existing sync bugs
-- Clear idleCheckpointTimer on disconnect
-- Allow reconnect with different passphrase
-- Add "last synced" timestamp in UI
-- Add unsynced-changes indicator
+### Phase 1: Fix existing sync bugs — DONE (Session 2)
+- ~~Clear idleCheckpointTimer on disconnect~~ ✓
+- ~~Allow reconnect with different passphrase~~ ✓
+- ~~Add "last synced" timestamp in UI~~ ✓
+- ~~Add unsynced-changes indicator~~ ✓
+- ~~Fix loadProject race condition~~ ✓
+- ~~Queue live diffs during catch-up~~ ✓
 
-### Phase 2: Per-project sharing
-- Split Yjs doc into per-project sub-documents
-- Each project gets its own room/passphrase or uses a shared team key
-- Personal projects stay local-only (never broadcast)
-- Shared projects use the sync relay
+### Phase 2: Workspace isolation + storage namespacing (Current — Weeks 1–4)
+- Implement workspace-scoped data model (ADR-001)
+- Namespace IndexedDB storage per workspace type
+- Migrate existing data to personalUno namespace
+- Add workspace selector UI
+- Generate persistent device identity
+- Separate personalUno Y.Doc (never attached to NetworkSync)
 
-### Phase 3: Device identity and authority
-- Generate persistent device UUID on first visit
-- Store device name/label
-- Track "project owner" (who created it)
-- Allow ownership transfer between devices
-- Role-based permissions (owner/editor/viewer)
+### Phase 3: Personal-multi stabilization (Weeks 3–6)
+- Robust disconnect/reconnect UX with state preservation
+- Storage quota monitoring and warnings
+- Incremental IDB persistence (reduce save payload)
+- Stress test with 3+ devices and large project counts
+- Release-quality sync for personal-multi
 
-### Phase 4: Team/Manager features
-- Subscription system for managers
-- Team creation and member invite flow
-- Team projects vs personal projects
-- Manager dashboard with activity log
+### Phase 4: Team-ready scaffolding (After Week 6, design only)
+- Role model draft (owner/admin/member/viewer)
+- Team data model (server-side, not E2EE)
+- Subscription tier schema
+- Objective/scoreboard entity contracts
 - Separate Yjs rooms per team

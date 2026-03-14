@@ -215,8 +215,8 @@ test.describe('CRDT Physics & Performance Verification', () => {
             return store.todoRows.some((r: any) => r.task === text);
         }, UNIQUE_STRING);
 
-        // Wait 1 second for the 500ms debounced storageService IDB auto-save to trigger
-        await page.waitForTimeout(1000);
+        // Wait for the 500ms debounced IDB auto-save (use 2s for WebKit CI reliability)
+        await page.waitForTimeout(2000);
 
         // Hard refresh
         await page.reload();

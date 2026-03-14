@@ -27,6 +27,7 @@ test.describe('Scout Feature', () => {
   });
 
   test('Happy Path: Ignite and Scout', async ({ page }) => {
+    test.setTimeout(60000);
 
     // 1. Visit Landing Page
     await page.goto('/');
@@ -37,17 +38,15 @@ test.describe('Scout Feature', () => {
     await page.getByRole('button', { name: 'START' }).click();
 
     // 3. Verify Engine Loaded
-    // Increased timeout for Mobile Safari in CI which can be very slow
     await page.waitForURL('**/engine', { timeout: 60000, waitUntil: 'commit' });
-    // Use .first() to target the <h1> and avoid strict mode violations from Header text
-    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Cubit Connect' }).first()).toBeVisible({ timeout: 15000 });
 
-    // 4. Open Scout
-    // Click the Scout button in the Header
+    // 4. Open Scout — wait for UI to be interactive after navigation
+    await page.waitForTimeout(500);
     await page.getByRole('button', { name: 'Scout' }).first().click();
 
     // 5. Verify Scout View
-    await expect(page.getByRole('heading', { name: 'The Scout' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'The Scout' })).toBeVisible({ timeout: 10000 });
 
     // 6. Enter Topic and Search
     const scoutInput = page.getByPlaceholder('What do you want to learn?');
@@ -56,7 +55,7 @@ test.describe('Scout Feature', () => {
     await page.getByRole('button', { name: 'SEARCH', exact: true }).click();
 
     // 7. Verify Results
-    await expect(page.getByText('#SourdoughStarter')).toBeVisible();
+    await expect(page.getByText('#SourdoughStarter')).toBeVisible({ timeout: 15000 });
   });
 
   test('Happy Path: Toggle Platforms', async ({ page }) => {

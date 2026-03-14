@@ -25,7 +25,7 @@ export default function PriorityDials() {
             <h2 className="text-center font-serif text-2xl font-bold italic mb-1 text-zinc-900 dark:text-stone-200">
                 Dial in Your Priorities
             </h2>
-            <p className="text-center text-sm text-zinc-500 dark:text-stone-500 mb-4">
+            <p className="text-center text-sm text-zinc-600 dark:text-stone-400 mb-4">
                 Focus on what matters now
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -44,7 +44,7 @@ export default function PriorityDials() {
             ${hasBoth ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
           `}
                 >
-                    <span className="text-xs font-mono uppercase tracking-widest text-green-600 dark:text-green-400 block mb-1">
+                    <span className="text-xs font-mono uppercase tracking-widest text-green-700 dark:text-green-400 block mb-1">
                         Dial Left
                     </span>
                     <p className="text-zinc-800 dark:text-stone-300 min-h-[2rem] pr-4">
@@ -82,7 +82,7 @@ export default function PriorityDials() {
             ${hasBoth ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
           `}
                 >
-                    <span className="text-xs font-mono uppercase tracking-widest text-yellow-600 dark:text-yellow-400 block mb-1">
+                    <span className="text-xs font-mono uppercase tracking-widest text-yellow-700 dark:text-yellow-400 block mb-1">
                         Dial Right
                     </span>
                     <p className="text-zinc-800 dark:text-stone-300 min-h-[2rem] pr-4">

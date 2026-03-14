@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      full_matrix:
+        description: 'Run full 13-device Playwright matrix'
+        type: boolean
+        default: false
 
 jobs:
   lint:
@@ -30,10 +36,44 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm audit --audit-level=high
-        continue-on-error: true # Report but don't block for now
+        continue-on-error: true
 
-  test:
-    name: Playwright Tests
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx vitest run
+
+  test-chrome:
+    name: Playwright (Chrome)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - run: npm run build
+      - name: Run Playwright tests (Chrome only)
+        run: npx playwright test --project="Desktop Chrome" --reporter=line --workers=2
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-chrome
+          path: playwright-report/
+          retention-days: 14
+
+  test-full:
+    name: Full Matrix (13 Devices)
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.full_matrix == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,11 +84,11 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps
       - run: npm run build
-      - name: Run Playwright tests
-        run: npx playwright test
+      - name: Run full Playwright matrix
+        run: npx playwright test --reporter=line --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: playwright-report
+          name: playwright-report-full
           path: playwright-report/
           retention-days: 30

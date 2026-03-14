@@ -13,6 +13,9 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:watch": "vitest watch",
+    "test:quick": "vitest run && npx playwright test --project='Desktop Chrome' tests/e2e/crdt-physics.spec.ts --ignore-snapshots --reporter=line --workers=2",
+    "test:sync": "npx playwright test --project='Desktop Chrome' --project='Desktop Safari' tests/e2e/sync.spec.ts --ignore-snapshots --reporter=line --workers=1",
+    "test:full": "for proj in 'Desktop Chrome' 'Desktop Firefox' 'Desktop Safari' 'Desktop Edge' 'iPad Safari' 'iPad Safari Landscape' 'iPad Pro Safari' 'iPad Pro Safari Landscape' 'Galaxy Tab' 'Mobile Safari' 'Mobile Safari Mini' 'Mobile Chrome' 'Galaxy S21'; do npx playwright test --project=\"$proj\" --ignore-snapshots --reporter=line --workers=2 || exit 1; done",
     "test:perf": "playwright test --project=Lighthouse",
     "prepare": "husky"
   },

@@ -409,7 +409,7 @@ export default function BookTabSidebar() {
 
                         {/* Footer */}
                         <div className="px-3 py-2 border-t border-zinc-200 dark:border-stone-700">
-                            <span className="text-[10px] font-mono text-zinc-400 dark:text-stone-500">
+                            <span className="text-[10px] font-mono text-zinc-500 dark:text-stone-400">
                                 {todoProjects.length} {todoProjects.length === 1 ? 'project' : 'projects'}
                             </span>
                         </div>
