@@ -1,34 +1,49 @@
-import { get, set, del } from 'idb-keyval';
+import { get, set, del, keys } from 'idb-keyval';
 import { ProjectDataSchema, StoredProjectData, TaskItem } from '@/schemas/storage';
+import { getUnoWorkspaceId, getDeviceId, getStorageKey } from '@/lib/identity';
+import type { WorkspaceType } from '@/lib/identity';
 
-const PROJECT_KEY = 'cubit_connect_project_v1';
+const LEGACY_KEY = 'cubit_connect_project_v1';
+const MIGRATION_FLAG = 'cubit_migration_done_v2';
+const MIGRATION_BACKUP_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-// Re-export types from schema to avoid duplication
 export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep } from '@/schemas/storage';
+
+function emptyState(): StoredProjectData {
+  return {
+    tasks: [],
+    todoRows: [],
+    priorityDials: { left: '', right: '', focusedSide: 'none' as const },
+    todoProjects: [],
+    yjsState: undefined,
+    updatedAt: Date.now(),
+  };
+}
 
 export const storageService = {
   /**
-   * Loads the entire project state from IndexedDB.
-   * Returns empty state if nothing found.
+   * Loads project state from the workspace-namespaced IndexedDB key.
+   * Falls back to the legacy key if no namespaced data exists (pre-migration).
    */
-  async getProject(): Promise<StoredProjectData> {
+  async getProject(workspaceType?: WorkspaceType, workspaceId?: string): Promise<StoredProjectData> {
+    const wsType = workspaceType || 'personalUno';
+    const wsId = workspaceId || getUnoWorkspaceId();
+    const key = getStorageKey(wsType, wsId);
+
     try {
-      const raw = await get(PROJECT_KEY);
-      if (!raw) return {
-        tasks: [],
-        todoRows: [],
-        priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-        todoProjects: [],
-        yjsState: undefined,
-        updatedAt: Date.now(),
-      };
+      let raw = await get(key);
+
+      // Fallback: if no namespaced data yet, check legacy key (transparent migration)
+      if (!raw && wsType === 'personalUno') {
+        raw = await get(LEGACY_KEY);
+      }
+
+      if (!raw) return emptyState();
 
       const result = ProjectDataSchema.safeParse(raw);
 
       if (!result.success) {
         console.error('CRITICAL: Storage Schema Validation Failed', result.error);
-        // 🛡️ MIGRATION / FALLBACK STRATEGY
-        // Attempt Partial Salvage for tasks if possible
         if (
           raw &&
           typeof raw === 'object' &&
@@ -45,34 +60,18 @@ export const storageService = {
             updatedAt: Date.now(),
           } as StoredProjectData;
         }
-
-        return {
-          tasks: [],
-          todoRows: [],
-          priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-          todoProjects: [],
-          yjsState: undefined,
-          updatedAt: Date.now(),
-        };
+        return emptyState();
       }
 
       return result.data;
     } catch (error) {
       console.error('Failed to load project from IndexedDB:', error);
-      return {
-        tasks: [],
-        todoRows: [],
-        priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-        todoProjects: [],
-        yjsState: undefined,
-        updatedAt: Date.now(),
-      };
+      return emptyState();
     }
   },
 
   /**
-   * Saves the entire project state.
-   * Note: This includes the base64 images, which is why we use IDB not LocalStorage.
+   * Saves the entire project state to the workspace-namespaced key.
    */
   async saveProject(
     tasks: TaskItem[],
@@ -87,7 +86,13 @@ export const storageService = {
     todoProjects?: import('@/schemas/storage').TodoProject[],
     activeProjectId?: string,
     yjsState?: Uint8Array,
+    workspaceType?: WorkspaceType,
+    workspaceId?: string,
   ): Promise<void> {
+    const wsType = workspaceType || 'personalUno';
+    const wsId = workspaceId || getUnoWorkspaceId();
+    const key = getStorageKey(wsType, wsId);
+
     try {
       const payload: StoredProjectData = {
         tasks,
@@ -99,36 +104,119 @@ export const storageService = {
         scoutPlatform,
         scoutHistory,
         inputMode,
-        // Legacy fields kept empty (migration has already run)
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' },
-        // New project-scoped data
         todoProjects: todoProjects || [],
         activeProjectId,
         yjsState,
         updatedAt: Date.now(),
       };
-      await set(PROJECT_KEY, payload);
+      await set(key, payload);
     } catch (error: unknown) {
       console.error('Failed to save project to IndexedDB:', error);
       const err = error as Error;
       if (err?.name === 'QuotaExceededError') {
         alert('⚠️ Storage Full! Please EXPORT a backup immediately.');
       }
-      throw error; // Let the UI know save failed
+      throw error;
     }
   },
 
   /**
-   * Clears all project data.
-   * Used for the "Hard Reset" feature.
+   * Clears project data for a specific workspace namespace.
    */
-  async clearProject(): Promise<void> {
+  async clearProject(workspaceType?: WorkspaceType, workspaceId?: string): Promise<void> {
+    const wsType = workspaceType || 'personalUno';
+    const wsId = workspaceId || getUnoWorkspaceId();
+    const key = getStorageKey(wsType, wsId);
+
     try {
-      await del(PROJECT_KEY);
+      await del(key);
     } catch (error) {
       console.error('Failed to clear project:', error);
     }
   },
-};
 
+  /**
+   * One-time migration: copy legacy data into personalUno namespace.
+   * Keeps the old key as a backup for 30 days.
+   */
+  async migrateIfNeeded(): Promise<boolean> {
+    if (typeof window === 'undefined') return false;
+
+    const alreadyDone = localStorage.getItem(MIGRATION_FLAG);
+    if (alreadyDone) {
+      this.cleanupLegacyBackup();
+      return false;
+    }
+
+    try {
+      const legacyData = await get(LEGACY_KEY);
+      if (!legacyData) {
+        localStorage.setItem(MIGRATION_FLAG, String(Date.now()));
+        return false;
+      }
+
+      const unoWorkspaceId = getUnoWorkspaceId();
+      const deviceId = getDeviceId();
+      const newKey = getStorageKey('personalUno', unoWorkspaceId);
+
+      const existingNew = await get(newKey);
+      if (existingNew) {
+        localStorage.setItem(MIGRATION_FLAG, String(Date.now()));
+        return false;
+      }
+
+      const parsed = ProjectDataSchema.safeParse(legacyData);
+      if (parsed.success) {
+        const data = parsed.data;
+        if (data.todoProjects) {
+          data.todoProjects = data.todoProjects.map(p => ({
+            ...p,
+            workspaceType: 'personalUno' as const,
+            workspaceId: unoWorkspaceId,
+            ownerId: deviceId,
+          }));
+        }
+        await set(newKey, data);
+      } else {
+        await set(newKey, legacyData);
+      }
+
+      localStorage.setItem(MIGRATION_FLAG, String(Date.now()));
+      console.log('✅ Migration complete: legacy data copied to personalUno namespace');
+      return true;
+    } catch (error) {
+      console.error('Migration failed:', error);
+      return false;
+    }
+  },
+
+  /**
+   * Garbage-collect the legacy key after 30-day backup window.
+   */
+  async cleanupLegacyBackup(): Promise<void> {
+    const migrationTime = localStorage.getItem(MIGRATION_FLAG);
+    if (!migrationTime) return;
+
+    const elapsed = Date.now() - Number(migrationTime);
+    if (elapsed > MIGRATION_BACKUP_TTL) {
+      try {
+        await del(LEGACY_KEY);
+        console.log('🗑️ Legacy backup key removed after 30-day retention');
+      } catch {
+        // Non-critical
+      }
+    }
+  },
+
+  /**
+   * List all workspace-namespaced keys in IndexedDB (for debugging).
+   */
+  async listNamespaces(): Promise<string[]> {
+    const allKeys = await keys();
+    return allKeys
+      .map(k => String(k))
+      .filter(k => k.startsWith('cubit_'));
+  },
+};

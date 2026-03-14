@@ -25,6 +25,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { TodoProject } from '@/schemas/storage';
+import WorkspaceSelector from '@/components/WorkspaceSelector';
 
 // Must match TAB_COLORS in useAppStore.ts
 const PALETTE = [
@@ -330,6 +331,9 @@ export default function BookTabSidebar() {
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
                         className="overflow-hidden border-r border-zinc-200 dark:border-stone-700 bg-zinc-50 dark:bg-stone-900 flex flex-col"
                     >
+                        {/* Workspace Switcher */}
+                        <WorkspaceSelector />
+
                         {/* Header */}
                         <div className="flex items-center justify-between px-3 py-3 border-b border-zinc-200 dark:border-stone-700">
                             <span className="text-xs font-mono uppercase tracking-widest text-zinc-500 dark:text-stone-400">

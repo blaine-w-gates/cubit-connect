@@ -14,12 +14,13 @@ and quality assurance.
 Session 1 established the codebase: 481 E2E tests across 13 devices, cursor
 rules, structured workflows. Session 2 fixed 3 critical sync bugs (timer leak,
 passphrase reconnect, loadProject race), added sync status UI, created 7
-multi-device sync E2E tests, and pushed at 91eef68.
+multi-device sync E2E tests, and pushed at 91eef68. Session 3 implemented
+Epic 1 (Workspace Infrastructure): device identity, schema metadata,
+namespaced IndexedDB storage, legacy data migration, and workspace selector UI.
 
-We are now entering the architecture and stabilization phase:
-- Locking the workspace-scoped data model (personalUno / personalMulti).
-- Implementing data isolation, identity, and storage namespacing.
-- Building fast test tiers so iteration does not require 30-minute full runs.
+Current focus:
+- Stabilizing personalMulti Y.Doc isolation and disconnect UX (Epic 2).
+- Stress testing multi-device sync with 3+ devices.
 - NOT building team/subscription features yet.
 
 ### Milestone Targets

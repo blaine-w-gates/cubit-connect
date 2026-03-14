@@ -146,10 +146,16 @@ export function bindTodoProjectToYMap(project: TodoProject, initialOrderKey?: st
     yProject.set('createdAt', project.createdAt);
     yProject.set('orderKey', initialOrderKey || project.orderKey || generateOrderKey());
 
+    // Workspace metadata (ADR-001)
+    yProject.set('workspaceType', project.workspaceType || 'personalUno');
+    yProject.set('workspaceId', project.workspaceId || '');
+    yProject.set('ownerId', project.ownerId || '');
+    if (project.teamId) yProject.set('teamId', project.teamId);
+    if (project.objectiveId) yProject.set('objectiveId', project.objectiveId);
+
     // Mandate 2: Entity Lists MUST be Y.Maps keyed by ID
     const rowsMap = new Y.Map();
     project.todoRows.forEach((row, i) => {
-        // Generate order key for legacy arrays if missing
         const prevKey = i === 0 ? undefined : project.todoRows[i - 1].orderKey;
         const orderKey = row.orderKey || generateOrderKey(prevKey || undefined);
         rowsMap.set(row.id, bindTodoRowToYMap(row, orderKey));
@@ -175,6 +181,11 @@ export function extractTodoProjectFromYMap(yProject: Y.Map<any>): TodoProject {
         orderKey: yProject.get('orderKey'),
         todoRows: sortYMapList(rowsList),
         priorityDials: extractPriorityDialsFromYMap(yProject.get('priorityDials')),
+        workspaceType: yProject.get('workspaceType') || 'personalUno',
+        workspaceId: yProject.get('workspaceId') || '',
+        ownerId: yProject.get('ownerId') || '',
+        teamId: yProject.get('teamId'),
+        objectiveId: yProject.get('objectiveId'),
     };
 }
 

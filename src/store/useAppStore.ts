@@ -15,6 +15,7 @@ import {
   applyUpdateToYText,
 } from '../lib/yjsHelpers';
 import { NetworkSync } from '@/lib/networkSync';
+import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
 // --- headless Yjs Core ---
 // Required for E2EE environments so devices deeply-offline don't lose tombstones
@@ -127,6 +128,12 @@ export interface ProjectState {
   restoreTodoRow: (row: TodoRow, index: number) => void;
 
 
+  // --- Workspace State (ADR-001) ---
+  activeWorkspaceType: WorkspaceType;
+  activeWorkspaceId: string;
+  deviceId: string;
+  switchWorkspace: (workspaceType: WorkspaceType, workspaceId?: string) => Promise<void>;
+
   // --- Network Sync Actions & State ---
   syncStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
   roomFingerprint: string | null;
@@ -216,6 +223,30 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   lastAddedRowId: null,
   setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
 
+  // --- Workspace State (ADR-001) ---
+  activeWorkspaceType: 'personalUno' as WorkspaceType,
+  activeWorkspaceId: typeof window !== 'undefined' ? getUnoWorkspaceId() : '',
+  deviceId: typeof window !== 'undefined' ? getDeviceId() : '',
+
+  switchWorkspace: async (workspaceType: WorkspaceType, workspaceId?: string) => {
+    const wsId = workspaceId || (workspaceType === 'personalUno' ? getUnoWorkspaceId() : '');
+    if (!wsId) {
+      console.warn('switchWorkspace: no workspaceId for type', workspaceType);
+      return;
+    }
+
+    set({
+      activeWorkspaceType: workspaceType,
+      activeWorkspaceId: wsId,
+      isHydrated: false,
+    });
+
+    isMigrating = false;
+
+    const { loadProject } = get();
+    await loadProject();
+  },
+
   // --- Network Sync Actions & State ---
   syncStatus: 'disconnected',
   roomFingerprint: null,
@@ -224,8 +255,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // --- Book Tab Project Actions ---
   addTodoProject: (name?: string) => {
-    const { todoProjects, nextProjectNumber } = get();
-    // Name = slot position (current count + 1), Color = monotonic counter cycle
+    const { todoProjects, nextProjectNumber, activeWorkspaceType, activeWorkspaceId, deviceId } = get();
     const colorIdx = (nextProjectNumber - 1) % TAB_COLORS.length;
     const slotNumber = todoProjects.length + 1;
     const newId = crypto.randomUUID();
@@ -237,6 +267,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       createdAt: Date.now(),
       orderKey: generateOrderKey(todoProjects.length > 0 ? todoProjects[todoProjects.length - 1].orderKey : undefined),
+      workspaceType: activeWorkspaceType,
+      workspaceId: activeWorkspaceId,
+      ownerId: deviceId,
     };
 
     // Mutate Yjs Data Structure
@@ -686,10 +719,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     loadProjectInFlight = (async () => {
-    // Guard: Don't re-fetch if already hydrated (prevents redundant IDB reads on navigation)
     if (get().isHydrated) return;
 
-    const data = await storageService.getProject();
+    // Run one-time migration from legacy key to personalUno namespace
+    await storageService.migrateIfNeeded();
+
+    const { activeWorkspaceType, activeWorkspaceId } = get();
+    const data = await storageService.getProject(activeWorkspaceType, activeWorkspaceId);
 
     // --- MIGRATION LAYER ---
     // Detects legacy string[] sub_steps and converts to CubitStep[] objects
@@ -755,6 +791,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         todoRows: data.todoRows,
         priorityDials: data.priorityDials || { left: '', right: '', focusedSide: 'none' as const },
         createdAt: Date.now(),
+        workspaceType: activeWorkspaceType,
+        workspaceId: activeWorkspaceId,
+        ownerId: get().deviceId,
       };
       todoProjects = [defaultProject];
       activeProjectId = defaultProject.id;
@@ -771,6 +810,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' as const },
         createdAt: Date.now(),
+        workspaceType: activeWorkspaceType,
+        workspaceId: activeWorkspaceId,
+        ownerId: get().deviceId,
       };
       todoProjects = [emptyProject];
       activeProjectId = emptyProject.id;
@@ -1173,9 +1215,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   // ⚡️ GLITCH-FREE RESET: For "Start Analysis" workflow
-  // Clears content but KEEPS processing state to prevent Manifesto flash
   startNewAnalysis: async (type: 'video' | 'text', title: string) => {
-    await storageService.clearProject();
+    const { activeWorkspaceType, activeWorkspaceId } = get();
+    await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
     // The Ghost Data Teardown:
     ydoc.transact(() => {
@@ -1203,15 +1245,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
   },
   resetProject: async () => {
-    // Smart Reset: Clear data but KEEP API Key
-    await storageService.clearProject();
+    const { activeWorkspaceType, activeWorkspaceId, deviceId: currentDeviceId } = get();
+    await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
-    // The Ghost Data Teardown:
     ydoc.transact(() => {
       yMetaMap.clear();
       yTranscript.delete(0, yTranscript.length);
 
-      // Tombstone all active tasks and projects to prevent Zombie Resurrection
       Array.from(yTasksMap.values()).forEach(t => t.set('isDeleted', true));
       Array.from(yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
     });
@@ -1223,6 +1263,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' as const },
       createdAt: Date.now(),
+      workspaceType: activeWorkspaceType,
+      workspaceId: activeWorkspaceId,
+      ownerId: currentDeviceId,
     };
     set({
       tasks: [],
@@ -1261,8 +1304,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       idleCheckpointTimer = null;
     }
 
-    // Factory Reset
-    await storageService.clearProject();
+    const { activeWorkspaceType, activeWorkspaceId } = get();
+    await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
     localStorage.removeItem(STORAGE_KEY_API);
 
     // Hard physics wipe: Instead of mathematically manipulating ydoc, 
@@ -1340,11 +1383,8 @@ useAppStore.subscribe((state) => {
   if (saveTimeout) clearTimeout(saveTimeout);
 
   saveTimeout = setTimeout(async () => {
-    // Filter: Only save if hydration is complete (prevents overwriting with initial empty state)
     if (state.isHydrated) {
       try {
-        // [TECH DEBT]: We are saving the full binary string on every keystroke debounce.
-        // For Chunk 3, this guarantees safety. In the future, we need incremental compaction.
         const yjsState = Y.encodeStateAsUpdate(ydoc);
 
         await storageService.saveProject(
@@ -1360,6 +1400,8 @@ useAppStore.subscribe((state) => {
           state.todoProjects,
           state.activeProjectId || undefined,
           yjsState,
+          state.activeWorkspaceType,
+          state.activeWorkspaceId,
         );
       } catch (err) {
         console.error('Auto-Save Failed:', err);

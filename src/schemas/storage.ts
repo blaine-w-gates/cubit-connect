@@ -53,6 +53,10 @@ export const PriorityDialsSchema = z.object({
   focusedSide: z.enum(['left', 'right', 'none']).optional().default('none'),
 });
 
+// --- Workspace Metadata (ADR-001) ---
+export const WorkspaceTypeEnum = z.enum(['personalUno', 'personalMulti', 'teamWorkspace']);
+export type WorkspaceType = z.infer<typeof WorkspaceTypeEnum>;
+
 // --- Todo Project Schema (Book Tab) ---
 // Each project has its own todoRows + priorityDials, identified by a color-coded tab.
 export const TodoProjectSchema = z.object({
@@ -62,7 +66,13 @@ export const TodoProjectSchema = z.object({
   todoRows: z.array(TodoRowSchema).default([]),
   priorityDials: PriorityDialsSchema.default({ left: '', right: '', focusedSide: 'none' }),
   createdAt: z.number(),
-  orderKey: z.string().optional(), // Used for Y.Map Fractional Indexing sorting
+  orderKey: z.string().optional(),
+  // Workspace metadata (ADR-001)
+  workspaceType: WorkspaceTypeEnum.default('personalUno'),
+  workspaceId: z.string().default(''),
+  ownerId: z.string().default(''),
+  teamId: z.string().optional(),
+  objectiveId: z.string().optional(),
 });
 
 export const ProjectDataSchema = z.object({

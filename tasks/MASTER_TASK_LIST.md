@@ -31,61 +31,55 @@ Last updated: March 15, 2026
 - [x] Updated testing.md with tier table, decision guide, sync test helpers
 - [x] Updated workflow.md with tiered test references
 
+### Session 3 — Workspace Infrastructure (Epic 1)
+- [x] Created `src/lib/identity.ts` — persistent deviceId, deviceLabel, unoWorkspaceId
+- [x] Added workspace metadata (workspaceType, workspaceId, ownerId, teamId, objectiveId) to TodoProjectSchema
+- [x] Updated Yjs helpers to bind/extract workspace metadata on projects
+- [x] Replaced single IDB key with namespaced `cubit_uno_{id}` / `cubit_multi_{hash}` keys
+- [x] Added `migrateIfNeeded()` for transparent legacy→uno migration with 30-day backup
+- [x] Added `switchWorkspace` action and `activeWorkspaceType`/`activeWorkspaceId` to store
+- [x] Created `WorkspaceSelector` component ("My Projects" / "Shared Projects")
+- [x] Wired WorkspaceSelector into BookTabSidebar above project list
+- [x] All 23 quick tests pass (19 unit + 4 CRDT)
+- [x] All 14 sync tests pass (7 Chrome + 7 Safari)
+- [x] Production build succeeds
+
 ---
 
-## Epic 1: Workspace Infrastructure (Weeks 1–2)
+## Epic 1: Workspace Infrastructure (Weeks 1–2) — COMPLETED (Session 3)
 
 Goal: Implement the foundational data model and storage layer that separates
 personalUno from personalMulti, so that all subsequent features build on clean
 workspace isolation.
 
-### 1.1 Generate persistent device identity
-- Generate `deviceId` via `crypto.randomUUID()` on first visit
-- Store in `localStorage('cubit_device_id')`
-- Add optional `deviceLabel` in `localStorage('cubit_device_label')`
-- Expose `getDeviceId()` utility in `src/lib/identity.ts`
-- **Files**: new `src/lib/identity.ts`, update `src/store/useAppStore.ts`
-- **Effort**: Small (1 hr)
-- **Test tier**: quick
+### 1.1 Generate persistent device identity ✅
+- Created `src/lib/identity.ts` with `getDeviceId()`, `getDeviceLabel()`, `getUnoWorkspaceId()`
+- Persistent UUIDs stored in localStorage
+- `getStorageKey()` builds namespace keys per workspace type
 
-### 1.2 Add workspace metadata to project schema
-- Add `WorkspaceMetadata` fields to `TodoProjectSchema` in `src/schemas/storage.ts`:
-  `workspaceType`, `workspaceId`, `ownerId`, optional `teamId`, optional `objectiveId`
-- Add same fields to the Yjs project map structure in `yjsHelpers.ts`
-- Default all new projects to `personalUno` with the browser's `workspaceId`
-- **Files**: `src/schemas/storage.ts`, `src/lib/yjsHelpers.ts`, `src/store/useAppStore.ts`
-- **Effort**: Medium (2 hrs)
-- **Test tier**: quick
+### 1.2 Add workspace metadata to project schema ✅
+- Added `workspaceType`, `workspaceId`, `ownerId`, `teamId?`, `objectiveId?` to `TodoProjectSchema`
+- Added `WorkspaceTypeEnum` Zod schema with defaults
+- Updated `bindTodoProjectToYMap` and `extractTodoProjectFromYMap` in yjsHelpers
+- All new projects stamped with active workspace metadata
 
-### 1.3 Namespace IndexedDB storage by workspace
-- Replace single `cubit_connect_project_v1` key with namespaced keys:
-  - `cubit_uno_{workspaceId}` for personal-uno
-  - `cubit_multi_{roomIdHash}` for personal-multi
-- Update `storageService` with workspace-aware `getProject(workspaceId)` and
-  `saveProject(workspaceId, ...)` methods
-- **Files**: `src/services/storage.ts`, `src/store/useAppStore.ts`
-- **Effort**: Medium (3 hrs)
-- **Test tier**: quick + sync
+### 1.3 Namespace IndexedDB storage by workspace ✅
+- Replaced single `cubit_connect_project_v1` with `cubit_uno_{id}` / `cubit_multi_{hash}`
+- `storageService.getProject()` and `saveProject()` accept workspace params
+- `clearProject()` is workspace-scoped
+- Auto-save subscription passes active workspace to save
 
-### 1.4 Migrate existing data to personalUno namespace
-- On first load after upgrade: detect old `cubit_connect_project_v1` key
-- Copy all existing projects into `cubit_uno_{newWorkspaceId}` with
-  `workspaceType: 'personalUno'` metadata
-- Keep old key as read-only backup for 30 days
-- Show no disruption to the user — data appears exactly as before
-- **Files**: `src/services/storage.ts` (migration function), `src/store/useAppStore.ts`
-- **Effort**: Medium (2 hrs)
-- **Test tier**: quick (add unit test for migration)
+### 1.4 Migrate existing data to personalUno namespace ✅
+- `storageService.migrateIfNeeded()` detects legacy key, copies to uno namespace
+- Projects stamped with `workspaceType: 'personalUno'` during migration
+- Old key kept as backup; `cleanupLegacyBackup()` removes after 30 days
+- Migration flag in localStorage prevents re-migration
 
-### 1.5 Workspace selector UI
-- Add workspace switcher in sidebar or above project tabs
-- Two modes visible: "My Projects" (personalUno) and "Shared Projects" (personalMulti)
-- Switching workspaces swaps the active Y.Doc and project list
-- personalMulti shows the sync status badge; personalUno does not
-- **Files**: new component (e.g., `src/components/WorkspaceSelector.tsx`),
-  update `src/components/todo/TodoSidebar.tsx`, `src/store/useAppStore.ts`
-- **Effort**: Medium (3 hrs)
-- **Test tier**: quick + full (layout across 13 devices)
+### 1.5 Workspace selector UI ✅
+- Created `src/components/WorkspaceSelector.tsx` with "My Projects" / "Shared Projects" tabs
+- Wired into `BookTabSidebar.tsx` above the project list
+- "Shared Projects" opens sync modal if not connected
+- Connected state shows green shield icon
 
 ---
 
@@ -232,8 +226,8 @@ documented here so implementation decisions in Epics 1–3 don't conflict.
 
 | Session | Epic | Focus | Estimated Time |
 |---------|------|-------|---------------|
-| **3** | Epic 1 | Device identity + schema + namespace + migration | 6–8 hrs |
-| **4** | Epic 1 + 2 | Workspace selector UI + Y.Doc isolation + disconnect UX | 6–8 hrs |
+| **3** | Epic 1 | Device identity + schema + namespace + migration + workspace UI ✅ | Complete |
+| **4** | Epic 2 | Y.Doc isolation + disconnect UX + stress tests | 6–8 hrs |
 | **5** | Epic 2 | Encryption/stress tests + storage quota + incremental persistence | 4–6 hrs |
 | **6** | Epic 3 | Error boundary + a11y fixes + mobile nav | 4–6 hrs |
 | **7** | Epic 3 | Ownership tracking + observer optimization + stabilization | 4–6 hrs |
