@@ -11,7 +11,9 @@ export default function SyncSetupModal() {
         syncStatus,
         connectToSyncServer,
         disconnectSyncServer,
-        roomFingerprint
+        roomFingerprint,
+        lastSyncedAt,
+        hasUnsyncedChanges,
     } = useAppStore();
 
     const [passphrase, setPassphrase] = useState('');
@@ -122,6 +124,29 @@ export default function SyncSetupModal() {
                                     </p>
                                 </div>
                             )}
+
+                            <div className="w-full bg-zinc-50 dark:bg-stone-800/50 rounded-xl p-4 border border-zinc-200 dark:border-stone-700">
+                                <div className="flex items-center justify-between">
+                                    <p className="text-sm font-medium text-zinc-700 dark:text-stone-300">
+                                        Last Synced
+                                    </p>
+                                    {hasUnsyncedChanges ? (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 dark:bg-amber-900/30 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+                                            Syncing pending
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-900/30 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:text-emerald-300">
+                                            <CheckCircle2 className="w-3.5 h-3.5" />
+                                            Up to date
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="mt-2 text-sm text-zinc-600 dark:text-stone-300">
+                                    {lastSyncedAt
+                                        ? new Date(lastSyncedAt).toLocaleString()
+                                        : 'Waiting for first sync event...'}
+                                </p>
+                            </div>
 
                             <button
                                 onClick={handleDisconnect}

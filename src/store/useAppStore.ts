@@ -130,8 +130,11 @@ export interface ProjectState {
   // --- Network Sync Actions & State ---
   syncStatus: 'disconnected' | 'connecting' | 'connected' | 'error';
   roomFingerprint: string | null;
+  lastSyncedAt: number | null;
+  hasUnsyncedChanges: boolean;
   connectToSyncServer: (passphrase: string) => Promise<void>;
   disconnectSyncServer: () => void;
+  flushSyncNow: () => Promise<void>;
 }
 
 export interface LogEntry {
@@ -151,6 +154,7 @@ let isMigrating = false;
 let networkSync: NetworkSync | null = null;
 const SYNC_SERVER_URL = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
+let loadProjectInFlight: Promise<void> | null = null;
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
@@ -215,6 +219,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // --- Network Sync Actions & State ---
   syncStatus: 'disconnected',
   roomFingerprint: null,
+  lastSyncedAt: null,
+  hasUnsyncedChanges: false,
 
   // --- Book Tab Project Actions ---
   addTodoProject: (name?: string) => {
@@ -591,24 +597,44 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ syncStatus: 'connecting', roomFingerprint: null });
 
     try {
-      if (!networkSync) {
-        // 1. Salted Single-Secret UX (Routing Security)
-        // Turbopack strictly requires relative paths for dynamic imports in some configurations
-        const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
-        const roomIdHash = await deriveRoomId(passphrase);
-        const syncKey = await deriveSyncKey(passphrase);
-
-        // 2. The Fingerprint for UI Verification (Solitary Universe Trap)
-        const roomFingerprint = roomIdHash.slice(0, 4).toUpperCase();
-        set({ roomFingerprint });
-
-        networkSync = new NetworkSync(ydoc, SYNC_SERVER_URL, roomIdHash, (status) => {
-          set({ syncStatus: status });
-        });
-
-        // UI Race Condition Patch: Await the onopen Promise directly
-        await networkSync.connect(syncKey);
+      // BUG-2 fix: always reset existing network client so users can reconnect
+      // with a new passphrase without requiring a manual disconnect first.
+      if (networkSync) {
+        networkSync.disconnect();
+        networkSync = null;
       }
+      if (idleCheckpointTimer) {
+        clearTimeout(idleCheckpointTimer);
+        idleCheckpointTimer = null;
+      }
+
+      // 1. Salted Single-Secret UX (Routing Security)
+      // Turbopack strictly requires relative paths for dynamic imports in some configurations
+      const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
+      const roomIdHash = await deriveRoomId(passphrase);
+      const syncKey = await deriveSyncKey(passphrase);
+
+      // 2. The Fingerprint for UI Verification (Solitary Universe Trap)
+      const roomFingerprint = roomIdHash.slice(0, 4).toUpperCase();
+      set({ roomFingerprint });
+
+      networkSync = new NetworkSync(
+        ydoc,
+        SYNC_SERVER_URL,
+        roomIdHash,
+        (status) => {
+          set({ syncStatus: status });
+        },
+        () => {
+          set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+        },
+      );
+
+      // UI Race Condition Patch: Await the onopen Promise directly
+      await networkSync.connect(syncKey);
+
+      // Initial successful connect counts as a sync event for UX timestamping.
+      set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
     } catch (err) {
       console.error("Failed to connect to E2EE Relay:", err);
       set({ syncStatus: 'error', roomFingerprint: null });
@@ -616,11 +642,23 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   disconnectSyncServer: () => {
+    // BUG-1 fix: stop idle checkpoint timer on explicit disconnect.
+    if (idleCheckpointTimer) {
+      clearTimeout(idleCheckpointTimer);
+      idleCheckpointTimer = null;
+    }
     if (networkSync) {
       networkSync.disconnect();
       networkSync = null;
     }
     set({ syncStatus: 'disconnected', roomFingerprint: null });
+  },
+
+  flushSyncNow: async () => {
+    if (!networkSync) return;
+    const fullState = Y.encodeStateAsUpdate(ydoc);
+    await networkSync.broadcastCheckpoint(fullState);
+    set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
   },
 
   // Actions
@@ -640,6 +678,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   loadProject: async () => {
+    // BUG-3 fix: single-flight lock avoids race when loadProject is called twice
+    // before hydration state flips true.
+    if (loadProjectInFlight) {
+      await loadProjectInFlight;
+      return;
+    }
+
+    loadProjectInFlight = (async () => {
     // Guard: Don't re-fetch if already hydrated (prevents redundant IDB reads on navigation)
     if (get().isHydrated) return;
 
@@ -822,6 +868,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     ydoc.on('update', (update: Uint8Array, origin: any) => {
       // THE ECHO STORM PREVENTION (Outbound Broadcast)
       if (origin !== 'network' && networkSync) {
+        set({ hasUnsyncedChanges: true });
         // BAND 1: Instantly broadcast tiny live diffs
         networkSync.broadcastUpdate(update);
 
@@ -925,6 +972,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         }); // Native display refresh rate
       }, 100); // Close the _crdtRenderDebounce setTimeout
     }); // Close the ydoc.on callback
+    })();
+
+    try {
+      await loadProjectInFlight;
+    } finally {
+      loadProjectInFlight = null;
+    }
   }, // Close the connectToSyncServer function call
 
   // ---------------------------------------------------------------------------
@@ -1201,6 +1255,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (networkSync) {
       networkSync.disconnect();
       networkSync = null;
+    }
+    if (idleCheckpointTimer) {
+      clearTimeout(idleCheckpointTimer);
+      idleCheckpointTimer = null;
     }
 
     // Factory Reset

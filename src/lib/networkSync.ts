@@ -33,6 +33,22 @@ export class NetworkSync {
     private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
     private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
     private visibilityListenerBound: boolean = false;
+    private queuedLiveDiffsDuringCatchUp: Uint8Array[] = [];
+
+    private releaseCatchUpLock() {
+        if (!this.catchUpLock) return;
+        this.catchUpLock = false;
+        if (this.queuedLiveDiffsDuringCatchUp.length > 0) {
+            console.log(`📦 Replaying ${this.queuedLiveDiffsDuringCatchUp.length} queued live diffs after catch-up.`);
+            this.ydoc.transact(() => {
+                this.queuedLiveDiffsDuringCatchUp.forEach((diff) => {
+                    Y.applyUpdate(this.ydoc, diff);
+                });
+            }, 'network');
+            this.queuedLiveDiffsDuringCatchUp = [];
+            this.onSyncActivity?.();
+        }
+    }
 
     private clearHeartbeat() {
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
@@ -44,17 +60,20 @@ export class NetworkSync {
     private intentionalDisconnect: boolean = false;
     private reconnectAttempts: number = 0;
     private onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void;
+    private onSyncActivity?: () => void;
 
     constructor(
         ydoc: Y.Doc,
         serverUrl: string,
         roomIdHash: string,
-        onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void
+        onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void,
+        onSyncActivity?: () => void
     ) {
         this.ydoc = ydoc;
         this.serverUrl = serverUrl;
         this.roomIdHash = roomIdHash;
         this.onStatusChange = onStatusChange;
+        this.onSyncActivity = onSyncActivity;
     }
 
     /**
@@ -115,7 +134,7 @@ export class NetworkSync {
                 setTimeout(() => {
                     if (this.catchUpLock && this.ws?.readyState === WebSocket.OPEN) {
                         console.log('⚡ [SYNC] Watchdog Timeout: No checkpoint received. Assuming Founder status. Unlocking Live Diffs.');
-                        this.catchUpLock = false;
+                        this.releaseCatchUpLock();
                         
                         // Seed the empty server with our Genesis Checkpoint
                         const fullState = Y.encodeStateAsUpdate(this.ydoc);
@@ -144,7 +163,7 @@ export class NetworkSync {
                         console.log('🌱 Room is empty. Uploading Genesis Checkpoint...');
                         const fullState = Y.encodeStateAsUpdate(this.ydoc);
                         this.broadcastCheckpoint(fullState);
-                        this.catchUpLock = false;
+                        this.releaseCatchUpLock();
                         return;
                     } 
                     
@@ -169,9 +188,10 @@ export class NetworkSync {
                         this.ydoc.transact(() => {
                             Y.applyUpdate(this.ydoc, yjsData);
                         }, 'network');
+                        this.onSyncActivity?.();
 
                         // Release the Genesis Lock only AFTER the massive blob is mathematically merged
-                        this.catchUpLock = false;
+                        this.releaseCatchUpLock();
                         console.log('✅ Genesis Catch-Up Complete. Unlocking Live Diffs.');
 
                         if (hasOfflineEdits) {
@@ -188,7 +208,8 @@ export class NetworkSync {
                         // SYNCHRONICITY TRAP: If a peer types while we are downloading the checkpoint,
                         // applying their diff *before* the checkpoint mathematically corrupts the vector clock.
                         if (this.catchUpLock) {
-                            console.warn('⏳ [INBOUND] Dropping live diff because Genesis Catch-Up is still locking.');
+                            console.warn('⏳ [INBOUND] Queueing live diff because Genesis Catch-Up is still locking.');
+                            this.queuedLiveDiffsDuringCatchUp.push(yjsData);
                             return;
                         }
 
@@ -196,6 +217,7 @@ export class NetworkSync {
                             Y.applyUpdate(this.ydoc, yjsData);
                         }, 'network');
                         console.log(`🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!`);
+                        this.onSyncActivity?.();
                     }
                 } catch (err) {
                     console.warn("🛡️ E2EE Payload Rejected (Possible wrong password or corrupted packet):", err);
@@ -297,6 +319,7 @@ export class NetworkSync {
             // Push the fully encrypted, tiny byte-array into the emergency OS buffer queue
             this.pendingDiffs.push(payload);
             this.ws.send(payload);
+            this.onSyncActivity?.();
         } catch (e) {
             console.error("Encryption failed before sending P2P diff:", e);
         }
@@ -318,6 +341,7 @@ export class NetworkSync {
             payload.set(ciphertext, 1);
 
             this.ws.send(payload);
+            this.onSyncActivity?.();
 
             // The massive Checkpoint contains all prior history mathematically. 
             // We can safely garbage-collect the pending tiny diffs queue.
@@ -347,5 +371,6 @@ export class NetworkSync {
         }
         this.key = null;
         this.pendingDiffs = [];
+        this.queuedLiveDiffsDuringCatchUp = [];
     }
 }
