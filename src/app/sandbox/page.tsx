@@ -2,19 +2,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Loader2, Play, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 const MODELS = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', role: 'The New Workhorse' },
-  { id: 'gemini-flash-latest', name: 'Gemini Flash Latest', role: 'The Rolling Edge' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', role: 'Current Primary' },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', role: 'Next Primary' },
   {
-    id: 'gemini-2.5-flash-lite-preview-09-2025',
-    name: 'Gemini 2.5 Flash Lite',
-    role: 'The Future Lite',
-  },
-  {
-    id: 'gemini-flash-lite-latest',
-    name: 'Gemini Flash Lite Latest',
-    role: 'The Efficiency Standard',
+    id: 'gemini-3.1-flash-lite-preview',
+    name: 'Gemini 3.1 Flash Lite',
+    role: 'Next Fallback',
   },
 ];
 
@@ -26,11 +22,16 @@ interface ModelResult {
   errorMsg?: string;
 }
 
+import { GeminiService } from '@/services/gemini';
+import { useAppStore } from '@/store/useAppStore';
+
 export default function SandboxPage() {
   const [systemPrompt, setSystemPrompt] = useState('You are a concise diagnostic computer.');
   const [userPrompt, setUserPrompt] = useState('Identify yourself. State your model version.');
   const [results, setResults] = useState<Record<string, ModelResult>>({});
   const [scanResult, setScanResult] = useState<string>('');
+  
+  const apiKey = useAppStore((state) => state.apiKey);
 
   useEffect(() => {
     // Initialize results state
@@ -42,6 +43,11 @@ export default function SandboxPage() {
   }, []);
 
   const handleIgnite = async () => {
+    if (!apiKey) {
+      toast.error('API Key Required', { description: 'Please enter your Gemini API key in Settings first.' });
+      return;
+    }
+
     // Reset states to loading
     const loadingState: Record<string, ModelResult> = {};
     MODELS.forEach((m) => {
@@ -58,51 +64,28 @@ export default function SandboxPage() {
   const testModel = async (modelId: string) => {
     const startTime = performance.now();
     try {
-      const response = await fetch('/api/gemini', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'sandboxGenerate',
-          modelName: modelId,
-          systemInstruction: systemPrompt,
-          contents: [{ parts: [{ text: userPrompt }] }],
-        }),
-      });
+      const text = await GeminiService.generateTestContent(
+        apiKey,
+        modelId,
+        systemPrompt,
+        userPrompt
+      );
 
       const endTime = performance.now();
       const latency = Math.round(endTime - startTime);
-      const data = await response.json();
-
-      if (!response.ok) {
-        setResults((prev) => ({
-          ...prev,
-          [modelId]: {
-            status: 'error',
-            statusCode: response.status,
-            latency,
-            errorMsg: data.error?.message || response.statusText,
-            output: JSON.stringify(data, null, 2),
-          },
-        }));
-        return;
-      }
-
-      const text = data.responseText || JSON.stringify(data, null, 2);
 
       setResults((prev) => ({
         ...prev,
         [modelId]: {
           status: 'success',
-          statusCode: response.status,
+          statusCode: 200,
           latency,
           output: text,
         },
       }));
     } catch (error: unknown) {
       const endTime = performance.now();
-      const errorMessage = error instanceof Error ? error.message : 'Network Error';
+      const errorMessage = error instanceof Error ? error.message : 'Unknown Error';
       setResults((prev) => ({
         ...prev,
         [modelId]: {

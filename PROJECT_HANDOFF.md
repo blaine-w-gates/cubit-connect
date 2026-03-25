@@ -39,8 +39,8 @@ Cubit Connect is a **Local-First AI Knowledge Distillation Engine**.
 
 ### C. The AI Engine (Gemini) — Dual Model Circuit Breaker
 
-- **Primary Model:** `gemini-2.5-flash` (`PRIMARY_MODEL` in `gemini.ts`).
-- **Fallback Model:** `gemini-2.5-flash-lite` (`FALLBACK_MODEL` in `gemini.ts`).
+- **Primary Model:** `gemini-3-flash-preview` (`PRIMARY_MODEL` in `gemini.ts`).
+- **Fallback Model:** `gemini-3.1-flash-lite-preview` (`FALLBACK_MODEL` in `gemini.ts`).
 - **Strategy:** If Primary hits `429`/quota, circuit breaker kicks in — cooldown for 60s, immediately switch to Fallback. If both are exhausted → `PROJECT_QUOTA_EXCEEDED` error shown to user.
 - **Rate Limit:** `MIN_DELAY_MS = 2000` enforced between all calls.
 - **Context Safety:** If transcript >100k chars, only Primary can handle it. If Primary is cooling down → fail fast.

@@ -39,10 +39,14 @@ const PALETTE = [
 // single-tap to open, single-tap to pick.
 function ColorAccordion({
     currentColor,
+    isOwner,
     onPick,
+    onTransfer,
 }: {
     currentColor: string;
+    isOwner: boolean;
     onPick: (color: string) => void;
+    onTransfer: () => void;
 }) {
     return (
         <motion.div
@@ -79,6 +83,22 @@ function ColorAccordion({
                     />
                 ))}
             </div>
+            
+            <div className="px-3 pb-3 mt-1">
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onTransfer();
+                    }}
+                    className={`w-full py-1.5 px-2 text-xs font-medium rounded border transition-colors ${
+                        isOwner
+                            ? 'bg-zinc-100 dark:bg-stone-800 text-zinc-700 dark:text-stone-300 border-zinc-200 dark:border-stone-700 hover:bg-zinc-200 dark:hover:bg-stone-700'
+                            : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 hover:bg-indigo-100 dark:hover:bg-indigo-900/40'
+                    }`}
+                >
+                    {isOwner ? 'Pass Ownership...' : 'Take Ownership!'}
+                </button>
+            </div>
         </motion.div>
     );
 }
@@ -98,7 +118,9 @@ function SortableProjectTab({
     onProjectDelete,
     onColorDotTap,
     onColorPick,
+    onTransfer,
     canDelete,
+    deviceId,
 }: {
     project: TodoProject;
     isActive: boolean;
@@ -113,7 +135,9 @@ function SortableProjectTab({
     onProjectDelete: (id: string) => void;
     onColorDotTap: (id: string) => void;
     onColorPick: (id: string, color: string) => void;
+    onTransfer: (id: string) => void;
     canDelete: boolean;
+    deviceId: string;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: project.id,
@@ -209,7 +233,9 @@ function SortableProjectTab({
                 {isColorOpen && (
                     <ColorAccordion
                         currentColor={project.color}
+                        isOwner={project.ownerId === deviceId}
                         onPick={(color) => onColorPick(project.id, color)}
+                        onTransfer={() => onTransfer(project.id)}
                     />
                 )}
             </AnimatePresence>
@@ -248,6 +274,8 @@ export default function BookTabSidebar() {
         deleteTodoProject,
         reorderTodoProjects,
         changeProjectColor,
+        transferOwnership,
+        deviceId,
     } = useAppStore(
         useShallow((s) => ({
             todoProjects: s.todoProjects,
@@ -258,6 +286,8 @@ export default function BookTabSidebar() {
             deleteTodoProject: s.deleteTodoProject,
             reorderTodoProjects: s.reorderTodoProjects,
             changeProjectColor: s.changeProjectColor,
+            transferOwnership: s.transferOwnership,
+            deviceId: s.deviceId,
         })),
     );
 
@@ -288,6 +318,22 @@ export default function BookTabSidebar() {
         setColorPickerId(null); // Close accordion after picking
     };
 
+    const handleTransfer = (projectId: string) => {
+        const project = todoProjects.find((p) => p.id === projectId);
+        if (!project) return;
+        
+        if (project.ownerId === deviceId) {
+            // Owner is passing away ownership — prompt for ID
+            const newOwner = window.prompt("Enter the Device ID of the new owner to pass transfer:", "device-id-xyz");
+            if (newOwner && newOwner.trim().length > 0) {
+                transferOwnership(projectId, newOwner.trim());
+            }
+        } else {
+            // Steal ownership (Taking ownership over a shared network state)
+            transferOwnership(projectId, deviceId);
+        }
+    };
+
     const handleDragStart = (e: DragStartEvent) => {
         setActiveDragId(e.active.id as string);
         setColorPickerId(null); // Close any open color picker when dragging
@@ -311,6 +357,14 @@ export default function BookTabSidebar() {
                 {!isOpen && (
                     <motion.button
                         key="toggle-open"
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={{ left: 0, right: 0.2 }}
+                        onDragEnd={(e, info) => {
+                            if (info.offset.x > 30 || info.velocity.x > 500) {
+                                setIsOpen(true);
+                            }
+                        }}
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -10 }}
@@ -332,8 +386,16 @@ export default function BookTabSidebar() {
                 {isOpen && (
                     <motion.aside
                         key="sidebar"
+                        drag="x"
+                        dragConstraints={{ left: 0, right: 0 }}
+                        dragElastic={{ left: 0.2, right: 0 }}
+                        onDragEnd={(e, info) => {
+                            if (info.offset.x < -30 || info.velocity.x < -500) {
+                                setIsOpen(false);
+                            }
+                        }}
                         initial={{ width: 0, opacity: 0 }}
-                        animate={{ width: 192, opacity: 1 }}
+                        animate={{ width: 192, opacity: 1, x: 0 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
                         className="overflow-hidden border-r border-zinc-200 dark:border-stone-700 bg-zinc-50 dark:bg-stone-900 flex flex-col"
@@ -396,7 +458,9 @@ export default function BookTabSidebar() {
                                             onProjectDelete={deleteTodoProject}
                                             onColorDotTap={handleColorDotTap}
                                             onColorPick={handleColorPick}
+                                            onTransfer={handleTransfer}
                                             canDelete={todoProjects.length > 1}
+                                            deviceId={deviceId}
                                         />
                                     ))}
                                 </SortableContext>

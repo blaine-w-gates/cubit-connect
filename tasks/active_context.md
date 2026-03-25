@@ -8,7 +8,7 @@ This file tracks the active plan and phase of the Cubit Connect project.
 
 **Phase:** Maintenance & Feature Expansion (Phase 5)
 **IDE:** Google Antigravity
-**AI Model:** `gemini-2.5-flash` (Primary) + `gemini-2.5-flash-lite` (Fallback)
+**AI Model:** `gemini-3-flash-preview` (Primary) + `gemini-3.1-flash-lite-preview` (Fallback)
 
 ## Completed Phases
 
@@ -59,7 +59,7 @@ This file tracks the active plan and phase of the Cubit Connect project.
 - [x] E2E tests (Playwright) + Unit tests (Vitest).
 - [x] Security hardening (`npm audit` fixes).
 - [x] Markdown Export.
-- [x] Toast Notifications (replace `alert()`).
+- [x] Toast Notifications (`sonner`).
 - [x] Drag-and-Drop task reordering.
 - [ ] Offline Indicator (sticky banner).
 - [x] Pre-commit Hooks (`husky`).

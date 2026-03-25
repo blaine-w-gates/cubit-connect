@@ -40,15 +40,15 @@
 - Markdown Export
 - Dark Mode
 - Mobile Header (hamburger menu)
-- Gemini Model Fallback (circuit breaker)
 - API Key encryption
 - Zod schema validation
+- Gemini Model Migration (3.0/3.1 Upgrade) ✅
+- Toast Notifications (`sonner`) ✅
+- Drag-and-Drop task reordering ✅
+- Pre-commit Hooks (`husky`) ✅
 
 ### Remaining (from Assessment Report)
 - Retry Action for AI (button on Task Card)
-- Toast Notifications (replace `alert()` with `sonner`)
-- Drag-and-Drop task reordering
 - Offline Indicator (sticky banner)
-- Pre-commit Hooks (`husky`)
 - Performance Monitoring (IDB size warning)
 - Centralized AI Prompt Templates (`src/prompts/`)

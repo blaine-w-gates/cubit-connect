@@ -24,6 +24,9 @@ export default function TodoPage() {
     const syncStatus = useAppStore((state) => state.syncStatus);
     const setIsSyncModalOpen = useAppStore((state) => state.setIsSyncModalOpen);
     const activeWorkspaceType = useAppStore((state) => state.activeWorkspaceType);
+    const activeProjectId = useAppStore((state) => state.activeProjectId);
+    const todoProjects = useAppStore((state) => state.todoProjects);
+    const deviceId = useAppStore((state) => state.deviceId);
 
     const [mounted, setMounted] = useState(false);
     const [confirmingReset, setConfirmingReset] = useState(false);
@@ -101,7 +104,24 @@ export default function TodoPage() {
                     {/* Section Heading */}
                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
                         <div className="flex items-center gap-3">
-                            <h3 className="font-serif text-2xl font-bold italic">Your Task Board:</h3>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                                <h3 className="font-serif text-2xl font-bold italic">
+                                    {todoProjects.find(p => p.id === activeProjectId)?.name || 'Your Task Board'}:
+                                </h3>
+                                {todoProjects.find(p => p.id === activeProjectId) && (
+                                    <span className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full border shadow-sm ${
+                                        todoProjects.find(p => p.id === activeProjectId)?.ownerId === deviceId 
+                                            ? 'bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 border-zinc-200 dark:border-stone-700'
+                                            : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
+                                    }`}>
+                                        <Monitor className="w-3 h-3" />
+                                        {todoProjects.find(p => p.id === activeProjectId)?.ownerId === deviceId 
+                                            ? 'Created by You' 
+                                            : `Owner ID: ${(todoProjects.find(p => p.id === activeProjectId)?.ownerId || 'Unknown').slice(0,6)}`}
+                                    </span>
+                                )}
+                            </div>
+
                             {activeWorkspaceType === 'personalUno' ? (
                                 <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 text-xs font-bold rounded-full border border-zinc-200 dark:border-stone-700">
                                     <Monitor className="w-3.5 h-3.5" />

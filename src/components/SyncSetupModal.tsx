@@ -71,11 +71,11 @@ export default function SyncSetupModal() {
 
     return (
         <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/50 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-zinc-900/50 backdrop-blur-sm"
             onClick={() => setIsSyncModalOpen(false)}
         >
             <div
-                className="bg-white dark:bg-stone-900 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-zinc-200 dark:border-stone-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto"
+                className="bg-white dark:bg-stone-900 w-full sm:max-w-md rounded-t-2xl sm:rounded-2xl shadow-2xl overflow-hidden border-t sm:border border-zinc-200 dark:border-stone-800 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto pb-8 sm:pb-0"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header */}

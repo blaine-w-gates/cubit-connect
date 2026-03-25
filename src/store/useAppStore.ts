@@ -131,6 +131,7 @@ export interface ProjectState {
   deleteTodoProject: (projectId: string) => void;
   changeProjectColor: (projectId: string, color: string) => void;
   reorderTodoProjects: (fromIdx: number, toIdx: number) => void;
+  transferOwnership: (projectId: string, newOwnerId: string) => void;
   // Todo row actions (operate on active project)
   addTodoRow: (task?: string) => void;
   deleteTodoRow: (rowId: string) => void;
@@ -375,6 +376,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(projectId);
     if (yProj) {
       yProj.set('color', color);
+    }
+  },
+
+  transferOwnership: (projectId: string, newOwnerId: string) => {
+    const yProj = yProjectsMap.get(projectId);
+    if (yProj) {
+      ydoc.transact(() => {
+        yProj.set('ownerId', newOwnerId);
+      });
     }
   },
 
@@ -880,10 +890,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       Y.applyUpdate(ydoc, data.yjsState);
       if (process.env.NODE_ENV === 'development') console.log('✅ Y.Doc Booted from Binary IDB History');
 
-      // We still need to map the Yjs state back to the Zustand arrays for the first render
-      todoProjects = Array.from(yProjectsMap.values()).map(extractTodoProjectFromYMap);
+      // 🔴 BUG FIX: Filter out Yjs 'isDeleted' tombstones during first-boot structural hydration!
+      // Previously, we mapped ALL history, meaning ghosts would render until the first CRDT update wiped them out all at once.
+      todoProjects = Array.from(yProjectsMap.values())
+        .filter(p => !p.get('isDeleted'))
+        .map(extractTodoProjectFromYMap);
+        
       migratedTasks.length = 0; // Clear legacy, Yjs is truth
-      migratedTasks.push(...Array.from(yTasksMap.values()).map(extractTaskItemFromYMap));
+      migratedTasks.push(...Array.from(yTasksMap.values())
+        .filter(t => !t.get('isDeleted'))
+        .map(extractTaskItemFromYMap));
 
     } else if (!isMigrating) {
       // 2. THE GENESIS BOOT (Legacy JSON -> Yjs)

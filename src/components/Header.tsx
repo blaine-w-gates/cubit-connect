@@ -48,6 +48,11 @@ export default function Header({
     };
   }, []);
 
+  // Close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
+
   return (
     <header className="sticky top-0 z-50 h-[60px] border-b border-zinc-200 dark:border-stone-800 bg-white/90 dark:bg-stone-900/90 backdrop-blur-sm relative">
       <div className="h-full px-4 md:px-6 flex items-center justify-between">

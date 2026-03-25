@@ -23,6 +23,23 @@ export default class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     console.error('ErrorBoundary caught:', error, info.componentStack);
+    try {
+      const crashLog = {
+        time: new Date().toISOString(),
+        message: error.message,
+        stack: error.stack,
+        componentStack: info.componentStack,
+        url: typeof window !== 'undefined' ? window.location.href : 'unknown'
+      };
+      const existingLogsStr = localStorage.getItem('cubit_crash_logs');
+      const existingLogs = existingLogsStr ? JSON.parse(existingLogsStr) : [];
+      existingLogs.push(crashLog);
+      // Keep only last 10 logs to prevent storage bloat
+      if (existingLogs.length > 10) existingLogs.shift();
+      localStorage.setItem('cubit_crash_logs', JSON.stringify(existingLogs));
+    } catch (loggingError) {
+      console.error('Failed to write crash log to localStorage', loggingError);
+    }
   }
 
   handleReload = () => {

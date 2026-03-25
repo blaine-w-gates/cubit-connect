@@ -3,8 +3,8 @@ import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
 
 // MODELS
-const PRIMARY_MODEL = 'gemini-2.5-flash';
-const FALLBACK_MODEL = 'gemini-2.5-flash-lite';
+const PRIMARY_MODEL = 'gemini-3-flash-preview';
+const FALLBACK_MODEL = 'gemini-3.1-flash-lite-preview';
 
 // CIRCUIT BREAKER STATE
 const COOLDOWN_DURATION = 60000; // 60 Seconds
@@ -314,5 +314,21 @@ export const GeminiService = {
       }
       throw err;
     }
+  },
+
+  async generateTestContent(
+    apiKey: string,
+    modelName: string,
+    systemInstruction: string,
+    userPrompt: string,
+  ): Promise<string> {
+    await this.enforceRateLimit();
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      systemInstruction,
+    });
+    const result = await this.withTimeout(model.generateContent(userPrompt));
+    return result.response.text();
   },
 };

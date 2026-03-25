@@ -76,11 +76,11 @@ export default function SettingsDialog() {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-zinc-900/60 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={() => onOpenChange(false)}
     >
       <div
-        className={`w-full max-w-md bg-white dark:bg-stone-900 border rounded-xl p-6 shadow-2xl relative animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto ${isQuotaMode ? 'border-red-200 dark:border-red-900 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-zinc-200 dark:border-stone-700'
+        className={`w-full sm:max-w-md bg-white dark:bg-stone-900 border-t sm:border rounded-t-2xl sm:rounded-xl p-6 shadow-2xl relative animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-0 sm:zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto pb-8 sm:pb-6 ${isQuotaMode ? 'border-red-200 dark:border-red-900 ring-4 ring-red-50 dark:ring-red-900/20' : 'border-zinc-200 dark:border-stone-700'
           }`}
         onClick={(e) => e.stopPropagation()}
       >

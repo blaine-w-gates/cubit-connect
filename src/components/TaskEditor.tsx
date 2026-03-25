@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronRight, Wand2, Check, X } from 'lucide-react';
+import { ChevronDown, ChevronRight, Wand2, Check, X, RefreshCw } from 'lucide-react';
 
 // Safe internal Spinner to prevent Lucide import issues
 const Spinner = ({ className }: { className?: string }) => (
@@ -93,10 +93,12 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
             >
               {activeProcessingId === task.id ? (
                 <Spinner className="w-3 h-3 animate-spin" />
+              ) : task.sub_steps && task.sub_steps.length > 0 ? (
+                <RefreshCw className="w-3 h-3" />
               ) : (
                 <Wand2 className="w-3 h-3" />
               )}
-              {activeProcessingId === task.id ? 'Thinking...' : 'Cubit'}
+              {activeProcessingId === task.id ? 'Thinking...' : task.sub_steps && task.sub_steps.length > 0 ? 'Retry' : 'Cubit'}
             </button>
           </div>
 
@@ -174,10 +176,12 @@ const TaskEditor = memo(function TaskEditor({ task, onCubit }: TaskEditorProps) 
                 >
                   {activeProcessingId === step.id ? (
                     <Spinner className="w-3 h-3 animate-spin" />
+                  ) : step.sub_steps && step.sub_steps.length > 0 ? (
+                    <RefreshCw className="w-3 h-3" />
                   ) : (
                     <Wand2 className="w-3 h-3" />
                   )}
-                  {activeProcessingId === step.id ? 'Thinking...' : 'Deep Dive'}
+                  {activeProcessingId === step.id ? 'Thinking...' : step.sub_steps && step.sub_steps.length > 0 ? 'Retry' : 'Deep Dive'}
                 </button>
               </div>
 

@@ -502,12 +502,21 @@ export default function TodoTable() {
     const handleTouchStart = (rowId: string, x: number, y: number) => {
         swipeRef.current = { startX: x, startY: y, rowId };
     };
-    const handleTouchEnd = (x: number, y: number) => {
+    const handleTouchEnd = (e: React.TouchEvent, x: number, y: number) => {
         if (!swipeRef.current) return;
+        
+        // Fix #9 Part 2: Prevent text editing gestures (like cursor scrubbing) from triggering delete
+        const targetTag = (e.target as HTMLElement).tagName?.toLowerCase();
+        if (targetTag === 'textarea' || targetTag === 'input') {
+            swipeRef.current = null;
+            return;
+        }
+
         const dx = x - swipeRef.current.startX;
         const dy = y - swipeRef.current.startY;
-        // Only trigger if horizontal movement dominates vertical
-        if (Math.abs(dx) > 100 && Math.abs(dy) < Math.abs(dx)) {
+        
+        // Strict Left-Swipe threshold to prevent accidental deletions
+        if (dx < -150 && Math.abs(dy) < Math.abs(dx)) {
             handleSwipeDelete(swipeRef.current.rowId);
         }
         swipeRef.current = null;
@@ -669,7 +678,7 @@ export default function TodoTable() {
                                             mc={mc}
                                             onDoubleClick={() => handleDoubleClickEmptyRow(row)}
                                             onTouchStart={(e: React.TouchEvent) => handleTouchStart(row.id, e.touches[0].clientX, e.touches[0].clientY)}
-                                            onTouchEnd={(e: React.TouchEvent) => handleTouchEnd(e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
+                                            onTouchEnd={(e: React.TouchEvent) => handleTouchEnd(e, e.changedTouches[0].clientX, e.changedTouches[0].clientY)}
                                             lastAddedRowId={lastAddedRowId}
                                             onTaskClick={(e: React.MouseEvent) => {
                                                 if (window.getSelection()?.toString()) return;
