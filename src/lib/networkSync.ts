@@ -302,7 +302,9 @@ export class NetworkSync {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const applyYdocId = (this.ydoc as any).__observerId || 'unknown';
                             console.log(`[NETWORKSYNC DEBUG] Applying update to ydoc ${applyYdocId} with origin 'network'`);
+                            console.log(`[NETWORKSYNC DEBUG] BEFORE applyUpdate - ydoc has ${(this.ydoc as unknown as { _observers?: Map<string, unknown> })._observers?.get('update')?.length || 0} update observers`);
                             Y.applyUpdate(this.ydoc, yjsData);
+                            console.log(`[NETWORKSYNC DEBUG] AFTER applyUpdate - update applied, observer should have fired`);
                         }, 'network');
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const afterYdocId = (this.ydoc as any).__observerId || 'unknown';

@@ -134,6 +134,11 @@ function registerYjsObserver(set: any, get: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     console.log('[YJS DEBUG] ydoc.on(update) fired on ydoc', ydocId, '- origin:', origin, 'update length:', update.length);
     
+    // CRITICAL DEBUG: Log ALL origins to see if network updates trigger this
+    if (origin === 'network') {
+      console.log('[YJS DEBUG] 🚨 NETWORK UPDATE RECEIVED - observer is working!');
+    }
+    
     // THE ECHO STORM PREVENTION (Outbound Broadcast)
     if (origin !== 'network' && networkSync) {
       set({ hasUnsyncedChanges: true });
