@@ -1,0 +1,347 @@
+
+Running 1 test using 1 worker
+
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: [HMR] connected
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: [Fast Refresh] rebuilding
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: [Fast Refresh] done in 616ms
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🧹 resetYDoc: Clearing stable Y.Doc to prevent stale observer disconnect.
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at resetYDoc (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1940:10)
+    at connectToSyncServer (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2482:21)
+    at async handleConnect (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:3468:13)
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+    at async connectToSyncServer (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2491:21)
+    at async handleConnect (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:3468:13)
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=90622118...
+[Browser A]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser A]: 🌱 Room is empty. Uploading Genesis Checkpoint...
+[Browser A]: [Fast Refresh] rebuilding
+[Browser A]: [Fast Refresh] done in 134ms
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser B]: [HMR] connected
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: [HMR] connected
+[Browser B]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🧹 resetYDoc: Clearing stable Y.Doc to prevent stale observer disconnect.
+[Browser B]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at resetYDoc (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1940:10)
+    at connectToSyncServer (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2482:21)
+    at async handleConnect (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:3468:13)
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2739:26
+    at async loadProject (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2801:17)
+    at async connectToSyncServer (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2491:21)
+    at async handleConnect (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:3468:13)
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=90622118...
+[Browser B]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser B]: 🌱 Room is empty. Uploading Genesis Checkpoint...
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[DEBUG] Page B active project: 194e079a-c826-4103-9c1b-d62cbf6c7a44. Adding task...
+[Browser B]: ✅ addTodoRow: Transacting Yjs set for row 1da3578c-67e8-4e87-9c91-274e79043e3d
+[Browser B]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at addTodoRow (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:2229:18)
+    at onClick (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_ea887ad0._.js:3390:25)
+    at executeDispatch (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:10314:13)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:965:74)
+    at processDispatchQueue (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:10340:41)
+    at http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:10615:13
+    at batchedUpdates$1 (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:2253:44)
+    at dispatchEventForPluginEventSystem (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:10416:9)
+    at dispatchEvent (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:12935:37)
+    at dispatchDiscreteEvent (http://localhost:3000/_next/static/chunks/b0155_next_dist_compiled_react-dom_aad688a9._.js:12917:64)
+[Browser B]: 📡 [YJS] Local change detected (length: 355, origin: null). Broadcasting...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (384 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=384
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 383 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 355 bytes.
+[Browser A]: 📥 [INBOUND] Received live P2P Diff (384 bytes)
+[Browser A]: 🌀 [PROXY] Handler CRASHED: TypeError: Cannot read properties of null (reading 'length')
+    at Object.handleYDocUpdate [as handler] (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1892:90)
+    at proxy (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1871:25)
+    at http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:462
+    at Array.forEach (<anonymous>)
+    at Doc.emit (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:290:449)
+    at Array.<anonymous> (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3109:33)
+    at callAll (http://localhost:3000/_next/static/chunks/b0155_lib0_8b2deed2._.js:2387:18)
+    at cleanupTransactions (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3119:218)
+    at transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:3266:17)
+    at Doc.transact (http://localhost:3000/_next/static/chunks/b0155_yjs_dist_yjs_mjs_fd380ba1._.js:712:16)
+    at ws.onmessage (http://localhost:3000/_next/static/chunks/Documents_cube%20it%20connect_cube%20it%20connect%20b_src_5cbaa9a5._.js:1660:35)
+[Browser A]: 🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=7, length=1
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=7, length=1
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 3075153056
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 744563692
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+  ✘  1 [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking (1.0m)
+
+
+  1) [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: page.waitForFunction: Test ended.
+
+      89 |         // Peer A must see Peer B's project arrive and contain the task.
+      90 |         // We wait for Page A to have 2 projects (its own and B's).
+    > 91 |         await pageA.waitForFunction(() => {
+         |                     ^
+      92 |             const store = (window as any).__STORE__;
+      93 |             if (!store) return false;
+      94 |             const state = store.getState();
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/sync-reconciliation.spec.ts:91:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/error-context.md
+
+  1 failed
+    [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 

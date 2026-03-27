@@ -1,5 +1,6 @@
 import * as Y from 'yjs';
-import { encryptUpdate, decryptUpdate } from '@/lib/cryptoSync';
+import { encryptUpdate, decryptUpdate } from './cryptoSync';
+import { getGlobalConnectionManager } from './syncConnectionManager';
 
 export const MSG_UPDATE = 3;
 export const MSG_REQUEST_CACHE = 4;
@@ -32,6 +33,7 @@ export class NetworkSync {
     private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     private heartbeatInterval: ReturnType<typeof setInterval> | null = null;
     private heartbeatTimeout: ReturnType<typeof setTimeout> | null = null;
+    private presenceInterval: ReturnType<typeof setInterval> | null = null;
     private visibilityListenerBound: boolean = false;
     private queuedLiveDiffsDuringCatchUp: Uint8Array[] = [];
 
@@ -53,33 +55,63 @@ export class NetworkSync {
     private clearHeartbeat() {
         if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
         if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout);
+        if (this.presenceInterval) clearInterval(this.presenceInterval);
         this.heartbeatInterval = null;
         this.heartbeatTimeout = null;
+        this.presenceInterval = null;
     }
 
     private intentionalDisconnect: boolean = false;
     private reconnectAttempts: number = 0;
     private onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void;
     private onSyncActivity?: () => void;
+    private onPeerPresence?: () => void;
+    private onPeerDisconnect?: () => void;
+    private onPeerEditing?: (isEditing: boolean) => void;
 
     constructor(
         ydoc: Y.Doc,
         serverUrl: string,
         roomIdHash: string,
         onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void,
-        onSyncActivity?: () => void
+        onSyncActivity?: () => void,
+        onPeerPresence?: () => void,
+        onPeerDisconnect?: () => void,
+        onPeerEditing?: (isEditing: boolean) => void
     ) {
         this.ydoc = ydoc;
         this.serverUrl = serverUrl;
         this.roomIdHash = roomIdHash;
         this.onStatusChange = onStatusChange;
         this.onSyncActivity = onSyncActivity;
+        this.onPeerPresence = onPeerPresence;
+        this.onPeerDisconnect = onPeerDisconnect;
+        this.onPeerEditing = onPeerEditing;
+        
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const ydocId = (this.ydoc as any).__observerId || 'unknown';
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.log(`[NETWORKSYNC DEBUG] Constructor - using ydoc ${ydocId}, ydoc.guid:`, (this.ydoc as any).guid);
+
+        // --- BROADCAST ENGINE ---
+        // Every local mutation (origin !== 'network') must be encrypted and sent to the relay.
+        // This ensures Peers stay in sync without manual 'Save' buttons.
+        this.ydoc.on('update', (update, origin) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const updateYdocId = (this.ydoc as any).__observerId || 'unknown';
+            console.log(`[NETWORKSYNC DEBUG] ydoc.on(update) fired on ydoc ${updateYdocId}, origin:`, origin);
+            if (origin !== 'network') {
+                console.log(`📡 [YJS] Local change detected (length: ${update.length}, origin: ${origin}). Broadcasting...`);
+                this.broadcastUpdate(update);
+            }
+        });
     }
 
     /**
      * Initializes the WebSocket connection.
      */
     async connect(derivedKey: CryptoKey): Promise<void> {
+        console.log(`🔌 NetworkSync: Connecting to ${this.serverUrl}?room=${this.roomIdHash.slice(0, 8)}...`);
         return new Promise((resolve, reject) => {
             if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return resolve();
 
@@ -108,7 +140,7 @@ export class NetworkSync {
                 if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
                 this.reconnectAttempts = 0; // Reset backoff pool on success
                 this.onStatusChange('connected');
-                console.log('🔗 E2EE WebSocket connected. Requesting Cache...');
+                console.log(`🔗 E2EE WebSocket connected to ${this.serverUrl}. Requesting Cache...`);
 
                 // THE APPLICATION-LEVEL HEARTBEAT (Bypassing ws.ping limits)
                 this.heartbeatInterval = setInterval(() => {
@@ -122,6 +154,19 @@ export class NetworkSync {
                         }, 5000);
                     }
                 }, 30000);
+
+                // ENCRYPTED PEER PRESENCE TRACKING (Dumb Relay Bypass)
+                // We broadcast an empty Yjs Update [0, 0] every 15s. The relay assumes it is live data and broadcasts it
+                // to everyone. This lets us verify other peers are alive and enforcing 2-Player Strict Mode.
+                this.presenceInterval = setInterval(() => {
+                    if (this.ws?.readyState === WebSocket.OPEN && this.key) {
+                        console.log(`[PRESENCE] Broadcasting heartbeat from ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
+                        const emptyUpdate = new Uint8Array([0, 0]);
+                        this.broadcastUpdate(emptyUpdate);
+                    } else {
+                        console.log(`[PRESENCE] Skipping heartbeat - ws=${this.ws?.readyState}, key=${!!this.key}`);
+                    }
+                }, 15000);
 
                 // The "Catch-Up" Protocol (Dual-Band): Download Last Checkpoint + Last 100 Diffs
                 const payload = new Uint8Array([MSG_REQUEST_CACHE]);
@@ -150,12 +195,20 @@ export class NetworkSync {
 
                 try {
                     const encryptedPayload = new Uint8Array(event.data);
-
-                    // Extract Unencrypted Native Header
                     const messageType = encryptedPayload[0];
+                    
+                    // Update connection manager stats
+                    getGlobalConnectionManager().updateStats({ messagesReceived: 1 });
+                    
+                    // Detailed MSG_UPDATE tracing
+                    if (messageType === MSG_UPDATE) {
+                        console.log(`📥 [NETWORK] Received MSG_UPDATE (${encryptedPayload.length} bytes) from server`);
+                    }
 
                     if (messageType === MSG_HEARTBEAT) {
                         if (this.heartbeatTimeout) clearTimeout(this.heartbeatTimeout);
+                        // Record heartbeat in connection manager
+                        getGlobalConnectionManager().recordHeartbeat();
                         return;
                     }
 
@@ -198,11 +251,39 @@ export class NetworkSync {
                             console.log('🔄 Uploading Post-Merge Genesis Diff to sync offline work...');
                             const fullState = Y.encodeStateAsUpdate(this.ydoc);
                             this.broadcastCheckpoint(fullState);
+
+                            // 🔴 BUG FIX: The generic Dumb Relay swallows MSG_CHECKPOINT to save it to cache, 
+                            // BUT it intentionally does not broadcast it to other live peers. To ensure live peers 
+                            // merge our offline edits immediately, we actively P2P broadcast the exact delta array.
+                            console.log('📡 Also broadcasting offline edits as P2P diff to bypass checkpoint swallowing...');
+                            this.broadcastUpdate(offlineEdits);
                         } else {
                             console.log('✅ No offline edits detected. Skipping Post-Merge broadcast to save bandwidth.');
                         }
 
                     } else if (messageType === MSG_UPDATE) {
+                        // DETECT ENCRYPTED PEER PRESENCE HEARTBEAT
+                        // An empty Yjs update [0, 0] is mathematically harmless, but serves as proof of life.
+                        if (yjsData.length === 2 && yjsData[0] === 0 && yjsData[1] === 0) {
+                            console.log(`[PRESENCE] Peer heartbeat received on ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
+                            // Record in connection manager for peer count tracking
+                            getGlobalConnectionManager().updatePeerCount(1);
+                            if (this.onPeerPresence) {
+                                console.log('[PRESENCE] Calling onPeerPresence callback');
+                                this.onPeerPresence();
+                            } else {
+                                console.warn('[PRESENCE] onPeerPresence callback not set!');
+                            }
+                            return; // Bypass Yjs merge payload cost entirely
+                        }
+                        
+                        // DETECT EXPLICIT DISCONNECT
+                        if (yjsData.length === 2 && yjsData[0] === 255 && yjsData[1] === 255) {
+                            console.log('🚪 Peer explicitly disconnected.');
+                            if (this.onPeerDisconnect) this.onPeerDisconnect();
+                            return;
+                        }
+
                         console.log(`📥 [INBOUND] Received live P2P Diff (${encryptedPayload.length} bytes)`);
                         // BAND 1: Live Peer Diffs
                         // SYNCHRONICITY TRAP: If a peer types while we are downloading the checkpoint,
@@ -212,14 +293,28 @@ export class NetworkSync {
                             this.queuedLiveDiffsDuringCatchUp.push(yjsData);
                             return;
                         }
+                        
+                        // BROADCAST SIGNAL: Peer has begun an edit. 
+                        // This triggers the "Strict Mode" turn-based lock on the local UI.
+                        if (this.onPeerEditing) this.onPeerEditing(true);
 
                         this.ydoc.transact(() => {
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            const applyYdocId = (this.ydoc as any).__observerId || 'unknown';
+                            console.log(`[NETWORKSYNC DEBUG] Applying update to ydoc ${applyYdocId} with origin 'network'`);
                             Y.applyUpdate(this.ydoc, yjsData);
                         }, 'network');
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const afterYdocId = (this.ydoc as any).__observerId || 'unknown';
+                        console.log(`[NETWORKSYNC DEBUG] Update applied to ydoc ${afterYdocId}`);
                         console.log(`🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!`);
                         this.onSyncActivity?.();
                     }
                 } catch (err) {
+                    const msgType = (event.data as ArrayBuffer).byteLength > 0 ? new Uint8Array(event.data)[0] : 'unknown';
+                    if (msgType === MSG_UPDATE) {
+                        console.warn("🛡️ E2EE Decryption failed for MSG_UPDATE - possible key mismatch or corrupted packet");
+                    }
                     console.warn("🛡️ E2EE Payload Rejected (Possible wrong password or corrupted packet):", err);
                 }
             };
@@ -314,14 +409,38 @@ export class NetworkSync {
             payload[0] = MSG_UPDATE;
             payload.set(ciphertext, 1);
 
-            console.log(`📡 [OUTBOUND] Sending live P2P Diff (${payload.length} bytes)`);
+            // Track message stats
+            const isPresence = update.length === 2 && update[0] === 0 && update[1] === 0;
+            console.log(`📡 [OUTBOUND] Sending ${isPresence ? 'presence heartbeat' : 'P2P Diff'} (${payload.length} bytes)`);
+            getGlobalConnectionManager().updateStats({ messagesSent: 1 });
 
             // Push the fully encrypted, tiny byte-array into the emergency OS buffer queue
             this.pendingDiffs.push(payload);
             this.ws.send(payload);
-            this.onSyncActivity?.();
+
+            // Avoid triggering UI spinner for invisible presence pings
+            if (update.length > 2) {
+                this.onSyncActivity?.();
+            }
         } catch (e) {
             console.error("Encryption failed before sending P2P diff:", e);
+        }
+    }
+    
+    /**
+     * Broadcasts an explicit termination signal.
+     */
+    async sendDisconnectSignal() {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
+        try {
+            const update = new Uint8Array([255, 255]);
+            const ciphertext = await encryptUpdate(update, this.key);
+            const payload = new Uint8Array(ciphertext.length + 1);
+            payload[0] = MSG_UPDATE;
+            payload.set(ciphertext, 1);
+            this.ws.send(payload);
+        } catch (e) {
+            console.error("Failed to send disconnect signal", e);
         }
     }
 
@@ -352,25 +471,28 @@ export class NetworkSync {
     }
 
     disconnect() {
-        this.intentionalDisconnect = true;
-        document.removeEventListener('visibilitychange', this.handleVisibilityChange);
-        this.visibilityListenerBound = false;
-        this.clearHeartbeat();
+        this.sendDisconnectSignal().finally(() => {
+            this.intentionalDisconnect = true;
+            document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+            this.visibilityListenerBound = false;
+            this.clearHeartbeat();
 
-        if (this.connectionTimeout) {
-            clearTimeout(this.connectionTimeout);
-            this.connectionTimeout = null;
-        }
-        if (this.reconnectTimeout) {
-            clearTimeout(this.reconnectTimeout);
-            this.reconnectTimeout = null;
-        }
-        if (this.ws) {
-            this.ws.close();
-            this.ws = null;
-        }
-        this.key = null;
-        this.pendingDiffs = [];
-        this.queuedLiveDiffsDuringCatchUp = [];
+            if (this.connectionTimeout) {
+                clearTimeout(this.connectionTimeout);
+                this.connectionTimeout = null;
+            }
+            if (this.reconnectTimeout) {
+                clearTimeout(this.reconnectTimeout);
+                this.reconnectTimeout = null;
+            }
+
+            if (this.ws) {
+                this.ws.close();
+                this.ws = null;
+            }
+            this.key = null;
+            this.onStatusChange('disconnected');
+            console.log('🔌 E2EE WebSocket disconnected by Client.');
+        });
     }
 }

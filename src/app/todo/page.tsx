@@ -12,6 +12,7 @@ import PriorityDials from '@/components/todo/PriorityDials';
 import TodoTable from '@/components/todo/TodoTable';
 import ActionBar from '@/components/todo/ActionBar';
 import BookTabSidebar from '@/components/todo/BookTabSidebar';
+import { SyncDebugOverlay } from '@/components/SyncDebugOverlay';
 import { Network, ShieldCheck, Loader2, Monitor } from 'lucide-react';
 
 export default function TodoPage() {
@@ -178,6 +179,7 @@ export default function TodoPage() {
                 </FadeIn>
             </div>
         </main>
+        <SyncDebugOverlay />
         </ErrorBoundary>
     );
 }

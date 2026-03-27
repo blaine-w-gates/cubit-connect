@@ -299,6 +299,9 @@ export default function TodoTable() {
         insertTodoRowAfter,
         setDialPriority,
         completeStepsUpTo,
+        activeWorkspaceType,
+        hasPeers,
+        peerIsEditing,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
@@ -319,6 +322,9 @@ export default function TodoTable() {
             insertTodoRowAfter: s.insertTodoRowAfter,
             setDialPriority: s.setDialPriority,
             completeStepsUpTo: s.completeStepsUpTo,
+            activeWorkspaceType: s.activeWorkspaceType,
+            hasPeers: s.hasPeers,
+            peerIsEditing: s.peerIsEditing,
         })),
     );
 
@@ -350,10 +356,28 @@ export default function TodoTable() {
     const isTaskActionTarget = activeMode === 'cubit';
     const isStepActionTarget = ['deepDive', 'dialLeft', 'dialRight'].includes(activeMode || '');
 
+    // Strict Mode: Shared Projects require both a connection and "Turn Reservation" to edit
+    const isLocked = activeWorkspaceType === 'personalMulti' && (!hasPeers || peerIsEditing);
+
+    const checkLock = useCallback(() => {
+        if (isLocked) {
+            const reason = !hasPeers 
+                ? 'To prevent sync mismatches, you must have at least 2 devices connected to edit a Shared Project.'
+                : 'A peer is currently making changes. Please wait for them to finish.';
+                
+            toast.error('Shared Project Locked', {
+                description: reason,
+                icon: '🔒',
+            });
+            return true;
+        }
+        return false;
+    }, [isLocked, hasPeers]);
+
     // --- Handlers ---
 
     const handleCubit = useCallback(async (rowId: string, taskText: string) => {
-
+        if (checkLock()) return;
         if (!taskText.trim()) {
             toast.warning('Empty Task', { description: 'Type a task name before using Cubit.' });
             return;
@@ -393,7 +417,7 @@ export default function TodoTable() {
     }, [setTodoSteps, setActiveMode, setProcessingRowId]);
 
     const handleDeepDive = useCallback(async (rowId: string, stepText: string, row: typeof todoRows[0]) => {
-
+        if (checkLock()) return;
         if (!stepText.trim()) return;
 
         // Create new row below with step as task
@@ -452,12 +476,15 @@ export default function TodoTable() {
         const currentMode = useAppStore.getState().activeMode;
 
         if (currentMode === 'deepDive') {
+            if (checkLock()) return;
             handleDeepDive(row.id, stepText, row);
             // handleDeepDive resets mode internally after async completion
         } else if (currentMode === 'dialLeft') {
+            if (checkLock()) return;
             setDialPriority('left', stepText);
             setActiveMode(null); // Fire and Forget
         } else if (currentMode === 'dialRight') {
+            if (checkLock()) return;
             setDialPriority('right', stepText);
             setActiveMode(null); // Fire and Forget
         }
@@ -465,6 +492,7 @@ export default function TodoTable() {
 
     // Fix #3: Uses store action `restoreTodoRow` instead of direct setState
     const handleSwipeDelete = useCallback((rowId: string) => {
+        if (checkLock()) return;
         const idx = todoRows.findIndex((r) => r.id === rowId);
         const row = todoRows[idx];
         if (!row) return;
@@ -582,6 +610,7 @@ export default function TodoTable() {
                     }
                 }
             } else if (dropData?.type === 'reset') {
+                if (checkLock()) return;
                 completeStepsUpTo(rowId, -1);
                 // Clear the auto-archive timer if dragging to reset zone
                 if (archiveTimersRef.current[rowId]) {
@@ -594,6 +623,7 @@ export default function TodoTable() {
 
         // Row Reorder Logic
         if (active.id === over.id) return;
+        if (checkLock()) return;
         const oldIndex = todoRows.findIndex((r) => r.id === active.id);
         const newIndex = todoRows.findIndex((r) => r.id === over.id);
         if (oldIndex !== -1 && newIndex !== -1) {
@@ -673,6 +703,7 @@ export default function TodoTable() {
                                             isCompleted={row.isCompleted}
                                             activeMode={activeMode}
                                             isModeActive={isModeActive}
+                                            isLocked={isLocked}
                                             isTaskActionTarget={isTaskActionTarget}
                                             isStepActionTarget={isStepActionTarget}
                                             mc={mc}
@@ -704,6 +735,7 @@ export default function TodoTable() {
                                                 }
                                             }}
                                             onRabbitAdvance={(rowId, currentStepIdx) => {
+                                                if (checkLock()) return;
                                                 const nextIdx = row.steps.findIndex((s, i) => i > currentStepIdx && s.text.trim());
                                                 let targetIdx = nextIdx;
                                                 if (nextIdx !== -1) {
@@ -746,6 +778,7 @@ export default function TodoTable() {
                                     isCompleted={todoRows.find((r) => r.id === activeRowId)!.isCompleted}
                                     activeMode={activeMode}
                                     isModeActive={isModeActive}
+                                    isLocked={isLocked}
                                     isTaskActionTarget={isTaskActionTarget}
                                     isStepActionTarget={isStepActionTarget}
                                     mc={mc}
@@ -779,6 +812,7 @@ interface SortableRowProps {
     isCompleted: boolean;
     activeMode: string | null;
     isModeActive: boolean;
+    isLocked: boolean;
     isTaskActionTarget: boolean;
     isStepActionTarget: boolean;
     mc: { bg: string } | null;
@@ -799,9 +833,9 @@ interface SortableRowProps {
 
 // --- Droppable Step Cell Component ---
 function StepCellNode({
-    row, step, si, isCompleted, isModeActive, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging
+    row, step, si, isCompleted, isModeActive, isLocked, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging
 }: {
-    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean
+    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isLocked: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean
 }) {
     const isPopulated = step.text.trim().length > 0;
 
@@ -809,13 +843,13 @@ function StepCellNode({
     const { setNodeRef, isOver } = useDroppable({
         id,
         data: { type: 'step', rowId: row.id, stepIdx: si },
-        disabled: isModeActive || !isPopulated, // Missing steps reject drops
+        disabled: isModeActive || isLocked || !isPopulated, // Missing steps reject drops
     });
 
     return (
         <td
             ref={setNodeRef}
-            className={`px-3 py-3 align-top w-[17.5%] relative transition-colors
+            className={`px-3 py-3 align-top w-[17.5%] relative transition-colors ${isLocked && !isPopulated ? 'opacity-50 cursor-not-allowed' : ''}
                 ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
                 ${isRabbitDragging && isPopulated && !isOver ? 'shadow-[inset_0_0_0_2px_rgba(99,102,241,0.2)]' : ''}
                 ${isOver ? 'bg-indigo-50 dark:bg-indigo-950/30 shadow-[inset_0_0_0_2px_rgba(99,102,241,0.5)]' : ''}
@@ -831,14 +865,14 @@ function StepCellNode({
                     value={step.text}
                     onSave={(val) => onStepSave(val, si)}
                     placeholder={`Step ${si + 1}`}
-                    disabled={isModeActive}
-                    className="text-zinc-700 dark:text-stone-300"
+                    disabled={isModeActive || isLocked}
+                    className={`text-zinc-700 dark:text-stone-300 ${isLocked ? 'cursor-not-allowed' : ''}`}
                 />
             </div>
             {/* Conditional Rabbit placement inside the Step Cell */}
             {currentStepIdx === si && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <RabbitDraggable rowId={row.id} disabled={isModeActive} onClick={onRabbitAdvance} variant="step" />
+                    <RabbitDraggable rowId={row.id} disabled={isModeActive || isLocked} onClick={onRabbitAdvance} variant="step" />
                 </div>
             )}
 
@@ -850,7 +884,7 @@ function StepCellNode({
 
 function SortableRow({
     row, isProcessing, isCompleted, activeMode: _activeMode, isModeActive,
-    isTaskActionTarget, isStepActionTarget, mc,
+    isLocked, isTaskActionTarget, isStepActionTarget, mc,
     onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
     onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId
 }: SortableRowProps) {
@@ -861,7 +895,7 @@ function SortableRow({
         transform,
         transition,
         isDragging,
-    } = useSortable({ id: row.id });
+    } = useSortable({ id: row.id, disabled: isLocked });
 
     const style = {
         transform: CSS.Transform.toString(transform),
@@ -914,15 +948,15 @@ function SortableRow({
                         {/* Render rabbit securely centered over the SVG ring if 0% progress */}
                         {currentStepIdx === -1 && (
                             <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-                                <div className="pointer-events-auto mt-[1px]">
-                                    <RabbitDraggable rowId={row.id} disabled={isModeActive} onClick={() => onRabbitAdvance(row.id, currentStepIdx)} variant="command" />
+                                <div className={`pointer-events-auto mt-[1px] ${isLocked ? 'opacity-50' : ''}`}>
+                                    <RabbitDraggable rowId={row.id} disabled={isModeActive || isLocked} onClick={() => onRabbitAdvance(row.id, currentStepIdx)} variant="command" />
                                 </div>
                             </div>
                         )}
                     </div>
 
                     {/* Sub-actions container (appears on hover, drag, or touch devices) */}
-                    <div className={`flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 hover-reveal transition-opacity ${isDragging ? 'opacity-100' : ''}`}>
+                    <div className={`flex flex-col gap-1 sm:opacity-0 sm:group-hover:opacity-100 hover-reveal transition-opacity ${isDragging ? 'opacity-100' : ''} ${isLocked ? 'hidden' : ''}`}>
                         <button
                             {...attributes}
                             {...listeners}
@@ -960,9 +994,9 @@ function SortableRow({
                         value={row.task}
                         onSave={onTaskSave}
                         placeholder="Type a task…"
-                        disabled={isModeActive}
+                        disabled={isModeActive || isLocked}
                         autoFocus={row.id === lastAddedRowId}
-                        className="text-zinc-700 dark:text-stone-300"
+                        className={`text-zinc-700 dark:text-stone-300 ${isLocked ? 'cursor-not-allowed' : ''}`}
                     />
                 </div>
             </td>
@@ -976,6 +1010,7 @@ function SortableRow({
                     si={si}
                     isCompleted={isCompleted || isRow100Percent}
                     isModeActive={isModeActive}
+                    isLocked={isLocked}
                     isStepActionTarget={isStepActionTarget}
                     mc={mc}
                     onStepSave={onStepSave}

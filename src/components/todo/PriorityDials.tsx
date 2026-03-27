@@ -6,13 +6,34 @@ import { useShallow } from 'zustand/react/shallow';
 import { X } from 'lucide-react';
 
 export default function PriorityDials() {
-    const { priorityDials, setDialFocus, setDialPriority } = useAppStore(
+    const { priorityDials, setDialFocus, setDialPriority, activeWorkspaceType, hasPeers, peerIsEditing } = useAppStore(
         useShallow((s) => ({
             priorityDials: s.priorityDials,
             setDialFocus: s.setDialFocus,
             setDialPriority: s.setDialPriority,
+            activeWorkspaceType: s.activeWorkspaceType,
+            hasPeers: s.hasPeers,
+            peerIsEditing: s.peerIsEditing,
         })),
     );
+
+    const isLocked = activeWorkspaceType === 'personalMulti' && (!hasPeers || peerIsEditing);
+    const checkLock = () => {
+        if (isLocked) {
+            const reason = !hasPeers
+                ? 'To prevent sync mismatches, you must have at least 2 devices connected to edit a Shared Project.'
+                : 'A peer is currently making changes. Please wait for them to finish.';
+
+            import('sonner').then(({ toast }) => {
+                toast.error('Shared Project Locked', {
+                    description: reason,
+                    icon: '🔒',
+                });
+            });
+            return true;
+        }
+        return false;
+    };
 
     const { left, right, focusedSide } = priorityDials;
     const hasBoth = left.trim() !== '' && right.trim() !== '';
@@ -34,14 +55,20 @@ export default function PriorityDials() {
                     ref={leftRef}
                     role="button"
                     tabIndex={0}
-                    onClick={() => hasBoth && setDialFocus('left')}
+                    onClick={() => {
+                        if (hasBoth) {
+                            if (checkLock()) return;
+                            setDialFocus('left');
+                        }
+                    }}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('left'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
             ${focusedSide === 'left' && left.trim()
                             ? 'border-[3px] border-green-500 bg-green-50 dark:bg-green-950/30 shadow-md'
                             : 'border-2 border-green-400/50 dark:border-green-700/50 bg-white dark:bg-stone-900'
                         }
-            ${hasBoth ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+            ${hasBoth && !isLocked ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+            ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
           `}
                 >
                     <span className="text-xs font-mono uppercase tracking-widest text-green-700 dark:text-green-400 block mb-1">
@@ -54,6 +81,7 @@ export default function PriorityDials() {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
+                                if (checkLock()) return;
                                 setDialPriority('left', '');
                                 setDialFocus('none');
                                 leftRef.current?.focus();
@@ -72,14 +100,20 @@ export default function PriorityDials() {
                     ref={rightRef}
                     role="button"
                     tabIndex={0}
-                    onClick={() => hasBoth && setDialFocus('right')}
+                    onClick={() => {
+                        if (hasBoth) {
+                            if (checkLock()) return;
+                            setDialFocus('right');
+                        }
+                    }}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); if (hasBoth) setDialFocus('right'); } }}
                     className={`relative group rounded-lg p-4 text-left transition-all max-h-24 overflow-y-auto text-sm
             ${focusedSide === 'right' && right.trim()
                             ? 'border-[3px] border-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 shadow-md'
                             : 'border-2 border-yellow-400/50 dark:border-yellow-700/50 bg-white dark:bg-stone-900'
                         }
-            ${hasBoth ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+            ${hasBoth && !isLocked ? 'cursor-pointer hover:shadow-md' : 'cursor-default'}
+            ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
           `}
                 >
                     <span className="text-xs font-mono uppercase tracking-widest text-yellow-700 dark:text-yellow-400 block mb-1">
@@ -92,6 +126,7 @@ export default function PriorityDials() {
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
+                                if (checkLock()) return;
                                 setDialPriority('right', '');
                                 setDialFocus('none');
                                 rightRef.current?.focus();

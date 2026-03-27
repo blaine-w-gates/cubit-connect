@@ -118,11 +118,20 @@ export default defineConfig({
       fullyParallel: false,
     },
   ],
-  webServer: {
-    command: 'npx serve -s out',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    stdout: 'ignore',
-    stderr: 'pipe',
-  },
+  webServer: [
+    {
+      command: 'npx serve -s out',
+      url: 'http://localhost:3000',
+      reuseExistingServer: true,
+      stdout: 'ignore',
+      stderr: 'pipe',
+    },
+    {
+      command: 'SYNC_MODE=memory node sync-server/server.js',
+      url: 'http://localhost:8080',
+      reuseExistingServer: true,
+      stdout: 'ignore',
+      stderr: 'pipe',
+    },
+  ],
 });

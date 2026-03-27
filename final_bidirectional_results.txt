@@ -1,0 +1,41 @@
+
+Running 1 test using 1 worker
+
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🧬 Genesis Boot Complete.
+  ✘  1 [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking (1.0m)
+
+
+  1) [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: page.waitForFunction: Test ended.
+
+      80 |         // Peer B adds a task; Peer A must see it.
+      81 |         await pageB.getByRole('button', { name: 'Task', exact: true }).click();
+    > 82 |         await pageA.waitForFunction(() => (window as any).__STORE__.getState().todoRows.length > 0, { timeout: 10000 });
+         |                     ^
+      83 |         await expect(pageA.getByText('New Task')).toBeVisible();
+      84 |         console.log('✅ AC1: Bidirectional Sync (B -> A) confirmed.');
+      85 |
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/sync-reconciliation.spec.ts:82:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/error-context.md
+
+  1 failed
+    [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 

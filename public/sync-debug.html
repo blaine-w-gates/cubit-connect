@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SYNC-001 Debug Page</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #1a1a2e;
+            color: #eee;
+        }
+        h1 { color: #4a9eff; margin-bottom: 10px; }
+        .subtitle { color: #888; margin-bottom: 30px; }
+        .panel {
+            background: #16213e;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .panel h2 {
+            color: #4a9eff;
+            margin-top: 0;
+            font-size: 1.2em;
+        }
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        label {
+            min-width: 120px;
+            color: #aaa;
+        }
+        input, select {
+            flex: 1;
+            padding: 10px;
+            background: #0f0f23;
+            border: 1px solid #333;
+            border-radius: 4px;
+            color: #fff;
+            font-family: monospace;
+        }
+        button {
+            padding: 12px 24px;
+            background: #4a9eff;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #3a8eef; }
+        button:disabled {
+            background: #444;
+            cursor: not-allowed;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .status.offline { background: #666; }
+        .status.connecting { background: #ff9800; }
+        .status.connected { background: #4caf50; }
+        .status.error { background: #f44336; }
+        #logs {
+            height: 400px;
+            overflow-y: auto;
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.85em;
+            line-height: 1.5;
+        }
+        .log-entry {
+            margin-bottom: 4px;
+            padding: 2px 4px;
+            border-radius: 2px;
+        }
+        .log-entry.inbound { color: #4caf50; }
+        .log-entry.outbound { color: #2196f3; }
+        .log-entry.presence { color: #ff9800; background: rgba(255,152,0,0.1); }
+        .log-entry.error { color: #f44336; background: rgba(244,67,54,0.1); }
+        .log-entry.peer { color: #9c27b0; font-weight: bold; }
+        .timestamp { color: #666; margin-right: 8px; }
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .metric {
+            background: #0f0f23;
+            padding: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: #4a9eff;
+        }
+        .metric-label {
+            color: #888;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        .actions button {
+            font-size: 0.9em;
+            padding: 8px 16px;
+        }
+        .hint {
+            color: #666;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 SYNC-001 Debug Page</h1>
+    <p class="subtitle">Manual peer discovery and sync testing</p>
+
+    <div class="panel">
+        <h2>Connection Settings</h2>
+        <div class="row">
+            <label>Server URL:</label>
+            <input type="text" id="serverUrl" value="ws://localhost:8080" />
+        </div>
+        <div class="row">
+            <label>Room Passphrase:</label>
+            <input type="text" id="roomPassphrase" value="debug-room-test" />
+        </div>
+        <div class="row">
+            <label>Status:</label>
+            <span id="status" class="status offline">Offline</span>
+        </div>
+        <div class="actions">
+            <button id="connectBtn" onclick="connect()">Connect</button>
+            <button id="disconnectBtn" onclick="disconnect()" disabled>Disconnect</button>
+            <button onclick="sendManualHeartbeat()">Send Presence</button>
+            <button onclick="clearLogs()">Clear Logs</button>
+            <button onclick="exportLogs()">Export Logs</button>
+        </div>
+        <p class="hint">
+            <strong>Quick Test:</strong> Open this page in two tabs, enter the same passphrase, and connect both. 
+            Watch for presence heartbeats and peer count changes.
+        </p>
+    </div>
+
+    <div class="panel">
+        <h2>Metrics</h2>
+        <div class="metrics">
+            <div class="metric">
+                <div class="metric-value" id="peerCount">0</div>
+                <div class="metric-label">Peers Detected</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="msgSent">0</div>
+                <div class="metric-label">Messages Sent</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="msgReceived">0</div>
+                <div class="metric-label">Messages Received</div>
+            </div>
+            <div class="metric">
+                <div class="metric-value" id="lastSeen">-</div>
+                <div class="metric-label">Last Peer Seen</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>Log Output</h2>
+        <div id="logs"></div>
+    </div>
+
+    <script>
+        // Simple crypto functions for standalone debug
+        const GLOBAL_STATIC_SALT = new TextEncoder().encode('cubit-static-salt-v1');
+        
+        let ws = null;
+        let syncKey = null;
+        let roomIdHash = null;
+        let heartbeatInterval = null;
+        let presenceInterval = null;
+        let lastPeerSeen = null;
+        let hasPeers = false;
+        let msgSent = 0;
+        let msgReceived = 0;
+
+        const MSG_HEARTBEAT = 0;
+        const MSG_UPDATE = 1;
+        const MSG_CHECKPOINT = 2;
+        const MSG_REQUEST_CACHE = 3;
+        const MSG_ROOM_EMPTY = 7;
+
+        async function deriveRoomId(passphrase) {
+            const enc = new TextEncoder();
+            const data = enc.encode(`cubit-routing-salt-${passphrase}`);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        async function deriveSyncKey(passphrase) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw', enc.encode(passphrase), { name: 'PBKDF2' },
+                false, ['deriveBits', 'deriveKey']
+            );
+            return crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: GLOBAL_STATIC_SALT, iterations: 100000, hash: 'SHA-256' },
+                keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+            );
+        }
+
+        async function encryptUpdate(data, key) {
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const cipherBuffer = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, data);
+            const cipherArray = new Uint8Array(cipherBuffer);
+            const payload = new Uint8Array(iv.length + cipherArray.length);
+            payload.set(iv, 0);
+            payload.set(cipherArray, iv.length);
+            return payload;
+        }
+
+        async function decryptUpdate(payload, key) {
+            if (payload.length < 12) throw new Error('Payload too short');
+            const iv = payload.slice(0, 12);
+            const cipherData = payload.slice(12);
+            const decrypted = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherData);
+            return new Uint8Array(decrypted);
+        }
+
+        function log(message, type = 'info') {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit', fractionalSecondDigits: 3 });
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.innerHTML = `<span class="timestamp">${timestamp}</span>${message}`;
+            logs.appendChild(entry);
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function connect() {
+            const passphrase = document.getElementById('roomPassphrase').value;
+            const serverUrl = document.getElementById('serverUrl').value;
+
+            if (!passphrase || !serverUrl) {
+                log('Error: Missing passphrase or server URL', 'error');
+                return;
+            }
+
+            setStatus('connecting');
+            log(`Connecting with passphrase: "${passphrase}"`, 'outbound');
+
+            try {
+                roomIdHash = await deriveRoomId(passphrase);
+                syncKey = await deriveSyncKey(passphrase);
+                const fingerprint = roomIdHash.slice(0, 4).toUpperCase();
+                log(`Room ID: ${roomIdHash.slice(0, 16)}... (fingerprint: ${fingerprint})`);
+
+                ws = new WebSocket(serverUrl);
+                
+                ws.onopen = async () => {
+                    log('WebSocket connected', 'outbound');
+                    
+                    // Join room
+                    const joinPayload = JSON.stringify({ type: 'join', roomId: roomIdHash });
+                    ws.send(joinPayload);
+                    log(`Sent join request for room ${roomIdHash.slice(0, 8)}`, 'outbound');
+
+                    // Start heartbeat
+                    heartbeatInterval = setInterval(() => {
+                        if (ws?.readyState === WebSocket.OPEN) {
+                            ws.send(new Uint8Array([MSG_HEARTBEAT]));
+                        }
+                    }, 30000);
+
+                    // Start presence (15s interval)
+                    presenceInterval = setInterval(async () => {
+                        if (ws?.readyState === WebSocket.OPEN && syncKey) {
+                            const emptyUpdate = new Uint8Array([0, 0]);
+                            const ciphertext = await encryptUpdate(emptyUpdate, syncKey);
+                            const payload = new Uint8Array(ciphertext.length + 1);
+                            payload[0] = MSG_UPDATE;
+                            payload.set(ciphertext, 1);
+                            ws.send(payload);
+                            msgSent++;
+                            updateMetrics();
+                            log(`Broadcasting presence heartbeat`, 'presence');
+                        }
+                    }, 15000);
+
+                    // Request cache
+                    setTimeout(() => {
+                        if (ws?.readyState === WebSocket.OPEN) {
+                            ws.send(new Uint8Array([MSG_REQUEST_CACHE]));
+                            log('Requested cache from server', 'outbound');
+                        }
+                    }, 1000);
+
+                    setStatus('connected');
+                };
+
+                ws.onmessage = async (event) => {
+                    msgReceived++;
+                    updateMetrics();
+
+                    if (!(event.data instanceof ArrayBuffer)) {
+                        // JSON message (join confirmation, etc)
+                        log(`Received: ${event.data}`, 'inbound');
+                        return;
+                    }
+
+                    const encryptedPayload = new Uint8Array(event.data);
+                    const messageType = encryptedPayload[0];
+
+                    if (messageType === MSG_HEARTBEAT) {
+                        log('Received server heartbeat', 'inbound');
+                        return;
+                    }
+
+                    if (messageType === MSG_ROOM_EMPTY) {
+                        log('Room is empty (genesis state)', 'inbound');
+                        return;
+                    }
+
+                    // Decrypt and handle
+                    try {
+                        const decrypted = await decryptUpdate(encryptedPayload.slice(1), syncKey);
+                        
+                        // Check for presence heartbeat
+                        if (decrypted.length === 2 && decrypted[0] === 0 && decrypted[1] === 0) {
+                            handlePeerPresence();
+                            return;
+                        }
+
+                        // Check for disconnect
+                        if (decrypted.length === 2 && decrypted[0] === 255 && decrypted[1] === 255) {
+                            log('Peer disconnected', 'peer');
+                            handlePeerDisconnect();
+                            return;
+                        }
+
+                        log(`Received encrypted update (${encryptedPayload.length} bytes)`, 'inbound');
+                    } catch (err) {
+                        log(`Decryption failed: ${err.message}`, 'error');
+                    }
+                };
+
+                ws.onclose = () => {
+                    log('WebSocket closed', 'error');
+                    cleanup();
+                    setStatus('offline');
+                };
+
+                ws.onerror = (err) => {
+                    log(`WebSocket error: ${err}`, 'error');
+                    setStatus('error');
+                };
+
+            } catch (err) {
+                log(`Connection failed: ${err.message}`, 'error');
+                setStatus('error');
+            }
+        }
+
+        function handlePeerPresence() {
+            lastPeerSeen = new Date();
+            if (!hasPeers) {
+                hasPeers = true;
+                log('✅ PEER DISCOVERED! HasPeers = true', 'peer');
+            }
+            updateMetrics();
+        }
+
+        function handlePeerDisconnect() {
+            hasPeers = false;
+            log('❌ Peer disconnected. HasPeers = false', 'peer');
+            updateMetrics();
+        }
+
+        function disconnect() {
+            if (ws?.readyState === WebSocket.OPEN && syncKey) {
+                // Send disconnect signal
+                const update = new Uint8Array([255, 255]);
+                encryptUpdate(update, syncKey).then(ciphertext => {
+                    const payload = new Uint8Array(ciphertext.length + 1);
+                    payload[0] = MSG_UPDATE;
+                    payload.set(ciphertext, 1);
+                    ws.send(payload);
+                    cleanup();
+                    ws.close();
+                });
+            } else {
+                cleanup();
+                ws?.close();
+            }
+            setStatus('offline');
+        }
+
+        function cleanup() {
+            if (heartbeatInterval) clearInterval(heartbeatInterval);
+            if (presenceInterval) clearInterval(presenceInterval);
+            heartbeatInterval = null;
+            presenceInterval = null;
+            hasPeers = false;
+            updateMetrics();
+        }
+
+        async function sendManualHeartbeat() {
+            if (!ws || ws.readyState !== WebSocket.OPEN || !syncKey) {
+                log('Not connected - cannot send heartbeat', 'error');
+                return;
+            }
+            const emptyUpdate = new Uint8Array([0, 0]);
+            const ciphertext = await encryptUpdate(emptyUpdate, syncKey);
+            const payload = new Uint8Array(ciphertext.length + 1);
+            payload[0] = MSG_UPDATE;
+            payload.set(ciphertext, 1);
+            ws.send(payload);
+            msgSent++;
+            updateMetrics();
+            log('Manual presence heartbeat sent', 'presence');
+        }
+
+        function setStatus(status) {
+            const el = document.getElementById('status');
+            el.className = `status ${status}`;
+            el.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            document.getElementById('connectBtn').disabled = status === 'connecting' || status === 'connected';
+            document.getElementById('disconnectBtn').disabled = status === 'offline' || status === 'error';
+        }
+
+        function updateMetrics() {
+            document.getElementById('peerCount').textContent = hasPeers ? '1+' : '0';
+            document.getElementById('msgSent').textContent = msgSent;
+            document.getElementById('msgReceived').textContent = msgReceived;
+            document.getElementById('lastSeen').textContent = lastSeen ? 
+                `${Math.floor((Date.now() - lastSeen.getTime()) / 1000)}s ago` : '-';
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+        }
+
+        function exportLogs() {
+            const logs = Array.from(document.querySelectorAll('.log-entry'))
+                .map(e => e.textContent)
+                .join('\n');
+            const blob = new Blob([logs], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sync-debug-${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Auto-connect if URL params provided
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('auto') === 'true') {
+            const room = params.get('room');
+            if (room) document.getElementById('roomPassphrase').value = room;
+            setTimeout(connect, 500);
+        }
+    </script>
+</body>
+</html>

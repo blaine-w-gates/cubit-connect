@@ -1,0 +1,147 @@
+
+Running 1 test using 1 worker
+
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: [HMR] connected
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2277534848
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: [HMR] connected
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2541707708
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🧹 resetYDoc: Clearing stable Y.Doc to prevent stale observer disconnect.
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2541707708
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 0 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2541707708
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=9270bd2f...
+[Browser A]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 2541707708
+[Browser A]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser A]: 🌱 Room is empty. Uploading Genesis Checkpoint + Broadcasting to live peers...
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (994 bytes)
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser B]: [HMR] connected
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: [HMR] connected
+[Browser B]: 🔗 [YJS] Observer handler updated in global registry.
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 889615155
+[Browser B]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser B]: ✅ [OBSERVER] Store Updated Sync.
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🧹 resetYDoc: Clearing stable Y.Doc to prevent stale observer disconnect.
+[Browser B]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 889615155
+[Browser B]: 🔄 [OBSERVER] Mapping Complete: 0 projects, 0 tasks.
+[Browser B]: ✅ [OBSERVER] Store Updated Sync.
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 889615155
+[Browser B]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser B]: ✅ [OBSERVER] Store Updated Sync.
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=9270bd2f...
+[Browser B]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 889615155
+[Browser B]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser B]: 🌱 Room is empty. Uploading Genesis Checkpoint + Broadcasting to live peers...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (994 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 2541707708
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=994
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 993 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 965 bytes.
+[Browser A]: 📥 [INBOUND] Received live P2P Diff (994 bytes)
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2541707708
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 2 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 889615155
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[DEBUG] Page B active project: 099c6c66-2c32-488b-9d85-29300544b580. Adding task...
+[Browser B]: ✅ addTodoRow: Transacting Yjs set for row 0c1fc593-43ba-412a-9e91-8e57b72541ea
+[Browser B]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 889615155
+[Browser B]: 🔄 [OBSERVER] Mapping Complete: 1 projects, 0 tasks.
+[Browser B]: ✅ [OBSERVER] Store Updated Sync.
+[Browser B]: 📡 [YJS] Local change detected (length: 355, origin: null). Broadcasting...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (384 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 2541707708
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=384
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 383 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 355 bytes.
+[Browser A]: 📥 [INBOUND] Received live P2P Diff (384 bytes)
+[Browser A]: 📡 [OBSERVER] handleYDocUpdate fired. Origin: transaction, Size: N/A, Doc ClientID: 2541707708
+[Browser A]: 🔄 [OBSERVER] Mapping Complete: 2 projects, 0 tasks.
+[Browser A]: ✅ [OBSERVER] Store Updated Sync.
+[Browser A]: 🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!
+[Browser A]: [DIAGNOSTIC] Convergence Match: Y-Map Size=2, Store Projects=2
+[DEBUG] Page A now sees 2 projects. Verifying task visibility...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message. Doc ClientID: 2541707708
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message. Doc ClientID: 889615155
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+  ✘  1 [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking (13.1s)
+
+
+  1) [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('New Task')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('New Task')[22m
+
+
+      108 |         // Switch Page A to Page B's project to see the task
+      109 |         await pageA.evaluate((id) => (window as any).__STORE__.getState().setActiveProject(id), idB);
+    > 110 |         await expect(pageA.getByText('New Task')).toBeVisible();
+          |                                                   ^
+      111 |         
+      112 |         console.log('✅ AC1: Bidirectional Sync (B -> A) confirmed.');
+      113 |
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/sync-reconciliation.spec.ts:110:51
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/error-context.md
+
+  1 failed
+    [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 

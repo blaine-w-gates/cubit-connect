@@ -121,6 +121,7 @@ function SortableProjectTab({
     onTransfer,
     canDelete,
     deviceId,
+    isLocked,
 }: {
     project: TodoProject;
     isActive: boolean;
@@ -138,10 +139,11 @@ function SortableProjectTab({
     onTransfer: (id: string) => void;
     canDelete: boolean;
     deviceId: string;
+    isLocked: boolean;
 }) {
     const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
         id: project.id,
-        disabled: isEditing || isColorOpen, // Don't drag while editing or picking color
+        disabled: isEditing || isColorOpen || isLocked, // Don't drag while editing or picking color or locked
     });
 
     const style = {
@@ -173,10 +175,10 @@ function SortableProjectTab({
                     type="button"
                     onClick={(e) => {
                         e.stopPropagation();
-                        onColorDotTap(project.id);
+                        if (!isLocked) onColorDotTap(project.id);
                     }}
                     className={`w-4 h-4 rounded-full flex-shrink-0 transition-all duration-150
-                        hover:scale-125 active:scale-95
+                        ${!isLocked ? 'hover:scale-125 active:scale-95' : 'opacity-50 cursor-not-allowed'}
                         ${isColorOpen ? 'ring-2 ring-offset-1 ring-zinc-400 dark:ring-stone-400 scale-110' : ''}
                     `}
                     style={{ backgroundColor: project.color }}
@@ -203,11 +205,11 @@ function SortableProjectTab({
                     <button
                         type="button"
                         onClick={() => { if (!isColorOpen) onProjectClick(project.id); }}
-                        onDoubleClick={() => onStartEditing(project.id, project.name)}
-                        className={`flex-1 min-w-0 text-left break-words bg-transparent border-none cursor-pointer p-0 ${isActive
+                        onDoubleClick={() => { if (!isLocked) onStartEditing(project.id, project.name); }}
+                        className={`flex-1 min-w-0 text-left break-words bg-transparent border-none p-0 ${isActive
                             ? 'font-semibold text-zinc-900 dark:text-stone-100'
                             : 'text-zinc-600 dark:text-stone-400'
-                        }`}
+                        } ${isLocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
                         aria-label={`Select project ${project.name}`}
                     >
                         {project.name}
@@ -276,6 +278,9 @@ export default function BookTabSidebar() {
         changeProjectColor,
         transferOwnership,
         deviceId,
+        activeWorkspaceType,
+        hasPeers,
+        peerIsEditing,
     } = useAppStore(
         useShallow((s) => ({
             todoProjects: s.todoProjects,
@@ -288,8 +293,29 @@ export default function BookTabSidebar() {
             changeProjectColor: s.changeProjectColor,
             transferOwnership: s.transferOwnership,
             deviceId: s.deviceId,
+            activeWorkspaceType: s.activeWorkspaceType,
+            hasPeers: s.hasPeers,
+            peerIsEditing: s.peerIsEditing,
         })),
     );
+
+    const isLocked = activeWorkspaceType === 'personalMulti' && (!hasPeers || peerIsEditing);
+    const checkLock = () => {
+        if (isLocked) {
+            const reason = !hasPeers
+                ? 'To prevent sync mismatches, you must have at least 2 devices connected to edit a Shared Project.'
+                : 'A peer is currently making changes. Please wait for them to finish.';
+
+            import('sonner').then(({ toast }) => {
+                toast.error('Shared Project Locked', {
+                    description: reason,
+                    icon: '🔒',
+                });
+            });
+            return true;
+        }
+        return false;
+    };
 
     const [isOpen, setIsOpen] = useState(true);
     const [editingId, setEditingId] = useState<string | null>(null);
@@ -304,7 +330,13 @@ export default function BookTabSidebar() {
     );
 
     const commitRename = () => {
-        if (editingId && draft.trim()) renameTodoProject(editingId, draft.trim());
+        if (editingId && draft.trim()) {
+            if (checkLock()) {
+                setEditingId(null);
+                return;
+            }
+            renameTodoProject(editingId, draft.trim());
+        }
         setEditingId(null);
     };
 
@@ -314,6 +346,7 @@ export default function BookTabSidebar() {
     };
 
     const handleColorPick = (projectId: string, color: string) => {
+        if (checkLock()) return;
         changeProjectColor(projectId, color);
         setColorPickerId(null); // Close accordion after picking
     };
@@ -326,10 +359,12 @@ export default function BookTabSidebar() {
             // Owner is passing away ownership — prompt for ID
             const newOwner = window.prompt("Enter the Device ID of the new owner to pass transfer:", "device-id-xyz");
             if (newOwner && newOwner.trim().length > 0) {
+                if (checkLock()) return;
                 transferOwnership(projectId, newOwner.trim());
             }
         } else {
             // Steal ownership (Taking ownership over a shared network state)
+            if (checkLock()) return;
             transferOwnership(projectId, deviceId);
         }
     };
@@ -342,6 +377,7 @@ export default function BookTabSidebar() {
         setActiveDragId(null);
         const { active, over } = e;
         if (over && active.id !== over.id) {
+            if (checkLock()) return;
             const from = todoProjects.findIndex((p) => p.id === active.id);
             const to = todoProjects.findIndex((p) => p.id === over.id);
             reorderTodoProjects(from, to);
@@ -420,10 +456,13 @@ export default function BookTabSidebar() {
 
                         {/* + Project */}
                         <button
-                            onClick={() => addTodoProject()}
-                            className="mx-3 mt-3 mb-1 flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold font-mono uppercase tracking-wide
+                            onClick={() => {
+                                if (checkLock()) return;
+                                addTodoProject();
+                            }}
+                            className={`mx-3 mt-3 mb-1 flex items-center gap-1.5 px-2 py-1.5 text-xs font-semibold font-mono uppercase tracking-wide
                                 bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900
-                                rounded hover:bg-zinc-800 dark:hover:bg-stone-300 transition-all active:scale-95"
+                                rounded transition-all ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-zinc-800 dark:hover:bg-stone-300 active:scale-95'}`}
                         >
                             <Plus className="w-3.5 h-3.5" />
                             Project
@@ -455,12 +494,16 @@ export default function BookTabSidebar() {
                                             onCancelRename={() => setEditingId(null)}
                                             onStartEditing={(id, name) => { setEditingId(id); setDraft(name); }}
                                             onProjectClick={setActiveProject}
-                                            onProjectDelete={deleteTodoProject}
+                                            onProjectDelete={(id) => {
+                                                if (checkLock()) return;
+                                                deleteTodoProject(id);
+                                            }}
                                             onColorDotTap={handleColorDotTap}
                                             onColorPick={handleColorPick}
                                             onTransfer={handleTransfer}
                                             canDelete={todoProjects.length > 1}
                                             deviceId={deviceId}
+                                            isLocked={isLocked}
                                         />
                                     ))}
                                 </SortableContext>

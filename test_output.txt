@@ -1,0 +1,49 @@
+
+Running 1 test using 1 worker
+
+[1A[2K[1/1] [Desktop Chrome] › tests/sync-reconciliation.spec.ts:31:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking
+[1A[2K  1) [Desktop Chrome] › tests/sync-reconciliation.spec.ts:31:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('👥 2+')
+    Expected: visible
+    Timeout: 15000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 15000ms[22m
+    [2m  - waiting for getByText('👥 2+')[22m
+
+
+      67 |         // 4. Verification: Peer B must see Peer A's existence in the Header
+      68 |         // The Header shows "👥 2+" when more than one peer is in the room.
+    > 69 |         await expect(pageB.getByText('👥 2+')).toBeVisible({ timeout: 15000 });
+         |                                                ^
+      70 |         
+      71 |         // 5. Test Lock Recovery: Disconnect Peer A
+      72 |         await pageA.close();
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/sync-reconciliation.spec.ts:69:48
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/error-context.md
+
+
+[1A[2K  1 failed
+    [Desktop Chrome] › tests/sync-reconciliation.spec.ts:31:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+To open last HTML report run:
+[36m[39m
+[36m  npx playwright show-report[39m
+[36m[39m

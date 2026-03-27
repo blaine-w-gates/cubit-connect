@@ -14,7 +14,7 @@
 
 const WebSocket = require('ws');
 const http = require('http');
-const redis = require('redis');
+// redis required conditionally below
 
 const PORT = process.env.PORT || 8080;
 const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
@@ -30,10 +30,51 @@ async function startServer() {
     console.log(`📡 Initializing Dumb Relay Server...`);
 
     // Initialize Redis Client
-    const redisClient = redis.createClient({ url: REDIS_URL });
-    redisClient.on('error', err => console.error('Redis Error:', err));
-    await redisClient.connect();
-    console.log('✅ Connected to Redis cache');
+    let redisClient;
+    if (process.env.SYNC_MODE === 'memory') {
+        process.env.REDIS_URL = 'memory';
+    }
+
+    if (process.env.REDIS_URL === 'memory' || !process.env.REDIS_URL) {
+        console.log('📂 Using In-Memory fallback (No Redis)');
+        const memoryStore = new Map();
+        redisClient = {
+            connect: async () => { },
+            on: () => { },
+            get: async (opts, key) => memoryStore.get(key),
+            set: async (key, val) => { memoryStore.set(key, val); return 'OK'; },
+            lRange: async (opts, key) => memoryStore.get(key) || [],
+            lPush: async (opts, key, val) => {
+                const list = memoryStore.get(key) || [];
+                list.unshift(val);
+                if (list.length > 100) list.pop();
+                memoryStore.set(key, list);
+                return list.length;
+            },
+            lTrim: async () => 'OK',
+            expire: async () => 'OK',
+            multi: () => ({
+                set: function (k, v) { memoryStore.set(k, v); return this; },
+                lPush: function (opts, k, v) {
+                    const list = memoryStore.get(k) || [];
+                    list.unshift(v);
+                    if (list.length > 100) list.pop();
+                    memoryStore.set(k, list);
+                    return this;
+                },
+                lTrim: function () { return this; },
+                expire: function () { return this; },
+                exec: async () => ['OK'],
+            }),
+            commandOptions: (opts) => opts,
+        };
+    } else {
+        const redis = require('redis');
+        redisClient = redis.createClient({ url: REDIS_URL });
+        redisClient.on('error', err => console.error('Redis Error:', err));
+        await redisClient.connect();
+        console.log('✅ Connected to Redis cache');
+    }
 
     // Create HTTP Server (Render requires binding to a port)
     const server = http.createServer((req, res) => {
@@ -53,21 +94,22 @@ async function startServer() {
         const roomId = url.searchParams.get('room');
 
         if (!roomId) {
+            console.log('❌ Connection rejected: Room ID missing');
             ws.close(1008, "Room ID missing");
             return;
         }
 
+        console.log(`🔌 New connection for room: ${roomId}`);
         // Assign Room and Set TCP Sever Lock
         ws.roomId = roomId;
         ws.isCatchingUp = true;
 
-        ws.on('message', async (message, isBinary) => {
-            if (!isBinary) return;
-
+        ws.on('message', async (message) => {
             const payload = new Uint8Array(message);
             if (payload.length === 0) return;
 
             const messageType = payload[0];
+            console.log(`📩 [SERVER] Received MSG_${messageType} from peer in room ${roomId.slice(0, 8)}`);
 
             if (messageType === MSG_REQUEST_CACHE) {
                 // [BAND 2] The Checkpoint Download
@@ -76,7 +118,7 @@ async function startServer() {
 
                 try {
                     // 1. Send the last Full Checkpoint (or notify if empty)
-                    const checkpointBlob = await redisClient.get(redis.commandOptions({ returnBuffers: true }), checkpointKey);
+                    const checkpointBlob = await redisClient.get(checkpointKey);
                     if (checkpointBlob && ws.readyState === WebSocket.OPEN) {
                         ws.send(checkpointBlob);
                     } else if (!checkpointBlob && ws.readyState === WebSocket.OPEN) {
@@ -85,7 +127,7 @@ async function startServer() {
                     }
 
                     // 2. Send the rolling buffer of up to 100 Live Diffs (Chronologically)
-                    const diffBlobs = await redisClient.lRange(redis.commandOptions({ returnBuffers: true }), diffListKey, 0, 99);
+                    const diffBlobs = await redisClient.lRange(diffListKey, 0, 99);
                     // Engineer Mandate: lPush puts newest at front. We must reverse to apply Oldest -> Newest.
                     diffBlobs.reverse();
                     for (const diff of diffBlobs) {
@@ -96,6 +138,7 @@ async function startServer() {
 
                     // Release the TCP Sever Lock *AFTER* the massive blob finishes transmission
                     ws.isCatchingUp = false;
+                    console.log(`🔓 [CACHE] Catch-Up Lock released for peer in room ${roomId.slice(0, 8)}`);
                 } catch (err) {
                     console.error(`Error serving cache to ${roomId}:`, err);
                     ws.isCatchingUp = false; // Release lock even on error
@@ -103,19 +146,28 @@ async function startServer() {
             }
             else if (messageType === MSG_UPDATE) {
                 // [BAND 1] Live Diff P2P Broadcasting & Rolling Buffer
+                
+                // Note: We cannot detect presence heartbeats from encrypted payload,
+                // so we always broadcast MSG_UPDATE to ensure presence gets through.
 
                 // Broadcast to other peers in the same room
-                // THE TCP SEVER PROTOCOL: Do not send to peers currently downloading the Genesis blob
+                let broadcastCount = 0;
                 wss.clients.forEach(client => {
-                    if (client !== ws && client.readyState === WebSocket.OPEN && client.roomId === roomId && !client.isCatchingUp) {
+                    if (client !== ws && client.readyState === WebSocket.OPEN && client.roomId === roomId) {
+                        // Always broadcast MSG_UPDATE - presence heartbeats must reach peers
+                        // even during catch-up to establish peer discovery
                         client.send(message);
+                        broadcastCount++;
                     }
                 });
+                if (broadcastCount > 0) {
+                    console.log(`📡 Relayed MSG_UPDATE to ${broadcastCount} peers in room ${roomId.slice(0, 8)}`);
+                }
 
                 // Push to Redis List and Trim to exactly 100 historical diffs
                 const diffListKey = `room:${roomId}:diffs`;
                 const multi = redisClient.multi()
-                    .lPush(redis.commandOptions({ returnBuffers: true }), diffListKey, Buffer.from(message))
+                    .lPush(diffListKey, Buffer.from(message))
                     .lTrim(diffListKey, 0, 99) // Safe overlap for Yjs idempotency
                     .expire(diffListKey, 86400 * 7); // 7-Day Expiry to prevent RAM leaks
 
@@ -137,11 +189,18 @@ async function startServer() {
                     .catch(err => console.error(`Error saving checkpoint for ${roomId}:`, err));
             }
             else if (messageType === MSG_HEARTBEAT) {
-                // MoE Rider: Strictly echo the heartbeat directly back to the originating socket
-                // DO NOT broadcast this to the entire room to save bandwidth and battery.
+                // Echo back to sender (for connection health check)
                 if (ws.readyState === WebSocket.OPEN) {
                     ws.send(payload);
                 }
+                
+                // Also broadcast to other peers as a lightweight presence signal
+                // This helps peers discover each other immediately upon connection
+                wss.clients.forEach(client => {
+                    if (client !== ws && client.readyState === WebSocket.OPEN && client.roomId === roomId) {
+                        client.send(payload);
+                    }
+                });
             }
         });
 

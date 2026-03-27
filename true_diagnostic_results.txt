@@ -1,0 +1,177 @@
+
+Running 1 test using 1 worker
+
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser A]: [HMR] connected
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser A]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser A]: 🧬 Genesis Boot Complete.
+[Browser A]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=b36125ff...
+[Browser A]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser A]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser A]: 🌱 Room is empty. Uploading Genesis Checkpoint...
+[Browser A]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: [HMR] connected
+[Browser B]: %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[Browser B]: [HMR] connected
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser B]: 🧬 Executing Genesis Boot: Migrating JSON to Y.Doc
+[Browser B]: 🧬 Genesis Boot Complete.
+[Browser B]: 🔌 NetworkSync: Connecting to ws://localhost:8080?room=b36125ff...
+[Browser B]: 🔗 E2EE WebSocket connected to ws://localhost:8080. Requesting Cache...
+[Browser B]: 📥 [NETWORK] Raw message received: type=6, length=1
+[Browser B]: 🌱 Room is empty. Uploading Genesis Checkpoint...
+[Browser B]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[DEBUG] Page B active project: d501d16f-c5fa-4866-aa6f-11ac9d6f2fdb. Adding task...
+[Browser B]: ✅ addTodoRow: Transacting Yjs set for row 6da387ba-08ff-4782-98db-74500884448d
+[Browser B]: 📡 [YJS] Local change detected (length: 355, origin: null). Broadcasting...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (384 bytes)
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (384 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=384
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 383 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 355 bytes.
+[Browser A]: 📥 [INBOUND] Received live P2P Diff (384 bytes)
+[Browser A]: 🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=384
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 383 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 355 bytes.
+[Browser A]: 📥 [INBOUND] Received live P2P Diff (384 bytes)
+[Browser A]: 🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!
+[Browser B]: 🔄 Observer Render Throttle [Yjs -> React]: 1 projects mapped.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=7, length=1
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=7, length=1
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: Deep Idle Reached: Generating 1MB+ E2EE Checkpoint...
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser A]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser B]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser B]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser B]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+[Browser B]: 📡 [OUTBOUND] Sending live P2P Diff (31 bytes)
+[Browser A]: 📥 [NETWORK] Raw message received: type=3, length=31
+[Browser A]: 🛡️ [NETWORK] Attempting to decrypt 30 bytes...
+[Browser A]: 🟢 [NETWORK] Decryption successful. Result: 2 bytes.
+  ✘  1 [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking (1.0m)
+
+
+  1) [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: page.waitForFunction: Test ended.
+
+      89 |         // Peer A must see Peer B's project arrive and contain the task.
+      90 |         // We wait for Page A to have 2 projects (its own and B's).
+    > 91 |         await pageA.waitForFunction(() => {
+         |                     ^
+      92 |             const state = (window as any).__STORE__.getState();
+      93 |             return state.todoProjects.length >= 2;
+      94 |         }, { timeout: 20000 });
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/sync-reconciliation.spec.ts:91:21
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-3.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/sync-reconciliation-Multi--8ec2e-Convergence-Dynamic-Locking-Desktop-Chrome/error-context.md
+
+  1 failed
+    [Desktop Chrome] › tests/sync-reconciliation.spec.ts:37:9 › Multi-Device Sync Reconciliation › E2E Sync Flow: Convergence & Dynamic Locking 

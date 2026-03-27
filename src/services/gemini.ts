@@ -121,7 +121,7 @@ export const GeminiService = {
   async withTimeout<T>(promise: Promise<T>, ms: number = 20000): Promise<T> {
     let timeoutId: NodeJS.Timeout;
     const timeoutPromise = new Promise<T>((_, reject) => {
-      timeoutId = setTimeout(() => reject(new Error('Request Timed Out (20s)')), ms);
+      timeoutId = setTimeout(() => reject(new Error(`Request Timed Out (${ms/1000}s)`)), ms);
     });
     return Promise.race([promise.finally(() => clearTimeout(timeoutId)), timeoutPromise]);
   },
@@ -303,7 +303,8 @@ export const GeminiService = {
           model: modelName,
           generationConfig: { responseMimeType: 'application/json' },
         });
-        return this.withTimeout(model.generateContent(prompt));
+        // Substeps generation can be complex, use 35s timeout
+        return this.withTimeout(model.generateContent(prompt), 35000);
       });
       return safeParseSubSteps(result.response.text());
     } catch (e: unknown) {

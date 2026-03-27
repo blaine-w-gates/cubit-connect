@@ -1,0 +1,320 @@
+# CUBIT CONNECT — AGENT CONSTRAINTS & PROTOCOLS
+**Version:** 2.0  
+**IDE:** Cursor / Windsurf / Antigravity  
+**Project:** Local-First AI Knowledge Distillation Engine
+
+---
+
+## ZERO-TRUST PRINCIPLE
+You do NOT have implicit context. Every assumption must be verified. Every task must be proven.
+
+---
+
+## 1. BROWSER REALITY CHECKS (Antigravity Protocols)
+
+### ASYNC VIDEO
+- Never loop through timestamps synchronously
+- MUST use recursive function/queue waiting for `video.onseeked`
+- Violation = System Failure
+
+### MEMORY SAFETY  
+- Always downscale canvas images (max 640px)
+- Use virtualization for long lists of images
+- Monitor IndexedDB size (warn if >500MB)
+
+### JSON SAFETY
+- Always wrap `JSON.parse` in try/catch
+- Strip "```json" fences before parsing
+- Handle `finishReason: SAFETY` gracefully
+
+### STRICT MODE
+- Use `useRef` lock or Zustand machine to prevent double-execution of AI calls
+- Check for pending state before triggering new operations
+
+### RATE LIMITS
+- Respect 2s+ delay between AI calls (MIN_DELAY_MS = 2000)
+- Circuit breaker: Switch to fallback model on 429 errors
+- If both models exhausted → show `PROJECT_QUOTA_EXCEEDED` error
+
+### HYDRATION
+- Always keep `suppressHydrationWarning` on `<html>` and `<body>`
+- Prevents "Jetski" extension crashes
+
+---
+
+## 2. ARCHITECTURE CONSTRAINTS
+
+### NO SERVERS
+- GitHub Pages only - no backend infrastructure
+- Local-first: Video NEVER leaves device
+- Browser Sandbox: All processing happens client-side
+
+### NO FFMPEG
+- Use Canvas API for video processing
+- No server-side video transcoding
+
+### INPUT VALIDATION
+- Test API Key before saving
+- Use loose regex for VTT validation
+- Zod schemas for all data boundaries
+
+### ICONS
+- `lucide-react` ONLY
+- Ban: `react-icons`, `fontawesome`
+
+### STYLING
+- Tailwind CSS v4 (CSS-native `@import "tailwindcss";`)
+- No `tailwind.config.js` file
+- Clean Enterprise aesthetic (Light + Dark modes)
+
+---
+
+## 3. STATE MANAGEMENT LAWS
+
+### Single Source of Truth
+- `src/store/useAppStore.ts` — Zustand is THE state authority
+- No prop drilling, no duplicate state
+- Access via `window.__STORE__` for debugging only
+
+### Persistence
+- IndexedDB (`idb-keyval`): Project data, screenshots, scout results
+- LocalStorage: API keys only (encrypted via `src/lib/crypto.ts`)
+- Yjs: Real-time sync state (separate from persistence)
+
+### Workspace Model
+- `personalUno`: Single device, no sync
+- `personalMulti`: Multi-device sync via Yjs/WebSocket
+- `teamWorkspace`: (Future) Team collaboration
+
+---
+
+## 4. AI INTEGRATION RULES
+
+### Dual Model Circuit Breaker
+```typescript
+PRIMARY_MODEL = 'gemini-2.5-flash'
+FALLBACK_MODEL = 'gemini-2.5-flash-lite'
+```
+- Primary hits 429/quota → cooldown 60s → switch to Fallback
+- Both exhausted → `PROJECT_QUOTA_EXCEEDED` error
+
+### Context Safety
+- Transcript >100k chars → Only Primary can handle
+- If Primary cooling down → fail fast with clear message
+
+### No Regressions
+- Never revert instructional design prompts to generic summaries
+- Prompt changes must preserve output quality
+
+---
+
+## 5. SYNC SYSTEM CONSTRAINTS (CRITICAL)
+
+### Yjs Update Chain
+1. `ydoc.on('update')` → Detect local change
+2. `broadcastUpdate()` → Encrypt and send
+3. WebSocket → Transmit to relay
+4. Relay → Broadcast to peers
+5. Peer → Decrypt and `applyUpdate()`
+
+### NetworkSync Lifecycle
+1. **Connection** → WebSocket opens
+2. **Key Derivation** → `deriveSyncKey(passphrase)`
+3. **Room Join** → `deriveRoomId(passphrase)` in URL param
+4. **Peer Discovery** → `hasPeers = true` when other clients detected
+5. **Data Sync** → Yjs updates propagate (separate from connection!)
+
+### Current Active Issue (SYNC-001)
+- Symptom: Tests timeout despite 👥 2+ showing
+- Status: Peer connection works, data sync fails
+- Investigation: Yjs updates not reaching peer despite WebSocket connected
+- Pattern: B creates task (1 row), A never receives (0 rows)
+
+### Testing Sync
+- Use `flushSyncNow()` for deterministic test sync
+- Prefer store evaluation over UI assertions
+- Check `hasPeers` before testing data propagation
+- Room ID must match exactly between peers
+
+---
+
+## 6. TESTING PROTOCOLS
+
+### Test Tiers
+| Tier | Command | Scope | Speed |
+|------|---------|-------|-------|
+| quick | `npm run test:quick` | Unit + 1 E2E | ~30s |
+| sync | `npm run test:sync` | Sync tests (Chrome + Safari) | ~2m |
+| full | `npm run test:full` | All 13 devices | ~10m |
+| perf | `npm run test:perf` | Lighthouse | ~1m |
+
+### Playwright Patterns
+```typescript
+// ✅ CORRECT: Exact match
+await page.getByRole('button', { name: 'Task', exact: true }).click();
+
+// ❌ WRONG: Substring match (ambiguous)
+await page.getByRole('button', { name: 'Task' }).click();
+
+// ✅ CORRECT: Store evaluation for sync
+await page.waitForFunction(() => 
+  (window as any).__STORE__.getState().todoRows.length > 0
+);
+
+// ❌ WRONG: Closure in waitForFunction
+await page.waitForFunction(() => 
+  checkRow(projA) // projA not in scope!
+);
+```
+
+### Chain of Verification
+Every task MUST prove:
+- [ ] Type check: `npm run type-check`
+- [ ] Lint: `npm run lint`
+- [ ] Unit tests: `npm test -- {pattern}`
+- [ ] E2E tests: `npx playwright test {file}`
+- [ ] Build: `npm run build`
+
+---
+
+## 7. THE GRAVEYARD (Learn from Failures)
+
+### SYNC-001: Yjs Propagation Failure
+**Date:** March 2026  
+**Symptom:** Peers connect (👥 2+) but data doesn't sync  
+**Cause:** Room ID mismatch or Yjs update chain broken  
+**Solution:** 
+- Verify roomIdHash identical on both peers
+- Check ydoc.on('update') fires when task added
+- Trace through encrypt → WebSocket → relay → peer → decrypt  
+**Prevention:** Add room ID verification test, expose ydoc for debugging
+
+### TRAP-002: The Closure Issue  
+**Symptom:** `ReferenceError: projA is not defined`  
+**Cause:** Using closure variable in waitForFunction  
+**Solution:** Pass args explicitly: `(arg) => check(arg), projA`  
+**Prevention:** Always pass arguments to waitForFunction
+
+### TRAP-003: The UI Timeout Death Spiral  
+**Symptom:** Tests timeout on simple UI interactions  
+**Cause:** Application state not ready or selector ambiguous  
+**Solution:** Use exact match selectors, wait for hydration  
+**Prevention:** Add `waitForTimeout` after reload, use exact selectors
+
+---
+
+## 8. EXECUTION WORKFLOW
+
+### Phase 0: Environmental Sanity Check
+```bash
+npm run type-check  # Must pass
+npm run lint        # Must pass  
+npm run test:quick  # Must pass
+git status          # Must be clean
+```
+
+### Phase 1: Execute Sub-Task
+- Work on single isolated task (< 2 hours)
+- No looking ahead, no scope creep
+
+### Phase 2: Verify
+- Deterministic proof required
+- "Looks good" = NOT verification
+- Measurable output = VERIFICATION
+
+### Phase 3: Commit
+```bash
+git add .
+git commit -m "[Agent] Verified completion: {Task Name}"
+```
+
+### Phase 4: Handoff
+- Autonomous mode: Next sub-task
+- Blind mode: Output logs, await instruction
+
+---
+
+## 9. ESCALATION TRIGGERS
+
+STOP and ask human if:
+- [ ] Instructions conflict with Master Calibration
+- [ ] Destructive operation (delete, migrate, overwrite)
+- [ ] Cannot verify with deterministic test
+- [ ] Context exceeds token limits
+- [ ] Sync system not working (current active issue)
+- [ ] Test timeout despite "correct" code
+- [ ] Need to install unapproved dependency
+- [ ] Modifying frozen zone (VideoInput.tsx)
+- [ ] Changing AI prompt affecting instructional design
+- [ ] API key or encryption changes
+
+---
+
+## 10. CRITICAL FILE MAP
+
+### Core Services
+- `src/services/gemini.ts` — AI brain, circuit breaker
+- `src/services/storage.ts` — IndexedDB persistence
+- `src/lib/networkSync.ts` — WebSocket/Yjs sync
+- `src/lib/crypto.ts` — API key encryption
+- `src/lib/cryptoSync.ts` — Yjs update encryption
+
+### State & Schemas
+- `src/store/useAppStore.ts` — Zustand state machine
+- `src/schemas/storage.ts` — Zod data schemas
+- `src/schemas/gemini.ts` — Zod AI response schemas
+
+### Testing
+- `tests/e2e/sync.spec.ts` — Multi-device sync tests
+- `tests/unit/` — Vitest unit tests
+- `playwright.config.ts` — Test configuration
+
+### Documentation
+- `master_calibration.md` — This doc's parent
+- `PROJECT_HANDOFF.md` — Detailed project context
+- `tasks/MASTER_TASK_LIST.md` — Epic roadmap
+- `docs/` — Architecture decisions, progress
+
+---
+
+## 11. QUICK REFERENCE
+
+### Common Commands
+```bash
+# Development
+npm run dev              # Start dev server
+npm run build            # Production build
+
+# Testing  
+npm run test             # Unit tests (Vitest)
+npm run test:quick       # Quick tier
+npm run test:sync        # Sync tier
+npm run test:full        # Full tier
+
+# Quality
+npm run type-check       # TypeScript check
+npm run lint             # ESLint
+npm run format           # Prettier
+```
+
+### Key Constants
+```typescript
+MIN_DELAY_MS = 2000      # AI rate limit
+MAX_CANVAS_PX = 640      # Image downscale
+STORAGE_WARNING_MB = 500 # IDB size warning
+```
+
+### Store Access (Debug Only)
+```typescript
+const store = (window as any).__STORE__;
+const state = store.getState();
+state.todoRows;          // Current tasks
+state.hasPeers;          // Peer connection status
+state.syncStatus;        // 'connected' | 'disconnected'
+```
+
+---
+
+**END OF CURSOR RULES**
+
+**Remember:** You are an autonomous execution node. Do not guess. Do not rely on implicit context. Operate via strict Specification Engineering. Verify everything. Commit after success.

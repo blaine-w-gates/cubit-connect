@@ -25,7 +25,9 @@ export default function Header({
 }: HeaderProps) {
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { setInputMode, setIsSettingsOpen, syncStatus, setIsSyncModalOpen } = useAppStore();
+  const { setInputMode, setIsSettingsOpen, syncStatus, setIsSyncModalOpen, hasPeers, activeWorkspaceType } = useAppStore();
+  
+  const isLocked = activeWorkspaceType === 'personalMulti' && !hasPeers;
   const pathname = usePathname();
   const router = useRouter();
   const isEnginePage = pathname === '/engine';
@@ -134,7 +136,15 @@ export default function Header({
                       'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
                 }`}
             >
-              <Network className="w-4 h-4" />
+              <div className="flex items-center gap-1">
+                <Network className="w-4 h-4" />
+                {syncStatus === 'connected' && (
+                  <span className="text-[10px] font-bold">
+                    {hasPeers ? '👥 2+' : '👤 1'}
+                  </span>
+                )}
+                {isLocked && <span title="Shared Project Locked">🔒</span>}
+              </div>
               <span className="hidden sm:inline">Sync</span>
             </button>
             <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
@@ -243,8 +253,16 @@ export default function Header({
                         'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
                   }`}
               >
-                <Network className="w-4 h-4" />
-                Sync Status
+                <div className="flex items-center gap-1.5">
+                  <Network className="w-4 h-4" />
+                  {syncStatus === 'connected' && (
+                    <span className="text-[10px]">
+                      {hasPeers ? '👥 2+ Peers' : '👤 Alone'}
+                    </span>
+                  )}
+                  {isLocked && <span className="ml-1">🔒 Locked</span>}
+                </div>
+                {!isLocked && <span>Sync Status</span>}
               </button>
             </div>
             <div className="pb-4 border-b border-zinc-100 dark:border-stone-800">

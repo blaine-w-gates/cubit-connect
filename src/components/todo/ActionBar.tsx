@@ -5,13 +5,34 @@ import { useShallow } from 'zustand/react/shallow';
 import { Plus, Sparkles, Telescope, ArrowLeftCircle, ArrowRightCircle } from 'lucide-react';
 
 export default function ActionBar() {
-    const { activeMode, setActiveMode, addTodoRow } = useAppStore(
+    const { activeMode, setActiveMode, addTodoRow, activeWorkspaceType, hasPeers, peerIsEditing } = useAppStore(
         useShallow((s) => ({
             activeMode: s.activeMode,
             setActiveMode: s.setActiveMode,
             addTodoRow: s.addTodoRow,
+            activeWorkspaceType: s.activeWorkspaceType,
+            hasPeers: s.hasPeers,
+            peerIsEditing: s.peerIsEditing,
         })),
     );
+
+    const isLocked = activeWorkspaceType === 'personalMulti' && (!hasPeers || peerIsEditing);
+    const checkLock = () => {
+        if (isLocked) {
+            const reason = !hasPeers
+                ? 'To prevent sync mismatches, you must have at least 2 devices connected to edit a Shared Project.'
+                : 'A peer is currently making changes. Please wait for them to finish.';
+
+            import('sonner').then(({ toast }) => {
+                toast.error('Shared Project Locked', {
+                    description: reason,
+                    icon: '🔒',
+                });
+            });
+            return true;
+        }
+        return false;
+    };
 
     const modes = [
         { key: 'cubit' as const, label: 'Cubit', color: 'cyan', Icon: Sparkles },
@@ -53,12 +74,16 @@ export default function ActionBar() {
                     return (
                         <button
                             key={key}
-                            onClick={() => setActiveMode(activeMode === key ? null : key)}
+                            onClick={() => {
+                                if (checkLock()) return;
+                                setActiveMode(activeMode === key ? null : key);
+                            }}
                             className={`flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold font-mono uppercase tracking-wide transition-all
                 ${isActive
                                     ? `${colors.active} scale-105`
                                     : `bg-zinc-100 dark:bg-stone-800 ${colors.text} hover:bg-zinc-200 dark:hover:bg-stone-700`
                                 }
+                ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
               `}
                             aria-pressed={isActive}
                         >
@@ -71,8 +96,11 @@ export default function ActionBar() {
                 {/* + Task button */}
                 <div className="h-6 w-[1px] bg-zinc-300 dark:bg-stone-600 mx-1" />
                 <button
-                    onClick={() => addTodoRow()}
-                    className="flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold font-mono uppercase tracking-wide bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 hover:bg-zinc-800 dark:hover:bg-stone-300 transition-all active:scale-95"
+                    onClick={() => {
+                        if (checkLock()) return;
+                        addTodoRow();
+                    }}
+                    className={`flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2.5 rounded-none text-xs sm:text-sm font-semibold font-mono uppercase tracking-wide bg-zinc-900 dark:bg-stone-200 text-white dark:text-stone-900 transition-all ${isLocked ? 'opacity-50 cursor-not-allowed' : 'hover:bg-zinc-800 dark:hover:bg-stone-300 active:scale-95'}`}
                 >
                     <Plus className="w-4 h-4" />
                     <span>Task</span>

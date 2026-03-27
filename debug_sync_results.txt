@@ -1,0 +1,42 @@
+
+Running 1 test using 1 worker
+
+[DEBUG] Page B adding task...
+  ✘  1 [Desktop Chrome] › tests/debug-task-sync.spec.ts:3:5 › Minimal Task Sync Audit (6.8s)
+
+
+  1) [Desktop Chrome] › tests/debug-task-sync.spec.ts:3:5 › Minimal Task Sync Audit ────────────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByText('New Task')
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByText('New Task')[22m
+
+
+      17 |     
+      18 |     // 4. Check Page B sees it
+    > 19 |     await expect(pageB.getByText('New Task')).toBeVisible({ timeout: 5000 });
+         |                                               ^
+      20 |     console.log('[DEBUG] Page B sees task locally.');
+      21 |     
+      22 |     // 5. Check Page A sees it (Convergence)
+        at /Users/jamesgates/Documents/cube it connect/cube it connect b/tests/debug-task-sync.spec.ts:19:47
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/debug-task-sync-Minimal-Task-Sync-Audit-Desktop-Chrome/test-failed-2.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/debug-task-sync-Minimal-Task-Sync-Audit-Desktop-Chrome/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/debug-task-sync-Minimal-Task-Sync-Audit-Desktop-Chrome/error-context.md
+
+  1 failed
+    [Desktop Chrome] › tests/debug-task-sync.spec.ts:3:5 › Minimal Task Sync Audit ─────────────────
