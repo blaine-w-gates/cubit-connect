@@ -131,6 +131,9 @@ function registerYjsObserver(set: any, get: any) {
   const projectCache = new Map<string, { json: string, parsed: TodoProject }>();
 
   ydoc.on('update', (update: Uint8Array, origin: any) => {
+    // IMMEDIATE FIRST LOG - before ANY other logic
+    console.log('[YJS DEBUG] 🔥 OBSERVER ENTERED - origin:', origin, 'ydoc:', ydocId);
+    
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     console.log('[YJS DEBUG] ydoc.on(update) fired on ydoc', ydocId, '- origin:', origin, 'update length:', update.length);
     
