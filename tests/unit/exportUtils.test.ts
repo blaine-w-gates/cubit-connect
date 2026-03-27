@@ -99,6 +99,9 @@ describe('generateAllProjectsMarkdown', () => {
         todoRows: [{ id: 'r1', task: 'Task 1', steps: [{ text: 'Step 1', isCompleted: false }, emptyStep, emptyStep, emptyStep], isCompleted: false }],
         priorityDials: { left: '', right: '', focusedSide: 'none' },
         createdAt: Date.now(),
+        workspaceType: 'personalUno',
+        workspaceId: 'test-workspace',
+        ownerId: 'test-device',
       },
     ];
     const md = generateAllProjectsMarkdown(projects);
