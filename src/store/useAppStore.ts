@@ -28,16 +28,16 @@ import {
 import { NetworkSync } from '@/lib/networkSync';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
-import { generateTestClientId, isTestEnvironment } from '@/lib/yjsClientId';
+import { generateUniqueClientId } from '@/lib/yjsClientId';
 
 // --- Mutable Yjs Core (swapped on workspace switch) ---
 // gc: false required for E2EE so deeply-offline devices don't lose tombstones
-// In test environments, use deterministic ClientID to prevent same-device collision
-const ydocOptions: { gc: boolean; clientID?: number } = { gc: false };
-if (isTestEnvironment()) {
-  ydocOptions.clientID = generateTestClientId();
-  console.log(`[YJS DEBUG] Test environment detected - using deterministic ClientID: ${ydocOptions.clientID}`);
-}
+// Use deterministic ClientID based on device fingerprint to prevent collisions
+const ydocOptions: { gc: boolean; clientID?: number } = { 
+  gc: false,
+  clientID: generateUniqueClientId() // Always use unique ClientID per device
+};
+console.log(`[YJS DEBUG] Using unique ClientID: ${ydocOptions.clientID}`);
 
 let ydoc = new Y.Doc(ydocOptions);
 registerYDocInstance(ydoc, 'module_init');
@@ -82,12 +82,12 @@ function resetYDoc(): Y.Doc {
   markInstanceDestroyed(ydoc, 'resetYDoc');
   ydoc.destroy();
   
-  // Create new Y.Doc with deterministic ClientID in test environments
-  const newYdocOptions: { gc: boolean; clientID?: number } = { gc: false };
-  if (isTestEnvironment()) {
-    newYdocOptions.clientID = generateTestClientId();
-    console.log(`[YJS DEBUG] resetYDoc() - using deterministic ClientID: ${newYdocOptions.clientID}`);
-  }
+  // Create new Y.Doc with unique ClientID based on device fingerprint
+  const newYdocOptions: { gc: boolean; clientID?: number } = { 
+    gc: false,
+    clientID: generateUniqueClientId() // Always use unique ClientID per device
+  };
+  console.log(`[YJS DEBUG] resetYDoc() - using unique ClientID: ${newYdocOptions.clientID}`);
   
   ydoc = new Y.Doc(newYdocOptions);
   const newId = registerYDocInstance(ydoc, 'resetYDoc');

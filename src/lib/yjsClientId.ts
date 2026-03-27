@@ -8,9 +8,64 @@
  * This module provides deterministic ClientID generation for testing scenarios.
  */
 
-// ClientID is a 64-bit unsigned integer in Yjs
-// We generate unique IDs using timestamp + counter + random to ensure uniqueness
+// Counter for unique ID generation
 let clientIdCounter = 0;
+
+/**
+ * Generate a unique ClientID for production use.
+ * Combines device fingerprint, timestamp, and random to ensure uniqueness across devices.
+ * This prevents the Yjs ClientID collision issue where two devices generate the same ID.
+ */
+export function generateUniqueClientId(): number {
+  // Get device fingerprint for uniqueness across devices
+  const deviceId = getOrCreateDeviceId();
+  const deviceHash = hashStringToNumber(deviceId);
+  
+  const now = Math.floor(Date.now() / 1000);
+  const counter = ++clientIdCounter % 0xFFFF;
+  const random = Math.floor(Math.random() * 0xFFFF);
+  
+  // Mix device hash into the high bits to ensure cross-device uniqueness
+  const high = ((now & 0xFFFF) | ((deviceHash & 0xFFFF) << 16)) * 0x100000000;
+  const low = ((counter << 16) | random) & 0xFFFFFFFF;
+  
+  const clientId = high + low;
+  
+  console.log(`[YJS DEBUG] Generated unique ClientID: ${clientId} (device: ${deviceId.slice(0, 8)}...)`);
+  return clientId;
+}
+
+/**
+ * Get or create a persistent device ID for this browser.
+ * Stored in localStorage to persist across sessions.
+ */
+function getOrCreateDeviceId(): string {
+  if (typeof window === 'undefined') return 'ssr-device';
+  
+  const key = 'cubit_device_id';
+  let deviceId = localStorage.getItem(key);
+  
+  if (!deviceId) {
+    deviceId = `device-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    localStorage.setItem(key, deviceId);
+    console.log(`[YJS DEBUG] Created new device ID: ${deviceId}`);
+  }
+  
+  return deviceId;
+}
+
+/**
+ * Simple string hash function for device ID hashing.
+ */
+function hashStringToNumber(str: string): number {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash);
+}
 
 /**
  * Generate a deterministic unique ClientID for testing.
