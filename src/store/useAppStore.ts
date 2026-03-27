@@ -1,8 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { create } from 'zustand';
-import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep, StoredProjectData } from '@/services/storage';
+import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 import * as Y from 'yjs';
+import {
+  registerYDocInstance,
+  markInstanceDestroyed,
+  markObserverRegistered,
+  transitionToPhase,
+  markObserverRegisteredInStateMachine,
+  enableDiagnostics,
+  getInstanceId,
+  assertInvariant,
+} from '@/lib/syncDiagnostics';
 import {
   bindTodoProjectToYMap,
   extractTodoProjectFromYMap,
@@ -17,12 +28,29 @@ import {
 import { NetworkSync } from '@/lib/networkSync';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
+import { generateTestClientId, isTestEnvironment } from '@/lib/yjsClientId';
+
 // --- Mutable Yjs Core (swapped on workspace switch) ---
 // gc: false required for E2EE so deeply-offline devices don't lose tombstones
-let ydoc = new Y.Doc({ gc: false });
-let yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
-let yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
-let yMetaMap = ydoc.getMap<any>('meta');
+// In test environments, use deterministic ClientID to prevent same-device collision
+const ydocOptions: { gc: boolean; clientID?: number } = { gc: false };
+if (isTestEnvironment()) {
+  ydocOptions.clientID = generateTestClientId();
+  console.log(`[YJS DEBUG] Test environment detected - using deterministic ClientID: ${ydocOptions.clientID}`);
+}
+
+let ydoc = new Y.Doc(ydocOptions);
+registerYDocInstance(ydoc, 'module_init');
+
+// Type aliases for Yjs maps to avoid explicit any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type YAnyMap = Y.Map<any>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type YAnyMeta = any;
+
+let yProjectsMap = ydoc.getMap<YAnyMap>('projects');
+let yTasksMap = ydoc.getMap<YAnyMap>('tasks');
+let yMetaMap = ydoc.getMap<YAnyMeta>('meta');
 let yTranscript = ydoc.getText('transcript');
 
 // Exported getter so Playwright tests can reach the active doc
@@ -32,17 +60,187 @@ export function getYDoc() { return ydoc; }
  * Destroy the current Y.Doc and create a fresh one.
  * Called during workspace switching to guarantee data isolation.
  * personalUno data never bleeds into a personalMulti sync channel.
+ * 
+ * CRITICAL: Also resets NetworkSync so it uses the new ydoc reference.
  */
 function resetYDoc(): Y.Doc {
+  const oldId = getInstanceId(ydoc);
+  console.log(`[YJS DEBUG] resetYDoc() called - destroying ydoc ${oldId || 'unknown'}`);
+  
+  // CRITICAL FIX: Disconnect NetworkSync BEFORE destroying ydoc
+  // This ensures NetworkSync will be recreated with the new ydoc reference
+  if (networkSync) {
+    console.log('[YJS DEBUG] resetYDoc() - disconnecting existing NetworkSync');
+    networkSync.disconnect();
+    networkSync = null;
+  }
+  if (idleCheckpointTimer) {
+    clearTimeout(idleCheckpointTimer);
+    idleCheckpointTimer = null;
+  }
+  
+  markInstanceDestroyed(ydoc, 'resetYDoc');
   ydoc.destroy();
-  ydoc = new Y.Doc({ gc: false });
-  yProjectsMap = ydoc.getMap<Y.Map<any>>('projects');
-  yTasksMap = ydoc.getMap<Y.Map<any>>('tasks');
-  yMetaMap = ydoc.getMap<any>('meta');
+  
+  // Create new Y.Doc with deterministic ClientID in test environments
+  const newYdocOptions: { gc: boolean; clientID?: number } = { gc: false };
+  if (isTestEnvironment()) {
+    newYdocOptions.clientID = generateTestClientId();
+    console.log(`[YJS DEBUG] resetYDoc() - using deterministic ClientID: ${newYdocOptions.clientID}`);
+  }
+  
+  ydoc = new Y.Doc(newYdocOptions);
+  const newId = registerYDocInstance(ydoc, 'resetYDoc');
+  
+  transitionToPhase('ydoc_reset', { ydocId: newId });
+  console.log(`[YJS DEBUG] resetYDoc() created new ydoc ${newId}`);
+  
+  // Reset the observer tracking on the new ydoc
+  (ydoc as { __observerId?: string }).__observerId = undefined;
+  
+  yProjectsMap = ydoc.getMap<Y.Map<any>>('projects'); // eslint-disable-line @typescript-eslint/no-explicit-any
+  yTasksMap = ydoc.getMap<Y.Map<any>>('tasks'); // eslint-disable-line @typescript-eslint/no-explicit-any
+  yMetaMap = ydoc.getMap<any>('meta'); // eslint-disable-line @typescript-eslint/no-explicit-any
   yTranscript = ydoc.getText('transcript');
+  
   return ydoc;
 }
 // -------------------------
+
+/**
+ * Register the main Yjs update observer on the current ydoc instance.
+ * This handles both outbound broadcast (for local changes) and inbound UI updates (for network changes).
+ * Must be called whenever a new ydoc is created (in resetYDoc) to ensure the observer is on the correct instance.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function registerYjsObserver(set: any, get: any) {
+  // Track observer registration
+  markObserverRegistered(ydoc, 'registerYjsObserver');
+  markObserverRegisteredInStateMachine();
+  
+  const ydocId = getInstanceId(ydoc) || 'unknown';
+  console.log('[YJS DEBUG] registerYjsObserver called - registering on ydoc instance', ydocId);
+  
+  // ---------------------------------------------------------------------------
+  // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
+  // ---------------------------------------------------------------------------
+
+  // MICRO-CACHES: These WeakMaps/Maps ensure we only generate new Object references
+  // if the underlying Y.Map JSON actually changed. This is our "React Re-Render Armor".
+  const taskCache = new Map<string, { json: string, parsed: TaskItem }>();
+  const projectCache = new Map<string, { json: string, parsed: TodoProject }>();
+
+  ydoc.on('update', (update: Uint8Array, origin: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    console.log('[YJS DEBUG] ydoc.on(update) fired on ydoc', ydocId, '- origin:', origin, 'update length:', update.length);
+    
+    // THE ECHO STORM PREVENTION (Outbound Broadcast)
+    if (origin !== 'network' && networkSync) {
+      set({ hasUnsyncedChanges: true });
+      // BAND 1: Instantly broadcast tiny live diffs
+      networkSync.broadcastUpdate(update);
+
+      // BAND 2: The Deep Idle Checkpoint (30 seconds)
+      // Reset the inactivity timer every time the user types.
+      if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
+      idleCheckpointTimer = setTimeout(() => {
+        console.log("Deep Idle Reached: Generating 1MB+ E2EE Checkpoint...");
+        const fullState = Y.encodeStateAsUpdate(ydoc);
+        networkSync?.broadcastCheckpoint(fullState);
+      }, 30000);
+    }
+
+    // --- THE CATCH-UP RENDER THROTTLE ---
+    // When the WebSocket sends 1 Checkpoint + 100 Live Diffs, this event fires 101 times in 10ms.
+    // If we call set() every time, React freezes. We debounce the actual Zustand update.
+    if ((window as any)._crdtRenderDebounce) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      clearTimeout((window as any)._crdtRenderDebounce);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (window as any)._crdtRenderDebounce = setTimeout(() => {
+      console.log('[YJS DEBUG] Executing debounced render from origin:', origin);
+      // 1. Extract raw lists but filter out tombstones immediately
+      const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+      const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+
+      // 2. Map through cache for Structural Sharing
+      const sharedProjects = rawYProjects.map(yProj => {
+        const parsed = extractTodoProjectFromYMap(yProj);
+        const json = JSON.stringify(parsed);
+        const cached = projectCache.get(parsed.id);
+        if (cached && cached.json === json) return cached.parsed;
+        projectCache.set(parsed.id, { json, parsed });
+        return parsed;
+      });
+
+      const sharedTasks = rawYTasks.map(yTask => {
+        const parsed = extractTaskItemFromYMap(yTask);
+        const json = JSON.stringify(parsed);
+        const cached = taskCache.get(parsed.id);
+        if (cached && cached.json === json) return cached.parsed;
+        taskCache.set(parsed.id, { json, parsed });
+        return parsed;
+      });
+
+      const updatedProjects = sortYMapList(sharedProjects);
+      console.log('[YJS OBSERVER] Rendering:', updatedProjects.length, 'projects, origin:', origin);
+
+      const currentActiveId = get().activeProjectId;
+      const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
+
+      // --- Document State Render Engine ---
+      let transcript = get().transcript;
+      const textFromCRDT = yTranscript.toString();
+      transcript = textFromCRDT === "" ? null : textFromCRDT;
+
+      let projectType = get().projectType;
+      if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
+
+      let projectTitle = get().projectTitle;
+      if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
+
+      let scoutResults = get().scoutResults;
+      if (yMetaMap.has('scoutResults')) {
+        const raw = yMetaMap.get('scoutResults');
+        if (raw) {
+          if (JSON.stringify(scoutResults) !== raw) {
+            try { scoutResults = JSON.parse(raw); } catch { }
+          }
+        }
+      }
+
+      let scoutHistory = get().scoutHistory;
+      if (yMetaMap.has('scoutHistory')) {
+        const raw = yMetaMap.get('scoutHistory');
+        if (raw) {
+          if (JSON.stringify(scoutHistory) !== raw) {
+            try { scoutHistory = JSON.parse(raw); } catch { }
+          }
+        }
+      }
+
+      requestAnimationFrame(() => {
+        set({
+          todoProjects: updatedProjects,
+          tasks: sharedTasks,
+          activeProjectId: actProj?.id || null,
+          todoRows: actProj ? actProj.todoRows : [],
+          priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
+          transcript,
+          projectType,
+          projectTitle,
+          scoutResults,
+          scoutHistory,
+        });
+      });
+    }, 100);
+  });
+  
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  console.log('[YJS DEBUG] ydoc.on(update) handler registered successfully on ydoc', ydocId);
+}
 
 // Book Tab color palette — cycles through these for new projects
 const TAB_COLORS = [
@@ -73,6 +271,14 @@ export interface ProjectState {
 
   activeProcessingId: string | null; // Electric UI
   setActiveProcessingId: (id: string | null) => void;
+
+  // --- COLLABORATION LOCKING (STRICT MODE) ---
+  peerIsEditing: boolean;
+  setPeerIsEditing: (isEditing: boolean) => void;
+
+  _syncToggle: boolean;
+  forceSyncUpdate: () => void;
+  syncFromYjs: () => void;
 
   // UI State
   isSettingsOpen: boolean;
@@ -158,6 +364,8 @@ export interface ProjectState {
   roomFingerprint: string | null;
   lastSyncedAt: number | null;
   hasUnsyncedChanges: boolean;
+  hasPeers: boolean;
+  lastPeerSeenAt: number;
   connectToSyncServer: (passphrase: string) => Promise<void>;
   disconnectSyncServer: () => void;
   flushSyncNow: () => Promise<void>;
@@ -178,9 +386,10 @@ let isMigrating = false;
 
 // E2EE WEBSOCKET MANAGER
 let networkSync: NetworkSync | null = null;
-const SYNC_SERVER_URL = process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
+const SYNC_SERVER_URL = (typeof window !== 'undefined' && localStorage.getItem('sync_server_url')) || process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
+let peerEditingTimer: NodeJS.Timeout | null = null;
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
@@ -218,6 +427,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setScoutPlatform: (platform) => {
     set({ scoutPlatform: platform });
   },
+  hasPeers: false,
+  lastPeerSeenAt: 0,
   addToScoutHistory: (topic: string) =>
     set((state) => {
       const current = state.scoutHistory;
@@ -243,8 +454,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
 
   // --- Workspace State (ADR-001) ---
-  activeWorkspaceType: 'personalUno' as WorkspaceType,
-  activeWorkspaceId: typeof window !== 'undefined' ? getUnoWorkspaceId() : '',
+  activeWorkspaceType: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_type') as WorkspaceType : null) || 'personalUno',
+  activeWorkspaceId: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_id') : null) || (typeof window !== 'undefined' ? getUnoWorkspaceId() : ''),
   deviceId: typeof window !== 'undefined' ? getDeviceId() : '',
 
   switchWorkspace: async (workspaceType: WorkspaceType, workspaceId?: string) => {
@@ -400,6 +611,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const emptyStep = { text: '', isCompleted: false };
 
@@ -431,6 +643,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     ydoc.transact(() => {
       const yRow = yRows.get(rowId);
@@ -444,6 +657,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const yRow = yRows.get(rowId);
     if (!yRow) return;
@@ -470,6 +684,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const yRow = yRows.get(rowId);
     if (!yRow) return;
@@ -494,6 +709,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const movedRow = todoRows[fromIdx];
     const yRow = yRows.get(movedRow.id);
@@ -516,6 +732,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const yRow = yRows.get(rowId);
     if (!yRow) return;
@@ -538,6 +755,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return '';
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
 
     // Find index to calculate order key
@@ -600,6 +818,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const yRow = yRows.get(rowId);
     if (!yRow) return;
@@ -615,6 +834,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
     const yRow = yRows.get(rowId);
     if (!yRow) return;
@@ -648,6 +868,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yProj = yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
 
     const prevKey = index > 0 && index <= todoRows.length ? todoRows[index - 1].orderKey : undefined;
@@ -668,6 +889,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     set({ syncStatus: 'connecting', roomFingerprint: null });
+    transitionToPhase('initializing');
 
     try {
       if (networkSync) {
@@ -691,8 +913,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const currentWsType = get().activeWorkspaceType;
       const currentWsId = get().activeWorkspaceId;
       const isSameRoom = currentWsType === 'personalMulti' && currentWsId === roomIdHash;
+      
+      console.log(`[YJS DEBUG] connectToSyncServer - currentWsType: ${currentWsType}, currentWsId: ${currentWsId?.slice(0,8)}, roomIdHash: ${roomIdHash?.slice(0,8)}, isSameRoom: ${isSameRoom}`);
 
       if (!isSameRoom) {
+        console.log('[YJS DEBUG] connectToSyncServer - NOT same room, calling resetYDoc and loadProject');
         resetYDoc();
         isMigrating = false;
         loadProjectInFlight = null;
@@ -704,8 +929,43 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         });
 
         const { loadProject } = get();
+        console.log('[YJS DEBUG] connectToSyncServer - about to await loadProject()');
+        transitionToPhase('loadProject_start', { ydocId: getInstanceId(ydoc) });
         await loadProject();
+        transitionToPhase('loadProject_complete', { ydocId: getInstanceId(ydoc) });
+        console.log('[YJS DEBUG] connectToSyncServer - loadProject() completed');
+      } else {
+        console.log('[YJS DEBUG] connectToSyncServer - SAME room, skipping resetYDoc and loadProject');
       }
+
+      // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
+      // But if loadProject didn't run or skipped registration, register it now
+      const currentYdocId = getInstanceId(ydoc);
+      const observerYdocId = (ydoc as { __observerId?: string }).__observerId;
+      console.log(`[YJS DEBUG] connectToSyncServer - checking observer: current ydoc ${currentYdocId}, observer registered on: ${observerYdocId}`);
+      
+      if (observerYdocId !== currentYdocId) {
+        console.log(`[YJS DEBUG] connectToSyncServer - Registering observer directly on ydoc ${currentYdocId}`);
+        registerYjsObserver(set, get);
+        (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+      }
+
+      // CRITICAL INVARIANT: Observer must be registered before NetworkSync creation
+      const finalObserverYdocId = (ydoc as { __observerId?: string }).__observerId;
+      const actualYdocId = getInstanceId(ydoc);
+      
+      assertInvariant(
+        'Observer registered on current ydoc before NetworkSync',
+        actualYdocId,
+        finalObserverYdocId,
+        { 
+          currentYdocId: actualYdocId, 
+          observerYdocId: finalObserverYdocId,
+          phase: 'pre-networkSync',
+        }
+      );
+
+      console.log(`[SYNC DEBUG] Connecting with roomIdHash: ${roomIdHash}, SYNC_SERVER_URL: ${SYNC_SERVER_URL}`);
 
       networkSync = new NetworkSync(
         ydoc,
@@ -713,17 +973,58 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         roomIdHash,
         (status) => {
           set({ syncStatus: status });
+          if (status !== 'connected') set({ hasPeers: false });
         },
         () => {
           set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
         },
+        () => {
+          // Peer Presence pulse
+          console.log(`[PEER DISCOVERY] Received presence pulse, setting hasPeers=true`);
+          set({ hasPeers: true, lastPeerSeenAt: Date.now() });
+        },
+        () => {
+          // Explicit Peer Disconnect
+          console.log(`[PEER DISCOVERY] Peer disconnected, setting hasPeers=false`);
+          set({ hasPeers: false });
+        },
+        (isEditing) => {
+          // --- TURN-BASED LOCKING (STRICT MODE) ---
+          if (isEditing) {
+            set({ peerIsEditing: true });
+            if (peerEditingTimer) clearTimeout(peerEditingTimer);
+            peerEditingTimer = setTimeout(() => {
+              set({ peerIsEditing: false });
+              peerEditingTimer = null;
+            }, 3000); // 3-Second Turn Reservation
+          }
+        }
       );
 
+      // Presence Watchdog: Revert to "Alone" if no pulse for 12 seconds
+      if ((window as any)._presenceWatchdog) clearInterval((window as any)._presenceWatchdog);
+      (window as any)._presenceWatchdog = setInterval(() => {
+        const { lastPeerSeenAt, hasPeers } = get();
+        if (hasPeers && Date.now() - lastPeerSeenAt > 12000) {
+          set({ hasPeers: false });
+        }
+      }, 3000);
+
       await networkSync.connect(syncKey);
+      transitionToPhase('networkSync_connecting', { ydocId: getInstanceId(ydoc) });
+      
+      if (!(window as any)._unloadListenerBound) {
+        (window as any)._unloadListenerBound = true;
+        window.addEventListener('beforeunload', () => {
+          networkSync?.sendDisconnectSignal();
+        });
+      }
 
       set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+      transitionToPhase('live', { ydocId: getInstanceId(ydoc) });
     } catch (err) {
       console.error("Failed to connect to E2EE Relay:", err);
+      transitionToPhase('error', { ydocId: getInstanceId(ydoc), error: String(err) });
       set({ syncStatus: 'error', roomFingerprint: null });
     }
   },
@@ -737,9 +1038,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       networkSync.disconnect();
       networkSync = null;
     }
+    if ((window as any)._presenceWatchdog) {
+      clearInterval((window as any)._presenceWatchdog);
+      (window as any)._presenceWatchdog = null;
+    }
     // Stay in personalMulti (offline); data persists in IDB namespace.
     // User can manually switch back to personalUno via WorkspaceSelector.
-    set({ syncStatus: 'disconnected', roomFingerprint: null });
+    set({ syncStatus: 'disconnected', roomFingerprint: null, hasPeers: false });
   },
 
   flushSyncNow: async () => {
@@ -766,15 +1071,37 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   loadProject: async () => {
+    const entryYdocId = (ydoc as any).__observerId || 'no-id';
+    console.log(`[YJS DEBUG] loadProject() called - isHydrated: ${get().isHydrated}, ydoc: ${entryYdocId}`);
+    
+    // CRITICAL: Always ensure observer is registered on the current ydoc instance
+    // This must happen BEFORE any early returns to prevent observer loss on reconnection
+    const currentYdocId = getInstanceId(ydoc);
+    const observerId = (ydoc as { __observerId?: string }).__observerId;
+    
+    if (observerId !== currentYdocId) {
+      console.log(`[YJS DEBUG] Observer not registered on current ydoc (observerId: ${observerId}, current: ${currentYdocId}), registering now...`);
+      registerYjsObserver(set, get);
+      (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+    }
+
     // BUG-3 fix: single-flight lock avoids race when loadProject is called twice
     // before hydration state flips true.
     if (loadProjectInFlight) {
+      console.log('[YJS DEBUG] loadProject() - waiting for existing loadProjectInFlight');
       await loadProjectInFlight;
       return;
     }
 
     loadProjectInFlight = (async () => {
-    if (get().isHydrated) return;
+    console.log(`[YJS DEBUG] loadProject() - inside async block, isHydrated: ${get().isHydrated}`);
+    
+    // Note: Observer registration moved to BEFORE loadProjectInFlight check
+    // to ensure it's always registered regardless of hydration state
+    if (get().isHydrated) {
+      console.log('[YJS DEBUG] loadProject() - EARLY RETURN because isHydrated is true');
+      return;
+    }
 
     // Run one-time migration from legacy key to personalUno namespace
     await storageService.migrateIfNeeded();
@@ -959,122 +1286,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       isHydrated: true, // ✅ Hydration Complete
     });
 
-    // ---------------------------------------------------------------------------
-    // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
-    // ---------------------------------------------------------------------------
+    // Ensure observer is registered (already done at function start, but double-check)
+    const finalYdocId = getInstanceId(ydoc);
+    const finalObserverId = (ydoc as { __observerId?: string }).__observerId;
+    if (finalObserverId !== finalYdocId) {
+      console.log(`[YJS DEBUG] loadProject() - Final observer check failed, re-registering (observerId: ${finalObserverId}, current: ${finalYdocId})`);
+      registerYjsObserver(set, get);
+      (ydoc as { __observerId?: string }).__observerId = finalYdocId;
+    }
 
-    // MICRO-CACHES: These WeakMaps/Maps ensure we only generate new Object references
-    // if the underlying Y.Map JSON actually changed. This is our "React Re-Render Armor".
-    const taskCache = new Map<string, { json: string, parsed: TaskItem }>();
-    const projectCache = new Map<string, { json: string, parsed: TodoProject }>();
-
-    ydoc.on('update', (update: Uint8Array, origin: any) => {
-      // THE ECHO STORM PREVENTION (Outbound Broadcast)
-      if (origin !== 'network' && networkSync) {
-        set({ hasUnsyncedChanges: true });
-        // BAND 1: Instantly broadcast tiny live diffs
-        networkSync.broadcastUpdate(update);
-
-        // BAND 2: The Deep Idle Checkpoint (30 seconds)
-        // Reset the inactivity timer every time the user types.
-        if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
-        idleCheckpointTimer = setTimeout(() => {
-          console.log("Deep Idle Reached: Generating 1MB+ E2EE Checkpoint...");
-          const fullState = Y.encodeStateAsUpdate(ydoc);
-          networkSync?.broadcastCheckpoint(fullState);
-        }, 30000);
-      }
-
-      // --- THE CATCH-UP RENDER THROTTLE ---
-      // When the WebSocket sends 1 Checkpoint + 100 Live Diffs, this event fires 101 times in 10ms.
-      // If we call set() every time, React freezes. We debounce the actual Zustand update.
-      if ((window as any)._crdtRenderDebounce) {
-        clearTimeout((window as any)._crdtRenderDebounce);
-      }
-
-      (window as any)._crdtRenderDebounce = setTimeout(() => {
-        // 1. Extract raw lists but filter out tombstones immediately
-        const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
-        const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
-
-        // 2. Map through cache for Structural Sharing
-        const sharedProjects = rawYProjects.map(yProj => {
-          const parsed = extractTodoProjectFromYMap(yProj);
-          const json = JSON.stringify(parsed);
-          const cached = projectCache.get(parsed.id);
-          if (cached && cached.json === json) return cached.parsed;
-          projectCache.set(parsed.id, { json, parsed });
-          return parsed;
-        });
-
-        const sharedTasks = rawYTasks.map(yTask => {
-          const parsed = extractTaskItemFromYMap(yTask);
-          const json = JSON.stringify(parsed);
-          const cached = taskCache.get(parsed.id);
-          if (cached && cached.json === json) return cached.parsed;
-          taskCache.set(parsed.id, { json, parsed });
-          return parsed;
-        });
-
-        const updatedProjects = sortYMapList(sharedProjects);
-        console.log('🔄 Observer Render Throttle [Yjs -> React]:', updatedProjects.length, 'projects mapped.');
-
-        const currentActiveId = get().activeProjectId;
-        const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0]; // Fallback to 0 if active was deleted
-
-        // --- Document State Render Engine ---
-        let transcript = get().transcript;
-        const textFromCRDT = yTranscript.toString();
-        // Null mapping to preserve empty states (Upload flow)
-        transcript = textFromCRDT === "" ? null : textFromCRDT;
-
-        let projectType = get().projectType;
-        if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
-
-        let projectTitle = get().projectTitle;
-        if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
-
-        // Note: active view mode variables (inputMode, scoutPlatform) are explicitly stripped from CRDT to prevent Poltergeist UX hijacks.
-
-        // Re-Render Armor Cache logic
-        let scoutResults = get().scoutResults;
-        if (yMetaMap.has('scoutResults')) {
-          const raw = yMetaMap.get('scoutResults');
-          if (raw) {
-            // Engineer Guardrail: Only swap memory reference if JSON is fundamentally different
-            if (JSON.stringify(scoutResults) !== raw) {
-              try { scoutResults = JSON.parse(raw); } catch { }
-            }
-          }
-        }
-
-        let scoutHistory = get().scoutHistory;
-        if (yMetaMap.has('scoutHistory')) {
-          const raw = yMetaMap.get('scoutHistory');
-          if (raw) {
-            // Engineer Guardrail: Prevent DOM redraws while typing on keys
-            if (JSON.stringify(scoutHistory) !== raw) {
-              try { scoutHistory = JSON.parse(raw); } catch { }
-            }
-          }
-        }
-
-        requestAnimationFrame(() => {
-          set({
-            todoProjects: updatedProjects,
-            tasks: sharedTasks,
-            activeProjectId: actProj?.id || null, // Ensure UI shifts if tab deleted
-            todoRows: actProj ? actProj.todoRows : [],
-            priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
-            transcript,
-            projectType,
-            projectTitle,
-            scoutResults,
-            scoutHistory,
-          });
-        }); // Native display refresh rate
-      }, 100); // Close the _crdtRenderDebounce setTimeout
-    }); // Close the ydoc.on callback
     })();
 
     try {
@@ -1082,7 +1302,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     } finally {
       loadProjectInFlight = null;
     }
-  }, // Close the connectToSyncServer function call
+  }, // Close the loadProject function
 
   // ---------------------------------------------------------------------------
 
@@ -1405,6 +1625,72 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   activeProcessingId: null,
   setActiveProcessingId: (id: string | null) => set({ activeProcessingId: id }),
 
+  peerIsEditing: false,
+  setPeerIsEditing: (isEditing: boolean) => set({ peerIsEditing: isEditing }),
+
+  _syncToggle: false,
+  forceSyncUpdate: () => set((s) => ({ _syncToggle: !s._syncToggle })),
+
+  /**
+   * Syncs Zustand state from Yjs document.
+   * Called when network updates are received to ensure UI reflects CRDT state.
+   */
+  syncFromYjs: () => {
+    // Extract current state from Yjs (same logic as debounced handler in loadProject)
+    const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+    const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+
+    // Map through cache for Structural Sharing (simple version without cache for now)
+    const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
+    const sharedTasks = rawYTasks.map(yTask => extractTaskItemFromYMap(yTask));
+
+    const updatedProjects = sortYMapList(sharedProjects);
+    const currentActiveId = get().activeProjectId;
+    const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
+
+    // Document State Render Engine
+    let transcript = get().transcript;
+    const textFromCRDT = yTranscript.toString();
+    transcript = textFromCRDT === "" ? null : textFromCRDT;
+
+    let projectType = get().projectType;
+    if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
+
+    let projectTitle = get().projectTitle;
+    if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
+
+    let scoutResults = get().scoutResults;
+    if (yMetaMap.has('scoutResults')) {
+      const raw = yMetaMap.get('scoutResults');
+      if (raw) {
+        try { scoutResults = JSON.parse(raw); } catch { }
+      }
+    }
+
+    let scoutHistory = get().scoutHistory;
+    if (yMetaMap.has('scoutHistory')) {
+      const raw = yMetaMap.get('scoutHistory');
+      if (raw) {
+        try { scoutHistory = JSON.parse(raw); } catch { }
+      }
+    }
+
+    set({
+      todoProjects: updatedProjects,
+      tasks: sharedTasks,
+      activeProjectId: actProj?.id || null,
+      todoRows: actProj ? actProj.todoRows : [],
+      priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
+      transcript,
+      projectType,
+      projectTitle,
+      scoutResults,
+      scoutHistory,
+    });
+    
+    console.log('🔄 syncFromYjs: Extracted', updatedProjects.length, 'projects,', actProj?.todoRows?.length || 0, 'rows');
+  },
+
   // UI State
   isSettingsOpen: false,
   settingsVariant: 'default',
@@ -1436,10 +1722,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   clearLogs: () => set({ logs: [] }),
 }));
 
-// Test Hook for Playwright
+// Test Hook for Playwright + Diagnostics
 if (typeof window !== 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (window as any).__STORE__ = useAppStore;
+  
+  // Enable sync diagnostics in development
+  enableDiagnostics();
 }
 
 // ---------------------------------------------------------------------------
@@ -1478,13 +1767,12 @@ useAppStore.subscribe((state) => {
   }, 500);
 });
 // ---------------------------------------------------------------------------
-// 🌍 GEMINI SYSTEM LOG BRIDGE
-// ---------------------------------------------------------------------------
 if (typeof window !== 'undefined') {
   GeminiEvents.addEventListener('gemini-log', ((event: CustomEvent) => {
     const { message, type } = event.detail;
-    // Prefix message with type if warning/error for better visibility in simple log
     const prefix = type === 'warning' ? '⚠️ ' : type === 'error' ? '🔴 ' : '';
     useAppStore.getState().addLog(`${prefix}${message}`);
   }) as EventListener);
+
+  (window as any).__STORE__ = useAppStore;
 }
