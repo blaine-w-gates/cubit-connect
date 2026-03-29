@@ -44,7 +44,7 @@ export class NetworkSync {
             console.log(`📦 Replaying ${this.queuedLiveDiffsDuringCatchUp.length} queued live diffs after catch-up.`);
             this.ydoc.transact(() => {
                 this.queuedLiveDiffsDuringCatchUp.forEach((diff) => {
-                    Y.applyUpdate(this.ydoc, diff);
+                    Y.applyUpdate(this.ydoc, diff, 'network');
                 });
             }, 'network');
             this.queuedLiveDiffsDuringCatchUp = [];

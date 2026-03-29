@@ -1,0 +1,24 @@
+[2026-03-29T17:16:38.595Z] --- STARTING HIGH-FIDELITY SYNC TEST ---
+[2026-03-29T17:16:38.597Z] Setting up isolated contexts...
+[2026-03-29T17:16:38.856Z] Navigating Context A to https://blaine-w-gates.github.io/cubit-connect/todo
+[2026-03-29T17:16:39.912Z] Navigating Context B to https://blaine-w-gates.github.io/cubit-connect/todo
+[2026-03-29T17:16:40.798Z] [Context A] Joining sync...
+[2026-03-29T17:16:43.084Z] [Context A] Successfully connected.
+[2026-03-29T17:16:43.084Z] [Context B] Joining sync...
+[2026-03-29T17:16:44.548Z] [Context B] Successfully connected.
+[2026-03-29T17:16:44.548Z] Waiting for peer discovery...
+[2026-03-29T17:16:50.548Z] Peers discovered each other.
+[2026-03-29T17:16:50.549Z] Creating project on Context A...
+[2026-03-29T17:16:50.563Z] Waiting for sync to Context B...
+[2026-03-29T17:17:00.571Z] ERROR DURING TEST: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+Locator: getByText('ANTIGRAVITY TEST 1774804598594')
+Expected: visible
+Timeout: 10000ms
+Error: element(s) not found
+
+Call log:
+[2m  - Expect "toBeVisible" with timeout 10000ms[22m
+[2m  - waiting for getByText('ANTIGRAVITY TEST 1774804598594')[22m
+
+[2026-03-29T17:17:00.571Z] VERDICT: FAIL
