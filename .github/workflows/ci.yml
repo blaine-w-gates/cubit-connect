@@ -5,12 +5,19 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  schedule:
+    # Run full tests every Sunday at 2 AM UTC (weekly)
+    - cron: '0 2 * * 0'
   workflow_dispatch:
     inputs:
-      full_matrix:
-        description: 'Run full 13-device Playwright matrix'
-        type: boolean
-        default: false
+      test_mode:
+        description: 'Test mode to run'
+        type: choice
+        options:
+          - focused
+          - full-chrome
+          - full-matrix
+        default: 'focused'
 
 jobs:
   lint:
@@ -50,9 +57,11 @@ jobs:
       - run: npm ci
       - run: npx vitest run
 
-  test-chrome:
-    name: Playwright (Chrome)
+  # FOCUSED TESTS: Run on every push (fast - only sync-related tests)
+  test-focused:
+    name: Focused Tests (Sync)
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule' && github.event.inputs.test_mode != 'full-chrome' && github.event.inputs.test_mode != 'full-matrix'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -62,7 +71,30 @@ jobs:
       - run: npm ci
       - run: npx playwright install chromium --with-deps
       - run: npm run build
-      - name: Run Playwright tests (Chrome only)
+      - name: Run focused sync tests
+        run: npx playwright test --project="Desktop Chrome" --grep "sync|Sync|SYNC" --reporter=line --workers=1
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-focused
+          path: playwright-report/
+          retention-days: 7
+
+  # FULL CHROME TESTS: Run weekly on schedule or manual trigger
+  test-chrome:
+    name: Full Chrome Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.test_mode == 'full-chrome'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      - run: npm ci
+      - run: npx playwright install chromium --with-deps
+      - run: npm run build
+      - name: Run full Chrome tests
         run: npx playwright test --project="Desktop Chrome" --reporter=line --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
@@ -71,9 +103,10 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
+  # FULL MATRIX: Manual trigger only (13 devices)
   test-full:
     name: Full Matrix (13 Devices)
-    if: github.event_name == 'workflow_dispatch' && github.event.inputs.full_matrix == 'true'
+    if: github.event.inputs.test_mode == 'full-matrix'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
