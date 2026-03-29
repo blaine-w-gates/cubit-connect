@@ -239,7 +239,7 @@ export class NetworkSync {
                         const hasOfflineEdits = offlineEdits.length > 2; // An empty Yjs update is [0, 0]
 
                         this.ydoc.transact(() => {
-                            Y.applyUpdate(this.ydoc, yjsData);
+                            Y.applyUpdate(this.ydoc, yjsData, 'network');
                         }, 'network');
                         this.onSyncActivity?.();
 
@@ -305,7 +305,7 @@ export class NetworkSync {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             const observerCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 'unknown';
                             console.log(`[NETWORKSYNC DEBUG] BEFORE applyUpdate - ydoc has ${observerCount} update observers`);
-                            Y.applyUpdate(this.ydoc, yjsData);
+                            Y.applyUpdate(this.ydoc, yjsData, 'network');
                             console.log(`[NETWORKSYNC DEBUG] AFTER applyUpdate - update applied, observer should have fired`);
                         }, 'network');
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
