@@ -3,8 +3,8 @@ import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
 
 // MODELS
-const PRIMARY_MODEL = 'gemini-3-flash-preview';
-const FALLBACK_MODEL = 'gemini-3.1-flash-lite-preview';
+const PRIMARY_MODEL = 'gemini-3.1-flash-lite-preview';
+const FALLBACK_MODEL = 'gemini-3-flash-preview';
 
 // CIRCUIT BREAKER STATE
 const COOLDOWN_DURATION = 60000; // 60 Seconds
@@ -180,6 +180,11 @@ export const GeminiService = {
             You are an expert Instructional Designer creating a "Recipe for Life" guide for high school students.
             Your goal is to turn the raw transcript below into a logical, step-by-step Action Plan.
 
+            CRITICAL LANGUAGE RULE:
+            Detect the language of the input transcript and reply ENTIRELY in that same language.
+            If the input is in Chinese, respond in Chinese. If English, respond in English.
+            Only use a different language if the user explicitly requests it in their input.
+
             RULES FOR TASKS:
             1. **Granularity:** Break the content into 4-8 distinct "Modules" or "Steps."
             2. **Naming:** Task names must be Action Verbs (e.g. "Scrape Leads" instead of "Scraping").
@@ -232,6 +237,10 @@ export const GeminiService = {
     const prompt = `
             Generate a "Mix Tape" of 10 high-signal search queries for the topic: "${topic}".
             
+            CRITICAL LANGUAGE RULE:
+            Detect the language of the input topic and generate queries in that SAME language.
+            If the topic is in Chinese, create Chinese search queries. If English, create English queries.
+            
             YOU MUST GENERATE 2 QUERIES FOR EACH OF THESE 5 PLATFORMS:
             1. **Instagram (Visual):** 2x Short Hashtags (1-2 words MAX, e.g. #Sourdough).
             2. **Reddit (Discourse):** 2x Short questions (e.g. "Hydration ratio?").
@@ -276,6 +285,11 @@ export const GeminiService = {
 
     const prompt = `
             You are a mentor teaching a student how to execute a specific task.
+            
+            CRITICAL LANGUAGE RULE:
+            Detect the language of the SPECIFIC INSTRUCTION below and reply ENTIRELY in that same language.
+            If the instruction is in Chinese, respond in Chinese. If English, respond in English.
+            Only use a different language if explicitly requested.
             
             GLOBAL CONTEXT (The bigger picture):
             "${transcript ? transcript.substring(0, 5000) : 'No background context provided.'}"
@@ -331,5 +345,42 @@ export const GeminiService = {
     });
     const result = await this.withTimeout(model.generateContent(userPrompt));
     return result.response.text();
+  },
+
+  // Model comparison test - returns timing results
+  async compareModels(apiKey: string): Promise<{lite: number, full: number, winner: string}> {
+    const testPrompt = 'Generate 3 simple JavaScript learning tasks. Return JSON array.';
+    
+    // Test lite model
+    const liteStart = Date.now();
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const liteModel = genAI.getGenerativeModel({
+        model: 'gemini-3.1-flash-lite-preview',
+        generationConfig: { responseMimeType: 'application/json' },
+      });
+      await this.withTimeout(liteModel.generateContent(testPrompt), 15000);
+    } catch { /* ignore */ }
+    const liteTime = Date.now() - liteStart;
+    
+    await this.enforceRateLimit();
+    
+    // Test full model
+    const fullStart = Date.now();
+    try {
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const fullModel = genAI.getGenerativeModel({
+        model: 'gemini-3-flash-preview',
+        generationConfig: { responseMimeType: 'application/json' },
+      });
+      await this.withTimeout(fullModel.generateContent(testPrompt), 15000);
+    } catch { /* ignore */ }
+    const fullTime = Date.now() - fullStart;
+    
+    return {
+      lite: liteTime,
+      full: fullTime,
+      winner: liteTime < fullTime ? 'gemini-3.1-flash-lite-preview' : 'gemini-3-flash-preview'
+    };
   },
 };
