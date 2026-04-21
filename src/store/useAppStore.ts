@@ -48,6 +48,9 @@ type YAnyMap = Y.Map<any>;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type YAnyMeta = any;
 
+// Note: Observer uses local observerProjectCache/observerTaskCache for structural sharing
+// These are recreated per observer instance in registerYjsObserver()
+
 let yProjectsMap = ydoc.getMap<YAnyMap>('projects');
 let yTasksMap = ydoc.getMap<YAnyMap>('tasks');
 let yMetaMap = ydoc.getMap<YAnyMeta>('meta');
@@ -81,6 +84,9 @@ function resetYDoc(): Y.Doc {
   
   markInstanceDestroyed(ydoc, 'resetYDoc');
   ydoc.destroy();
+  
+  // Note: Observer caches are local to registerYjsObserver and are recreated
+  // when the observer is registered on the new ydoc instance
   
   // Create new Y.Doc with unique ClientID based on device fingerprint
   const newYdocOptions: { gc: boolean; clientID?: number } = { 
@@ -125,10 +131,40 @@ function registerYjsObserver(set: any, get: any) {
   // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
   // ---------------------------------------------------------------------------
 
-  // MICRO-CACHES: These WeakMaps/Maps ensure we only generate new Object references
+  // MICRO-CACHES: These ensure we only generate new Object references
   // if the underlying Y.Map JSON actually changed. This is our "React Re-Render Armor".
-  const taskCache = new Map<string, { json: string, parsed: TaskItem }>();
-  const projectCache = new Map<string, { json: string, parsed: TodoProject }>();
+  // NOTE: These are LOCAL to registerYjsObserver, recreated per observer instance.
+  const observerTaskCache = new Map<string, { json: string, parsed: TaskItem }>();
+  const observerProjectCache = new Map<string, { json: string, parsed: TodoProject }>();
+  
+  // DIRTY TRACKER: O(1) change detection without modifying mutation sites.
+  // Yjs observeDeep tells us exactly which projects/tasks changed.
+  const dirtyProjectIds = new Set<string>();
+  const dirtyTaskIds = new Set<string>();
+  
+  // Listen for deep changes in projects
+  yProjectsMap.observeDeep((events) => {
+    events.forEach(event => {
+      // If a child changed, the project ID is the first key in the path
+      if (event.path.length > 0) dirtyProjectIds.add(event.path[0] as string);
+      // If a project was added/removed from the root map
+      else if (event.target === yProjectsMap && 'keysChanged' in event) {
+        (event.keysChanged as Set<string>).forEach((key: string) => dirtyProjectIds.add(key));
+      }
+    });
+  });
+  
+  // Listen for deep changes in tasks
+  yTasksMap.observeDeep((events) => {
+    events.forEach(event => {
+      // If a child changed, the task ID is the first key in the path
+      if (event.path.length > 0) dirtyTaskIds.add(event.path[0] as string);
+      // If a task was added/removed from the root map
+      else if (event.target === yTasksMap && 'keysChanged' in event) {
+        (event.keysChanged as Set<string>).forEach((key: string) => dirtyTaskIds.add(key));
+      }
+    });
+  });
 
   ydoc.on('update', (update: Uint8Array, origin: any) => {
     // IMMEDIATE FIRST LOG - before ANY other logic
@@ -173,24 +209,35 @@ function registerYjsObserver(set: any, get: any) {
       const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
       const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
 
-      // 2. Map through cache for Structural Sharing
+      // 2. Map through cache for Structural Sharing with O(1) dirty check early bail
       const sharedProjects = rawYProjects.map(yProj => {
+        const id = yProj.get('id');
+        const cached = observerProjectCache.get(id);
+        // O(1) early bail: if not dirty and cache exists, skip expensive extraction
+        if (!dirtyProjectIds.has(id) && cached) return cached.parsed;
+        // Slow path: extract and cache
         const parsed = extractTodoProjectFromYMap(yProj);
         const json = JSON.stringify(parsed);
-        const cached = projectCache.get(parsed.id);
-        if (cached && cached.json === json) return cached.parsed;
-        projectCache.set(parsed.id, { json, parsed });
+        observerProjectCache.set(id, { json, parsed });
         return parsed;
       });
+      // Clear dirty tracker after processing
+      dirtyProjectIds.clear();
 
+      // 2b. Map through cache for Structural Sharing with O(1) dirty check early bail
       const sharedTasks = rawYTasks.map(yTask => {
+        const id = yTask.get('id');
+        const cached = observerTaskCache.get(id);
+        // O(1) early bail: if not dirty and cache exists, skip expensive extraction
+        if (!dirtyTaskIds.has(id) && cached) return cached.parsed;
+        // Slow path: extract and cache
         const parsed = extractTaskItemFromYMap(yTask);
         const json = JSON.stringify(parsed);
-        const cached = taskCache.get(parsed.id);
-        if (cached && cached.json === json) return cached.parsed;
-        taskCache.set(parsed.id, { json, parsed });
+        observerTaskCache.set(id, { json, parsed });
         return parsed;
       });
+      // Clear dirty tracker after processing
+      dirtyTaskIds.clear();
 
       const updatedProjects = sortYMapList(sharedProjects);
       console.log('[YJS OBSERVER] Rendering:', updatedProjects.length, 'projects, origin:', origin);
@@ -266,7 +313,7 @@ export interface ProjectState {
   transcript: string | null; // New state
   scoutResults: string[];
   scoutHistory: string[]; // New: Scout feature persistence
-  projectType: 'video' | 'text'; // New: MVP Text Mode
+  projectType: 'video' | 'text' | 'scout'; // New: MVP Text Mode + Scout Mode
   projectTitle: string; // New: Title Persistence
 
   // Strike 17.5: Global Input Mode & Scout Persistence
@@ -316,7 +363,7 @@ export interface ProjectState {
   setTranscript: (text: string) => Promise<void>; // New action
   setScoutResults: (results: string[]) => Promise<void>;
   addToScoutHistory: (topic: string) => void;
-  setProjectType: (type: 'video' | 'text') => Promise<void>;
+  setProjectType: (type: 'video' | 'text' | 'scout') => Promise<void>;
   setProjectTitle: (title: string) => Promise<void>;
   startTextProject: (title: string, text: string) => Promise<void>;
 
@@ -377,6 +424,31 @@ export interface ProjectState {
   connectToSyncServer: (passphrase: string) => Promise<void>;
   disconnectSyncServer: () => void;
   flushSyncNow: () => Promise<void>;
+
+  // --- Today Page / Pomodoro Timer State (P1-T2) ---
+  // Timer State
+  activeTimerSession: import('@/schemas/storage').TimerSession | null;
+  timerRemainingSeconds: number;
+  timerStatus: 'idle' | 'running' | 'paused' | 'completed';
+  
+  // Task Selection
+  todayTaskId: string | null;
+  todayTaskDialSource: 'left' | 'right' | null;
+  todayPreferences: import('@/schemas/storage').TodayPreferences;
+  timerSessions: import('@/schemas/storage').TimerSession[];
+  
+  // Timer Actions
+  selectTaskForToday: (taskId: string, dialSource: 'left' | 'right' | null) => void;
+  clearTodayTask: () => void;
+  startTimer: () => void;
+  pauseTimer: () => void;
+  resumeTimer: () => void;
+  stopTimer: () => void;
+  resetTimer: () => void;
+  completeTimer: () => void;
+  tickTimer: (remainingSeconds: number) => void;
+  updateTimerPreferences: (prefs: Partial<import('@/schemas/storage').TodayPreferences>) => void;
+  addTimerSession: (session: import('@/schemas/storage').TimerSession) => void;
 }
 
 export interface LogEntry {
@@ -1073,6 +1145,22 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   logs: [],
 
+  // --- Today Page / Pomodoro Timer Initial State (P1-T2) ---
+  activeTimerSession: null,
+  timerRemainingSeconds: 25 * 60, // 25 minutes in seconds
+  timerStatus: 'idle',
+  todayTaskId: null,
+  todayTaskDialSource: null,
+  todayPreferences: {
+    defaultDuration: 25,
+    autoStart: false,
+    soundEnabled: true,
+    notificationEnabled: true,
+    vibrationEnabled: true,
+    showRowTomatoButtons: true,
+  },
+  timerSessions: [],
+
   // Actions
   setVideoHandleState: (hasHandle: boolean) => {
     set({ hasVideoHandle: hasHandle });
@@ -1291,6 +1379,79 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       priorityDials: activeProject.priorityDials,
       // Seed the counter so new projects always have unique names & colors.
       nextProjectNumber: todoProjects.length + 1,
+      // Today Page timer state (P1-T2) - load from storage or use defaults
+      todayPreferences: data.todayPreferences || {
+        defaultDuration: 25,
+        autoStart: false,
+        soundEnabled: true,
+        notificationEnabled: true,
+        vibrationEnabled: true,
+        showRowTomatoButtons: true,
+      },
+      // Check if timer session expired while away and update sessions/history
+      ...(() => {
+        const session = data.activeTimerSession;
+        const existingSessions = data.timerSessions || [];
+
+        // If no active session or already completed, no changes needed
+        if (!session || session.status === 'completed') {
+          return {
+            timerSessions: existingSessions,
+            activeTimerSession: session || null,
+          };
+        }
+
+        const elapsed = Date.now() - session.startedAt - (session.totalPausedMs || 0);
+
+        // Session expired while away - add to history and clear active
+        if (elapsed >= session.durationMs) {
+          console.log('[Timer] Session expired during absence, auto-completing and adding to history');
+          const completedSession = {
+            ...session,
+            status: 'completed' as const,
+            endedAt: session.startedAt + session.durationMs,
+          };
+          return {
+            timerSessions: [...existingSessions, completedSession],
+            activeTimerSession: null, // Clear active session since it's now in history
+          };
+        }
+
+        // Session still valid, keep as-is
+        return {
+          timerSessions: existingSessions,
+          activeTimerSession: session,
+        };
+      })(),
+      todayTaskId: data.todayTaskId || null,
+      todayTaskDialSource: data.todayTaskDialSource || null,
+      // If there's an active timer session, restore remaining time
+      timerStatus: (() => {
+        const session = data.activeTimerSession;
+        if (!session || session.status === 'completed') return 'idle';
+
+        // Check if expired (consistent with activeTimerSession logic above)
+        const elapsed = Date.now() - session.startedAt - (session.totalPausedMs || 0);
+        if (elapsed >= session.durationMs) return 'completed'; // Expired sessions shown as completed
+
+        // Valid active session - restore as paused (safe default)
+        return session.status === 'running' ? 'paused' :
+          (session.status === 'abandoned' ? 'idle' : (session.status || 'idle'));
+      })(),
+      timerRemainingSeconds: (() => {
+        const session = data.activeTimerSession;
+        // No active session, completed, or expired - return default duration
+        if (!session || session.status === 'completed') {
+          return (data.todayPreferences?.defaultDuration || 25) * 60;
+        }
+
+        // Check if expired (consistent with activeTimerSession logic above)
+        const elapsed = Date.now() - session.startedAt - (session.totalPausedMs || 0);
+        if (elapsed >= session.durationMs) return 0; // Expired sessions show 0 seconds
+
+        // Valid active session - calculate remaining time
+        return Math.max(0, Math.ceil((session.durationMs - elapsed) / 1000));
+      })(),
       isHydrated: true, // ✅ Hydration Complete
     });
 
@@ -1478,7 +1639,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ scoutResults: results });
   },
 
-  setProjectType: async (type: 'video' | 'text') => {
+  setProjectType: async (type: 'video' | 'text' | 'scout') => {
     ydoc.transact(() => { yMetaMap.set('projectType', type); }, 'local');
     set({ projectType: type });
   },
@@ -1728,6 +1889,313 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
   },
   clearLogs: () => set({ logs: [] }),
+
+  // --- Today Page / Pomodoro Timer Actions (P1-T2) ---
+  selectTaskForToday: (taskId: string, dialSource: 'left' | 'right' | null) => {
+    const state = get();
+    const activeProject = state.todoProjects.find(p => p.id === state.activeProjectId);
+    const task = activeProject?.todoRows.find(r => r.id === taskId);
+    
+    if (!task) {
+      console.warn('[Timer] Task not found for Today:', taskId);
+      return;
+    }
+    
+    // If there's already a task, queue the new one (don't replace)
+    if (state.todayTaskId && state.todayTaskId !== taskId) {
+      console.log('[Timer] Queuing new task for Today (existing:', state.todayTaskId, 'new:', taskId + ')');
+    }
+    
+    set({
+      todayTaskId: taskId,
+      todayTaskDialSource: dialSource,
+      timerStatus: 'idle',
+      timerRemainingSeconds: state.todayPreferences.defaultDuration * 60,
+    });
+    
+    console.log('[Timer] Task selected for Today:', taskId, 'from dial:', dialSource);
+  },
+
+  clearTodayTask: () => {
+    const state = get();
+    if (state.timerStatus === 'running' || state.timerStatus === 'paused') {
+      // Mark session as abandoned if timer was active
+      if (state.activeTimerSession) {
+        const abandonedSession = {
+          ...state.activeTimerSession,
+          status: 'abandoned' as const,
+          endedAt: Date.now(),
+        };
+        set((s) => ({
+          timerSessions: [...s.timerSessions, abandonedSession],
+        }));
+      }
+    }
+    
+    set({
+      todayTaskId: null,
+      todayTaskDialSource: null,
+      activeTimerSession: null,
+      timerStatus: 'idle',
+      timerRemainingSeconds: get().todayPreferences.defaultDuration * 60,
+    });
+    console.log('[Timer] Today task cleared');
+  },
+
+  startTimer: () => {
+    const state = get();
+    if (!state.todayTaskId) {
+      console.warn('[Timer] Cannot start timer: no task selected');
+      return;
+    }
+    // L6 Fix: Guard against double-start
+    if (state.activeTimerSession?.status === 'running') {
+      console.warn('[Timer] Timer already running, ignoring duplicate start');
+      return;
+    }
+
+    const now = Date.now();
+    const durationMs = state.todayPreferences.defaultDuration * 60 * 1000;
+    
+    const newSession = {
+      id: crypto.randomUUID(),
+      taskId: state.todayTaskId,
+      projectId: state.activeProjectId || '',
+      dialSource: state.todayTaskDialSource || 'left',
+      status: 'running' as const,
+      startedAt: now,
+      durationMs,
+      totalPausedMs: 0,
+      interruptions: [],
+      ownerClientId: '', // Will be set by TimerOwnershipManager
+      ownerTabId: '', // Will be set by TimerOwnershipManager
+      ownerDeviceId: state.deviceId,
+      completed: false,
+    };
+    
+    set({
+      activeTimerSession: newSession,
+      timerStatus: 'running',
+      timerRemainingSeconds: state.todayPreferences.defaultDuration * 60,
+    });
+    
+    console.log('[Timer] Session started:', newSession.id);
+  },
+
+  pauseTimer: () => {
+    const state = get();
+    if (state.timerStatus !== 'running' || !state.activeTimerSession) {
+      console.warn('[Timer] Cannot pause: timer not running');
+      return;
+    }
+    // L6 Fix: Guard against double-pause
+    if (state.activeTimerSession.status === 'paused') {
+      console.warn('[Timer] Timer already paused, ignoring duplicate pause');
+      return;
+    }
+
+    const now = Date.now();
+    const pausedAt = now;
+    
+    const updatedSession = {
+      ...state.activeTimerSession,
+      status: 'paused' as const,
+      lastPausedAt: pausedAt,
+      interruptions: [
+        ...state.activeTimerSession.interruptions,
+        { pausedAt, resumedAt: undefined },
+      ],
+    };
+    
+    set({
+      activeTimerSession: updatedSession,
+      timerStatus: 'paused',
+    });
+    
+    console.log('[Timer] Timer paused at:', now);
+  },
+
+  resumeTimer: () => {
+    const state = get();
+    if (state.timerStatus !== 'paused' || !state.activeTimerSession) {
+      console.warn('[Timer] Cannot resume: timer not paused');
+      return;
+    }
+    // L6 Fix: Guard against double-resume
+    if (state.activeTimerSession.status === 'running') {
+      console.warn('[Timer] Timer already running, ignoring duplicate resume');
+      return;
+    }
+
+    const now = Date.now();
+    const pausedDuration = state.activeTimerSession.lastPausedAt 
+      ? now - state.activeTimerSession.lastPausedAt 
+      : 0;
+    
+    // Update the last interruption with resumedAt
+    const updatedInterruptions = [...state.activeTimerSession.interruptions];
+    const lastInterruption = updatedInterruptions[updatedInterruptions.length - 1];
+    if (lastInterruption && !lastInterruption.resumedAt) {
+      lastInterruption.resumedAt = now;
+    }
+    
+    const updatedSession = {
+      ...state.activeTimerSession,
+      status: 'running' as const,
+      totalPausedMs: state.activeTimerSession.totalPausedMs + pausedDuration,
+      lastPausedAt: undefined,
+      interruptions: updatedInterruptions,
+    };
+    
+    set({
+      activeTimerSession: updatedSession,
+      timerStatus: 'running',
+    });
+    
+    console.log('[Timer] Timer resumed, paused duration:', pausedDuration);
+  },
+
+  stopTimer: () => {
+    const state = get();
+    if (!state.activeTimerSession) {
+      console.warn('[Timer] No active session to stop');
+      return;
+    }
+    
+    // Mark as abandoned and save to history
+    const abandonedSession = {
+      ...state.activeTimerSession,
+      status: 'abandoned' as const,
+      endedAt: Date.now(),
+    };
+    
+    set((s) => ({
+      timerSessions: [...s.timerSessions, abandonedSession],
+      activeTimerSession: null,
+      timerStatus: 'idle',
+      timerRemainingSeconds: s.todayPreferences.defaultDuration * 60,
+    }));
+    
+    // Clear from yMetaMap and persist abandoned session to history
+    ydoc.transact(() => {
+      yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, abandonedSession]));
+      yMetaMap.delete('activeTimerSession');
+      yMetaMap.delete('timerStatus');
+      yMetaMap.delete('timerRemainingSeconds');
+    }, 'local');
+    
+    console.log('[Timer] Timer stopped, session abandoned:', abandonedSession.id);
+  },
+
+  resetTimer: () => {
+    // Simple reset - clear timer state without any persistence
+    set((s) => ({
+      activeTimerSession: null,
+      timerStatus: 'idle',
+      timerRemainingSeconds: s.todayPreferences.defaultDuration * 60,
+    }));
+    
+    console.log('[Timer] Timer reset');
+  },
+
+  completeTimer: () => {
+    const state = get();
+    if (!state.activeTimerSession) {
+      console.warn('[Timer] No active session to complete');
+      return;
+    }
+    
+    const completedSession = {
+      ...state.activeTimerSession,
+      status: 'completed' as const,
+      completed: true,
+      endedAt: Date.now(),
+    };
+    
+    const updatedSession = {
+      ...completedSession,
+      status: 'completed' as const,
+    };
+    
+    set((s) => ({
+      timerSessions: [...s.timerSessions, completedSession],
+      activeTimerSession: updatedSession,
+      timerStatus: 'completed',
+    }));
+
+    // Show browser notification if enabled and permitted
+    console.log('[Timer] Notification check:', {
+      enabled: state.todayPreferences.notificationEnabled,
+      apiAvailable: typeof Notification !== 'undefined',
+      permission: typeof Notification !== 'undefined' ? Notification.permission : 'N/A',
+    });
+    if (state.todayPreferences.notificationEnabled && typeof Notification !== 'undefined') {
+      if (Notification.permission === 'granted') {
+        console.log('[Timer] Showing notification - permission granted');
+        new Notification('Pomodoro Complete!', {
+          body: 'Time for a break!',
+          icon: '/favicon.ico',
+          badge: '/favicon.ico',
+          tag: 'pomodoro-complete',
+          requireInteraction: true,
+        });
+      } else if (Notification.permission !== 'denied') {
+        console.log('[Timer] Requesting notification permission...');
+        // Request permission and show if granted
+        Notification.requestPermission().then((permission) => {
+          console.log('[Timer] Permission result:', permission);
+          if (permission === 'granted') {
+            new Notification('Pomodoro Complete!', {
+              body: 'Time for a break!',
+              icon: '/favicon.ico',
+              badge: '/favicon.ico',
+              tag: 'pomodoro-complete',
+              requireInteraction: true,
+            });
+          }
+        });
+      } else {
+        console.log('[Timer] Notification permission denied, not showing');
+      }
+    } else {
+      console.log('[Timer] Notifications disabled or API not available');
+    }
+
+    // Persist completion to yMetaMap (for history tracking)
+    ydoc.transact(() => {
+      yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, completedSession]));
+      yMetaMap.set('activeTimerSession', JSON.stringify(updatedSession));
+      yMetaMap.set('timerStatus', 'completed');
+    }, 'local');
+    
+    // Clear after a delay (keep briefly for sync)
+    setTimeout(() => {
+      ydoc.transact(() => {
+        yMetaMap.delete('activeTimerSession');
+        yMetaMap.delete('timerStatus');
+        yMetaMap.delete('timerRemainingSeconds');
+      }, 'local');
+    }, 5000);
+    
+    console.log('[Timer] Timer completed:', updatedSession.id);
+  },
+
+  tickTimer: (remainingSeconds: number) => {
+    set({ timerRemainingSeconds: remainingSeconds });
+  },
+  updateTimerPreferences: (prefs: Partial<import('@/schemas/storage').TodayPreferences>) => {
+    set((s) => ({
+      todayPreferences: { ...s.todayPreferences, ...prefs },
+    }));
+    console.log('[Timer] Preferences updated:', prefs);
+  },
+
+  addTimerSession: (session: import('@/schemas/storage').TimerSession) => {
+    set((s) => ({
+      timerSessions: [...s.timerSessions, session],
+    }));
+    console.log('[Timer] Session added to history:', session.id);
+  },
 }));
 
 // Test Hook for Playwright + Diagnostics
@@ -1752,22 +2220,28 @@ useAppStore.subscribe((state) => {
       try {
         const yjsState = Y.encodeStateAsUpdate(ydoc);
 
-        await storageService.saveProject(
-          state.tasks,
-          state.transcript || undefined,
-          state.scoutResults,
-          state.projectType,
-          state.projectTitle,
-          state.scoutTopic,
-          state.scoutPlatform,
-          state.scoutHistory,
-          state.inputMode,
-          state.todoProjects,
-          state.activeProjectId || undefined,
+        await storageService.saveProject({
+          tasks: state.tasks,
+          transcript: state.transcript || undefined,
+          scoutResults: state.scoutResults,
+          projectType: state.projectType,
+          projectTitle: state.projectTitle,
+          scoutTopic: state.scoutTopic,
+          scoutPlatform: state.scoutPlatform,
+          scoutHistory: state.scoutHistory,
+          inputMode: state.inputMode,
+          todoProjects: state.todoProjects,
+          activeProjectId: state.activeProjectId || undefined,
           yjsState,
-          state.activeWorkspaceType,
-          state.activeWorkspaceId,
-        );
+          workspaceType: state.activeWorkspaceType,
+          workspaceId: state.activeWorkspaceId,
+          // Today Page timer state (P1-T2)
+          timerSessions: state.timerSessions,
+          todayPreferences: state.todayPreferences,
+          activeTimerSession: state.activeTimerSession,
+          todayTaskId: state.todayTaskId,
+          todayTaskDialSource: state.todayTaskDialSource,
+        });
       } catch (err) {
         console.error('Auto-Save Failed:', err);
       }

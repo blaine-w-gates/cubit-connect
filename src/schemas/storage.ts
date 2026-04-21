@@ -75,23 +75,86 @@ export const TodoProjectSchema = z.object({
   objectiveId: z.string().optional(),
 });
 
+// --- Timer Session Schema (Today Page / Pomodoro) ---
+export const TimerInterruptionSchema = z.object({
+  pausedAt: z.number(),
+  resumedAt: z.number().optional(),
+});
+
+export const BreakSessionSchema = z.object({
+  startedAt: z.number().optional(),
+  durationMs: z.number().default(5 * 60 * 1000),
+  completed: z.boolean().default(false),
+});
+
+export const TimerSessionSchema = z.object({
+  id: z.string(),
+  taskId: z.string(),
+  projectId: z.string(),
+  dialSource: z.enum(['left', 'right']),
+  // DISCRETE STATUS - NOT DERIVED
+  status: z.enum(['idle', 'running', 'paused', 'completed', 'abandoned']),
+  // TIMESTAMP MATH COMPONENTS
+  startedAt: z.number(),
+  endedAt: z.number().optional(),
+  durationMs: z.number().default(25 * 60 * 1000),
+  // PAUSE/RESUME ACCUMULATOR
+  totalPausedMs: z.number().default(0),
+  lastPausedAt: z.number().optional(),
+  // TEMPORAL INTERRUPTION ARRAY (replaces simple count)
+  interruptions: z.array(TimerInterruptionSchema).default([]),
+  // AWARENESS: Who owns the active execution
+  ownerClientId: z.string(),
+  ownerTabId: z.string(),
+  ownerDeviceId: z.string(),
+  // BREAK SESSION (Fogg cognitive load reset)
+  breakSession: BreakSessionSchema.optional(),
+  completed: z.boolean().default(false),
+});
+
+// --- Today Page Preferences ---
+export const TodayPreferencesSchema = z.object({
+  defaultDuration: z.number().default(25),
+  autoStart: z.boolean().default(false),
+  soundEnabled: z.boolean().default(true),
+  notificationEnabled: z.boolean().default(true),
+  vibrationEnabled: z.boolean().default(true),
+  showRowTomatoButtons: z.boolean().default(true),
+});
+
 export const ProjectDataSchema = z.object({
   tasks: z.array(TaskItemSchema),
   transcript: z.string().optional(),
   scoutResults: z.array(z.string()).optional(),
-  projectType: z.enum(['video', 'text']).optional(),
+  projectType: z.enum(['video', 'text', 'scout']).optional().nullable(),
   projectTitle: z.string().optional(),
   scoutTopic: z.string().optional(),
   scoutPlatform: z.string().optional(),
   scoutHistory: z.array(z.string()).optional(),
-  inputMode: z.enum(['video', 'text', 'scout']).optional(),
+  inputMode: z.enum(['video', 'text', 'scout']).optional().nullable(),
   // LEGACY: Flat todoRows/priorityDials (kept for migration from old format)
   todoRows: z.array(TodoRowSchema).optional().default([]),
   priorityDials: PriorityDialsSchema.optional().default({ left: '', right: '', focusedSide: 'none' }),
   // NEW: Project-scoped todo data (Book Tabs)
   todoProjects: z.array(TodoProjectSchema).optional().default([]),
-  activeProjectId: z.string().optional(),
-  yjsState: z.custom<Uint8Array>((val) => val instanceof Uint8Array || (val && typeof (val as any).byteLength === 'number')).optional(),
+  activeProjectId: z.string().optional().nullable(),
+  yjsState: z.custom<Uint8Array>((val: unknown) => val instanceof Uint8Array || (val !== null && typeof val === 'object' && 'byteLength' in val && typeof (val as { byteLength: unknown }).byteLength === 'number')).optional(),
+  // NEW: Today Page timer state (P1-T1)
+  timerSessions: z.array(TimerSessionSchema).optional().default([]),
+  todayPreferences: TodayPreferencesSchema.optional().default({
+    defaultDuration: 25,
+    autoStart: false,
+    soundEnabled: true,
+    notificationEnabled: true,
+    vibrationEnabled: true,
+    showRowTomatoButtons: true,
+  }),
+  activeTimerSession: TimerSessionSchema.optional().nullable(),
+  todayTaskId: z.string().optional().nullable(),
+  todayTaskDialSource: z.enum(['left', 'right']).optional().nullable(),
+  // Workspace metadata (ADR-001)
+  workspaceType: WorkspaceTypeEnum.optional(),
+  workspaceId: z.string().optional(),
   updatedAt: z.number(),
 });
 
@@ -101,3 +164,9 @@ export type PriorityDials = z.infer<typeof PriorityDialsSchema>;
 export type TodoProject = z.infer<typeof TodoProjectSchema>;
 export type TaskItem = z.infer<typeof TaskItemSchema>;
 export type StoredProjectData = z.infer<typeof ProjectDataSchema>;
+// NEW: Today Page types (P1-T1)
+export type TimerInterruption = z.infer<typeof TimerInterruptionSchema>;
+export type BreakSession = z.infer<typeof BreakSessionSchema>;
+export type TimerSession = z.infer<typeof TimerSessionSchema>;
+export type TodayPreferences = z.infer<typeof TodayPreferencesSchema>;
+export type TimerStatus = 'idle' | 'running' | 'paused' | 'completed' | 'abandoned';

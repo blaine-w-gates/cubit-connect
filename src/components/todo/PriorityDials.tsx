@@ -1,12 +1,14 @@
 'use client';
 
 import { useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
-import { X } from 'lucide-react';
+import { X, ArrowRight } from 'lucide-react';
 
 export default function PriorityDials() {
-    const { priorityDials, setDialFocus, setDialPriority, activeWorkspaceType, hasPeers, peerIsEditing } = useAppStore(
+    const router = useRouter();
+    const { priorityDials, setDialFocus, setDialPriority, activeWorkspaceType, hasPeers, peerIsEditing, selectTaskForToday } = useAppStore(
         useShallow((s) => ({
             priorityDials: s.priorityDials,
             setDialFocus: s.setDialFocus,
@@ -14,6 +16,7 @@ export default function PriorityDials() {
             activeWorkspaceType: s.activeWorkspaceType,
             hasPeers: s.hasPeers,
             peerIsEditing: s.peerIsEditing,
+            selectTaskForToday: s.selectTaskForToday,
         })),
     );
 
@@ -140,6 +143,37 @@ export default function PriorityDials() {
                     )}
                 </div>
             </div>
+
+            {/* Go to Today Action - Only show when both dials are populated */}
+            {hasBoth && (
+                <div className="mt-4 flex justify-center">
+                    <button
+                        onClick={() => {
+                            // Determine which dial has focus to pre-select that task
+                            const selectedDial = focusedSide === 'right' ? 'right' : 'left';
+                            const selectedTaskName = selectedDial === 'right' ? right : left;
+                            
+                            // Find the row in the todo list that contains this priority step
+                            const todoRows = useAppStore.getState().todoRows;
+                            const matchingRow = todoRows.find(r => r.steps.some(s => s.text.trim() === selectedTaskName.trim()));
+                            
+                            if (matchingRow) {
+                                // Pre-select the task for Today
+                                selectTaskForToday(matchingRow.id, selectedDial as 'left' | 'right');
+                            }
+                            
+                            // Navigate to Today page with shallow routing for instant transition
+                            router.push('/today');
+                        }}
+                        className="group flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white rounded-xl font-semibold shadow-lg shadow-amber-500/25 hover:shadow-xl hover:shadow-amber-500/30 transition-all duration-300 transform hover:scale-105 active:scale-95"
+                        aria-label="Go to Today page to focus on this priority"
+                    >
+                        <span className="text-xl">🍅</span>
+                        <span>Go to Today</span>
+                        <ArrowRight className="w-5 h-5 transition-transform duration-300 group-hover:translate-x-1" />
+                    </button>
+                </div>
+            )}
         </div>
     );
 }

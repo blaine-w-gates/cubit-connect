@@ -26,6 +26,10 @@ export class NetworkSync {
     // we keep any currently-encrypting diffs in a synchronous queue.
     private pendingDiffs: Uint8Array[] = [];
 
+    // CRITICAL FIX: Track pending encryption promises to prevent data loss during disconnect
+    // This ensures updates complete before WebSocket closes
+    private pendingPromises: Set<Promise<void>> = new Set();
+
     // THE GENESIS DROP LOCK (Dual-Band Race Condition)
     // We must ignore live diffs from peers while the massive initial checkpoint is still downloading/parsing.
     private catchUpLock: boolean = true;
@@ -401,80 +405,115 @@ export class NetworkSync {
     /**
      * Broadcasts a live, tiny CRDT operational update to the relay instantly.
      */
-    async broadcastUpdate(update: Uint8Array) {
+    async broadcastUpdate(update: Uint8Array): Promise<void> {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
 
+        // CRITICAL FIX: Track this async operation so flush() can await it
+        const operation = this.doBroadcastUpdate(update);
+        this.pendingPromises.add(operation);
+        await operation.finally(() => this.pendingPromises.delete(operation));
+    }
+
+    private async doBroadcastUpdate(update: Uint8Array): Promise<void> {
         try {
             // Encrypt the Yjs Update directly
-            const ciphertext = await encryptUpdate(update, this.key);
+            const ciphertext = await encryptUpdate(update, this.key!);
             
             // Prepend UNENCRYPTED routing byte so the Dumb Relay can parse it
             const payload = new Uint8Array(ciphertext.length + 1);
             payload[0] = MSG_UPDATE;
             payload.set(ciphertext, 1);
 
-            // Track message stats
-            const isPresence = update.length === 2 && update[0] === 0 && update[1] === 0;
-            console.log(`📡 [OUTBOUND] Sending ${isPresence ? 'presence heartbeat' : 'P2P Diff'} (${payload.length} bytes)`);
-            getGlobalConnectionManager().updateStats({ messagesSent: 1 });
-
-            // Push the fully encrypted, tiny byte-array into the emergency OS buffer queue
+            // Push the fully encrypted byte-array into the emergency OS buffer queue.
+            // This is read by the visibilitychange handler for synchronous TCP dump
+            // when iOS/Safari suspends the app (no async allowed in that handler).
             this.pendingDiffs.push(payload);
-            this.ws.send(payload);
+            this.ws!.send(payload);
 
             // Avoid triggering UI spinner for invisible presence pings
             if (update.length > 2) {
                 this.onSyncActivity?.();
             }
         } catch (e) {
-            console.error("Encryption failed before sending P2P diff:", e);
+            console.error("Failed to encrypt and send update:", e);
         }
     }
-    
+
     /**
-     * Broadcasts an explicit termination signal.
+     * Broadcasts a checkpoint/full state update to the relay.
+     * Called when we receive a full state and need to acknowledge/broadcast it.
      */
-    async sendDisconnectSignal() {
+    async broadcastCheckpoint(fullUpdate: Uint8Array): Promise<void> {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
+
+        // CRITICAL FIX: Track this async operation so flush() can await it
+        const operation = this.doBroadcastCheckpoint(fullUpdate);
+        this.pendingPromises.add(operation);
+        await operation.finally(() => this.pendingPromises.delete(operation));
+    }
+
+    private async doBroadcastCheckpoint(fullUpdate: Uint8Array): Promise<void> {
+        try {
+            const ciphertext = await encryptUpdate(fullUpdate, this.key!);
+            
+            const payload = new Uint8Array(ciphertext.length + 1);
+            payload[0] = MSG_CHECKPOINT;
+            payload.set(ciphertext, 1);
+
+            this.ws!.send(payload);
+            this.onSyncActivity?.();
+
+            // The massive Checkpoint contains all prior history mathematically.
+            // We can safely garbage-collect the pending tiny diffs queue.
+            this.pendingDiffs = [];
+        } catch (e) {
+            console.error("Failed to encrypt and send checkpoint:", e);
+        }
+    }
+
+    async sendDisconnectSignal(): Promise<void> {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
+
+        // CRITICAL FIX: Track this async operation so flush() can await it
+        const operation = this.doSendDisconnectSignal();
+        this.pendingPromises.add(operation);
+        await operation.finally(() => this.pendingPromises.delete(operation));
+    }
+
+    private async doSendDisconnectSignal(): Promise<void> {
         try {
             const update = new Uint8Array([255, 255]);
-            const ciphertext = await encryptUpdate(update, this.key);
+            const ciphertext = await encryptUpdate(update, this.key!);
             const payload = new Uint8Array(ciphertext.length + 1);
             payload[0] = MSG_UPDATE;
             payload.set(ciphertext, 1);
-            this.ws.send(payload);
+            this.ws!.send(payload);
         } catch (e) {
             console.error("Failed to send disconnect signal", e);
         }
     }
 
     /**
-     * Broadcasts the massive 1MB+ Full Checkpoint (Debounced/Deep Idle).
+     * CRITICAL FIX: Flush pending encryption operations before disconnecting
+     * This prevents data loss when workspace switching during active sync operations
      */
-    async broadcastCheckpoint(fullUpdate: Uint8Array) {
-        if (!this.ws || this.ws.readyState !== WebSocket.OPEN || !this.key) return;
-
-        try {
-            // Encrypt the Yjs Update directly
-            const ciphertext = await encryptUpdate(fullUpdate, this.key);
-
-            // Prepend UNENCRYPTED routing byte so the Dumb Relay can parse it
-            const payload = new Uint8Array(ciphertext.length + 1);
-            payload[0] = MSG_CHECKPOINT;
-            payload.set(ciphertext, 1);
-
-            this.ws.send(payload);
-            this.onSyncActivity?.();
-
-            // The massive Checkpoint contains all prior history mathematically. 
-            // We can safely garbage-collect the pending tiny diffs queue.
-            this.pendingDiffs = [];
-        } catch (e) {
-            console.error("Encryption failed before sending Checkpoint:", e);
-        }
+    async flush(): Promise<void> {
+        if (this.pendingPromises.size === 0) return;
+        
+        console.log(`[NetworkSync] Flushing ${this.pendingPromises.size} pending operations...`);
+        const startTime = Date.now();
+        
+        // Wait for all pending encryption operations to complete
+        await Promise.all(Array.from(this.pendingPromises));
+        
+        const elapsed = Date.now() - startTime;
+        console.log(`[NetworkSync] Flush complete (${elapsed}ms)`);
     }
 
-    disconnect() {
+    async disconnect(): Promise<void> {
+        // CRITICAL FIX: Flush pending operations before closing socket
+        await this.flush();
+        
         this.sendDisconnectSignal().finally(() => {
             this.intentionalDisconnect = true;
             document.removeEventListener('visibilitychange', this.handleVisibilityChange);

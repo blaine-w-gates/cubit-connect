@@ -8,7 +8,7 @@ This file tracks the active plan and phase of the Cubit Connect project.
 
 **Phase:** Maintenance & Feature Expansion (Phase 5)
 **IDE:** Google Antigravity
-**AI Model:** `gemini-3-flash-preview` (Primary) + `gemini-3.1-flash-lite-preview` (Fallback)
+**AI Model:** `gemini-2.5-flash` (Primary) + `gemini-2.5-flash-lite` (Fallback)
 
 ## Completed Phases
 

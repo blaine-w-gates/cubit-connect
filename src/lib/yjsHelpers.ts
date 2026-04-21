@@ -3,6 +3,9 @@ import { generateKeyBetween } from 'fractional-indexing';
 import diff from 'fast-diff';
 import { TodoRow, TodoStep, TodoProject, TaskItem, CubitStep } from '@/schemas/storage';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ type YMap = Y.Map<any>;
+
 /**
  * Calculates deterministic diff operations to safely mutate Y.Text character-by-character
  * instead of destroying the entire string and recreating it (Wipe-and-Replace Bug).
@@ -29,14 +32,19 @@ export function applyUpdateToYText(yText: Y.Text, newString: string) {
 
 /**
  * Generates a clean Fractional Index string logic based on surrounding items.
+ * Keys are normalized to lowercase for consistent lexicographic ordering.
  */
 export function generateOrderKey(prevKey?: string, nextKey?: string): string {
     try {
-        return generateKeyBetween(prevKey ?? null, nextKey ?? null);
+        // Normalize to lowercase for consistent comparison
+        const normalizedPrev = prevKey?.toLowerCase() ?? null;
+        const normalizedNext = nextKey?.toLowerCase() ?? null;
+        return generateKeyBetween(normalizedPrev, normalizedNext);
     } catch (err) {
         console.error('Fractional Indexing Error, falling back to lexicographical default', err);
-        // Extremely rudimentary fallback just in case
-        return prevKey ? prevKey + 'a' : 'a0';
+        // Fallback with lowercase key
+        const fallbackBase = prevKey?.toLowerCase() ?? 'a0';
+        return fallbackBase + 'n';
     }
 }
 
@@ -46,8 +54,9 @@ export function generateOrderKey(prevKey?: string, nextKey?: string): string {
  */
 export function sortYMapList<T extends { id: string, orderKey?: string }>(items: T[]): T[] {
     return items.sort((a, b) => {
-        const keyA = a.orderKey || '';
-        const keyB = b.orderKey || '';
+        // Normalize to lowercase for consistent comparison
+        const keyA = (a.orderKey || '').toLowerCase();
+        const keyB = (b.orderKey || '').toLowerCase();
         if (keyA === keyB) {
             return a.id.localeCompare(b.id); // Tie-breaker!
         }
@@ -56,7 +65,7 @@ export function sortYMapList<T extends { id: string, orderKey?: string }>(items:
 }
 
 // --- Todo Steps Binding ---
-export function bindTodoStepToYMap(step: TodoStep): Y.Map<any> {
+export function bindTodoStepToYMap(step: TodoStep): YMap {
     const yStep = new Y.Map();
     const yText = new Y.Text(step.text);
     yStep.set('text', yText);
@@ -64,7 +73,7 @@ export function bindTodoStepToYMap(step: TodoStep): Y.Map<any> {
     return yStep;
 }
 
-export function extractTodoStepFromYMap(yStep: Y.Map<any>): TodoStep {
+export function extractTodoStepFromYMap(yStep: YMap): TodoStep {
     return {
         text: (yStep.get('text') as Y.Text)?.toString() || '',
         isCompleted: !!yStep.get('isCompleted'),
@@ -72,7 +81,7 @@ export function extractTodoStepFromYMap(yStep: Y.Map<any>): TodoStep {
 }
 
 // --- Todo Row Binding ---
-export function bindTodoRowToYMap(row: TodoRow, initialOrderKey?: string): Y.Map<any> {
+export function bindTodoRowToYMap(row: TodoRow, initialOrderKey?: string): YMap {
     const yRow = new Y.Map();
     yRow.set('id', row.id);
 
@@ -91,8 +100,8 @@ export function bindTodoRowToYMap(row: TodoRow, initialOrderKey?: string): Y.Map
     return yRow;
 }
 
-export function extractTodoRowFromYMap(yRow: Y.Map<any>): TodoRow {
-    const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
+export function extractTodoRowFromYMap(yRow: YMap): TodoRow {
+    const ySteps = yRow.get('steps') as Y.Array<YMap>;
     const rawSteps = ySteps ? ySteps.toArray().map(extractTodoStepFromYMap) : [];
 
     return {
@@ -112,7 +121,7 @@ export function extractTodoRowFromYMap(yRow: Y.Map<any>): TodoRow {
 }
 
 // --- Priority Dials Binding ---
-export function bindPriorityDialsToYMap(dials: import('@/schemas/storage').PriorityDials): Y.Map<any> {
+export function bindPriorityDialsToYMap(dials: import('@/schemas/storage').PriorityDials): YMap {
     const yDials = new Y.Map();
 
     const leftText = new Y.Text(dials.left || '');
@@ -125,7 +134,7 @@ export function bindPriorityDialsToYMap(dials: import('@/schemas/storage').Prior
     return yDials;
 }
 
-export function extractPriorityDialsFromYMap(yDials: Y.Map<any>): import('@/schemas/storage').PriorityDials {
+export function extractPriorityDialsFromYMap(yDials: YMap): import('@/schemas/storage').PriorityDials {
     if (!yDials) return { left: '', right: '', focusedSide: 'none' };
     return {
         left: (yDials.get('left') as Y.Text)?.toString() || '',
@@ -135,7 +144,7 @@ export function extractPriorityDialsFromYMap(yDials: Y.Map<any>): import('@/sche
 }
 
 // --- Todo Project Binding ---
-export function bindTodoProjectToYMap(project: TodoProject, initialOrderKey?: string): Y.Map<any> {
+export function bindTodoProjectToYMap(project: TodoProject, initialOrderKey?: string): YMap {
     const yProject = new Y.Map();
     yProject.set('id', project.id);
 
@@ -167,8 +176,8 @@ export function bindTodoProjectToYMap(project: TodoProject, initialOrderKey?: st
     return yProject;
 }
 
-export function extractTodoProjectFromYMap(yProject: Y.Map<any>): TodoProject {
-    const rowsMap = yProject.get('todoRows') as Y.Map<Y.Map<any>>;
+export function extractTodoProjectFromYMap(yProject: YMap): TodoProject {
+    const rowsMap = yProject.get('todoRows') as Y.Map<YMap>;
     const rowsList = rowsMap ? Array.from(rowsMap.values())
         .filter(yRow => !yRow.get('isDeleted'))
         .map(extractTodoRowFromYMap) : [];
@@ -192,7 +201,7 @@ export function extractTodoProjectFromYMap(yProject: Y.Map<any>): TodoProject {
 
 // --- Cubit/Deep Dive Tasks Binding ---
 // Recursive steps!
-export function bindCubitStepToYMap(step: CubitStep): Y.Map<any> {
+export function bindCubitStepToYMap(step: CubitStep): YMap {
     const yStep = new Y.Map();
     yStep.set('id', step.id);
 
@@ -216,8 +225,8 @@ export function bindCubitStepToYMap(step: CubitStep): Y.Map<any> {
     return yStep;
 }
 
-export function extractCubitStepFromYMap(yStep: Y.Map<any>): CubitStep {
-    const ySub = yStep.get('sub_steps') as Y.Array<Y.Map<any>>;
+export function extractCubitStepFromYMap(yStep: YMap): CubitStep {
+    const ySub = yStep.get('sub_steps') as Y.Array<YMap>;
     const sub_steps = ySub ? ySub.toArray().map(extractCubitStepFromYMap) : [];
 
     return {
@@ -228,7 +237,7 @@ export function extractCubitStepFromYMap(yStep: Y.Map<any>): CubitStep {
     };
 }
 
-export function bindTaskItemToYMap(task: TaskItem): Y.Map<any> {
+export function bindTaskItemToYMap(task: TaskItem): YMap {
     const yTask = new Y.Map();
     yTask.set('id', task.id);
 
@@ -251,8 +260,8 @@ export function bindTaskItemToYMap(task: TaskItem): Y.Map<any> {
     return yTask;
 }
 
-export function extractTaskItemFromYMap(yTask: Y.Map<any>): TaskItem {
-    const ySub = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
+export function extractTaskItemFromYMap(yTask: YMap): TaskItem {
+    const ySub = yTask.get('sub_steps') as Y.Array<YMap>;
     const sub_steps = ySub ? ySub.toArray().map(extractCubitStepFromYMap) : [];
 
     return {

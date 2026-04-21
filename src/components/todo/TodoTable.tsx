@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { X, Check, GripVertical } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
@@ -80,6 +81,7 @@ function EditableCell({
     disabled,
     autoFocus = false,
     className = '',
+    onTabOutForward,
 }: {
     value: string;
     onSave: (val: string) => void;
@@ -87,6 +89,7 @@ function EditableCell({
     disabled?: boolean;
     autoFocus?: boolean;
     className?: string;
+    onTabOutForward?: () => void;
 }) {
     const [editing, setEditing] = useState(autoFocus);
     const [draft, setDraft] = useState(value);
@@ -134,6 +137,11 @@ function EditableCell({
                         commit();
                     }
                     if (e.key === 'Escape') { setDraft(value); setEditing(false); }
+                    if (e.key === 'Tab' && !e.shiftKey && onTabOutForward) {
+                        e.preventDefault();
+                        commit();
+                        onTabOutForward();
+                    }
                 }}
                 className={`w-full bg-transparent border-b border-zinc-400 dark:border-stone-500 outline-none text-sm px-1 py-0.5 resize-none max-h-[200px] overflow-y-auto ${className}`}
                 placeholder={placeholder}
@@ -144,6 +152,13 @@ function EditableCell({
 
     return (
         <span
+            tabIndex={disabled ? -1 : 0}
+            onFocus={() => {
+                if (!disabled) {
+                    setDraft(value);
+                    setEditing(true);
+                }
+            }}
             onDoubleClick={() => {
                 if (!disabled) {
                     setDraft(value);
@@ -156,7 +171,7 @@ function EditableCell({
                     setEditing(true);
                 }
             }}
-            className={`block text-sm whitespace-pre-wrap break-words cursor-default ${!value ? 'text-zinc-400 dark:text-stone-600 italic' : ''} ${className}`}
+            className={`block text-sm whitespace-pre-wrap break-words cursor-text focus:outline-none focus:bg-zinc-100 dark:focus:bg-stone-800 rounded px-1 min-h-[1.5rem] transition-colors ${!value ? 'text-zinc-400 dark:text-stone-600 italic' : ''} ${className}`}
         >
             {value || placeholder || '—'}
         </span>
@@ -280,13 +295,12 @@ function RabbitOverlayWrapper() {
 }
 
 export default function TodoTable() {
+    const router = useRouter();
     const {
         todoRows,
-        activeProjectId,
         activeMode,
         processingRowId,
         lastAddedRowId,
-        priorityDials,
         setActiveMode,
         setProcessingRowId,
         toggleTodoRowCompletion,
@@ -302,6 +316,8 @@ export default function TodoTable() {
         activeWorkspaceType,
         hasPeers,
         peerIsEditing,
+        selectTaskForToday,
+        showRowTomatoButtons,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
@@ -325,6 +341,9 @@ export default function TodoTable() {
             activeWorkspaceType: s.activeWorkspaceType,
             hasPeers: s.hasPeers,
             peerIsEditing: s.peerIsEditing,
+            selectTaskForToday: s.selectTaskForToday,
+            // P2 Fix: Select only the specific property to avoid unnecessary re-renders
+            showRowTomatoButtons: s.todayPreferences.showRowTomatoButtons,
         })),
     );
 
@@ -359,7 +378,7 @@ export default function TodoTable() {
     // Strict Mode: Shared Projects require both a connection and "Turn Reservation" to edit
     const isLocked = activeWorkspaceType === 'personalMulti' && (!hasPeers || peerIsEditing);
 
-    const checkLock = useCallback(() => {
+    const checkLock = useCallback((): boolean => {
         if (isLocked) {
             const reason = !hasPeers 
                 ? 'To prevent sync mismatches, you must have at least 2 devices connected to edit a Shared Project.'
@@ -414,7 +433,7 @@ export default function TodoTable() {
             setActiveMode(null);
             setProcessingRowId(null);
         }
-    }, [setTodoSteps, setActiveMode, setProcessingRowId]);
+    }, [setTodoSteps, setActiveMode, setProcessingRowId, checkLock]);
 
     const handleDeepDive = useCallback(async (rowId: string, stepText: string, row: typeof todoRows[0]) => {
         if (checkLock()) return;
@@ -465,7 +484,7 @@ export default function TodoTable() {
             setActiveMode(null);
             setProcessingRowId(null);
         }
-    }, [insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId]);
+    }, [insertTodoRowAfter, setTodoSteps, setActiveMode, setProcessingRowId, checkLock]);
 
     // Fix #1 & #2: Each branch resets independently. No trailing setActiveMode(null).
     // Read activeMode from getState() to avoid stale closure.
@@ -488,7 +507,7 @@ export default function TodoTable() {
             setDialPriority('right', stepText);
             setActiveMode(null); // Fire and Forget
         }
-    }, [handleDeepDive, setDialPriority, setActiveMode]);
+    }, [handleDeepDive, setDialPriority, setActiveMode, checkLock]);
 
     // Fix #3: Uses store action `restoreTodoRow` instead of direct setState
     const handleSwipeDelete = useCallback((rowId: string) => {
@@ -519,7 +538,7 @@ export default function TodoTable() {
         });
 
         undoTimerRef.current = setTimeout(() => { /* undo window expired */ }, 5000);
-    }, [todoRows, deleteTodoRow, restoreTodoRow]);
+    }, [todoRows, deleteTodoRow, restoreTodoRow, checkLock]);
 
     const handleDoubleClickEmptyRow = useCallback((row: typeof todoRows[0]) => {
         const isEmpty = !row.task.trim() && row.steps.every((s) => !s.text.trim());
@@ -557,11 +576,11 @@ export default function TodoTable() {
         useSensor(KeyboardSensor),
     );
 
-    const handleDragStart = useCallback((event: any) => {
-        if (event.active.data.current?.type === 'rabbit') {
-            setActiveRabbitId(event.active.id);
+    const handleDragStart = useCallback((event: { active: { id: string | number; data?: { current?: { type?: string } } } }) => {
+        if (event.active.data?.current?.type === 'rabbit') {
+            setActiveRabbitId(String(event.active.id));
         } else {
-            setActiveRowId(event.active.id as string);
+            setActiveRowId(String(event.active.id));
         }
     }, []);
 
@@ -629,7 +648,7 @@ export default function TodoTable() {
         if (oldIndex !== -1 && newIndex !== -1) {
             reorderTodoRows(oldIndex, newIndex);
         }
-    }, [todoRows, reorderTodoRows, completeStepsUpTo]);
+    }, [todoRows, reorderTodoRows, completeStepsUpTo, checkLock]);
 
     if (todoRows.length === 0) {
         return (
@@ -692,16 +711,17 @@ export default function TodoTable() {
                         </thead>
                         <SortableContext items={todoRows.map((r) => r.id)} strategy={verticalListSortingStrategy}>
                             <tbody>
-                                {todoRows.map((row) => {
+                                {todoRows.map((row, idx) => {
                                     const isProcessing = processingRowId === row.id;
 
                                     return (
                                         <SortableRow
                                             key={row.id}
+                                            isLastRow={idx === todoRows.length - 1}
+                                            onAddRow={() => useAppStore.getState().addTodoRow('')}
                                             row={row}
                                             isProcessing={isProcessing}
                                             isCompleted={row.isCompleted}
-                                            activeMode={activeMode}
                                             isModeActive={isModeActive}
                                             isLocked={isLocked}
                                             isTaskActionTarget={isTaskActionTarget}
@@ -757,6 +777,13 @@ export default function TodoTable() {
                                             }}
                                             explosionTargetId={explosionTargetId}
                                             isRabbitDragging={activeRabbitId !== null}
+                                            onGoToToday={() => {
+                                                // Pre-select this task for Today - row tomato implies neutral focus
+                                                selectTaskForToday(row.id, null);
+                                                // Navigate to Today page
+                                                router.push('/today');
+                                            }}
+                                            showRowTomatoButtons={showRowTomatoButtons}
                                         />
                                     );
                                 })}
@@ -767,38 +794,51 @@ export default function TodoTable() {
 
                 {/* Portal for rendering Rabbit visibly above overflow-hidden bounds */}
                 <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
-                    {activeRabbitId ? (
-                        <RabbitOverlayWrapper />
-                    ) : activeRowId && todoRows.find((r) => r.id === activeRowId) ? (
-                        <table className="w-full min-w-[900px] table-fixed border-collapse bg-white dark:bg-[#1c1917] shadow-xl rounded-xl">
-                            <tbody>
-                                <SortableRow
-                                    row={todoRows.find((r) => r.id === activeRowId)!}
-                                    isProcessing={processingRowId === activeRowId}
-                                    isCompleted={todoRows.find((r) => r.id === activeRowId)!.isCompleted}
-                                    activeMode={activeMode}
-                                    isModeActive={isModeActive}
-                                    isLocked={isLocked}
-                                    isTaskActionTarget={isTaskActionTarget}
-                                    isStepActionTarget={isStepActionTarget}
-                                    mc={mc}
-                                    onDoubleClick={() => { }}
-                                    onTouchStart={() => { }}
-                                    onTouchEnd={() => { }}
-                                    lastAddedRowId={lastAddedRowId}
-                                    onTaskClick={() => { }}
-                                    onToggleComplete={() => { }}
-                                    onDelete={() => { }}
-                                    onTaskSave={() => { }}
-                                    onStepSave={() => { }}
-                                    onStepClick={() => { }}
-                                    onRabbitAdvance={() => { }}
-                                    explosionTargetId={null}
-                                    isRabbitDragging={false}
-                                />
-                            </tbody>
-                        </table>
-                    ) : null}
+                    {(() => {
+                        // Q7 Fix: Single computation of DragOverlay content
+                        if (activeRabbitId) {
+                            return <RabbitOverlayWrapper />;
+                        }
+                        if (activeRowId) {
+                            const activeRow = todoRows.find((r) => r.id === activeRowId);
+                            if (activeRow) {
+                                return (
+                                    <table className="w-full min-w-[900px] table-fixed border-collapse bg-white dark:bg-[#1c1917] shadow-xl rounded-xl">
+                                        <tbody>
+                                            <SortableRow
+                                                row={activeRow}
+                                                isProcessing={processingRowId === activeRowId}
+                                                isCompleted={activeRow.isCompleted}
+                                                isModeActive={isModeActive}
+                                                isLocked={isLocked}
+                                                isTaskActionTarget={isTaskActionTarget}
+                                                isStepActionTarget={isStepActionTarget}
+                                                mc={mc}
+                                                onDoubleClick={() => { }}
+                                                onTouchStart={() => { }}
+                                                onTouchEnd={() => { }}
+                                                lastAddedRowId={lastAddedRowId}
+                                                onTaskClick={() => { }}
+                                                onToggleComplete={() => { }}
+                                                onDelete={() => { }}
+                                                onTaskSave={() => { }}
+                                                onStepSave={() => { }}
+                                                onStepClick={() => { }}
+                                                onRabbitAdvance={() => { }}
+                                                explosionTargetId={null}
+                                                isRabbitDragging={false}
+                                                onGoToToday={() => { }}
+                                                isLastRow={false}
+                                                onAddRow={() => { }}
+                                                showRowTomatoButtons={false}
+                                            />
+                                        </tbody>
+                                    </table>
+                                );
+                            }
+                        }
+                        return null;
+                    })()}
                 </DragOverlay>
             </DndContext>
         </div>
@@ -810,7 +850,6 @@ interface SortableRowProps {
     row: { id: string; task: string; steps: [TodoStep, TodoStep, TodoStep, TodoStep]; isCompleted: boolean };
     isProcessing: boolean;
     isCompleted: boolean;
-    activeMode: string | null;
     isModeActive: boolean;
     isLocked: boolean;
     isTaskActionTarget: boolean;
@@ -829,13 +868,17 @@ interface SortableRowProps {
     explosionTargetId: string | null;
     isRabbitDragging: boolean;
     lastAddedRowId: string | null;
+    onGoToToday: () => void;
+    isLastRow: boolean;
+    onAddRow: () => void;
+    showRowTomatoButtons: boolean;
 }
 
 // --- Droppable Step Cell Component ---
 function StepCellNode({
-    row, step, si, isCompleted, isModeActive, isLocked, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging
+    row, step, si, isCompleted, isModeActive, isLocked, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging, isLastRow, onAddRow
 }: {
-    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isLocked: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean
+    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isLocked: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean, isLastRow: boolean, onAddRow: () => void
 }) {
     const isPopulated = step.text.trim().length > 0;
 
@@ -867,6 +910,7 @@ function StepCellNode({
                     placeholder={`Step ${si + 1}`}
                     disabled={isModeActive || isLocked}
                     className={`text-zinc-700 dark:text-stone-300 ${isLocked ? 'cursor-not-allowed' : ''}`}
+                    onTabOutForward={si === 3 && isLastRow ? onAddRow : undefined}
                 />
             </div>
             {/* Conditional Rabbit placement inside the Step Cell */}
@@ -883,10 +927,10 @@ function StepCellNode({
 }
 
 function SortableRow({
-    row, isProcessing, isCompleted, activeMode: _activeMode, isModeActive,
+    row, isProcessing, isCompleted, isModeActive,
     isLocked, isTaskActionTarget, isStepActionTarget, mc,
     onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
-    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId
+    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId, onGoToToday, isLastRow, onAddRow, showRowTomatoButtons
 }: SortableRowProps) {
     const {
         attributes,
@@ -967,6 +1011,19 @@ function SortableRow({
                         >
                             <GripVertical className="w-5 h-5" />
                         </button>
+                        {showRowTomatoButtons && (
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    onGoToToday();
+                                }}
+                                className="w-7 h-7 flex items-center justify-center rounded text-zinc-300 dark:text-stone-600 hover:text-amber-500 hover:bg-amber-50 dark:hover:text-amber-400 dark:hover:bg-amber-950/20 transition-all"
+                                title="Go to Today 🍅"
+                                aria-label="Go to Today page to focus on this task"
+                            >
+                                <span className="text-sm">🍅</span>
+                            </button>
+                        )}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -1019,6 +1076,8 @@ function SortableRow({
                     onRabbitAdvance={() => onRabbitAdvance(row.id, currentStepIdx)}
                     explosionTargetId={explosionTargetId}
                     isRabbitDragging={isRabbitDragging}
+                    isLastRow={isLastRow}
+                    onAddRow={onAddRow}
                 />
             ))}
         </tr>

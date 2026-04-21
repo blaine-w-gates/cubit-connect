@@ -3,7 +3,7 @@ import { TaskItem } from '@/services/storage';
 interface PrintableReportProps {
   tasks: TaskItem[];
   projectTitle: string;
-  projectType?: 'video' | 'text';
+  projectType?: 'video' | 'text' | 'scout';
 }
 
 // React 19: 'ref' is available as a prop, but forwardRef ensures library compatibility

@@ -77,6 +77,19 @@ describe('Store Double Save Reproduction', () => {
       todoRows: [],
       priorityDials: { left: '', right: '', focusedSide: 'none' },
       todoProjects: [],
+      // Timer state fields (Pomodoro feature)
+      timerSessions: [],
+      todayPreferences: {
+        defaultDuration: 25,
+        autoStart: false,
+        soundEnabled: true,
+        notificationEnabled: true,
+        vibrationEnabled: true,
+        showRowTomatoButtons: true,
+      },
+      activeTimerSession: null,
+      todayTaskId: null,
+      todayTaskDialSource: null,
       updatedAt: Date.now(),
     });
 

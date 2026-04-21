@@ -1,5 +1,5 @@
 import { get, set, del, keys } from 'idb-keyval';
-import { ProjectDataSchema, StoredProjectData, TaskItem } from '@/schemas/storage';
+import { ProjectDataSchema, StoredProjectData, TaskItem, TodoProject, TimerSession, TodayPreferences } from '@/schemas/storage';
 import { getUnoWorkspaceId, getDeviceId, getStorageKey } from '@/lib/identity';
 import type { WorkspaceType } from '@/lib/identity';
 
@@ -7,7 +7,7 @@ const LEGACY_KEY = 'cubit_connect_project_v1';
 const MIGRATION_FLAG = 'cubit_migration_done_v2';
 const MIGRATION_BACKUP_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep } from '@/schemas/storage';
+export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep, TimerSession, TodayPreferences } from '@/schemas/storage';
 
 function emptyState(): StoredProjectData {
   return {
@@ -16,8 +16,48 @@ function emptyState(): StoredProjectData {
     priorityDials: { left: '', right: '', focusedSide: 'none' as const },
     todoProjects: [],
     yjsState: undefined,
+    // Today Page timer state defaults
+    timerSessions: [],
+    todayPreferences: {
+      defaultDuration: 25,
+      autoStart: false,
+      soundEnabled: true,
+      notificationEnabled: true,
+      vibrationEnabled: true,
+      showRowTomatoButtons: true,
+    },
+    activeTimerSession: null,
+    todayTaskId: null,
+    todayTaskDialSource: null,
     updatedAt: Date.now(),
   };
+}
+
+/**
+ * Parameters for saving project data - refactored from 19 positional args
+ * to a single object to prevent parameter order bugs and improve maintainability.
+ */
+export interface SaveProjectParams {
+  tasks: TaskItem[];
+  transcript?: string;
+  scoutResults?: string[];
+  projectType: 'video' | 'text' | 'scout' | null;
+  projectTitle: string;
+  scoutTopic?: string;
+  scoutPlatform?: string;
+  scoutHistory?: string[];
+  inputMode: 'video' | 'text' | 'scout' | null;
+  todoProjects: TodoProject[];
+  activeProjectId?: string | null;
+  yjsState: Uint8Array;
+  workspaceType: WorkspaceType;
+  workspaceId?: string;
+  // Today Page timer state
+  timerSessions?: TimerSession[];
+  todayPreferences?: TodayPreferences;
+  activeTimerSession?: TimerSession | null;
+  todayTaskId?: string | null;
+  todayTaskDialSource?: 'left' | 'right' | null;
 }
 
 export const storageService = {
@@ -40,6 +80,28 @@ export const storageService = {
 
       if (!raw) return emptyState();
 
+      // Pre-process: Transform legacy todoRows with string steps to proper objects
+      if (raw && typeof raw === 'object' && 'todoRows' in raw) {
+        const rawData = raw as { todoRows?: unknown[] };
+        if (Array.isArray(rawData.todoRows)) {
+          rawData.todoRows = rawData.todoRows.map((row: unknown) => {
+            if (row && typeof row === 'object' && 'steps' in row) {
+              const rowObj = row as { steps: unknown; [key: string]: unknown };
+              if (Array.isArray(rowObj.steps)) {
+                // Transform string steps to TodoStep objects
+                rowObj.steps = rowObj.steps.map((step: unknown) => {
+                  if (typeof step === 'string') {
+                    return { text: step, isCompleted: false };
+                  }
+                  return step;
+                });
+              }
+            }
+            return row;
+          });
+        }
+      }
+
       const result = ProjectDataSchema.safeParse(raw);
 
       if (!result.success) {
@@ -57,13 +119,44 @@ export const storageService = {
             priorityDials: { left: '', right: '', focusedSide: 'none' as const },
             todoProjects: [],
             yjsState: undefined,
+            // Today Page timer state defaults for legacy salvage
+            timerSessions: [],
+            todayPreferences: {
+              defaultDuration: 25,
+              autoStart: false,
+              soundEnabled: true,
+              notificationEnabled: true,
+              vibrationEnabled: true,
+              showRowTomatoButtons: true,
+            },
+            activeTimerSession: null,
+            todayTaskId: null,
+            todayTaskDialSource: null,
             updatedAt: Date.now(),
           } as StoredProjectData;
         }
         return emptyState();
       }
 
-      return result.data;
+      // Migration: Inject defaults for missing timer fields
+      const data = result.data;
+      const migrated: StoredProjectData = {
+        ...data,
+        timerSessions: data.timerSessions ?? [],
+        todayPreferences: data.todayPreferences ?? {
+          defaultDuration: 25,
+          autoStart: false,
+          soundEnabled: true,
+          notificationEnabled: true,
+          vibrationEnabled: true,
+          showRowTomatoButtons: true,
+        },
+        activeTimerSession: data.activeTimerSession ?? null,
+        todayTaskId: data.todayTaskId ?? null,
+        todayTaskDialSource: data.todayTaskDialSource ?? null,
+      };
+
+      return migrated;
     } catch (error) {
       console.error('Failed to load project from IndexedDB:', error);
       return emptyState();
@@ -73,42 +166,42 @@ export const storageService = {
   /**
    * Saves the entire project state to the workspace-namespaced key.
    */
-  async saveProject(
-    tasks: TaskItem[],
-    transcript?: string,
-    scoutResults?: string[],
-    projectType?: 'video' | 'text',
-    projectTitle?: string,
-    scoutTopic?: string,
-    scoutPlatform?: string,
-    scoutHistory?: string[],
-    inputMode?: 'video' | 'text' | 'scout',
-    todoProjects?: import('@/schemas/storage').TodoProject[],
-    activeProjectId?: string,
-    yjsState?: Uint8Array,
-    workspaceType?: WorkspaceType,
-    workspaceId?: string,
-  ): Promise<void> {
-    const wsType = workspaceType || 'personalUno';
-    const wsId = workspaceId || getUnoWorkspaceId();
+  async saveProject(params: SaveProjectParams): Promise<void> {
+    const wsType = params.workspaceType || 'personalUno';
+    const wsId = params.workspaceId || getUnoWorkspaceId();
     const key = getStorageKey(wsType, wsId);
 
     try {
       const payload: StoredProjectData = {
-        tasks,
-        transcript,
-        scoutResults,
-        projectType,
-        projectTitle,
-        scoutTopic,
-        scoutPlatform,
-        scoutHistory,
-        inputMode,
+        tasks: params.tasks,
+        transcript: params.transcript,
+        scoutResults: params.scoutResults,
+        projectType: params.projectType,
+        projectTitle: params.projectTitle,
+        scoutTopic: params.scoutTopic,
+        scoutPlatform: params.scoutPlatform,
+        scoutHistory: params.scoutHistory,
+        inputMode: params.inputMode,
         todoRows: [],
         priorityDials: { left: '', right: '', focusedSide: 'none' },
-        todoProjects: todoProjects || [],
-        activeProjectId,
-        yjsState,
+        todoProjects: params.todoProjects || [],
+        activeProjectId: params.activeProjectId || null,
+        yjsState: params.yjsState,
+        workspaceId: wsId,
+        workspaceType: wsType,
+        // Today Page timer state (P1-T2)
+        timerSessions: params.timerSessions || [],
+        todayPreferences: params.todayPreferences || {
+          defaultDuration: 25,
+          autoStart: false,
+          soundEnabled: true,
+          notificationEnabled: true,
+          vibrationEnabled: true,
+          showRowTomatoButtons: true,
+        },
+        activeTimerSession: params.activeTimerSession || null,
+        todayTaskId: params.todayTaskId || null,
+        todayTaskDialSource: params.todayTaskDialSource || null,
         updatedAt: Date.now(),
       };
       await set(key, payload);

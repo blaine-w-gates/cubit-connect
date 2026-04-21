@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useShallow } from 'zustand/react/shallow';
 import { ChevronRight, ChevronLeft, Plus, X } from 'lucide-react';
@@ -16,7 +16,6 @@ import {
     type DragStartEvent,
     type DragEndEvent,
     DragOverlay,
-    defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {
     SortableContext,
@@ -147,9 +146,9 @@ function SortableProjectTab({
     });
 
     const style = {
-        transform: CSS.Transform.toString(transform),
+        transform: CSS.Translate.toString(transform),
         transition,
-        opacity: isDragging ? 0 : 1,
+        opacity: isDragging ? 0.3 : undefined, // Dim but show placeholder outline
         borderLeftColor: isActive ? project.color : 'transparent',
     };
 
@@ -163,11 +162,12 @@ function SortableProjectTab({
                 {...listeners}
                 role="listitem"
                 className={`group relative flex items-center gap-2 px-2 py-2 rounded-md
-                    transition-all text-sm select-none
+                    text-sm select-none
                     ${isActive
                         ? 'bg-white dark:bg-stone-800 shadow-sm border-l-4'
                         : 'hover:bg-zinc-100 dark:hover:bg-stone-800/50 border-l-4 border-transparent'
                     }
+                    ${isDragging ? 'bg-zinc-100 dark:bg-stone-800/30 border-2 border-dashed border-zinc-300 dark:border-stone-600' : ''}
                 `}
             >
                 {/* Color dot — sibling button, not nested */}
@@ -250,8 +250,8 @@ function ProjectTabOverlay({ project, isActive }: { project: TodoProject; isActi
     return (
         <div
             className="flex items-center gap-2 px-2 py-2 rounded-md cursor-grabbing
-                shadow-xl ring-1 ring-black/5 dark:ring-white/10
-                text-sm select-none bg-white dark:bg-stone-800 border-l-4"
+                shadow-2xl ring-2 ring-amber-500/30 dark:ring-amber-500/20
+                text-sm select-none bg-white dark:bg-stone-800 border-l-4 scale-105"
             style={{ borderLeftColor: isActive ? project.color : 'transparent' }}
         >
             <div className="w-4 h-4 rounded-full flex-shrink-0" style={{ backgroundColor: project.color }} />
@@ -317,7 +317,7 @@ export default function BookTabSidebar() {
         return false;
     };
 
-    const [isOpen, setIsOpen] = useState(true);
+    const [isOpen, setIsOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [draft, setDraft] = useState('');
     const [activeDragId, setActiveDragId] = useState<string | null>(null);
@@ -325,7 +325,7 @@ export default function BookTabSidebar() {
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-        useSensor(TouchSensor, { activationConstraint: { delay: 250, tolerance: 5 } }),
+        useSensor(TouchSensor, { activationConstraint: { delay: 100, tolerance: 5 } }),
         useSensor(KeyboardSensor),
     );
 
@@ -373,6 +373,8 @@ export default function BookTabSidebar() {
         setActiveDragId(e.active.id as string);
         setColorPickerId(null); // Close any open color picker when dragging
     };
+    const lastReorderRef = useRef<{ from: number; to: number; time: number } | null>(null);
+
     const handleDragEnd = (e: DragEndEvent) => {
         setActiveDragId(null);
         const { active, over } = e;
@@ -380,6 +382,20 @@ export default function BookTabSidebar() {
             if (checkLock()) return;
             const from = todoProjects.findIndex((p) => p.id === active.id);
             const to = todoProjects.findIndex((p) => p.id === over.id);
+            if (from === -1 || to === -1) {
+                console.warn('[BookTabSidebar] Invalid drag indices:', { from, to, active: active.id, over: over.id });
+                return;
+            }
+            // Prevent duplicate calls within 500ms (same from/to)
+            const now = Date.now();
+            if (lastReorderRef.current &&
+                lastReorderRef.current.from === from &&
+                lastReorderRef.current.to === to &&
+                now - lastReorderRef.current.time < 500) {
+                console.log('[BookTabSidebar] Duplicate reorder prevented');
+                return;
+            }
+            lastReorderRef.current = { from, to, time: now };
             reorderTodoProjects(from, to);
         }
     };
@@ -393,7 +409,7 @@ export default function BookTabSidebar() {
                 {!isOpen && (
                     <motion.button
                         key="toggle-open"
-                        drag="x"
+                        drag={activeDragId ? false : "x"}
                         dragConstraints={{ left: 0, right: 0 }}
                         dragElastic={{ left: 0, right: 0.2 }}
                         onDragEnd={(e, info) => {
@@ -406,7 +422,7 @@ export default function BookTabSidebar() {
                         exit={{ opacity: 0, x: -10 }}
                         transition={{ duration: 0.15 }}
                         onClick={() => setIsOpen(true)}
-                        className="sticky top-24 h-10 w-8 flex items-center justify-center
+                        className="h-10 w-8 flex items-center justify-center
                             bg-zinc-100 dark:bg-stone-800 border border-zinc-300 dark:border-stone-600
                             rounded-r-md hover:bg-zinc-200 dark:hover:bg-stone-700 transition-colors"
                         title="Open project tabs"
@@ -422,7 +438,7 @@ export default function BookTabSidebar() {
                 {isOpen && (
                     <motion.aside
                         key="sidebar"
-                        drag="x"
+                        drag={activeDragId ? false : "x"}
                         dragConstraints={{ left: 0, right: 0 }}
                         dragElastic={{ left: 0.2, right: 0 }}
                         onDragEnd={(e, info) => {
@@ -508,13 +524,7 @@ export default function BookTabSidebar() {
                                     ))}
                                 </SortableContext>
 
-                                <DragOverlay
-                                    dropAnimation={{
-                                        sideEffects: defaultDropAnimationSideEffects({
-                                            styles: { active: { opacity: '0.4' } },
-                                        }),
-                                    }}
-                                >
+                                <DragOverlay dropAnimation={null} className="z-[100]">
                                     {activeDragProject ? (
                                         <ProjectTabOverlay
                                             project={activeDragProject}

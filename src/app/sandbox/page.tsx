@@ -1,16 +1,17 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Loader2, Play, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MODELS = [
-  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', role: 'Current Primary' },
-  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', role: 'Next Primary' },
+  { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite', role: 'Current Primary' },
+  { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash', role: 'Current Fallback' },
+  { id: 'gemini-3-flash-preview', name: 'Gemini 3 Flash Preview', role: 'Future Primary' },
   {
     id: 'gemini-3.1-flash-lite-preview',
     name: 'Gemini 3.1 Flash Lite',
-    role: 'Next Fallback',
+    role: 'Future Fallback',
   },
 ];
 
@@ -28,19 +29,16 @@ import { useAppStore } from '@/store/useAppStore';
 export default function SandboxPage() {
   const [systemPrompt, setSystemPrompt] = useState('You are a concise diagnostic computer.');
   const [userPrompt, setUserPrompt] = useState('Identify yourself. State your model version.');
-  const [results, setResults] = useState<Record<string, ModelResult>>({});
-  const [scanResult, setScanResult] = useState<string>('');
-  
-  const apiKey = useAppStore((state) => state.apiKey);
-
-  useEffect(() => {
-    // Initialize results state
+  const [results, setResults] = useState<Record<string, ModelResult>>(() => {
     const initialResults: Record<string, ModelResult> = {};
     MODELS.forEach((m) => {
       initialResults[m.id] = { status: 'idle' };
     });
-    setResults(initialResults);
-  }, []);
+    return initialResults;
+  });
+  const [scanResult, setScanResult] = useState<string>('');
+  
+  const apiKey = useAppStore((state) => state.apiKey);
 
   const handleIgnite = async () => {
     if (!apiKey) {

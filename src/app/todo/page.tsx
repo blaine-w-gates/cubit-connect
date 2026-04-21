@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { useRouter } from 'next/navigation';
 
 import Header from '@/components/Header';
 import SettingsDialog from '@/components/SettingsDialog';
@@ -16,8 +15,6 @@ import { SyncDebugOverlay } from '@/components/SyncDebugOverlay';
 import { Network, ShieldCheck, Loader2, Monitor } from 'lucide-react';
 
 export default function TodoPage() {
-    const router = useRouter();
-
     const loadProject = useAppStore((state) => state.loadProject);
     const isHydrated = useAppStore((state) => state.isHydrated);
     const todoRows = useAppStore((state) => state.todoRows);
@@ -92,10 +89,14 @@ export default function TodoPage() {
                 </div>
             )}
 
-            {/* Main Content — flex row: sidebar + content */}
-            <div className="flex flex-1 w-full max-w-7xl mx-auto">
-                {/* Book Tab Sidebar */}
-                {isHydrated && <BookTabSidebar />}
+            {/* Main Content — flex row: sidebar + content with gap */}
+            <div className="flex flex-1 w-full max-w-7xl mx-auto gap-6">
+                {/* Book Tab Sidebar — sticky to header */}
+                {isHydrated && (
+                    <div className="sticky top-0 self-start h-fit">
+                        <BookTabSidebar />
+                    </div>
+                )}
 
                 {/* Content Panel — fades in once hydrated */}
                 <FadeIn

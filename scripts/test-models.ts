@@ -1,8 +1,8 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const MODELS = {
-  LITE: 'gemini-3.1-flash-lite-preview',
-  FULL: 'gemini-3-flash-preview',
+  LITE: 'gemini-2.5-flash-lite',
+  FULL: 'gemini-2.5-flash',
 };
 
 const TEST_PROMPT = `Generate 3 simple tasks for learning JavaScript. Format as JSON array with task_name and description fields.`;

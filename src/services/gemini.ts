@@ -3,8 +3,8 @@ import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
 
 // MODELS
-const PRIMARY_MODEL = 'gemini-3.1-flash-lite-preview';
-const FALLBACK_MODEL = 'gemini-3-flash-preview';
+const PRIMARY_MODEL = 'gemini-2.5-flash-lite';
+const FALLBACK_MODEL = 'gemini-2.5-flash';
 
 // CIRCUIT BREAKER STATE
 const COOLDOWN_DURATION = 60000; // 60 Seconds
@@ -151,7 +151,7 @@ export const GeminiService = {
   async analyzeTranscript(
     apiKey: string,
     transcript: string,
-    mode: 'video' | 'text' = 'video',
+    mode: 'video' | 'text' | 'scout' = 'video',
     videoDuration?: number,
   ): Promise<TaskItem[]> {
     await this.enforceRateLimit();
@@ -356,7 +356,7 @@ export const GeminiService = {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const liteModel = genAI.getGenerativeModel({
-        model: 'gemini-3.1-flash-lite-preview',
+        model: 'gemini-2.5-flash-lite',
         generationConfig: { responseMimeType: 'application/json' },
       });
       await this.withTimeout(liteModel.generateContent(testPrompt), 15000);
@@ -370,7 +370,7 @@ export const GeminiService = {
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const fullModel = genAI.getGenerativeModel({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-2.5-flash',
         generationConfig: { responseMimeType: 'application/json' },
       });
       await this.withTimeout(fullModel.generateContent(testPrompt), 15000);
@@ -380,7 +380,7 @@ export const GeminiService = {
     return {
       lite: liteTime,
       full: fullTime,
-      winner: liteTime < fullTime ? 'gemini-3.1-flash-lite-preview' : 'gemini-3-flash-preview'
+      winner: liteTime < fullTime ? 'gemini-2.5-flash-lite' : 'gemini-2.5-flash'
     };
   },
 };
