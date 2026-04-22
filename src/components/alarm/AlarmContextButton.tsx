@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Bell, Clock } from 'lucide-react';
+import { createPortal } from 'react-dom';
 import { AlarmTimePickerModal } from './AlarmTimePickerModal';
 
 interface AlarmContextButtonProps {
@@ -38,24 +39,27 @@ export function AlarmContextButton({
           e.stopPropagation();
           setIsModalOpen(true);
         }}
-        className="absolute -top-8 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-full shadow-lg transition-all animate-in zoom-in-75"
+        className="absolute -bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1.5 px-3 py-1.5 bg-cyan-500 hover:bg-cyan-600 text-white text-sm font-medium rounded-full shadow-lg transition-all animate-in zoom-in-75 whitespace-nowrap"
         title="Set alarm for this step"
       >
         <Bell className="w-3.5 h-3.5" />
         <span>Set Alarm</span>
       </button>
 
-      <AlarmTimePickerModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        projectId={projectId}
-        rowId={rowId}
-        stepIndex={stepIndex}
-        stepText={stepText}
-        taskText={taskText}
-        projectName={projectName}
-        stepId={stepId}
-      />
+      {isModalOpen && typeof document !== 'undefined' && createPortal(
+        <AlarmTimePickerModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          projectId={projectId}
+          rowId={rowId}
+          stepIndex={stepIndex}
+          stepText={stepText}
+          taskText={taskText}
+          projectName={projectName}
+          stepId={stepId}
+        />,
+        document.body
+      )}
     </>
   );
 }
