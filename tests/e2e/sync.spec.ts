@@ -35,7 +35,7 @@ async function connectDevice(page: Page, passphrase: string) {
 
   await page.waitForFunction(() => {
     return (window as any).__STORE__.getState().syncStatus === 'connected';
-  });
+  }, { timeout: 10000 });
   // Allow initial checkpoint/watchdog flow to finish before assertions.
   await page.waitForTimeout(3000);
 }
@@ -178,7 +178,10 @@ async function reconnectAndCatchUp(page: Page, passphrase: string) {
   await page.evaluate(async (pwd) => {
     await (window as any).__STORE__.getState().connectToSyncServer(pwd);
   }, passphrase);
-  await page.waitForFunction(() => (window as any).__STORE__.getState().syncStatus === 'connected');
+  await page.waitForFunction(
+    () => (window as any).__STORE__.getState().syncStatus === 'connected',
+    { timeout: 10000 }
+  );
   await page.waitForTimeout(3000);
 }
 
