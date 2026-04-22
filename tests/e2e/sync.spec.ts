@@ -100,9 +100,9 @@ async function waitForProject(page: Page, name: string, timeoutMs = 5000) {
         projectNames: state?.todoProjects?.map((p: any) => ({ id: p?.id, name: p?.name })) ?? [],
         activeProjectId: state?.activeProjectId,
 
-        // Yjs diagnostics (via __SYNC_MONITOR)
-        ydocId: (win as any).__SYNC_MONITOR?.getStateMachine?.()?.currentYdocId || 'no-ydoc',
-        observerRegistered: (win as any).__SYNC_MONITOR?.getStateMachine?.()?.observerRegistered || false,
+        // Yjs diagnostics (via __SYNC_MONITOR) - use getAllInstances for real status
+        ydocInstances: (win as any).__SYNC_MONITOR?.getAllInstances?.() || [],
+        ydocSummary: (win as any).__SYNC_MONITOR?.getInstanceSummary?.() || 'no-monitor',
       };
     });
 
