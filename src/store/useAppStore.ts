@@ -1034,16 +1034,24 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         console.log('[YJS DEBUG] connectToSyncServer - SAME room, skipping resetYDoc and loadProject');
       }
 
+      // CRITICAL: Check if ydoc is destroyed/missing and recreate it
+      // This can happen when reconnecting to same room after disconnect
+      const currentYdocId = getInstanceId(ydoc);
+      if (!currentYdocId) {
+        console.log('[YJS DEBUG] connectToSyncServer - ydoc is null/destroyed, calling resetYDoc()');
+        resetYDoc();
+      }
+
       // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
       // But if loadProject didn't run or skipped registration, register it now
-      const currentYdocId = getInstanceId(ydoc);
+      const finalYdocId = getInstanceId(ydoc);
       const observerYdocId = (ydoc as { __observerId?: string }).__observerId;
-      console.log(`[YJS DEBUG] connectToSyncServer - checking observer: current ydoc ${currentYdocId}, observer registered on: ${observerYdocId}`);
-      
-      if (observerYdocId !== currentYdocId) {
-        console.log(`[YJS DEBUG] connectToSyncServer - Registering observer directly on ydoc ${currentYdocId}`);
+      console.log(`[YJS DEBUG] connectToSyncServer - checking observer: current ydoc ${finalYdocId}, observer registered on: ${observerYdocId}`);
+
+      if (observerYdocId !== finalYdocId) {
+        console.log(`[YJS DEBUG] connectToSyncServer - Registering observer directly on ydoc ${finalYdocId}`);
         registerYjsObserver(set, get);
-        (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+        (ydoc as { __observerId?: string }).__observerId = finalYdocId;
       }
 
       // CRITICAL INVARIANT: Observer must be registered before NetworkSync creation
