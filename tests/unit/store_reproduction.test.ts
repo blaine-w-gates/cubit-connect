@@ -45,8 +45,9 @@ describe('Store Double Save Reproduction', () => {
     // Expect NO immediate manual save
     expect(storageService.saveProject).toHaveBeenCalledTimes(0);
 
-    // Fast-forward debounce time (500ms)
+    // Fast-forward debounce time (500ms) and run all pending timers
     vi.advanceTimersByTime(500);
+    await vi.runAllTimersAsync();
 
     // Expect subscription save (Total 1)
     expect(storageService.saveProject).toHaveBeenCalledTimes(1);
@@ -99,8 +100,9 @@ describe('Store Double Save Reproduction', () => {
     // Expect NO immediate manual save
     expect(storageService.saveProject).toHaveBeenCalledTimes(0);
 
-    // Fast-forward debounce time (500ms)
+    // Fast-forward debounce time (500ms) and run all pending timers
     vi.advanceTimersByTime(500);
+    await vi.runAllTimersAsync();
 
     // Expect subscription save (Total 1)
     expect(storageService.saveProject).toHaveBeenCalledTimes(1);

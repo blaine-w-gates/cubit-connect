@@ -1804,7 +1804,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   importTasks: async (newTasks: TaskItem[]) => {
     ydoc.transact(() => {
-      // Mark existing tasks as deleted to mirror the old "replacement" behavior, 
+      // Mark existing tasks as deleted to mirror the old "replacement" behavior,
       // generating tombstones to protect offline sync peers.
       Array.from(yTasksMap.keys()).forEach(k => {
         const yTask = yTasksMap.get(k);
@@ -1816,6 +1816,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         yTasksMap.set(task.id, bindTaskItemToYMap(task));
       });
     });
+
+    // Trigger subscription save (Yjs mutations don't trigger Zustand subscription)
+    get().forceSyncUpdate();
   },
 
   setProcessing: (isProcessing: boolean) => {
