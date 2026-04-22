@@ -229,6 +229,26 @@ export function recordZustandUpdate(ydoc: Y.Doc): void {
   }
 }
 
+export function recordUpdateReceived(ydoc: Y.Doc): void {
+  const id = ydocToInstanceId.get(ydoc);
+  if (id) {
+    const instance = instanceRegistry.get(id);
+    if (instance) {
+      instance.updatesReceived++;
+    }
+  }
+}
+
+export function markUpdateApplied(ydoc: Y.Doc): void {
+  const id = ydocToInstanceId.get(ydoc);
+  if (id) {
+    const instance = instanceRegistry.get(id);
+    if (instance) {
+      instance.updatesApplied++;
+    }
+  }
+}
+
 export function getAllInstances(): YDocInstance[] {
   return Array.from(instanceRegistry.values());
 }

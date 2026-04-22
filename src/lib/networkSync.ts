@@ -1,6 +1,7 @@
 import * as Y from 'yjs';
 import { encryptUpdate, decryptUpdate } from './cryptoSync';
 import { getGlobalConnectionManager } from './syncConnectionManager';
+import { recordUpdateReceived, markUpdateApplied } from './syncDiagnostics';
 
 export const MSG_UPDATE = 3;
 export const MSG_REQUEST_CACHE = 4;
@@ -230,6 +231,8 @@ export class NetworkSync {
                     const yjsData = decrypted;
 
                     if (messageType === MSG_CHECKPOINT) {
+                        recordUpdateReceived(this.ydoc);
+                        
                         // BAND 2: The Genesis Checkpoint
 
                         // THE CHECKPOINT STORM PREVENTION:
@@ -245,6 +248,7 @@ export class NetworkSync {
                         this.ydoc.transact(() => {
                             Y.applyUpdate(this.ydoc, yjsData, 'network');
                         }, 'network');
+                        markUpdateApplied(this.ydoc);
                         this.onSyncActivity?.();
 
                         // Release the Genesis Lock only AFTER the massive blob is mathematically merged
@@ -266,6 +270,8 @@ export class NetworkSync {
                         }
 
                     } else if (messageType === MSG_UPDATE) {
+                        recordUpdateReceived(this.ydoc);
+                        
                         // DETECT ENCRYPTED PEER PRESENCE HEARTBEAT
                         // An empty Yjs update [0, 0] is mathematically harmless, but serves as proof of life.
                         if (yjsData.length === 2 && yjsData[0] === 0 && yjsData[1] === 0) {
@@ -315,6 +321,7 @@ export class NetworkSync {
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const afterYdocId = (this.ydoc as any).__observerId || 'unknown';
                         console.log(`[NETWORKSYNC DEBUG] Update applied to ydoc ${afterYdocId}`);
+                        markUpdateApplied(this.ydoc);
                         console.log(`🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!`);
                         this.onSyncActivity?.();
                     }
