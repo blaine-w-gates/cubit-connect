@@ -123,24 +123,37 @@ async function startServer() {
                 const diffListKey = `room:${roomId}:diffs`;
 
                 try {
+                    console.log(`📦 [CACHE] Peer requested cache for room ${roomId.slice(0, 8)}`);
+                    
                     // 1. Send the last Full Checkpoint (or notify if empty)
                     const checkpointBlob = await redisClient.get(checkpointKey);
+                    console.log(`📦 [CACHE] Redis checkpoint for ${roomId.slice(0, 8)}: ${checkpointBlob ? 'exists (' + checkpointBlob.length + ' bytes)' : 'NULL'}`);
+                    
                     if (checkpointBlob && ws.readyState === WebSocket.OPEN) {
+                        console.log(`📤 [CACHE] Sending checkpoint (${checkpointBlob.length} bytes) to peer in ${roomId.slice(0, 8)}`);
                         ws.send(checkpointBlob);
+                        console.log(`✅ [CACHE] Checkpoint sent successfully`);
                     } else if (!checkpointBlob && ws.readyState === WebSocket.OPEN) {
+                        console.log(`📤 [CACHE] No checkpoint found, sending MSG_ROOM_EMPTY to ${roomId.slice(0, 8)}`);
                         // Room is entirely empty. Signal client to upload its Genesis Checkpoint.
                         ws.send(new Uint8Array([MSG_ROOM_EMPTY]));
+                    } else {
+                        console.warn(`⚠️ [CACHE] Cannot send: readyState=${ws.readyState}, hasBlob=${!!checkpointBlob}`);
                     }
 
                     // 2. Send the rolling buffer of up to 100 Live Diffs (Chronologically)
                     const diffBlobs = await redisClient.lRange(diffListKey, 0, 99);
+                    console.log(`📦 [CACHE] Found ${diffBlobs.length} diffs for room ${roomId.slice(0, 8)}`);
                     // Engineer Mandate: lPush puts newest at front. We must reverse to apply Oldest -> Newest.
                     diffBlobs.reverse();
+                    let sentCount = 0;
                     for (const diff of diffBlobs) {
                         if (ws.readyState === WebSocket.OPEN) {
                             ws.send(diff);
+                            sentCount++;
                         }
                     }
+                    console.log(`📤 [CACHE] Sent ${sentCount}/${diffBlobs.length} diffs to ${roomId.slice(0, 8)}`);
 
                     // Release the TCP Sever Lock *AFTER* the massive blob finishes transmission
                     ws.isCatchingUp = false;
