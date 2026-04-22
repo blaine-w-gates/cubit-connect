@@ -233,6 +233,13 @@ export class NetworkSync {
                     if (messageType === MSG_CHECKPOINT) {
                         recordUpdateReceived(this.ydoc);
                         
+                        // DEBUG: Check ydoc state before applying checkpoint
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const checkpointYdocId = (this.ydoc as any).__observerId || 'unknown';
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const checkpointObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
+                        console.log(`[NETWORKSYNC DEBUG] CHECKPOINT BEFORE applyUpdate - ydoc ${checkpointYdocId}, observers: ${checkpointObserverCount}`);
+                        
                         // BAND 2: The Genesis Checkpoint
 
                         // THE CHECKPOINT STORM PREVENTION:
@@ -249,6 +256,7 @@ export class NetworkSync {
                             Y.applyUpdate(this.ydoc, yjsData, 'network');
                         }, 'network');
                         markUpdateApplied(this.ydoc);
+                        console.log(`[NETWORKSYNC DEBUG] CHECKPOINT applied to ydoc ${checkpointYdocId}, observer should have fired`);
                         this.onSyncActivity?.();
 
                         // Release the Genesis Lock only AFTER the massive blob is mathematically merged
@@ -308,16 +316,23 @@ export class NetworkSync {
                         // This triggers the "Strict Mode" turn-based lock on the local UI.
                         if (this.onPeerEditing) this.onPeerEditing(true);
 
+                        // DEBUG: Check ydoc state before applying
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const preYdocId = (this.ydoc as any).__observerId || 'unknown';
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const preObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const preObserverId = (this.ydoc as any)._observers?.get?.('update')?.[0]?._callback ? 'has-callback' : 'no-callback';
+                        console.log(`[NETWORKSYNC DEBUG] BEFORE applyUpdate - ydoc ${preYdocId}, observers: ${preObserverCount}, state: ${preObserverId}`);
+
                         this.ydoc.transact(() => {
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const applyYdocId = (this.ydoc as any).__observerId || 'unknown';
-                            console.log(`[NETWORKSYNC DEBUG] Applying update to ydoc ${applyYdocId} with origin 'network'`);
-                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                            const observerCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 'unknown';
-                            console.log(`[NETWORKSYNC DEBUG] BEFORE applyUpdate - ydoc has ${observerCount} update observers`);
                             Y.applyUpdate(this.ydoc, yjsData, 'network');
-                            console.log(`[NETWORKSYNC DEBUG] AFTER applyUpdate - update applied, observer should have fired`);
                         }, 'network');
+
+                        // DEBUG: Check if observer fired
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        const postObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
+                        console.log(`[NETWORKSYNC DEBUG] AFTER applyUpdate - observers: ${postObserverCount}, check if observer fired!`);
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const afterYdocId = (this.ydoc as any).__observerId || 'unknown';
                         console.log(`[NETWORKSYNC DEBUG] Update applied to ydoc ${afterYdocId}`);
