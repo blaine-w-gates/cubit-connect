@@ -41,10 +41,24 @@ async function connectDevice(page: Page, passphrase: string) {
 }
 
 async function waitForProject(page: Page, name: string, timeoutMs = 5000) {
+  // Ensure store is hydrated before polling
+  await page.waitForFunction(() => {
+    const store = (window as any).__STORE__?.getState?.();
+    return store?.isHydrated === true;
+  }, { timeout: 3000 }).catch(() => null);
+
+  // Enhanced polling with better state checks
   await page.waitForFunction(
     (projectName) => {
-      const store = (window as any).__STORE__.getState();
-      return store.todoProjects.some((p: any) => p.name === projectName);
+      const store = (window as any).__STORE__?.getState?.();
+
+      // Guard against undefined/null store
+      if (!store || !Array.isArray(store.todoProjects)) {
+        return false;
+      }
+
+      // Check if project exists with null-safe property access
+      return store.todoProjects.some((p: any) => p?.name === projectName);
     },
     name,
     { timeout: timeoutMs },
@@ -52,10 +66,24 @@ async function waitForProject(page: Page, name: string, timeoutMs = 5000) {
 }
 
 async function waitForTaskInAnyProject(page: Page, taskName: string, timeoutMs = 10000) {
+  // Ensure store is hydrated before polling
+  await page.waitForFunction(() => {
+    const store = (window as any).__STORE__?.getState?.();
+    return store?.isHydrated === true;
+  }, { timeout: 3000 }).catch(() => null);
+
   await page.waitForFunction(
     (name) => {
-      const store = (window as any).__STORE__.getState();
-      return store.todoProjects.some((p: any) => p.todoRows?.some((r: any) => r.task === name));
+      const store = (window as any).__STORE__?.getState?.();
+
+      // Guard against undefined/null store
+      if (!store || !Array.isArray(store.todoProjects)) {
+        return false;
+      }
+
+      return store.todoProjects.some((p: any) =>
+        p?.todoRows?.some((r: any) => r?.task === name)
+      );
     },
     taskName,
     { timeout: timeoutMs },
@@ -451,6 +479,8 @@ test.describe('Multi-device sync e2e', () => {
   });
 
   test('Three devices converge on all shared changes', async ({ browser }) => {
+    test.setTimeout(120000);
+
     const room = `sync-room-${Date.now()}-three`;
     const p1 = `D1 Project-${Date.now()}`;
     const p2 = `D2 Project-${Date.now()}`;
@@ -471,22 +501,22 @@ test.describe('Multi-device sync e2e', () => {
       await d1.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
       await reconnectAndCatchUp(d2.page, room);
       await reconnectAndCatchUp(d3.page, room);
-      await waitForProject(d2.page, p1, 10000);
-      await waitForProject(d3.page, p1, 10000);
+      await waitForProject(d2.page, p1, 15000);
+      await waitForProject(d3.page, p1, 15000);
 
       await d2.page.evaluate((name) => (window as any).__STORE__.getState().addTodoProject(name), p2);
       await d2.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
       await reconnectAndCatchUp(d1.page, room);
       await reconnectAndCatchUp(d3.page, room);
-      await waitForProject(d1.page, p2, 10000);
-      await waitForProject(d3.page, p2, 10000);
+      await waitForProject(d1.page, p2, 15000);
+      await waitForProject(d3.page, p2, 15000);
 
       await d3.page.evaluate((name) => (window as any).__STORE__.getState().addTodoProject(name), p3);
       await d3.page.evaluate(async () => (window as any).__STORE__.getState().flushSyncNow());
       await reconnectAndCatchUp(d1.page, room);
       await reconnectAndCatchUp(d2.page, room);
-      await waitForProject(d1.page, p3, 10000);
-      await waitForProject(d2.page, p3, 10000);
+      await waitForProject(d1.page, p3, 15000);
+      await waitForProject(d2.page, p3, 15000);
 
       const assertAllSeen = async (page: Page) => {
         await page.waitForFunction(

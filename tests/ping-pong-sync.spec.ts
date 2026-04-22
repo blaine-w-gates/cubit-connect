@@ -79,10 +79,24 @@ async function flushSync(page: Page) {
 }
 
 async function waitForProject(page: Page, name: string, timeoutMs = 10000) {
+  // Ensure store is hydrated before polling
+  await page.waitForFunction(() => {
+    const store = (window as any).__STORE__?.getState?.();
+    return store?.isHydrated === true;
+  }, { timeout: 3000 }).catch(() => null);
+
+  // Enhanced polling with better state checks
   await page.waitForFunction(
     (projectName) => {
-      const store = (window as any).__STORE__.getState();
-      return store.todoProjects.some((p: any) => p.name === projectName);
+      const store = (window as any).__STORE__?.getState?.();
+
+      // Guard against undefined/null store
+      if (!store || !Array.isArray(store.todoProjects)) {
+        return false;
+      }
+
+      // Check if project exists with null-safe property access
+      return store.todoProjects.some((p: any) => p?.name === projectName);
     },
     name,
     { timeout: timeoutMs }
@@ -90,10 +104,22 @@ async function waitForProject(page: Page, name: string, timeoutMs = 10000) {
 }
 
 async function waitForProjectGone(page: Page, name: string, timeoutMs = 10000) {
+  // Ensure store is hydrated before polling
+  await page.waitForFunction(() => {
+    const store = (window as any).__STORE__?.getState?.();
+    return store?.isHydrated === true;
+  }, { timeout: 3000 }).catch(() => null);
+
   await page.waitForFunction(
     (projectName) => {
-      const store = (window as any).__STORE__.getState();
-      return !store.todoProjects.some((p: any) => p.name === projectName);
+      const store = (window as any).__STORE__?.getState?.();
+
+      // Guard against undefined/null store
+      if (!store || !Array.isArray(store.todoProjects)) {
+        return false;
+      }
+
+      return !store.todoProjects.some((p: any) => p?.name === projectName);
     },
     name,
     { timeout: timeoutMs }
