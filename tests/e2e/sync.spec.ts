@@ -41,53 +41,137 @@ async function connectDevice(page: Page, passphrase: string) {
 }
 
 async function waitForProject(page: Page, name: string, timeoutMs = 5000) {
+  const startTime = Date.now();
+  const testName = (expect.getState() as { currentTestName?: string }).currentTestName || 'unknown-test';
+
   // Ensure store is hydrated before polling
-  await page.waitForFunction(() => {
+  const hydrationResult = await page.waitForFunction(() => {
     const store = (window as any).__STORE__?.getState?.();
     return store?.isHydrated === true;
   }, { timeout: 3000 }).catch(() => null);
 
-  // Enhanced polling with better state checks
-  await page.waitForFunction(
-    (projectName) => {
-      const store = (window as any).__STORE__?.getState?.();
+  if (!hydrationResult) {
+    console.warn(`[DIAGNOSTIC] ${testName}: Store hydration timeout for project "${name}"`);
+  }
 
-      // Guard against undefined/null store
-      if (!store || !Array.isArray(store.todoProjects)) {
-        return false;
-      }
+  try {
+    // Enhanced polling with better state checks
+    await page.waitForFunction(
+      (projectName) => {
+        const store = (window as any).__STORE__?.getState?.();
 
-      // Check if project exists with null-safe property access
-      return store.todoProjects.some((p: any) => p?.name === projectName);
-    },
-    name,
-    { timeout: timeoutMs },
-  );
+        // Guard against undefined/null store
+        if (!store || !Array.isArray(store.todoProjects)) {
+          return false;
+        }
+
+        // Check if project exists with null-safe property access
+        return store.todoProjects.some((p: any) => p?.name === projectName);
+      },
+      name,
+      { timeout: timeoutMs },
+    );
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[DIAGNOSTIC] ${testName}: Project "${name}" found in ${elapsed}ms`);
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+
+    // Capture diagnostic state at failure
+    const diagnostic = await page.evaluate(() => {
+      const win = window as any;
+      const store = win.__STORE__;
+      const state = store?.getState?.();
+
+      return {
+        // Store infrastructure
+        storeExists: !!store,
+        getStateExists: !!store?.getState,
+        stateExists: !!state,
+
+        // Hydration & sync
+        isHydrated: state?.isHydrated,
+        syncStatus: state?.syncStatus,
+        hasPeers: state?.hasPeers,
+        peerCount: state?.peerCount,
+
+        // Data
+        projectCount: state?.todoProjects?.length ?? 0,
+        projectNames: state?.todoProjects?.map((p: any) => ({ id: p?.id, name: p?.name })) ?? [],
+        activeProjectId: state?.activeProjectId,
+
+        // Yjs diagnostics (if available)
+        ydocId: state?.ydoc?.guid || 'no-ydoc',
+        observerRegistered: state?.ydoc?.observerRegistered || false,
+      };
+    });
+
+    console.error(`[DIAGNOSTIC] ${testName}: waitForProject FAILED for "${name}" after ${elapsed}ms`);
+    console.error(`[DIAGNOSTIC] State dump:`, JSON.stringify(diagnostic, null, 2));
+
+    throw error;
+  }
 }
 
 async function waitForTaskInAnyProject(page: Page, taskName: string, timeoutMs = 10000) {
+  const startTime = Date.now();
+  const testName = (expect.getState() as { currentTestName?: string }).currentTestName || 'unknown-test';
+
   // Ensure store is hydrated before polling
-  await page.waitForFunction(() => {
+  const hydrationResult = await page.waitForFunction(() => {
     const store = (window as any).__STORE__?.getState?.();
     return store?.isHydrated === true;
   }, { timeout: 3000 }).catch(() => null);
 
-  await page.waitForFunction(
-    (name) => {
-      const store = (window as any).__STORE__?.getState?.();
+  if (!hydrationResult) {
+    console.warn(`[DIAGNOSTIC] ${testName}: Store hydration timeout for task "${taskName}"`);
+  }
 
-      // Guard against undefined/null store
-      if (!store || !Array.isArray(store.todoProjects)) {
-        return false;
-      }
+  try {
+    await page.waitForFunction(
+      (name) => {
+        const store = (window as any).__STORE__?.getState?.();
 
-      return store.todoProjects.some((p: any) =>
-        p?.todoRows?.some((r: any) => r?.task === name)
-      );
-    },
-    taskName,
-    { timeout: timeoutMs },
-  );
+        // Guard against undefined/null store
+        if (!store || !Array.isArray(store.todoProjects)) {
+          return false;
+        }
+
+        return store.todoProjects.some((p: any) =>
+          p?.todoRows?.some((r: any) => r?.task === name)
+        );
+      },
+      taskName,
+      { timeout: timeoutMs },
+    );
+
+    const elapsed = Date.now() - startTime;
+    console.log(`[DIAGNOSTIC] ${testName}: Task "${taskName}" found in ${elapsed}ms`);
+  } catch (error) {
+    const elapsed = Date.now() - startTime;
+
+    // Capture diagnostic state at failure
+    const diagnostic = await page.evaluate(() => {
+      const win = window as any;
+      const store = win.__STORE__;
+      const state = store?.getState?.();
+
+      return {
+        storeExists: !!store,
+        isHydrated: state?.isHydrated,
+        syncStatus: state?.syncStatus,
+        projectCount: state?.todoProjects?.length ?? 0,
+        allTasks: state?.todoProjects?.flatMap((p: any) =>
+          p?.todoRows?.map((r: any) => ({ project: p?.name, task: r?.task })) ?? []
+        ) ?? [],
+      };
+    });
+
+    console.error(`[DIAGNOSTIC] ${testName}: waitForTaskInAnyProject FAILED for "${taskName}" after ${elapsed}ms`);
+    console.error(`[DIAGNOSTIC] State dump:`, JSON.stringify(diagnostic, null, 2));
+
+    throw error;
+  }
 }
 
 async function reconnectAndCatchUp(page: Page, passphrase: string) {
