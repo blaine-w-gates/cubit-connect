@@ -1718,6 +1718,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const { activeWorkspaceType, activeWorkspaceId, deviceId: currentDeviceId } = get();
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
+    // CRITICAL: Ensure observer is registered on current ydoc before modifying state
+    // This prevents observer loss when resetProject is called during test setup
+    const currentYdocId = getInstanceId(ydoc);
+    const observerId = (ydoc as { __observerId?: string }).__observerId;
+
+    if (observerId !== currentYdocId) {
+      console.log(`[YJS DEBUG] resetProject - Observer not registered (observerId: ${observerId}, current: ${currentYdocId}), registering now...`);
+      registerYjsObserver(set, get);
+      (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+    }
+
     ydoc.transact(() => {
       yMetaMap.clear();
       yTranscript.delete(0, yTranscript.length);
