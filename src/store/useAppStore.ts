@@ -8,6 +8,7 @@ import {
   registerYDocInstance,
   markInstanceDestroyed,
   markObserverRegistered,
+  markNetworkSyncAttached,
   transitionToPhase,
   markObserverRegisteredInStateMachine,
   enableDiagnostics,
@@ -1104,6 +1105,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           }
         }
       );
+
+      // Mark this ydoc as having NetworkSync attached for diagnostics
+      markNetworkSyncAttached(ydoc, 'network-sync-' + Date.now());
 
       // Presence Watchdog: Revert to "Alone" if no pulse for 12 seconds
       if ((window as any)._presenceWatchdog) clearInterval((window as any)._presenceWatchdog);
