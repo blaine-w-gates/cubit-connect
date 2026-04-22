@@ -31,7 +31,8 @@ function createOscillatorTone(
   audioContext: AudioContext,
   frequency: number,
   duration: number,
-  type: OscillatorType = 'sine'
+  type: OscillatorType = 'sine',
+  volume: number = 1.0 // 0.0 to 1.0
 ): void {
   const oscillator = audioContext.createOscillator();
   const gainNode = audioContext.createGain();
@@ -43,7 +44,9 @@ function createOscillatorTone(
   oscillator.type = type;
   
   const now = audioContext.currentTime;
-  gainNode.gain.setValueAtTime(0.3, now);
+  // Apply volume scaling: base 0.3 * volume (0.0 to 1.0)
+  const scaledVolume = 0.3 * Math.max(0, Math.min(1, volume));
+  gainNode.gain.setValueAtTime(scaledVolume, now);
   gainNode.gain.exponentialRampToValueAtTime(0.01, now + duration);
   
   oscillator.start(now);
@@ -51,7 +54,7 @@ function createOscillatorTone(
 }
 
 export function useAudioContext(options: UseAudioContextOptions = {}): UseAudioContextReturn {
-  const { enabled = true } = options;
+  const { enabled = true, volume = 1.0 } = options;
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -105,11 +108,11 @@ export function useAudioContext(options: UseAudioContextOptions = {}): UseAudioC
     if (!enabled || !isUnlocked || !audioContextRef.current) return;
     
     try {
-      createOscillatorTone(audioContextRef.current, frequency, duration, type);
+      createOscillatorTone(audioContextRef.current, frequency, duration, type, volume);
     } catch (err) {
       console.error('[AudioContext] Failed to play oscillator:', err);
     }
-  }, [enabled, isUnlocked]);
+  }, [enabled, isUnlocked, volume]);
   
   // Play completion sound (pleasant ascending chime)
   const playCompletionSound = useCallback(async (): Promise<void> => {

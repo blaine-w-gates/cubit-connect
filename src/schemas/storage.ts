@@ -32,8 +32,14 @@ export const TaskItemSchema = z.object({
   sub_steps: z.array(CubitStepSchema).optional().default([]),
 });
 
+// --- Workspace Metadata (ADR-001) ---
+// Define this BEFORE schemas that use it to avoid circular reference
+export const WorkspaceTypeEnum = z.enum(['personalUno', 'personalMulti', 'teamWorkspace']);
+export type WorkspaceType = z.infer<typeof WorkspaceTypeEnum>;
+
 // --- To-Do Page Schemas ---
 export const TodoStepSchema = z.object({
+  id: z.string().optional(), // UUID - backfilled on load for legacy data
   text: z.string(),
   isCompleted: z.boolean().default(false),
 });
@@ -45,6 +51,10 @@ export const TodoRowSchema = z.object({
   isCompleted: z.boolean().optional().default(false),
   sourceStepId: z.string().optional(),  // Tracks Deep Dive origin (for future linking)
   orderKey: z.string().optional(), // Used for Y.Map Fractional Indexing sorting
+  // Future-proofing for Supabase account migration (V2)
+  userId: z.string().uuid().optional(),
+  workspaceId: z.string().optional(),
+  workspaceType: WorkspaceTypeEnum.optional(),
 });
 
 export const PriorityDialsSchema = z.object({
@@ -53,9 +63,47 @@ export const PriorityDialsSchema = z.object({
   focusedSide: z.enum(['left', 'right', 'none']).optional().default('none'),
 });
 
-// --- Workspace Metadata (ADR-001) ---
-export const WorkspaceTypeEnum = z.enum(['personalUno', 'personalMulti', 'teamWorkspace']);
-export type WorkspaceType = z.infer<typeof WorkspaceTypeEnum>;
+// --- Alarm System Schema (V1/V2) ---
+// MUST be defined BEFORE TodoProjectSchema since TodoProjectSchema references it
+// Alarms are stored as "snapshots" (copied text) so they survive task deletion.
+// V1 Limitation: Alarms fire only when app tab is active (setInterval throttles in background).
+// V2: Added recurrence support for habit tracking.
+export const AlarmRecurrenceSchema = z.object({
+  type: z.enum(['once', 'daily', 'weekdays']).default('once'),
+  // For 'weekdays', stores which days (0=Sun, 1=Mon, ..., 6=Sat)
+  weekdays: z.array(z.number().min(0).max(6)).optional(),
+  // Tracks if this alarm instance is part of a recurring series
+  isRecurringInstance: z.boolean().default(false),
+  // Original alarm ID that started this recurring chain
+  parentAlarmId: z.string().optional(),
+});
+
+export const AlarmRecordSchema = z.object({
+  id: z.string(), // UUID
+  // Snapshot fields - survive task deletion
+  stepText: z.string(),
+  taskText: z.string(),
+  projectName: z.string(),
+  // Weak references to source (nullable if source deleted)
+  sourceProjectId: z.string().optional(),
+  sourceTaskId: z.string().optional(),
+  sourceStepId: z.string().optional(), // Uses step.id (backfilled UUID)
+  // Trigger fields
+  alarmTimeMs: z.number(), // Unix timestamp
+  status: z.enum(['pending', 'triggered', 'dismissed', 'snoozed']).default('pending'),
+  // Snooze tracking
+  snoozeCount: z.number().default(0), // Track how many times snoozed
+  originalAlarmTimeMs: z.number().optional(), // Original time before snoozes
+  // Recurrence (V2)
+  recurrence: AlarmRecurrenceSchema.optional(),
+  // Metadata
+  createdAt: z.number(),
+  // Identity anchors - ownerClientId required now, userId for V2 Supabase migration
+  ownerClientId: z.string(),
+  userId: z.string().uuid().optional(), // Null until Supabase auth implemented
+  workspaceId: z.string().optional(), // Null until team workspaces
+  workspaceType: WorkspaceTypeEnum.optional(),
+});
 
 // --- Todo Project Schema (Book Tab) ---
 // Each project has its own todoRows + priorityDials, identified by a color-coded tab.
@@ -73,6 +121,8 @@ export const TodoProjectSchema = z.object({
   ownerId: z.string().default(''),
   teamId: z.string().optional(),
   objectiveId: z.string().optional(),
+  // Alarm system (V1) - stored at project level for Yjs sync
+  alarms: z.array(AlarmRecordSchema).default([]),
 });
 
 // --- Timer Session Schema (Today Page / Pomodoro) ---
@@ -110,6 +160,10 @@ export const TimerSessionSchema = z.object({
   // BREAK SESSION (Fogg cognitive load reset)
   breakSession: BreakSessionSchema.optional(),
   completed: z.boolean().default(false),
+  // Future-proofing for Supabase account migration (V2)
+  userId: z.string().uuid().optional(),
+  workspaceId: z.string().optional(),
+  workspaceType: WorkspaceTypeEnum.optional(),
 });
 
 // --- Today Page Preferences ---
@@ -117,6 +171,7 @@ export const TodayPreferencesSchema = z.object({
   defaultDuration: z.number().default(25),
   autoStart: z.boolean().default(false),
   soundEnabled: z.boolean().default(true),
+  soundVolume: z.number().min(0).max(1).default(1), // 0.0 to 1.0 (V2)
   notificationEnabled: z.boolean().default(true),
   vibrationEnabled: z.boolean().default(true),
   showRowTomatoButtons: z.boolean().default(true),
@@ -145,6 +200,7 @@ export const ProjectDataSchema = z.object({
     defaultDuration: 25,
     autoStart: false,
     soundEnabled: true,
+    soundVolume: 1,
     notificationEnabled: true,
     vibrationEnabled: true,
     showRowTomatoButtons: true,
@@ -170,3 +226,8 @@ export type BreakSession = z.infer<typeof BreakSessionSchema>;
 export type TimerSession = z.infer<typeof TimerSessionSchema>;
 export type TodayPreferences = z.infer<typeof TodayPreferencesSchema>;
 export type TimerStatus = 'idle' | 'running' | 'paused' | 'completed' | 'abandoned';
+// NEW: Alarm system types (V1/V2)
+export type AlarmRecord = z.infer<typeof AlarmRecordSchema>;
+export type AlarmStatus = 'pending' | 'triggered' | 'dismissed' | 'snoozed';
+export type AlarmRecurrence = z.infer<typeof AlarmRecurrenceSchema>;
+export type RecurrenceType = 'once' | 'daily' | 'weekdays';

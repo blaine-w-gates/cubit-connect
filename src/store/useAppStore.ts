@@ -449,6 +449,16 @@ export interface ProjectState {
   tickTimer: (remainingSeconds: number) => void;
   updateTimerPreferences: (prefs: Partial<import('@/schemas/storage').TodayPreferences>) => void;
   addTimerSession: (session: import('@/schemas/storage').TimerSession) => void;
+
+  // --- Alarm System Actions (V1) ---
+  createAlarm: (projectId: string, alarm: import('@/schemas/storage').AlarmRecord) => void;
+  updateAlarmStatus: (projectId: string, alarmId: string, status: import('@/schemas/storage').AlarmStatus, updates?: Partial<import('@/schemas/storage').AlarmRecord>) => void;
+  deleteAlarm: (projectId: string, alarmId: string) => void;
+
+  // --- Alarm UI State (V1) ---
+  selectedStepId: { projectId: string; rowId: string; stepIndex: number } | null;
+  selectStep: (projectId: string, rowId: string, stepIndex: number) => void;
+  clearSelectedStep: () => void;
 }
 
 export interface LogEntry {
@@ -533,6 +543,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   lastAddedRowId: null,
   setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
 
+  // --- Alarm UI State (V1) ---
+  selectedStepId: null,
+  selectStep: (projectId, rowId, stepIndex) => set({ selectedStepId: { projectId, rowId, stepIndex } }),
+  clearSelectedStep: () => set({ selectedStepId: null }),
+
   // --- Workspace State (ADR-001) ---
   activeWorkspaceType: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_type') as WorkspaceType : null) || 'personalUno',
   activeWorkspaceId: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_id') : null) || (typeof window !== 'undefined' ? getUnoWorkspaceId() : ''),
@@ -593,6 +608,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       workspaceType: activeWorkspaceType,
       workspaceId: activeWorkspaceId,
       ownerId: deviceId,
+      alarms: [],
     };
 
     // Mutate Yjs Data Structure
@@ -1155,6 +1171,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     defaultDuration: 25,
     autoStart: false,
     soundEnabled: true,
+    soundVolume: 1,
     notificationEnabled: true,
     vibrationEnabled: true,
     showRowTomatoButtons: true,
@@ -1272,6 +1289,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         workspaceType: activeWorkspaceType,
         workspaceId: activeWorkspaceId,
         ownerId: get().deviceId,
+        alarms: [],
       };
       todoProjects = [defaultProject];
       activeProjectId = defaultProject.id;
@@ -1291,6 +1309,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         workspaceType: activeWorkspaceType,
         workspaceId: activeWorkspaceId,
         ownerId: get().deviceId,
+        alarms: [],
       };
       todoProjects = [emptyProject];
       activeProjectId = emptyProject.id;
@@ -1384,6 +1403,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         defaultDuration: 25,
         autoStart: false,
         soundEnabled: true,
+        soundVolume: 1,
         notificationEnabled: true,
         vibrationEnabled: true,
         showRowTomatoButtons: true,
@@ -1716,6 +1736,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       workspaceType: activeWorkspaceType,
       workspaceId: activeWorkspaceId,
       ownerId: currentDeviceId,
+      alarms: [],
     };
     set({
       tasks: [],
@@ -2195,6 +2216,90 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerSessions: [...s.timerSessions, session],
     }));
     console.log('[Timer] Session added to history:', session.id);
+  },
+
+  // --- Alarm System Actions (V1) ---
+  // Alarms are stored per-project in a nested Y.Map for Yjs sync
+  createAlarm: (projectId: string, alarm: import('@/schemas/storage').AlarmRecord) => {
+    const yProj = yProjectsMap.get(projectId);
+    if (!yProj) {
+      console.warn('[Alarm] Cannot create alarm: project not found', projectId);
+      return;
+    }
+
+    // Import here to avoid circular dependency
+    const { bindAlarmToYMap } = require('@/lib/yjsHelpers');
+
+    ydoc.transact(() => {
+      // CRITICAL: Initialize alarms map if it doesn't exist (legacy projects)
+      let yAlarms = yProj.get('alarms') as Y.Map<any>;
+      if (!yAlarms) {
+        yAlarms = new Y.Map();
+        yProj.set('alarms', yAlarms);
+      }
+      yAlarms.set(alarm.id, bindAlarmToYMap(alarm));
+    });
+
+    console.log('[Alarm] Created:', alarm.id, alarm.stepText);
+  },
+
+  updateAlarmStatus: (projectId: string, alarmId: string, status: import('@/schemas/storage').AlarmStatus, updates?: Partial<import('@/schemas/storage').AlarmRecord>) => {
+    const yProj = yProjectsMap.get(projectId);
+    if (!yProj) {
+      console.warn('[Alarm] Cannot update alarm: project not found', projectId);
+      return;
+    }
+
+    const yAlarms = yProj.get('alarms') as Y.Map<any>;
+    if (!yAlarms) {
+      console.warn('[Alarm] Cannot update alarm: no alarms map', projectId);
+      return;
+    }
+
+    const yAlarm = yAlarms.get(alarmId);
+    if (!yAlarm) {
+      console.warn('[Alarm] Cannot update alarm: alarm not found', alarmId);
+      return;
+    }
+
+    ydoc.transact(() => {
+      yAlarm.set('status', status);
+      if (updates?.alarmTimeMs !== undefined) {
+        yAlarm.set('alarmTimeMs', updates.alarmTimeMs);
+      }
+      if (updates?.snoozeCount !== undefined) {
+        yAlarm.set('snoozeCount', updates.snoozeCount);
+      }
+      if (updates?.originalAlarmTimeMs !== undefined) {
+        yAlarm.set('originalAlarmTimeMs', updates.originalAlarmTimeMs);
+      }
+    });
+
+    console.log('[Alarm] Updated status:', alarmId, status);
+  },
+
+  deleteAlarm: (projectId: string, alarmId: string) => {
+    const yProj = yProjectsMap.get(projectId);
+    if (!yProj) {
+      console.warn('[Alarm] Cannot delete alarm: project not found', projectId);
+      return;
+    }
+
+    const yAlarms = yProj.get('alarms') as Y.Map<any>;
+    if (!yAlarms) {
+      console.warn('[Alarm] Cannot delete alarm: no alarms map', projectId);
+      return;
+    }
+
+    ydoc.transact(() => {
+      // Soft delete using tombstone pattern (consistent with other entities)
+      const yAlarm = yAlarms.get(alarmId);
+      if (yAlarm) {
+        yAlarm.set('isDeleted', true);
+      }
+    });
+
+    console.log('[Alarm] Deleted (soft):', alarmId);
   },
 }));
 

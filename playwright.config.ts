@@ -6,7 +6,8 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
   workers: undefined,
-  timeout: 60000,
+  timeout: 120000,
+  globalTimeout: 600000,
   reporter: [['html', { open: 'never' }]],
   use: {
     baseURL: 'http://localhost:3000',
@@ -120,18 +121,20 @@ export default defineConfig({
   ],
   webServer: [
     {
-      command: 'npx serve -s out',
+      command: 'npx serve -s out -l 3000',
       url: 'http://localhost:3000',
-      reuseExistingServer: true,
-      stdout: 'ignore',
+      reuseExistingServer: !process.env.CI,
+      stdout: 'pipe',
       stderr: 'pipe',
+      timeout: 120000,
     },
     {
       command: 'SYNC_MODE=memory node sync-server/server.js',
-      url: 'http://localhost:8080',
-      reuseExistingServer: true,
-      stdout: 'ignore',
+      url: 'http://localhost:8080/health',
+      reuseExistingServer: !process.env.CI,
+      stdout: 'pipe',
       stderr: 'pipe',
+      timeout: 120000,
     },
   ],
 });

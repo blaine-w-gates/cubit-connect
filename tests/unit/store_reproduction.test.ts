@@ -83,6 +83,7 @@ describe('Store Double Save Reproduction', () => {
         defaultDuration: 25,
         autoStart: false,
         soundEnabled: true,
+        soundVolume: 1,
         notificationEnabled: true,
         vibrationEnabled: true,
         showRowTomatoButtons: true,

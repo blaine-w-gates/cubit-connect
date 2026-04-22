@@ -16,7 +16,9 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { PomodoroTimer } from '@/components/today/PomodoroTimer';
 import { TaskFocusCard } from '@/components/today/TaskFocusCard';
-import { Settings, X } from 'lucide-react';
+import { AlarmDashboard } from '@/components/alarm/AlarmDashboard';
+import { NotificationPermissionBanner } from '@/components/alarm/NotificationPermissionBanner';
+import { Settings, X, Bell, Volume2, VolumeX } from 'lucide-react';
 
 export default function TodayPage() {
   const [showSettings, setShowSettings] = useState(false);
@@ -105,7 +107,7 @@ export default function TodayPage() {
                 />
               </button>
             </div>
-            <div className="flex items-center justify-between py-3">
+            <div className="flex items-center justify-between py-3 border-b border-stone-200/50 dark:border-stone-700/50">
               <div>
                 <p className="font-medium text-stone-900 dark:text-stone-100">Enable notifications</p>
                 <p className="text-sm text-stone-500 dark:text-stone-400">Show desktop notification when timer completes</p>
@@ -130,6 +132,60 @@ export default function TodayPage() {
                 </button>
               </div>
             </div>
+
+            {/* V2: Audio Settings */}
+            <div className="py-3 border-b border-stone-200/50 dark:border-stone-700/50">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  {todayPreferences.soundEnabled ? (
+                    <Volume2 className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                  ) : (
+                    <VolumeX className="w-4 h-4 text-stone-500 dark:text-stone-400" />
+                  )}
+                  <div>
+                    <p className="font-medium text-stone-900 dark:text-stone-100">Alarm sound</p>
+                    <p className="text-sm text-stone-500 dark:text-stone-400">Play audio when alarms trigger</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => updateTimerPreferences({ soundEnabled: !todayPreferences.soundEnabled })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    todayPreferences.soundEnabled
+                      ? 'bg-amber-500 dark:bg-amber-600'
+                      : 'bg-stone-300 dark:bg-stone-600'
+                  }`}
+                  role="switch"
+                  aria-checked={todayPreferences.soundEnabled}
+                  aria-label={todayPreferences.soundEnabled ? 'Disable alarm sound' : 'Enable alarm sound'}
+                >
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      todayPreferences.soundEnabled ? 'translate-x-6' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+              
+              {/* Volume Slider - only show when sound is enabled */}
+              {todayPreferences.soundEnabled && (
+                <div className="flex items-center gap-3 mt-3 pl-6">
+                  <span className="text-xs text-stone-500 dark:text-stone-400">Volume</span>
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.1"
+                    value={todayPreferences.soundVolume ?? 1}
+                    onChange={(e) => updateTimerPreferences({ soundVolume: parseFloat(e.target.value) })}
+                    className="flex-1 h-2 bg-stone-200 dark:bg-stone-700 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                    aria-label="Alarm volume"
+                  />
+                  <span className="text-xs text-stone-600 dark:text-stone-400 w-8 text-right">
+                    {Math.round((todayPreferences.soundVolume ?? 1) * 100)}%
+                  </span>
+                </div>
+              )}
+            </div>
           </section>
         )}
 
@@ -146,6 +202,15 @@ export default function TodayPage() {
             <PomodoroTimer />
           </section>
 
+          {/* Alarm Dashboard - Shows triggered and pending alarms */}
+          <section aria-label="Alarms" className="bg-white/60 dark:bg-stone-900/60 backdrop-blur-lg border border-stone-200/50 dark:border-stone-700/50 rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center gap-2 mb-4">
+              <Bell className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+              <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">Alarms</h2>
+            </div>
+            <AlarmDashboard />
+          </section>
+
         </div>
 
         {/* Instructions */}
@@ -157,6 +222,9 @@ export default function TodayPage() {
         </footer>
 
       </div>
+
+      {/* Notification Permission Banner */}
+      <NotificationPermissionBanner />
     </main>
   );
 }

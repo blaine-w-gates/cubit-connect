@@ -78,6 +78,12 @@ async function startServer() {
 
     // Create HTTP Server (Render requires binding to a port)
     const server = http.createServer((req, res) => {
+        // Health check endpoint for CI/playwright
+        if (req.url === '/health') {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ status: 'ok', timestamp: Date.now() }));
+            return;
+        }
         res.writeHead(200, { 'Content-Type': 'text/plain' });
         res.end('Cubit Connect Dumb Relay is Active\n');
     });

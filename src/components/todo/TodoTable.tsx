@@ -4,9 +4,11 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Check, GripVertical } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
+import { useOnClickOutside } from '@/hooks/useOnClickOutside';
 import { useShallow } from 'zustand/react/shallow';
 import { GeminiService } from '@/services/gemini';
 import { TodoStep } from '@/services/storage';
+import { AlarmContextButton } from '@/components/alarm/AlarmContextButton';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import {
@@ -318,6 +320,12 @@ export default function TodoTable() {
         peerIsEditing,
         selectTaskForToday,
         showRowTomatoButtons,
+        // Alarm system
+        activeProjectId,
+        todoProjects,
+        selectedStepId,
+        selectStep,
+        clearSelectedStep,
     } = useAppStore(
         useShallow((s) => ({
             todoRows: s.todoRows,
@@ -344,8 +352,28 @@ export default function TodoTable() {
             selectTaskForToday: s.selectTaskForToday,
             // P2 Fix: Select only the specific property to avoid unnecessary re-renders
             showRowTomatoButtons: s.todayPreferences.showRowTomatoButtons,
+            // Alarm system
+            todoProjects: s.todoProjects,
+            selectedStepId: s.selectedStepId,
+            selectStep: s.selectStep,
+            clearSelectedStep: s.clearSelectedStep,
         })),
     );
+
+    // Ref for click-outside handling
+    const tableRef = useRef<HTMLDivElement>(null);
+    
+    // Clear selection when clicking outside the table
+    useOnClickOutside(tableRef, () => {
+        if (selectedStepId) {
+            clearSelectedStep();
+        }
+    });
+
+    // Get active project info for alarms
+    const activeProject = todoProjects.find(p => p.id === activeProjectId);
+    const projectName = activeProject?.name || 'Untitled Project';
+    const projectAlarms = activeProject?.alarms || [];
 
     // Track active drag for the overlay portal
     const [activeRabbitId, setActiveRabbitId] = useState<string | null>(null);
@@ -667,7 +695,7 @@ export default function TodoTable() {
     }
 
     return (
-        <div className="overflow-x-auto pb-20">
+        <div className="overflow-x-auto pb-20" ref={tableRef}>
             <DndContext
                 sensors={sensors}
                 collisionDetection={closestCenter}
@@ -784,6 +812,12 @@ export default function TodoTable() {
                                                 router.push('/today');
                                             }}
                                             showRowTomatoButtons={showRowTomatoButtons}
+                                            // Alarm props
+                                            projectId={activeProjectId || ''}
+                                            projectName={projectName}
+                                            selectedStepId={selectedStepId}
+                                            onSelectStep={selectStep}
+                                            alarms={projectAlarms}
                                         />
                                     );
                                 })}
@@ -831,6 +865,12 @@ export default function TodoTable() {
                                                 isLastRow={false}
                                                 onAddRow={() => { }}
                                                 showRowTomatoButtons={false}
+                                                // Alarm props (drag overlay doesn't need interactivity)
+                                                projectId={activeProjectId || ''}
+                                                projectName={projectName}
+                                                selectedStepId={null}
+                                                onSelectStep={() => { }}
+                                                alarms={[]}
                                             />
                                         </tbody>
                                     </table>
@@ -872,13 +912,23 @@ interface SortableRowProps {
     isLastRow: boolean;
     onAddRow: () => void;
     showRowTomatoButtons: boolean;
+    // Alarm system props
+    projectId: string;
+    projectName: string;
+    selectedStepId: { projectId: string; rowId: string; stepIndex: number } | null;
+    onSelectStep: (projectId: string, rowId: string, stepIndex: number) => void;
+    alarms: { id: string; sourceStepId?: string; status: string; alarmTimeMs: number }[];
 }
 
 // --- Droppable Step Cell Component ---
 function StepCellNode({
-    row, step, si, isCompleted, isModeActive, isLocked, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging, isLastRow, onAddRow
+    row, step, si, isCompleted, isModeActive, isLocked, isStepActionTarget, mc, onStepSave, onStepClick, currentStepIdx, onRabbitAdvance, explosionTargetId, isRabbitDragging, isLastRow, onAddRow,
+    // Alarm props
+    projectId, projectName, isSelected, onSelectStep, stepAlarm
 }: {
-    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isLocked: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean, isLastRow: boolean, onAddRow: () => void
+    row: SortableRowProps['row'], step: TodoStep, si: number, isCompleted: boolean, isModeActive: boolean, isLocked: boolean, isStepActionTarget: boolean, mc: { bg: string } | null, onStepSave: (val: string, si: number) => void, onStepClick: (si: number) => void, currentStepIdx: number, onRabbitAdvance: () => void, explosionTargetId: string | null, isRabbitDragging: boolean, isLastRow: boolean, onAddRow: () => void,
+    // Alarm props
+    projectId: string, projectName: string, isSelected: boolean, onSelectStep: () => void, stepAlarm?: { id: string; alarmTimeMs: number; status: string }
 }) {
     const isPopulated = step.text.trim().length > 0;
 
@@ -896,13 +946,31 @@ function StepCellNode({
                 ${isStepActionTarget && mc ? `cursor-pointer ${mc.bg}` : ''}
                 ${isRabbitDragging && isPopulated && !isOver ? 'shadow-[inset_0_0_0_2px_rgba(99,102,241,0.2)]' : ''}
                 ${isOver ? 'bg-indigo-50 dark:bg-indigo-950/30 shadow-[inset_0_0_0_2px_rgba(99,102,241,0.5)]' : ''}
+                ${isSelected ? 'ring-2 ring-cyan-400 dark:ring-cyan-500 ring-inset' : ''}
             `}
             onClick={(e) => {
                 if (window.getSelection()?.toString()) return;
                 e.stopPropagation();
+                onSelectStep();
                 onStepClick(si);
             }}
         >
+            {/* Alarm Context Button - appears when step is selected */}
+            {isSelected && isPopulated && !isModeActive && !isLocked && (
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-20">
+                    <AlarmContextButton
+                        projectId={projectId}
+                        rowId={row.id}
+                        stepIndex={si}
+                        stepText={step.text}
+                        taskText={row.task}
+                        projectName={projectName}
+                        stepId={step.id || `${row.id}-step-${si}`}
+                        isSelected={isSelected}
+                    />
+                </div>
+            )}
+
             <div className={`transition-opacity duration-200 ${currentStepIdx === si ? 'opacity-0' : 'opacity-100'} ${isCompleted ? 'opacity-40 line-through' : ''}`}>
                 <EditableCell
                     value={step.text}
@@ -912,6 +980,13 @@ function StepCellNode({
                     className={`text-zinc-700 dark:text-stone-300 ${isLocked ? 'cursor-not-allowed' : ''}`}
                     onTabOutForward={si === 3 && isLastRow ? onAddRow : undefined}
                 />
+                {/* Alarm indicator - shows clock icon for steps with alarms */}
+                {stepAlarm && stepAlarm.status !== 'dismissed' && (
+                    <span className="inline-flex items-center gap-1 text-xs text-cyan-600 dark:text-cyan-400 ml-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                        {new Date(stepAlarm.alarmTimeMs).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                    </span>
+                )}
             </div>
             {/* Conditional Rabbit placement inside the Step Cell */}
             {currentStepIdx === si && (
@@ -927,10 +1002,11 @@ function StepCellNode({
 }
 
 function SortableRow({
-    row, isProcessing, isCompleted, isModeActive,
+    row, projectId, projectName, isProcessing, isCompleted, isModeActive,
     isLocked, isTaskActionTarget, isStepActionTarget, mc,
     onDoubleClick, onTouchStart, onTouchEnd, onTaskClick,
-    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId, onGoToToday, isLastRow, onAddRow, showRowTomatoButtons
+    onToggleComplete, onDelete, onTaskSave, onStepSave, onStepClick, onRabbitAdvance, explosionTargetId, isRabbitDragging, lastAddedRowId, onGoToToday, isLastRow, onAddRow, showRowTomatoButtons,
+    selectedStepId, onSelectStep, alarms
 }: SortableRowProps) {
     const {
         attributes,
@@ -1059,27 +1135,38 @@ function SortableRow({
             </td>
 
             {/* Step Columns — 3-6/6 */}
-            {row.steps.map((step, si) => (
-                <StepCellNode
-                    key={si}
-                    row={row}
-                    step={step}
-                    si={si}
-                    isCompleted={isCompleted || isRow100Percent}
-                    isModeActive={isModeActive}
-                    isLocked={isLocked}
-                    isStepActionTarget={isStepActionTarget}
-                    mc={mc}
-                    onStepSave={onStepSave}
-                    onStepClick={onStepClick}
-                    currentStepIdx={currentStepIdx}
-                    onRabbitAdvance={() => onRabbitAdvance(row.id, currentStepIdx)}
-                    explosionTargetId={explosionTargetId}
-                    isRabbitDragging={isRabbitDragging}
-                    isLastRow={isLastRow}
-                    onAddRow={onAddRow}
-                />
-            ))}
+            {row.steps.map((step, si) => {
+                const stepId = step.id || `${row.id}-step-${si}`;
+                const isSelected = selectedStepId?.projectId === projectId && selectedStepId?.rowId === row.id && selectedStepId?.stepIndex === si;
+                const stepAlarm = alarms.find(a => a.sourceStepId === stepId && a.status !== 'dismissed');
+                return (
+                    <StepCellNode
+                        key={si}
+                        row={row}
+                        step={step}
+                        si={si}
+                        isCompleted={isCompleted || isRow100Percent}
+                        isModeActive={isModeActive}
+                        isLocked={isLocked}
+                        isStepActionTarget={isStepActionTarget}
+                        mc={mc}
+                        onStepSave={onStepSave}
+                        onStepClick={onStepClick}
+                        currentStepIdx={currentStepIdx}
+                        onRabbitAdvance={() => onRabbitAdvance(row.id, currentStepIdx)}
+                        explosionTargetId={explosionTargetId}
+                        isRabbitDragging={isRabbitDragging}
+                        isLastRow={isLastRow}
+                        onAddRow={onAddRow}
+                        // Alarm props
+                        projectId={projectId}
+                        projectName={projectName}
+                        isSelected={isSelected}
+                        onSelectStep={() => onSelectStep(projectId, row.id, si)}
+                        stepAlarm={stepAlarm}
+                    />
+                );
+            })}
         </tr>
     );
 }

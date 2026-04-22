@@ -90,18 +90,19 @@ describe('generateAllProjectsMarkdown', () => {
   });
 
   it('includes project names as section titles', () => {
-    const emptyStep = { text: '', isCompleted: false };
+    const emptyStep = { id: 'empty-step', text: '', isCompleted: false };
     const projects: TodoProject[] = [
       {
         id: 'p1',
         name: 'Project A',
         color: '#22D3EE',
-        todoRows: [{ id: 'r1', task: 'Task 1', steps: [{ text: 'Step 1', isCompleted: false }, emptyStep, emptyStep, emptyStep], isCompleted: false }],
+        todoRows: [{ id: 'r1', task: 'Task 1', steps: [{ id: 'step-1', text: 'Step 1', isCompleted: false }, emptyStep, emptyStep, emptyStep], isCompleted: false }],
         priorityDials: { left: '', right: '', focusedSide: 'none' },
         createdAt: Date.now(),
         workspaceType: 'personalUno',
         workspaceId: 'test-workspace',
         ownerId: 'test-device',
+        alarms: [],
       },
     ];
     const md = generateAllProjectsMarkdown(projects);

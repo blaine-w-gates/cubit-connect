@@ -1,7 +1,7 @@
 import * as Y from 'yjs';
 import { generateKeyBetween } from 'fractional-indexing';
 import diff from 'fast-diff';
-import { TodoRow, TodoStep, TodoProject, TaskItem, CubitStep } from '@/schemas/storage';
+import { TodoRow, TodoStep, TodoProject, TaskItem, CubitStep, AlarmRecord } from '@/schemas/storage';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
  type YMap = Y.Map<any>;
@@ -65,8 +65,11 @@ export function sortYMapList<T extends { id: string, orderKey?: string }>(items:
 }
 
 // --- Todo Steps Binding ---
+// UUID backfill: If step has no ID (legacy data), generate one on extraction
 export function bindTodoStepToYMap(step: TodoStep): YMap {
     const yStep = new Y.Map();
+    // Ensure ID exists (generate if missing for legacy compatibility)
+    yStep.set('id', step.id || crypto.randomUUID());
     const yText = new Y.Text(step.text);
     yStep.set('text', yText);
     yStep.set('isCompleted', step.isCompleted);
@@ -74,7 +77,10 @@ export function bindTodoStepToYMap(step: TodoStep): YMap {
 }
 
 export function extractTodoStepFromYMap(yStep: YMap): TodoStep {
+    const id = yStep.get('id');
     return {
+        // Backfill UUID for legacy steps without IDs - critical for alarm references
+        id: id || crypto.randomUUID(),
         text: (yStep.get('text') as Y.Text)?.toString() || '',
         isCompleted: !!yStep.get('isCompleted'),
     };
@@ -107,16 +113,20 @@ export function extractTodoRowFromYMap(yRow: YMap): TodoRow {
     return {
         id: yRow.get('id'),
         task: (yRow.get('task') as Y.Text)?.toString() || '',
-        // Enforce 4-tuple typing
+        // Enforce 4-tuple typing - steps now include backfilled UUIDs
         steps: [
-            rawSteps[0] || { text: '', isCompleted: false },
-            rawSteps[1] || { text: '', isCompleted: false },
-            rawSteps[2] || { text: '', isCompleted: false },
-            rawSteps[3] || { text: '', isCompleted: false }
+            rawSteps[0] || { id: crypto.randomUUID(), text: '', isCompleted: false },
+            rawSteps[1] || { id: crypto.randomUUID(), text: '', isCompleted: false },
+            rawSteps[2] || { id: crypto.randomUUID(), text: '', isCompleted: false },
+            rawSteps[3] || { id: crypto.randomUUID(), text: '', isCompleted: false }
         ],
         isCompleted: !!yRow.get('isCompleted'),
         sourceStepId: yRow.get('sourceStepId'),
         orderKey: yRow.get('orderKey'),
+        // Future-proof fields (null until Supabase migration)
+        userId: yRow.get('userId'),
+        workspaceId: yRow.get('workspaceId'),
+        workspaceType: yRow.get('workspaceType'),
     };
 }
 
@@ -173,6 +183,13 @@ export function bindTodoProjectToYMap(project: TodoProject, initialOrderKey?: st
 
     yProject.set('priorityDials', bindPriorityDialsToYMap(project.priorityDials));
 
+    // Alarms: Stored as Y.Map keyed by alarm ID for efficient updates
+    const alarmsMap = new Y.Map();
+    project.alarms?.forEach(alarm => {
+        alarmsMap.set(alarm.id, bindAlarmToYMap(alarm));
+    });
+    yProject.set('alarms', alarmsMap);
+
     return yProject;
 }
 
@@ -181,6 +198,12 @@ export function extractTodoProjectFromYMap(yProject: YMap): TodoProject {
     const rowsList = rowsMap ? Array.from(rowsMap.values())
         .filter(yRow => !yRow.get('isDeleted'))
         .map(extractTodoRowFromYMap) : [];
+
+    // Extract alarms from nested Y.Map
+    const alarmsMap = yProject.get('alarms') as Y.Map<YMap>;
+    const alarmsList = alarmsMap ? Array.from(alarmsMap.values())
+        .filter(yAlarm => !yAlarm.get('isDeleted'))
+        .map(extractAlarmFromYMap) : [];
 
     return {
         id: yProject.get('id'),
@@ -195,9 +218,64 @@ export function extractTodoProjectFromYMap(yProject: YMap): TodoProject {
         ownerId: yProject.get('ownerId') || '',
         teamId: yProject.get('teamId'),
         objectiveId: yProject.get('objectiveId'),
+        alarms: alarmsList,
     };
 }
 
+
+// --- Alarm Binding ---
+export function bindAlarmToYMap(alarm: AlarmRecord): YMap {
+    const yAlarm = new Y.Map();
+    yAlarm.set('id', alarm.id);
+    
+    // Snapshot fields (survive task deletion)
+    yAlarm.set('stepText', alarm.stepText);
+    yAlarm.set('taskText', alarm.taskText);
+    yAlarm.set('projectName', alarm.projectName);
+    
+    // Weak references (nullable)
+    if (alarm.sourceProjectId) yAlarm.set('sourceProjectId', alarm.sourceProjectId);
+    if (alarm.sourceTaskId) yAlarm.set('sourceTaskId', alarm.sourceTaskId);
+    if (alarm.sourceStepId) yAlarm.set('sourceStepId', alarm.sourceStepId);
+    
+    // Trigger fields
+    yAlarm.set('alarmTimeMs', alarm.alarmTimeMs);
+    yAlarm.set('status', alarm.status);
+    yAlarm.set('snoozeCount', alarm.snoozeCount || 0);
+    if (alarm.originalAlarmTimeMs) yAlarm.set('originalAlarmTimeMs', alarm.originalAlarmTimeMs);
+    
+    // Metadata
+    yAlarm.set('createdAt', alarm.createdAt);
+    
+    // Identity anchors
+    yAlarm.set('ownerClientId', alarm.ownerClientId);
+    if (alarm.userId) yAlarm.set('userId', alarm.userId);
+    if (alarm.workspaceId) yAlarm.set('workspaceId', alarm.workspaceId);
+    if (alarm.workspaceType) yAlarm.set('workspaceType', alarm.workspaceType);
+    
+    return yAlarm;
+}
+
+export function extractAlarmFromYMap(yAlarm: YMap): AlarmRecord {
+    return {
+        id: yAlarm.get('id'),
+        stepText: yAlarm.get('stepText') || '',
+        taskText: yAlarm.get('taskText') || '',
+        projectName: yAlarm.get('projectName') || '',
+        sourceProjectId: yAlarm.get('sourceProjectId'),
+        sourceTaskId: yAlarm.get('sourceTaskId'),
+        sourceStepId: yAlarm.get('sourceStepId'),
+        alarmTimeMs: yAlarm.get('alarmTimeMs'),
+        status: yAlarm.get('status') || 'pending',
+        snoozeCount: yAlarm.get('snoozeCount') || 0,
+        originalAlarmTimeMs: yAlarm.get('originalAlarmTimeMs'),
+        createdAt: yAlarm.get('createdAt'),
+        ownerClientId: yAlarm.get('ownerClientId'),
+        userId: yAlarm.get('userId'),
+        workspaceId: yAlarm.get('workspaceId'),
+        workspaceType: yAlarm.get('workspaceType'),
+    };
+}
 
 // --- Cubit/Deep Dive Tasks Binding ---
 // Recursive steps!

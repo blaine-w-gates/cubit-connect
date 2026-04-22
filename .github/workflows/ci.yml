@@ -72,7 +72,8 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - run: npm run build
       - name: Run focused sync tests
-        run: npx playwright test --project="Desktop Chrome" --grep "sync|Sync|SYNC" --reporter=line --workers=1
+        # Playwright will start webServer automatically, CI=true ensures fresh server instances
+        run: CI=true npx playwright test --project="Desktop Chrome" --grep "sync|Sync|SYNC" --reporter=line --workers=1
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -95,7 +96,8 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - run: npm run build
       - name: Run full Chrome tests
-        run: npx playwright test --project="Desktop Chrome" --reporter=line --workers=2
+        # Playwright will start webServer automatically, CI=true ensures fresh server instances
+        run: CI=true npx playwright test --project="Desktop Chrome" --reporter=line --workers=2
       - uses: actions/upload-artifact@v4
         if: always()
         with:

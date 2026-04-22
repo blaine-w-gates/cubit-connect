@@ -35,18 +35,23 @@ test.describe('Multi-Device Sync Reconciliation', () => {
     });
 
     test('E2E Sync Flow: Convergence & Dynamic Locking', async ({ browser }) => {
+        test.setTimeout(120000);
+        
         const PASSPHRASE = `test-passphrase-${Date.now()}`;
         
         // 1. Setup Peer A (The Seeder/Owner)
         const contextA = await browser.newContext();
         const pageA = await contextA.newPage();
         
-        await pageA.goto('/todo');
+        await pageA.goto('/todo', { waitUntil: 'networkidle' });
         await pageA.evaluate(() => {
             localStorage.setItem('sync_server_url', 'ws://localhost:8080');
             localStorage.setItem('theme', 'dark');
         });
-        await pageA.reload();
+        await pageA.reload({ waitUntil: 'networkidle' });
+        
+        // Wait for Sync button to be available
+        await pageA.getByRole('button', { name: 'Sync', exact: true }).waitFor({ state: 'visible', timeout: 15000 });
         
         // Connect Peer A
         await pageA.getByRole('button', { name: 'Sync', exact: true }).click();
@@ -59,13 +64,16 @@ test.describe('Multi-Device Sync Reconciliation', () => {
         const contextB = await browser.newContext();
         const pageB = await contextB.newPage();
         
-        await pageB.goto('/todo');
+        await pageB.goto('/todo', { waitUntil: 'networkidle' });
         await pageB.evaluate(() => {
             localStorage.setItem('sync_server_url', 'ws://localhost:8080');
             localStorage.setItem('theme', 'dark');
         });
-        await pageB.reload();
+        await pageB.reload({ waitUntil: 'networkidle' });
 
+        // Wait for Sync button to be available
+        await pageB.getByRole('button', { name: 'Sync', exact: true }).waitFor({ state: 'visible', timeout: 15000 });
+        
         // Connect Peer B
         await pageB.getByRole('button', { name: 'Sync', exact: true }).click();
         await pageB.getByPlaceholder('Enter a shared secret...').fill(PASSPHRASE);

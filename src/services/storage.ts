@@ -7,7 +7,7 @@ const LEGACY_KEY = 'cubit_connect_project_v1';
 const MIGRATION_FLAG = 'cubit_migration_done_v2';
 const MIGRATION_BACKUP_TTL = 30 * 24 * 60 * 60 * 1000; // 30 days
 
-export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep, TimerSession, TodayPreferences } from '@/schemas/storage';
+export type { StoredProjectData, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProject, TodoStep, TimerSession, TodayPreferences, AlarmRecord } from '@/schemas/storage';
 
 function emptyState(): StoredProjectData {
   return {
@@ -22,6 +22,7 @@ function emptyState(): StoredProjectData {
       defaultDuration: 25,
       autoStart: false,
       soundEnabled: true,
+      soundVolume: 1,
       notificationEnabled: true,
       vibrationEnabled: true,
       showRowTomatoButtons: true,
@@ -102,6 +103,37 @@ export const storageService = {
         }
       }
 
+      // Pre-process: Backfill UUIDs for steps that don't have IDs (Alarm system V1 compatibility)
+      // This ensures all steps have stable IDs for alarm references
+      if (raw && typeof raw === 'object' && 'todoProjects' in raw) {
+        const rawData = raw as { todoProjects?: unknown[] };
+        if (Array.isArray(rawData.todoProjects)) {
+          rawData.todoProjects = rawData.todoProjects.map((project: unknown) => {
+            if (project && typeof project === 'object' && 'todoRows' in project) {
+              const projObj = project as { todoRows?: unknown[]; [key: string]: unknown };
+              if (Array.isArray(projObj.todoRows)) {
+                projObj.todoRows = projObj.todoRows.map((row: unknown) => {
+                  if (row && typeof row === 'object' && 'steps' in row) {
+                    const rowObj = row as { steps?: unknown[]; [key: string]: unknown };
+                    if (Array.isArray(rowObj.steps)) {
+                      // Backfill UUID for any step missing an ID
+                      rowObj.steps = rowObj.steps.map((step: unknown) => {
+                        if (step && typeof step === 'object' && !('id' in step)) {
+                          return { ...step, id: crypto.randomUUID() };
+                        }
+                        return step;
+                      });
+                    }
+                  }
+                  return row;
+                });
+              }
+            }
+            return project;
+          });
+        }
+      }
+
       const result = ProjectDataSchema.safeParse(raw);
 
       if (!result.success) {
@@ -125,6 +157,7 @@ export const storageService = {
               defaultDuration: 25,
               autoStart: false,
               soundEnabled: true,
+              soundVolume: 1,
               notificationEnabled: true,
               vibrationEnabled: true,
               showRowTomatoButtons: true,
@@ -195,6 +228,7 @@ export const storageService = {
           defaultDuration: 25,
           autoStart: false,
           soundEnabled: true,
+          soundVolume: 1,
           notificationEnabled: true,
           vibrationEnabled: true,
           showRowTomatoButtons: true,
