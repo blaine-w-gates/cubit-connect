@@ -189,10 +189,10 @@ function registerYjsObserver(set: any, get: any) {
       // Reset the inactivity timer every time the user types.
       if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
       idleCheckpointTimer = setTimeout(() => {
-        console.log("Deep Idle Reached: Generating 1MB+ E2EE Checkpoint...");
+        console.log(`Deep Idle Reached: Generating 1MB+ E2EE Checkpoint... (env: ${isTestEnvironment ? 'test' : 'prod'}, delay: ${IDLE_CHECKPOINT_DELAY}ms)`);
         const fullState = Y.encodeStateAsUpdate(ydoc);
         networkSync?.broadcastCheckpoint(fullState);
-      }, 30000);
+      }, IDLE_CHECKPOINT_DELAY);
     }
 
     // --- THE CATCH-UP RENDER THROTTLE ---
@@ -481,6 +481,15 @@ const SYNC_SERVER_URL = (typeof window !== 'undefined' && localStorage.getItem('
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
 let peerEditingTimer: NodeJS.Timeout | null = null;
+
+// Test environment detection - reduce checkpoint timer for faster e2e tests
+const isTestEnvironment = typeof window !== 'undefined' && (
+  window.location.hostname === 'localhost' && window.location.port === '3000' && 
+  (window as any).__PLAYWRIGHT__ || 
+  process.env.NODE_ENV === 'test' ||
+  process.env.CI === 'true'
+);
+const IDLE_CHECKPOINT_DELAY = isTestEnvironment ? 500 : 30000; // 500ms in tests, 30s in production
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
