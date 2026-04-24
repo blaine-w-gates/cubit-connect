@@ -1388,6 +1388,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         if (data.transcript) applyUpdateToYText(yTranscript, data.transcript);
       });
       console.log('🧬 Genesis Boot Complete.');
+      
+      // Immediate genesis checkpoint broadcast for test environments
+      // This ensures Device B can sync immediately without waiting for idle timer
+      if (isTestEnvironment && networkSync) {
+        console.log('🚀 [TEST MODE] Immediate Genesis checkpoint broadcast');
+        const genesisState = Y.encodeStateAsUpdate(ydoc);
+        networkSync.broadcastCheckpoint(genesisState);
+      }
     }
 
     // --- Scalar Document State Hydration ---
