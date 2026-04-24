@@ -13,6 +13,7 @@ import {
   markObserverRegisteredInStateMachine,
   enableDiagnostics,
   getInstanceId,
+  getInstance,
   assertInvariant,
   recordZustandUpdate,
 } from '@/lib/syncDiagnostics';
@@ -71,6 +72,16 @@ export function getYDoc() { return ydoc; }
 function resetYDoc(): Y.Doc {
   const oldId = getInstanceId(ydoc);
   console.log(`[YJS DEBUG] resetYDoc() called - destroying ydoc ${oldId || 'unknown'}`);
+  
+  // CRITICAL FIX: Check for pending updates before destroying
+  // If updates were received but not applied, they will be lost
+  if (oldId) {
+    const instance = getInstance(oldId);
+    if (instance && instance.updatesReceived > instance.updatesApplied) {
+      const pending = instance.updatesReceived - instance.updatesApplied;
+      console.warn(`[YJS DEBUG] resetYDoc() - WARNING: Destroying ydoc with ${pending} pending updates! Data loss likely.`);
+    }
+  }
   
   // CRITICAL FIX: Disconnect NetworkSync BEFORE destroying ydoc
   // This ensures NetworkSync will be recreated with the new ydoc reference
