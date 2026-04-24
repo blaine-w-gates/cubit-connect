@@ -489,6 +489,7 @@ const SYNC_SERVER_URL = (typeof window !== 'undefined' && localStorage.getItem('
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
 let peerEditingTimer: NodeJS.Timeout | null = null;
+let connectToSyncServerInFlight = false;
 
 // Test environment detection - reduce checkpoint timer for faster e2e tests and local dev
 const isTestEnvironment = typeof window !== 'undefined' && (
@@ -994,9 +995,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // --- Network Sync Actions ---
   connectToSyncServer: async (passphrase: string) => {
+    // RE-ENTRY GUARD: Prevent concurrent connectToSyncServer calls
+    if (connectToSyncServerInFlight) {
+      console.log('[YJS DEBUG] connectToSyncServer - already in flight, skipping duplicate call');
+      return;
+    }
+    connectToSyncServerInFlight = true;
+
     const { isHydrated } = get();
     if (!isHydrated) {
       console.warn("E2EE Sync Blocked: Cannot connect to relay before local IndexedDB establishes genesis state.");
+      connectToSyncServerInFlight = false;
       return;
     }
 
@@ -1028,9 +1037,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       
       console.log(`[YJS DEBUG] connectToSyncServer - currentWsType: ${currentWsType}, currentWsId: ${currentWsId?.slice(0,8)}, roomIdHash: ${roomIdHash?.slice(0,8)}, isSameRoom: ${isSameRoom}`);
 
+      // Track if we already reset in this call to prevent double-reset
+      let didResetInThisCall = false;
+
       if (!isSameRoom) {
         console.log('[YJS DEBUG] connectToSyncServer - NOT same room, calling resetYDoc and loadProject');
         resetYDoc();
+        didResetInThisCall = true;
+        const ydocAfterReset = getInstanceId(ydoc);
+        console.log(`[YJS DEBUG] connectToSyncServer - ydoc after reset: ${ydocAfterReset}`);
         isMigrating = false;
         loadProjectInFlight = null;
 
@@ -1052,10 +1067,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
       // CRITICAL: Check if ydoc is destroyed/missing and recreate it
       // This can happen when reconnecting to same room after disconnect
+      // BUT: Skip if we already reset in this call (prevents double-reset bug)
       const currentYdocId = getInstanceId(ydoc);
-      if (!currentYdocId) {
+      if (!currentYdocId && !didResetInThisCall) {
         console.log('[YJS DEBUG] connectToSyncServer - ydoc is null/destroyed, calling resetYDoc()');
         resetYDoc();
+      } else if (!currentYdocId && didResetInThisCall) {
+        console.log('[YJS DEBUG] connectToSyncServer - WARNING: ydoc destroyed immediately after reset, skipping second reset to prevent data loss');
       }
 
       // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
@@ -1153,6 +1171,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       console.error("Failed to connect to E2EE Relay:", err);
       transitionToPhase('error', { ydocId: getInstanceId(ydoc), error: String(err) });
       set({ syncStatus: 'error', roomFingerprint: null });
+    } finally {
+      connectToSyncServerInFlight = false;
+      console.log('[YJS DEBUG] connectToSyncServer - in-flight flag cleared');
     }
   },
 
