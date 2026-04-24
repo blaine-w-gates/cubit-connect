@@ -210,6 +210,10 @@ function registerYjsObserver(set: any, get: any) {
       // 1. Extract raw lists but filter out tombstones immediately
       const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
       const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+      
+      // DEBUG: Log what observer is extracting
+      const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
+      console.log('[SYNC DEBUG] Observer extracting:', rawYProjects.length, 'projects:', JSON.stringify(projectNamesDebug));
 
       // 2. Map through cache for Structural Sharing with O(1) dirty check early bail
       const sharedProjects = rawYProjects.map(yProj => {
@@ -1896,6 +1900,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // Extract current state from Yjs (same logic as debounced handler in loadProject)
     const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
     const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+    
+    // DEBUG: Log what we're extracting
+    const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
+    console.log('[SYNC DEBUG] syncFromYjs extracting:', rawYProjects.length, 'projects:', JSON.stringify(projectNamesDebug));
 
     // Map through cache for Structural Sharing (simple version without cache for now)
     const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
