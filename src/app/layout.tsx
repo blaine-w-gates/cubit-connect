@@ -52,6 +52,7 @@ import { GlobalErrorListener } from '@/components/GlobalErrorListener';
 import { Toaster } from 'sonner';
 import { ThemeProvider } from 'next-themes';
 import OfflineIndicator from '@/components/OfflineIndicator';
+import { AppReadyIndicator } from '@/components/AppReadyIndicator';
 
 import SyncSetupModal from '@/components/SyncSetupModal';
 
@@ -68,6 +69,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <AppReadyIndicator />
         <OfflineIndicator />
         <ErrorBoundary>
           <GlobalErrorListener />

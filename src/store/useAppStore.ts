@@ -482,14 +482,12 @@ let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
 let peerEditingTimer: NodeJS.Timeout | null = null;
 
-// Test environment detection - reduce checkpoint timer for faster e2e tests
+// Test environment detection - reduce checkpoint timer for faster e2e tests and local dev
 const isTestEnvironment = typeof window !== 'undefined' && (
-  window.location.hostname === 'localhost' && window.location.port === '3000' && 
   (window as any).__PLAYWRIGHT__ || 
-  process.env.NODE_ENV === 'test' ||
-  process.env.CI === 'true'
+  window.location.hostname === 'localhost'
 );
-const IDLE_CHECKPOINT_DELAY = isTestEnvironment ? 500 : 30000; // 500ms in tests, 30s in production
+const IDLE_CHECKPOINT_DELAY = isTestEnvironment ? 500 : 30000; // 500ms in tests/local dev, 30s in production
 
 export const useAppStore = create<ProjectState>((set, get) => ({
   // Initial State
