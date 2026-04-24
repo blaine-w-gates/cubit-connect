@@ -69,7 +69,7 @@ export function getYDoc() { return ydoc; }
  * 
  * CRITICAL: Also resets NetworkSync so it uses the new ydoc reference.
  */
-function resetYDoc(): Y.Doc {
+async function resetYDoc(): Promise<Y.Doc> {
   const oldId = getInstanceId(ydoc);
   console.log(`[YJS DEBUG] resetYDoc() called - destroying ydoc ${oldId || 'unknown'}`);
   
@@ -86,8 +86,9 @@ function resetYDoc(): Y.Doc {
   // CRITICAL FIX: Disconnect NetworkSync BEFORE destroying ydoc
   // This ensures NetworkSync will be recreated with the new ydoc reference
   if (networkSync) {
-    console.log('[YJS DEBUG] resetYDoc() - disconnecting existing NetworkSync');
-    networkSync.disconnect();
+    console.log('[YJS DEBUG] resetYDoc() - disconnecting existing NetworkSync (awaiting flush...)');
+    await networkSync.disconnect();
+    console.log('[YJS DEBUG] resetYDoc() - NetworkSync disconnected and flushed');
     networkSync = null;
   }
   if (idleCheckpointTimer) {
@@ -597,7 +598,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     // 2. Create a fresh Y.Doc so no data from the old workspace leaks
-    resetYDoc();
+    await resetYDoc();
     isMigrating = false;
     loadProjectInFlight = null;
 
@@ -1053,7 +1054,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
       if (!isSameRoom) {
         console.log('[YJS DEBUG] connectToSyncServer - NOT same room, calling resetYDoc and loadProject');
-        resetYDoc();
+        await resetYDoc();
         didResetInThisCall = true;
         const ydocAfterReset = getInstanceId(ydoc);
         console.log(`[YJS DEBUG] connectToSyncServer - ydoc after reset: ${ydocAfterReset}`);
@@ -1082,7 +1083,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const currentYdocId = getInstanceId(ydoc);
       if (!currentYdocId && !didResetInThisCall) {
         console.log('[YJS DEBUG] connectToSyncServer - ydoc is null/destroyed, calling resetYDoc()');
-        resetYDoc();
+        await resetYDoc();
       } else if (!currentYdocId && didResetInThisCall) {
         console.log('[YJS DEBUG] connectToSyncServer - WARNING: ydoc destroyed immediately after reset, skipping second reset to prevent data loss');
       }
