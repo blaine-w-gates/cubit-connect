@@ -14,6 +14,7 @@ import {
   enableDiagnostics,
   getInstanceId,
   assertInvariant,
+  recordZustandUpdate,
 } from '@/lib/syncDiagnostics';
 import {
   bindTodoProjectToYMap,
@@ -290,6 +291,9 @@ function registerYjsObserver(set: any, get: any) {
           scoutResults,
           scoutHistory,
         });
+        
+        // Track that Zustand state was updated from Yjs
+        recordZustandUpdate(ydoc);
       });
     }, 100);
   });
@@ -1918,6 +1922,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutResults,
       scoutHistory,
     });
+    
+    // Track that Zustand state was synced from Yjs
+    recordZustandUpdate(ydoc);
     
     console.log('🔄 syncFromYjs: Extracted', updatedProjects.length, 'projects,', actProj?.todoRows?.length || 0, 'rows');
   },
