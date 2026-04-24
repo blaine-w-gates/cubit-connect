@@ -532,9 +532,32 @@ export class NetworkSync {
         console.log(`[NetworkSync] Flush complete (${elapsed}ms)`);
     }
 
+    /**
+     * CRITICAL FIX: Flush queued Yjs updates that are waiting for catchUpLock
+     * This prevents data loss when resetYDoc is called while updates are queued
+     */
+    flushQueuedUpdates(): void {
+        if (this.queuedLiveDiffsDuringCatchUp.length === 0) return;
+        
+        console.log(`[NetworkSync] Flushing ${this.queuedLiveDiffsDuringCatchUp.length} queued Yjs updates before disconnect...`);
+        
+        // Apply all queued updates immediately (don't wait for catchUpLock)
+        this.ydoc.transact(() => {
+            this.queuedLiveDiffsDuringCatchUp.forEach((diff) => {
+                Y.applyUpdate(this.ydoc, diff, 'network');
+            });
+        }, 'network');
+        
+        this.queuedLiveDiffsDuringCatchUp = [];
+        console.log('[NetworkSync] Queued updates applied successfully');
+    }
+
     async disconnect(): Promise<void> {
         // CRITICAL FIX: Flush pending operations before closing socket
         await this.flush();
+        
+        // CRITICAL FIX: Apply any queued Yjs updates before disconnecting
+        this.flushQueuedUpdates();
         
         this.sendDisconnectSignal().finally(() => {
             this.intentionalDisconnect = true;
