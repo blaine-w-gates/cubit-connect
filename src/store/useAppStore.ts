@@ -1092,6 +1092,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           if (status !== 'connected') set({ hasPeers: false });
         },
         () => {
+          // CRITICAL FIX: Force immediate state sync when checkpoint arrives
+          // The debounced observer may miss the initial document load due to cache/dirty tracking issues
+          const { syncFromYjs } = get();
+          syncFromYjs();
           set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
         },
         () => {
