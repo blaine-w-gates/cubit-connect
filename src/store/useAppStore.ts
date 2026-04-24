@@ -1300,7 +1300,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (
       todoProjects.length === 0 &&
       data.todoRows &&
-      data.todoRows.length > 0
+      data.todoRows.length > 0 &&
+      yProjectsMap.size === 0  // CRITICAL FIX: Don't migrate if network data already exists
     ) {
       const defaultProject: TodoProject = {
         id: crypto.randomUUID(),
@@ -1321,7 +1322,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     // If no projects exist at all, create an empty default
-    if (todoProjects.length === 0) {
+    // CRITICAL FIX: Check if ydoc already has network-synced projects before creating default
+    // This prevents loadProject from overwriting network data that arrived during initialization
+    if (todoProjects.length === 0 && yProjectsMap.size === 0) {
       const emptyProject: TodoProject = {
         id: crypto.randomUUID(),
         name: 'My First Project',
@@ -1340,10 +1343,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
     // Ensure activeProjectId points to a valid project
     if (!activeProjectId || !todoProjects.find((p) => p.id === activeProjectId)) {
-      activeProjectId = todoProjects[0].id;
+      activeProjectId = todoProjects[0]?.id || null;
     }
 
-    const activeProject = todoProjects.find((p) => p.id === activeProjectId)!;
     // -----------------------
 
     // ==========================================
@@ -1414,6 +1416,22 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const safeTranscript = yTranscript.toString();
     if (safeTranscript !== "") data.transcript = safeTranscript;
 
+    // CRITICAL FIX: If ydoc has network-synced projects, extract them instead of using stale local vars
+    // This prevents loadProject from overwriting data that arrived during initialization
+    const hasNetworkProjects = yProjectsMap.size > 0;
+    if (hasNetworkProjects) {
+      todoProjects = sortYMapList(
+        Array.from(yProjectsMap.values())
+          .filter(p => !p.get('isDeleted'))
+          .map(extractTodoProjectFromYMap)
+      );
+      if (!activeProjectId || !todoProjects.find(p => p.id === activeProjectId)) {
+        activeProjectId = todoProjects[0]?.id || null;
+      }
+      console.log(`[YJS DEBUG] loadProject() - Using ${todoProjects.length} projects from ydoc (network-synced)`);
+    }
+    const finalActiveProject = todoProjects.find(p => p.id === activeProjectId) || todoProjects[0];
+
     set({
       tasks: migratedTasks as TaskItem[],
       transcript: data.transcript || null,
@@ -1425,8 +1443,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       scoutHistory: data.scoutHistory || [],
       todoProjects,
       activeProjectId,
-      todoRows: activeProject.todoRows,
-      priorityDials: activeProject.priorityDials,
+      todoRows: finalActiveProject?.todoRows || [],
+      priorityDials: finalActiveProject?.priorityDials || { left: '', right: '', focusedSide: 'none' },
       // Seed the counter so new projects always have unique names & colors.
       nextProjectNumber: todoProjects.length + 1,
       // Today Page timer state (P1-T2) - load from storage or use defaults
