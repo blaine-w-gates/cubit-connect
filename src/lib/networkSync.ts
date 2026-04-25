@@ -306,6 +306,15 @@ export class NetworkSync {
                         // An empty Yjs update [0, 0] is mathematically harmless, but serves as proof of life.
                         if (yjsData.length === 2 && yjsData[0] === 0 && yjsData[1] === 0) {
                             console.log(`[PRESENCE] Peer heartbeat received on ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
+                            
+                            // CRITICAL FIX: Respond immediately with our own heartbeat for mutual discovery
+                            // This ensures joining peers can detect us within the 1s Founder wait window
+                            if (!this.hasDetectedPeers) {
+                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat');
+                                const responseHeartbeat = new Uint8Array([0, 0]);
+                                this.broadcastUpdate(responseHeartbeat);
+                            }
+                            
                             // Record in connection manager for peer count tracking
                             this.hasDetectedPeers = true;
                             getGlobalConnectionManager().updatePeerCount(1);
