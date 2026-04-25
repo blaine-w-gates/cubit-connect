@@ -315,6 +315,15 @@ export class NetworkSync {
                                 console.log('[PRESENCE] First peer detected, broadcasting response heartbeat');
                                 const responseHeartbeat = new Uint8Array([0, 0]);
                                 this.broadcastUpdate(responseHeartbeat);
+                                
+                                // CRITICAL FIX: If we're the Founder (catchUpLock still active, no checkpoint received),
+                                // upload our state immediately so the joining peer can fetch it
+                                if (this.catchUpLock) {
+                                    console.log('[PRESENCE] Founder detected joining peer - uploading checkpoint immediately');
+                                    const currentState = Y.encodeStateAsUpdate(this.ydoc);
+                                    this.broadcastCheckpoint(currentState);
+                                    this.releaseCatchUpLock();
+                                }
                             }
                             
                             // Record in connection manager for peer count tracking
