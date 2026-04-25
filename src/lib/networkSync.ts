@@ -50,6 +50,8 @@ export class NetworkSync {
             this.ydoc.transact(() => {
                 this.queuedLiveDiffsDuringCatchUp.forEach((diff) => {
                     Y.applyUpdate(this.ydoc, diff, 'network');
+                    // Mark each applied update for diagnostics
+                    markUpdateApplied(this.ydoc);
                 });
             }, 'network');
             this.queuedLiveDiffsDuringCatchUp = [];
