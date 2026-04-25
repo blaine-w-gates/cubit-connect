@@ -71,6 +71,7 @@ export class NetworkSync {
     private intentionalDisconnect: boolean = false;
     private reconnectAttempts: number = 0;
     private hasDetectedPeers: boolean = false;
+    private hasUploadedCheckpointForPeer: boolean = false;
     private onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void;
     private onSyncActivity?: () => void;
     private onPeerPresence?: () => void;
@@ -312,16 +313,19 @@ export class NetworkSync {
                             // CRITICAL FIX: Respond immediately with our own heartbeat for mutual discovery
                             // This ensures joining peers can detect us within the 1s Founder wait window
                             if (!this.hasDetectedPeers) {
-                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat and checkpoint');
+                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat');
                                 const responseHeartbeat = new Uint8Array([0, 0]);
                                 this.broadcastUpdate(responseHeartbeat);
-                                
-                                // CRITICAL FIX: Upload our state immediately when detecting a new peer
-                                // This bridges the "Discovery vs Lock Race" where Device A's lock expires
-                                // before Device B joins. We upload regardless of catchUpLock status.
-                                console.log('[PRESENCE] Detected joining peer - uploading checkpoint immediately');
+                            }
+                            
+                            // CRITICAL FIX: Upload checkpoint when we detect ANY peer (not just first)
+                            // but only once per connection session. This ensures Device B can fetch
+                            // our state regardless of when they join.
+                            if (!this.hasUploadedCheckpointForPeer) {
+                                console.log('[PRESENCE] Detected peer - uploading checkpoint immediately (regardless of join timing)');
                                 const currentState = Y.encodeStateAsUpdate(this.ydoc);
                                 this.broadcastCheckpoint(currentState);
+                                this.hasUploadedCheckpointForPeer = true;
                                 
                                 // If we were still in catchUp mode, release it now
                                 if (this.catchUpLock) {
@@ -620,6 +624,10 @@ export class NetworkSync {
         
         // CRITICAL FIX: Apply any queued Yjs updates before disconnecting
         this.flushQueuedUpdates();
+        
+        // Reset peer detection flags so we can upload again on reconnect
+        this.hasDetectedPeers = false;
+        this.hasUploadedCheckpointForPeer = false;
         
         this.sendDisconnectSignal().finally(() => {
             this.intentionalDisconnect = true;
