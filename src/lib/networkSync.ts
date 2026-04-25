@@ -227,10 +227,14 @@ export class NetworkSync {
                                 console.log('🌱 No peers detected after 1s. Claiming Founder and uploading Genesis.');
                                 const fullState = Y.encodeStateAsUpdate(this.ydoc);
                                 this.broadcastCheckpoint(fullState);
+                                this.releaseCatchUpLock();
                             } else {
-                                console.log('🌱 Peers detected! Skipping Founder upload, waiting for their checkpoint.');
+                                console.log('🌱 Peers detected! Re-requesting cache to fetch their checkpoint...');
+                                // CRITICAL FIX: Re-request cache now that we know a peer exists.
+                                // Their checkpoint might have just been saved to Redis.
+                                this.requestCache();
+                                // Don't release catchUpLock here - let the checkpoint handler do it
                             }
-                            this.releaseCatchUpLock();
                         }, 1000);
                         return;
                     } 
@@ -483,6 +487,17 @@ export class NetworkSync {
         const operation = this.doBroadcastCheckpoint(fullUpdate);
         this.pendingPromises.add(operation);
         await operation.finally(() => this.pendingPromises.delete(operation));
+    }
+
+    /**
+     * Re-requests the cache from the server.
+     * Used when we detect peers after receiving MSG_ROOM_EMPTY.
+     */
+    requestCache(): void {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+        console.log('📦 [CACHE] Re-requesting cache from server...');
+        const payload = new Uint8Array([MSG_REQUEST_CACHE]);
+        this.ws.send(payload);
     }
 
     private async doBroadcastCheckpoint(fullUpdate: Uint8Array): Promise<void> {
