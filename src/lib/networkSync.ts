@@ -339,9 +339,12 @@ export class NetworkSync {
                         // SYNCHRONICITY TRAP: If a peer types while we are downloading the checkpoint,
                         // applying their diff *before* the checkpoint mathematically corrupts the vector clock.
                         if (this.catchUpLock) {
-                            console.warn('⏳ [INBOUND] Queueing live diff because Genesis Catch-Up is still locking.');
-                            this.queuedLiveDiffsDuringCatchUp.push(yjsData);
-                            return;
+                            // CRITICAL FIX: If we receive a live diff from a peer, it means they're active.
+                            // Release the catchUpLock and apply the update (and any queued updates).
+                            // This handles the case where we re-requested cache but the checkpoint hasn't arrived yet.
+                            console.warn('⏳ [INBOUND] Received live diff while catchUpLock active. Releasing lock and applying.');
+                            this.releaseCatchUpLock();
+                            // Fall through to apply this update (queued updates are already applied by releaseCatchUpLock)
                         }
                         
                         // BROADCAST SIGNAL: Peer has begun an edit. 
