@@ -83,6 +83,17 @@ async function resetYDoc(): Promise<Y.Doc> {
     }
   }
   
+  // CRITICAL FIX: Sync any pending data to Zustand before destroying ydoc
+  // This handles the "Pre-Attachment Race" where updates arrive before networkSync is assigned
+  if (oldId) {
+    const instance = getInstance(oldId);
+    if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
+      console.log('[YJS DEBUG] resetYDoc() - ydoc has unapplied updates, forcing syncFromYjs before destroy');
+      useAppStore.getState().syncFromYjs();
+      console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed for pre-attached updates');
+    }
+  }
+  
   // CRITICAL FIX: Disconnect NetworkSync BEFORE destroying ydoc
   // This ensures NetworkSync will be recreated with the new ydoc reference
   if (networkSync) {
@@ -90,12 +101,6 @@ async function resetYDoc(): Promise<Y.Doc> {
     await networkSync.disconnect();
     console.log('[YJS DEBUG] resetYDoc() - NetworkSync disconnected and flushed');
     networkSync = null;
-    
-    // CRITICAL FIX: Force immediate sync to Zustand before destroying ydoc
-    // The flush applied updates to the Y.Doc, but the debounced observer may not fire before destroy
-    console.log('[YJS DEBUG] resetYDoc() - forcing immediate syncFromYjs before destroy');
-    useAppStore.getState().syncFromYjs();
-    console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed');
   }
   if (idleCheckpointTimer) {
     clearTimeout(idleCheckpointTimer);
