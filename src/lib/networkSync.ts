@@ -342,7 +342,20 @@ export class NetworkSync {
                             }
                             
                             // Record in connection manager for peer count tracking
+                            const wasFirstPeer = !this.hasDetectedPeers;
                             this.hasDetectedPeers = true;
+                            
+                            // CRITICAL FIX: When we detect a peer and we're still waiting for data (catchUpLock or first peer),
+                            // re-request cache after a short delay to give them time to upload
+                            if (this.catchUpLock || wasFirstPeer) {
+                                console.log('[PRESENCE] Peer detected while waiting for data, scheduling cache re-request in 500ms...');
+                                setTimeout(() => {
+                                    if (this.ws?.readyState === WebSocket.OPEN) {
+                                        console.log('[PRESENCE] Re-requesting cache after peer detection...');
+                                        this.requestCache();
+                                    }
+                                }, 500);
+                            }
                             getGlobalConnectionManager().updatePeerCount(1);
                             if (this.onPeerPresence) {
                                 console.log('[PRESENCE] Calling onPeerPresence callback');
