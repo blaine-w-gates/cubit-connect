@@ -324,8 +324,16 @@ export class NetworkSync {
                             if (!this.hasUploadedCheckpointForPeer) {
                                 console.log('[PRESENCE] Detected peer - uploading checkpoint immediately (regardless of join timing)');
                                 const currentState = Y.encodeStateAsUpdate(this.ydoc);
-                                this.broadcastCheckpoint(currentState);
-                                this.hasUploadedCheckpointForPeer = true;
+                                this.hasUploadedCheckpointForPeer = true; // Set immediately to prevent duplicate uploads
+                                
+                                // CRITICAL FIX: Await the checkpoint upload to ensure it completes before Device B requests cache
+                                this.broadcastCheckpoint(currentState).then(() => {
+                                    console.log('[PRESENCE] Checkpoint upload completed successfully');
+                                }).catch(err => {
+                                    console.error('[PRESENCE] Checkpoint upload failed:', err);
+                                    // Reset flag so we can retry on next peer detection
+                                    this.hasUploadedCheckpointForPeer = false;
+                                });
                                 
                                 // If we were still in catchUp mode, release it now
                                 if (this.catchUpLock) {
