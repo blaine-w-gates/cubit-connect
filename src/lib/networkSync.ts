@@ -174,6 +174,14 @@ export class NetworkSync {
                     }
                 }, 15000);
 
+                // CRITICAL FIX: Broadcast immediate presence heartbeat BEFORE requesting cache
+                // This ensures other peers know we exist before they make Founder decisions
+                if (this.ws?.readyState === WebSocket.OPEN && this.key) {
+                    console.log(`[PRESENCE] Broadcasting immediate heartbeat on connect from ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
+                    const emptyUpdate = new Uint8Array([0, 0]);
+                    this.broadcastUpdate(emptyUpdate);
+                }
+
                 // The "Catch-Up" Protocol (Dual-Band): Download Last Checkpoint + Last 100 Diffs
                 const payload = new Uint8Array([MSG_REQUEST_CACHE]);
                 // Request Cache packet does not need encryption, it just triggers the server playback
