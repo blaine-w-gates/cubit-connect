@@ -90,6 +90,13 @@ async function resetYDoc(): Promise<Y.Doc> {
     await networkSync.disconnect();
     console.log('[YJS DEBUG] resetYDoc() - NetworkSync disconnected and flushed');
     networkSync = null;
+    
+    // CRITICAL FIX: Force immediate sync to Zustand before destroying ydoc
+    // The flush applied updates to the Y.Doc, but the debounced observer may not fire before destroy
+    console.log('[YJS DEBUG] resetYDoc() - forcing immediate syncFromYjs before destroy');
+    const { syncFromYjs } = get();
+    syncFromYjs();
+    console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed');
   }
   if (idleCheckpointTimer) {
     clearTimeout(idleCheckpointTimer);
