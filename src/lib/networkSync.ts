@@ -312,16 +312,19 @@ export class NetworkSync {
                             // CRITICAL FIX: Respond immediately with our own heartbeat for mutual discovery
                             // This ensures joining peers can detect us within the 1s Founder wait window
                             if (!this.hasDetectedPeers) {
-                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat');
+                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat and checkpoint');
                                 const responseHeartbeat = new Uint8Array([0, 0]);
                                 this.broadcastUpdate(responseHeartbeat);
                                 
-                                // CRITICAL FIX: If we're the Founder (catchUpLock still active, no checkpoint received),
-                                // upload our state immediately so the joining peer can fetch it
+                                // CRITICAL FIX: Upload our state immediately when detecting a new peer
+                                // This bridges the "Discovery vs Lock Race" where Device A's lock expires
+                                // before Device B joins. We upload regardless of catchUpLock status.
+                                console.log('[PRESENCE] Detected joining peer - uploading checkpoint immediately');
+                                const currentState = Y.encodeStateAsUpdate(this.ydoc);
+                                this.broadcastCheckpoint(currentState);
+                                
+                                // If we were still in catchUp mode, release it now
                                 if (this.catchUpLock) {
-                                    console.log('[PRESENCE] Founder detected joining peer - uploading checkpoint immediately');
-                                    const currentState = Y.encodeStateAsUpdate(this.ydoc);
-                                    this.broadcastCheckpoint(currentState);
                                     this.releaseCatchUpLock();
                                 }
                             }
