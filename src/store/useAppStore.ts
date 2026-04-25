@@ -79,28 +79,31 @@ async function resetYDoc(): Promise<Y.Doc> {
     const instance = getInstance(oldId);
     if (instance && instance.updatesReceived > instance.updatesApplied) {
       const pending = instance.updatesReceived - instance.updatesApplied;
-      console.warn(`[YJS DEBUG] resetYDoc() - WARNING: Destroying ydoc with ${pending} pending updates! Data loss likely.`);
+      console.warn(`[YJS DEBUG] resetYDoc() - WARNING: Destroying ydoc with ${pending} pending updates!`);
     }
   }
   
-  // CRITICAL FIX: Sync any pending data to Zustand before destroying ydoc
-  // This handles the "Pre-Attachment Race" where updates arrive before networkSync is assigned
-  if (oldId) {
-    const instance = getInstance(oldId);
-    if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
-      console.log('[YJS DEBUG] resetYDoc() - ydoc has unapplied updates, forcing syncFromYjs before destroy');
-      useAppStore.getState().syncFromYjs();
-      console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed for pre-attached updates');
-    }
-  }
-  
-  // CRITICAL FIX: Disconnect NetworkSync BEFORE destroying ydoc
-  // This ensures NetworkSync will be recreated with the new ydoc reference
+  // CRITICAL FIX: Disconnect NetworkSync BEFORE syncing/destroying ydoc
+  // This ensures queued updates are applied to the ydoc before we extract state
   if (networkSync) {
     console.log('[YJS DEBUG] resetYDoc() - disconnecting existing NetworkSync (awaiting flush...)');
     await networkSync.disconnect();
     console.log('[YJS DEBUG] resetYDoc() - NetworkSync disconnected and flushed');
     networkSync = null;
+    
+    // AFTER flush, sync any newly-applied data to Zustand
+    console.log('[YJS DEBUG] resetYDoc() - forcing syncFromYjs after flush');
+    useAppStore.getState().syncFromYjs();
+    console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed after flush');
+  } else if (oldId) {
+    // NetworkSync is null but ydoc might still have unapplied updates
+    // This handles the "Pre-Attachment Race" where updates arrived before networkSync was assigned
+    const instance = getInstance(oldId);
+    if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
+      console.log('[YJS DEBUG] resetYDoc() - ydoc has unapplied updates but networkSync is null, attempting syncFromYjs');
+      useAppStore.getState().syncFromYjs();
+      console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed for pre-attached updates');
+    }
   }
   if (idleCheckpointTimer) {
     clearTimeout(idleCheckpointTimer);
