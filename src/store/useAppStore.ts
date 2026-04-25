@@ -94,8 +94,7 @@ async function resetYDoc(): Promise<Y.Doc> {
     // CRITICAL FIX: Force immediate sync to Zustand before destroying ydoc
     // The flush applied updates to the Y.Doc, but the debounced observer may not fire before destroy
     console.log('[YJS DEBUG] resetYDoc() - forcing immediate syncFromYjs before destroy');
-    const { syncFromYjs } = get();
-    syncFromYjs();
+    useAppStore.getState().syncFromYjs();
     console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed');
   }
   if (idleCheckpointTimer) {
