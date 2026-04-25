@@ -68,6 +68,7 @@ export class NetworkSync {
 
     private intentionalDisconnect: boolean = false;
     private reconnectAttempts: number = 0;
+    private hasDetectedPeers: boolean = false;
     private onStatusChange: (status: 'connecting' | 'connected' | 'error' | 'disconnected') => void;
     private onSyncActivity?: () => void;
     private onPeerPresence?: () => void;
@@ -218,10 +219,19 @@ export class NetworkSync {
                     }
 
                     if (messageType === MSG_ROOM_EMPTY) {
-                        console.log('🌱 Room is empty. Uploading Genesis Checkpoint...');
-                        const fullState = Y.encodeStateAsUpdate(this.ydoc);
-                        this.broadcastCheckpoint(fullState);
-                        this.releaseCatchUpLock();
+                        console.log('🌱 Room is empty. Waiting for peer discovery before claiming Founder...');
+                        // CRITICAL FIX: Don't immediately upload Genesis. Wait 1s to see if peers exist.
+                        // This prevents the race where we overwrite another peer's checkpoint.
+                        setTimeout(() => {
+                            if (!this.hasDetectedPeers) {
+                                console.log('🌱 No peers detected after 1s. Claiming Founder and uploading Genesis.');
+                                const fullState = Y.encodeStateAsUpdate(this.ydoc);
+                                this.broadcastCheckpoint(fullState);
+                            } else {
+                                console.log('🌱 Peers detected! Skipping Founder upload, waiting for their checkpoint.');
+                            }
+                            this.releaseCatchUpLock();
+                        }, 1000);
                         return;
                     } 
                     
@@ -285,6 +295,7 @@ export class NetworkSync {
                         if (yjsData.length === 2 && yjsData[0] === 0 && yjsData[1] === 0) {
                             console.log(`[PRESENCE] Peer heartbeat received on ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
                             // Record in connection manager for peer count tracking
+                            this.hasDetectedPeers = true;
                             getGlobalConnectionManager().updatePeerCount(1);
                             if (this.onPeerPresence) {
                                 console.log('[PRESENCE] Calling onPeerPresence callback');
