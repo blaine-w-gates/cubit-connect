@@ -14,9 +14,11 @@ import { useReactToPrint } from 'react-to-print';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
+import { getStorageInfo, formatStorageSize } from '@/lib/storageMonitor';
 import { Manifesto } from '@/components/Manifesto';
 import Header from '@/components/Header';
 import SettingsDialog from '@/components/SettingsDialog';
+import OfflineIndicator from '@/components/OfflineIndicator';
 import { PrintableReport } from '@/components/PrintableReport';
 import VideoInput from '@/components/VideoInput';
 import ResultsFeed from '@/components/ResultsFeed';
@@ -57,6 +59,50 @@ export default function EnginePage() {
   const [confirmingReset, setConfirmingReset] = useState(false);
   // isSettingsOpen moved to Global Store
   const [resetKey, setResetKey] = useState(0);
+
+  // Storage monitoring with toast alerts
+  useEffect(() => {
+    if (!mounted) return;
+
+    let lastStatus: string | null = null;
+
+    const checkStorage = async () => {
+      const info = await getStorageInfo();
+      if (!info) return;
+
+      // Show toast only when crossing thresholds (not on every check)
+      if (info.status !== lastStatus) {
+        if (info.status === 'critical') {
+          // INTENTIONALLY PERSISTENT: Critical storage warning requires user action
+          // Dismissible but urgent - data loss imminent
+          toast.error(`Storage Critical: ${formatStorageSize(info.usage)} used`, {
+            description: 'Export your data immediately to prevent data loss.',
+            duration: 0, // Persistent until dismissed
+            action: {
+              label: 'Open Settings',
+              onClick: () => useAppStore.getState().setIsSettingsOpen(true),
+            },
+          });
+        } else if (info.status === 'warning') {
+          // INTENTIONALLY NOTICEABLE: Warning should be visible but not blocking
+          // Auto-dismiss after reasonable time
+          toast.warning(`Storage Nearly Full: ${formatStorageSize(info.usage)} used`, {
+            description: 'Approaching 50MB limit. Consider exporting data.',
+            duration: 10000, // 10 seconds
+          });
+        }
+        lastStatus = info.status;
+      }
+    };
+
+    // Check immediately on mount
+    checkStorage();
+
+    // Check periodically (every 30 seconds)
+    const interval = setInterval(checkStorage, 30000);
+
+    return () => clearInterval(interval);
+  }, [mounted]);
 
   // Hydrate on mount
   useEffect(() => {
@@ -100,6 +146,7 @@ export default function EnginePage() {
 
   return (
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
+      <OfflineIndicator />
       <SettingsDialog />
 
       {/* Hidden Video Element for Processing */}

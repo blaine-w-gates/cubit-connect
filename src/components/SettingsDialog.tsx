@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { GeminiService } from '@/services/gemini';
-import { storageService } from '@/services/storage';
-import { LogOut, HardDrive, Download } from 'lucide-react';
+import { getStorageInfo, formatStorageSize, type StorageStatus } from '@/lib/storageMonitor';
+import { LogOut, HardDrive, Download, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
 
 const Spinner = ({ className }: { className?: string }) => (
   <svg
@@ -38,7 +32,7 @@ export default function SettingsDialog() {
   const [error, setError] = useState<string | null>(null);
   const [mounted, setMounted] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
-  const [storageEst, setStorageEst] = useState<{ usage: number; quota: number } | null>(null);
+  const [storageEst, setStorageEst] = useState<{ usage: number; quota: number; status: StorageStatus } | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,7 +41,15 @@ export default function SettingsDialog() {
 
   useEffect(() => {
     if (!open) return;
-    storageService.getStorageEstimate().then(setStorageEst);
+    getStorageInfo().then((info) => {
+      if (info) {
+        setStorageEst({
+          usage: info.usage,
+          quota: info.quota,
+          status: info.status,
+        });
+      }
+    });
   }, [open]);
 
   // Sync input with store when opening, if needed.
@@ -149,14 +151,17 @@ export default function SettingsDialog() {
 
         {/* Storage Section */}
         {storageEst && storageEst.quota > 0 && (
-          <div className="mb-6 pt-6 border-t border-zinc-200 dark:border-stone-700">
-            <div className="flex items-center gap-2 text-zinc-700 dark:text-stone-300 mb-2">
-              <HardDrive className="w-4 h-4" />
-              <span className="text-sm font-medium">Local Storage</span>
+          <div className={`mb-6 pt-6 border-t border-zinc-200 dark:border-stone-700 ${storageEst.status === 'critical' ? 'bg-red-50 dark:bg-red-900/20 p-3 rounded-lg -mx-2' : storageEst.status === 'warning' ? 'bg-amber-50 dark:bg-amber-900/20 p-3 rounded-lg -mx-2' : ''}`}>
+            <div className={`flex items-center gap-2 mb-2 ${storageEst.status === 'critical' ? 'text-red-600 dark:text-red-400' : storageEst.status === 'warning' ? 'text-amber-600 dark:text-amber-400' : 'text-zinc-700 dark:text-stone-300'}`}>
+              {storageEst.status === 'critical' ? <AlertCircle className="w-4 h-4" /> : <HardDrive className="w-4 h-4" />}
+              <span className="text-sm font-medium">
+                {storageEst.status === 'critical' ? 'Storage Critical' : storageEst.status === 'warning' ? 'Storage Nearly Full' : 'Local Storage'}
+              </span>
             </div>
-            <p className={`text-sm mb-3 ${storageEst.usage / storageEst.quota >= 0.8 ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-zinc-600 dark:text-stone-400'}`}>
-              {formatBytes(storageEst.usage)} of {formatBytes(storageEst.quota)} used
-              {storageEst.usage / storageEst.quota >= 0.8 && ' — approaching limit'}
+            <p className={`text-sm mb-3 ${storageEst.status === 'critical' ? 'text-red-600 dark:text-red-400 font-medium' : storageEst.status === 'warning' ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-zinc-600 dark:text-stone-400'}`}>
+              {formatStorageSize(storageEst.usage)} used
+              {storageEst.status === 'warning' && ' — approaching 50MB limit'}
+              {storageEst.status === 'critical' && ' — export data immediately!'}
             </p>
             <button
               onClick={() => useAppStore.getState().exportAndClearData()}

@@ -1,3 +1,13 @@
+/**
+ * Offline Indicator Component
+ *
+ * Displays a sticky banner when the user is offline.
+ * Uses network status hook to detect connectivity changes.
+ *
+ * @module OfflineIndicator
+ * @component
+ */
+
 'use client';
 
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
