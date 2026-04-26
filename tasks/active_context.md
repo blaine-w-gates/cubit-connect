@@ -61,6 +61,7 @@ This file tracks the active plan and phase of the Cubit Connect project.
 - [x] Markdown Export.
 - [x] Toast Notifications (`sonner`).
 - [x] Drag-and-Drop task reordering.
-- [ ] Offline Indicator (sticky banner).
+- [x] Offline Indicator (sticky banner).
 - [x] Pre-commit Hooks (`husky`).
+- [x] Performance Monitoring (IDB size warning at 50MB/55MB).
 - [ ] Centralized AI Prompts (`src/prompts/`).
