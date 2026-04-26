@@ -421,3 +421,30 @@ When a new bug is caught:
 ---
 
 **Remember:** Every bug caught is a constraint added. The system gets smarter every sprint.
+
+---
+
+## ARCHIVED DOCUMENTATION
+
+### DEPLOY_SYNC_SERVER.md
+**Status:** 🗑️ ARCHIVED — April 26, 2026  
+**Reason:** Legacy sync-server/ directory deleted per ADR-004  
+
+This document detailed how to deploy the custom WebSocket relay server on Render.com. The server enabled real-time End-to-End Encrypted (E2EE) synchronization between devices.
+
+**Key Points from Original Document:**
+- Architecture: Frontend (Next.js Static Site) + Relay Server (Node.js + Redis)
+- Security: All data AES-256-GCM encrypted before leaving browser
+- Root Directory: `sync-server` (critical setting on Render)
+- Redis: Used for caching encrypted checkpoints and diffs
+- Instance Type: Free tier acceptable (or Starter for persistent uptime)
+
+**Migration Note:** 
+Supabase Realtime now provides managed infrastructure, eliminating the need for custom relay server deployment. See ADR-004 for deletion rationale.
+
+**Original Content Location:**
+```
+DEPLOY_SYNC_SERVER.md (deleted from repo root)
+Length: 197 lines
+Last modified: April 2026
+```

@@ -12,6 +12,7 @@
 
 import { test, expect } from '@playwright/test';
 
+// Types for window globals are defined in src/lib/featureFlags.ts
 test.describe('Feature Flags E2E', () => {
   test.describe.configure({ mode: 'serial' });
 
@@ -106,7 +107,7 @@ test.describe('Feature Flags E2E', () => {
     const toggleResults = await page.evaluate(() => {
       const results: boolean[] = [];
       for (let i = 0; i < 5; i++) {
-        const result = (window as any).__toggleSupabaseSync__();
+        const result = window.__toggleSupabaseSync__?.() ?? false;
         results.push(result);
       }
       return results;
@@ -127,12 +128,12 @@ test.describe('Feature Flags E2E', () => {
 
     // Check initial telemetry
     const initialTelemetry = await page.evaluate(() => {
-      return (window as any).__SYNC_TELEMETRY__ || [];
+      return window.__SYNC_TELEMETRY__ || [];
     });
 
     // Enable Supabase sync
     await page.evaluate(() => {
-      (window as any).__USE_SUPABASE_SYNC__ = true;
+      window.__USE_SUPABASE_SYNC__ = true;
       localStorage.setItem('USE_SUPABASE_SYNC', 'true');
     });
 
@@ -141,13 +142,13 @@ test.describe('Feature Flags E2E', () => {
 
     // Verify flag is set
     const isEnabled = await page.evaluate(() => {
-      return (window as any).__USE_SUPABASE_SYNC__;
+      return window.__USE_SUPABASE_SYNC__;
     });
     expect(isEnabled).toBe(true);
 
     // Check telemetry was emitted
     const finalTelemetry = await page.evaluate(() => {
-      return (window as any).__SYNC_TELEMETRY__ || [];
+      return window.__SYNC_TELEMETRY__ || [];
     });
 
     // Should have more telemetry events than initial
@@ -160,22 +161,22 @@ test.describe('Feature Flags E2E', () => {
 
     // Clear telemetry
     await page.evaluate(() => {
-      (window as any).__SYNC_TELEMETRY__ = [];
+      window.__SYNC_TELEMETRY__ = [];
     });
 
     // Toggle flag
     await page.evaluate(() => {
-      (window as any).__toggleSupabaseSync__();
+      window.__toggleSupabaseSync__?.();
     });
 
     // Check telemetry
     const telemetry = await page.evaluate(() => {
-      return (window as any).__SYNC_TELEMETRY__ || [];
+      return window.__SYNC_TELEMETRY__ || [];
     });
 
     // Should have flag_toggled event
     const hasToggleEvent = telemetry.some(
-      (e: any) => e.event === 'flag_toggled'
+      (e) => e.event === 'flag_toggled'
     );
     expect(hasToggleEvent).toBe(true);
   });
@@ -189,7 +190,7 @@ test.describe('Feature Flags E2E', () => {
       return {
         hasTelemetry: '__SYNC_TELEMETRY__' in window,
         hasFlag: '__USE_SUPABASE_SYNC__' in window,
-        hasToggle: typeof (window as any).__toggleSupabaseSync__ === 'function',
+        hasToggle: typeof window.__toggleSupabaseSync__ === 'function',
         hasUnsavedChanges: '__SYNC_HAS_UNSAVED_CHANGES__' in window,
       };
     });

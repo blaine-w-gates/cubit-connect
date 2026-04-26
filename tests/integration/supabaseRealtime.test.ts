@@ -8,7 +8,7 @@
  * @runtime-verification
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import * as Y from 'yjs';
 import { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
 import { generateUniqueClientId } from '@/lib/yjsClientId';
@@ -32,7 +32,7 @@ class MockSupabaseRealtime {
   private channels: Map<string, MockChannel> = new Map();
   private subscribers: Map<string, Set<(payload: unknown) => void>> = new Map();
 
-  channel(name: string, _config?: unknown) {
+  channel(name: string, _config?: unknown) { // eslint-disable-line @typescript-eslint/no-unused-vars
     if (!this.channels.has(name)) {
       this.channels.set(name, new MockChannel(name, this));
     }
@@ -133,7 +133,6 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
   let ydoc: Y.Doc;
   let sync: SupabaseSyncProd;
   let derivedKey: CryptoKey;
-  let mockRealtime: MockSupabaseRealtime;
 
   beforeAll(async () => {
     // Create Yjs document with unique client ID
@@ -143,9 +142,6 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
 
     // Generate E2EE key
     derivedKey = await deriveTestKey('test-passphrase');
-
-    // Initialize mock Realtime
-    mockRealtime = new MockSupabaseRealtime();
   });
 
   afterAll(() => {
@@ -161,7 +157,7 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
   describe('C1: Real Supabase Connection', () => {
     it('should establish connection within timeout', async () => {
       const roomHash = `test-room-${Date.now()}`;
-      let statusChanges: string[] = [];
+      const statusChanges: string[] = [];
 
       sync = new SupabaseSyncProd(
         ydoc,
@@ -190,7 +186,7 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
 
     it('should handle connection timeout gracefully', async () => {
       const roomHash = `timeout-test-${Date.now()}`;
-      let statusChanges: string[] = [];
+      const statusChanges: string[] = [];
 
       // Create sync instance
       sync = new SupabaseSyncProd(
@@ -218,7 +214,6 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
   describe('C2: E2EE Actually Encrypts', () => {
     it('should encrypt Yjs updates', async () => {
       const roomHash = `e2ee-test-${Date.now()}`;
-      let receivedUpdate: Uint8Array | null = null;
 
       sync = new SupabaseSyncProd(
         ydoc,

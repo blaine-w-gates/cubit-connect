@@ -3,9 +3,9 @@
  * 
  * Manages cross-tab timer ownership using:
  * 1. BroadcastChannel API for same-device coordination (fast, reliable)
- * 2. Yjs Awareness (via NetworkSync) for cross-device coordination (per Gemini directive #2)
+ * 2. Yjs Awareness (via SupabaseSync) for cross-device coordination
  * 
- * Per Gemini directive: "Use the existing NetworkSync awareness. Do not create separate instance."
+ * Uses existing SupabaseSync awareness. Do not create separate instance.
  * Awareness states are ephemeral out-of-band messages, not persisted to document history.
  */
 
@@ -74,8 +74,8 @@ export class TimerOwnershipManager {
   }
   
   /**
-   * Set the Yjs awareness instance (from NetworkSync)
-   * Per Gemini directive: Use existing NetworkSync awareness
+   * Set the Yjs awareness instance (from SupabaseSync)
+   * Uses existing sync awareness for cross-device coordination
    */
   setAwareness(awareness: unknown | null): void {
     this.awareness = awareness;
