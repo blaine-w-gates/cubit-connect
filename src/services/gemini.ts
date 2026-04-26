@@ -1,6 +1,12 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { TaskItem } from './storage';
 import { safeParseTasks, safeParseSearchQueries, safeParseSubSteps } from '@/lib/validation';
+import {
+  transcriptAnalysisPrompt,
+  subStepsPrompt,
+  searchQueriesPrompt,
+  testPrompt,
+} from '@/prompts';
 
 // MODELS
 const PRIMARY_MODEL = 'gemini-2.5-flash-lite';
@@ -161,11 +167,6 @@ export const GeminiService = {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const promptRules =
-      mode === 'text'
-        ? `TEXT MODE: Source is raw text. SET "timestamp_seconds": 0 for all tasks.`
-        : `VIDEO MODE: Identify timestamps where new topics begin.`;
-
     // 0. CONTEXT CHECK (Safety Valve for Lite)
     // If transcript is huge (>25k tokens approx 100k chars), force Primary Model or fail if Primary is hot.
     // We act conservatively: If > 100,000 chars, we assume it's too big for Lite.
@@ -180,30 +181,11 @@ export const GeminiService = {
       );
     }
 
-    const prompt = `
-            You are an expert Instructional Designer creating a "Recipe for Life" guide for high school students.
-            Your goal is to turn the raw transcript below into a logical, step-by-step Action Plan.
-
-            CRITICAL LANGUAGE RULE:
-            Detect the language of the input transcript and reply ENTIRELY in that same language.
-            If the input is in Chinese, respond in Chinese. If English, respond in English.
-            Only use a different language if the user explicitly requests it in their input.
-
-            RULES FOR TASKS:
-            1. **Granularity:** Break the content into 4-8 distinct "Modules" or "Steps."
-            2. **Naming:** Task names must be Action Verbs (e.g. "Scrape Leads" instead of "Scraping").
-            3. **Description:** The description must summarize the *value* of this step (Why do we do this?).
-            4. **Visual Match:** Select timestamp where the speaker *starts* explaining a new visual concept.
-            5. **Language:** Simple, direct, no jargon. Use short sentences.
-            6. **FORMAT:** 'timestamp_seconds' must be a RAW NUMBER (e.g. 150.5). DO NOT use "MM:SS" format.
-            ${videoDuration ? `7. **CONSTRAINT:** Timestamp MUST be less than ${videoDuration} seconds.` : ''}
-
-            FORMAT:
-            [{ "task_name": "Actionable Title", "timestamp_seconds": 12.5, "description": "Clear explanation of why this step matters." }]
-
-            ${promptRules}
-            TRANSCRIPT: ${transcript.substring(0, 30000)}
-        `;
+    const prompt = transcriptAnalysisPrompt(
+      transcript,
+      mode as 'video' | 'text',
+      videoDuration,
+    );
 
     try {
       // Pass a closure that accepts the modelName
@@ -240,27 +222,7 @@ export const GeminiService = {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const prompt = `
-            Generate a "Mix Tape" of 10 high-signal search queries for the topic: "${topic}".
-            
-            CRITICAL LANGUAGE RULE:
-            Detect the language of the input topic and generate queries in that SAME language.
-            If the topic is in Chinese, create Chinese search queries. If English, create English queries.
-            
-            YOU MUST GENERATE 2 QUERIES FOR EACH OF THESE 5 PLATFORMS:
-            1. **Instagram (Visual):** 2x Short Hashtags (1-2 words MAX, e.g. #Sourdough).
-            2. **Reddit (Discourse):** 2x Short questions (e.g. "Hydration ratio?").
-            3. **TikTok (Viral):** 2x Short hooks (e.g. "POV: Sourdough").
-            4. **LinkedIn (Professional):** 2x Core terms (e.g. "Bakery Logistics").
-            5. **Facebook (Community):** 2x Group names (e.g. "Sourdough Bakers").
-
-            RULES:
-            - **Strict Brevity:** ALL queries must be UNDER 4 WORDS.
-            - **NO PLATFORM NAMES:** Do not include "Reddit", "TikTok", etc.
-            - Mix them up.
-            - Total: Exactly 10 queries.
-            - Format: JSON Array of strings.
-        `;
+    const prompt = searchQueriesPrompt(topic);
     try {
       const result = await this.retryWithBackoff(async (modelName) => {
         const model = genAI.getGenerativeModel({
@@ -291,34 +253,7 @@ export const GeminiService = {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
 
-    const prompt = `
-            You are a mentor teaching a student how to execute a specific task.
-            
-            CRITICAL LANGUAGE RULE:
-            Detect the language of the SPECIFIC INSTRUCTION below and reply ENTIRELY in that same language.
-            If the instruction is in Chinese, respond in Chinese. If English, respond in English.
-            Only use a different language if explicitly requested.
-            
-            GLOBAL CONTEXT (The bigger picture):
-            "${transcript ? transcript.substring(0, 5000) : 'No background context provided.'}"
-
-            NEIGHBOR TASKS (Scope Constraints):
-            ${neighborContext || 'No sibling tasks provided.'}
-
-            SPECIFIC INSTRUCTION (The Current Execution Step):
-            "${instruction}"
-
-            GOAL: Break the "SPECIFIC INSTRUCTION" down into 4 concrete, actionable sub-steps.
-
-            CRITICAL RULES:
-            1. **Scope Boundary:** Focus ONLY on the execution of the Current Step. Do NOT include actions that belong to the "Next Task" listed in Neighbor Tasks.
-            2. **User is King:** If the "SPECIFIC INSTRUCTION" conflicts with context, follow the instruction.
-            3. **Contextual Intelligence:** Use the Global Context to make the steps specific (e.g. specific names/places).
-            4. **No Repetition:** Do NOT simply repeat the Task Name.
-            5. **Fast-Forward:** If the Previous Task covered preparation, assume it is done. Start directly with execution.
-
-            FORMAT: JSON Array of 4 Strings.
-        `;
+    const prompt = subStepsPrompt(instruction, transcript, neighborContext);
     try {
       const result = await this.retryWithBackoff(async (modelName) => {
         const model = genAI.getGenerativeModel({
@@ -359,7 +294,7 @@ export const GeminiService = {
 
   // Model comparison test - returns timing results
   async compareModels(apiKey: string): Promise<{lite: number, full: number, winner: string}> {
-    const testPrompt = 'Generate 3 simple JavaScript learning tasks. Return JSON array.';
+    const prompt = testPrompt();
     
     // Test lite model
     const liteStart = Date.now();
@@ -369,7 +304,7 @@ export const GeminiService = {
         model: 'gemini-2.5-flash-lite',
         generationConfig: { responseMimeType: 'application/json' },
       });
-      await this.withTimeout(liteModel.generateContent(testPrompt), 15000);
+      await this.withTimeout(liteModel.generateContent(prompt), 15000);
     } catch {
       // INTENTIONALLY IGNORING: Lite model test is timing comparison only
       // Failure doesn't invalidate the API key, just means lite model unavailable
@@ -386,7 +321,7 @@ export const GeminiService = {
         model: 'gemini-2.5-flash',
         generationConfig: { responseMimeType: 'application/json' },
       });
-      await this.withTimeout(fullModel.generateContent(testPrompt), 15000);
+      await this.withTimeout(fullModel.generateContent(prompt), 15000);
     } catch {
       // INTENTIONALLY IGNORING: Full model test is timing comparison only
       // Failure doesn't invalidate the API key, just means full model unavailable
