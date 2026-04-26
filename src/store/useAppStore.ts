@@ -28,7 +28,6 @@ import {
   bindCubitStepToYMap,
   applyUpdateToYText,
 } from '../lib/yjsHelpers';
-import { NetworkSync } from '@/lib/networkSync';
 import type { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
 import { getUseSupabaseSync } from '@/lib/featureFlags';
 import { loadSupabaseSync } from '@/lib/supabaseSyncLoader';
@@ -87,17 +86,17 @@ async function resetYDoc(): Promise<Y.Doc> {
     }
   }
   
-  // CRITICAL FIX: Disconnect NetworkSync BEFORE syncing/destroying ydoc
+  // CRITICAL FIX: Disconnect sync manager BEFORE syncing/destroying ydoc
   // This ensures queued updates are applied to the ydoc before we extract state
-  if (networkSync) {
-    await networkSync.disconnect();
-    networkSync = null;
+  if (syncManager) {
+    await syncManager.disconnect();
+    syncManager = null;
     
     // AFTER flush, sync any newly-applied data to Zustand
     useAppStore.getState().syncFromYjs();
   } else if (oldId) {
-    // NetworkSync is null but ydoc might still have unapplied updates
-    // This handles the "Pre-Attachment Race" where updates arrived before networkSync was assigned
+    // Sync manager is null but ydoc might still have unapplied updates
+    // This handles the "Pre-Attachment Race" where updates arrived before sync was assigned
     const instance = getInstance(oldId);
     if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
       useAppStore.getState().syncFromYjs();
@@ -199,17 +198,17 @@ function registerYjsObserver(set: any, get: any) {
     }
     
     // THE ECHO STORM PREVENTION (Outbound Broadcast)
-    if (origin !== 'network' && networkSync) {
+    if (origin !== 'network' && syncManager) {
       set({ hasUnsyncedChanges: true });
       // BAND 1: Instantly broadcast tiny live diffs
-      networkSync.broadcastUpdate(update);
+      syncManager.broadcastUpdate(update);
 
       // BAND 2: The Deep Idle Checkpoint (30 seconds)
       // Reset the inactivity timer every time the user types.
       if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
       idleCheckpointTimer = setTimeout(() => {
         const fullState = Y.encodeStateAsUpdate(ydoc);
-        networkSync?.broadcastCheckpoint(fullState);
+        syncManager?.broadcastCheckpoint(fullState);
       }, IDLE_CHECKPOINT_DELAY);
     }
 
@@ -500,9 +499,8 @@ const STORAGE_KEY_API = 'cubit_api_key';
 // MIGRATION MUTEX: Prevents React.StrictMode from double-booting legacy JSON into Yjs
 let isMigrating = false;
 
-// E2EE SYNC MANAGER (NetworkSync or SupabaseSyncProd based on feature flag)
-let networkSync: NetworkSync | SupabaseSyncProd | null = null;
-const SYNC_SERVER_URL = (typeof window !== 'undefined' && localStorage.getItem('sync_server_url')) || process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
+// E2EE SYNC MANAGER (Supabase Realtime - legacy NetworkSync removed)
+let syncManager: SupabaseSyncProd | null = null;
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
 let peerEditingTimer: NodeJS.Timeout | null = null;
@@ -594,10 +592,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     // 1. If switching TO personalUno, disconnect sync (uno data never leaves browser)
-    if (workspaceType === 'personalUno' && networkSync) {
+    if (workspaceType === 'personalUno' && syncManager) {
       if (idleCheckpointTimer) { clearTimeout(idleCheckpointTimer); idleCheckpointTimer = null; }
-      networkSync.disconnect();
-      networkSync = null;
+      syncManager.disconnect();
+      syncManager = null;
       set({ syncStatus: 'disconnected', roomFingerprint: null });
     }
 
@@ -1026,9 +1024,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     transitionToPhase('initializing');
 
     try {
-      if (networkSync) {
-        networkSync.disconnect();
-        networkSync = null;
+      if (syncManager) {
+        syncManager.disconnect();
+        syncManager = null;
       }
       if (idleCheckpointTimer) {
         clearTimeout(idleCheckpointTimer);
@@ -1091,18 +1089,18 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         (ydoc as { __observerId?: string }).__observerId = finalYdocId;
       }
 
-      // CRITICAL INVARIANT: Observer must be registered before NetworkSync creation
+      // CRITICAL INVARIANT: Observer must be registered before sync manager creation
       const finalObserverYdocId = (ydoc as { __observerId?: string }).__observerId;
       const actualYdocId = getInstanceId(ydoc);
       
       assertInvariant(
-        'Observer registered on current ydoc before NetworkSync',
+        'Observer registered on current ydoc before sync creation',
         actualYdocId,
         finalObserverYdocId,
         { 
           currentYdocId: actualYdocId, 
           observerYdocId: finalObserverYdocId,
-          phase: 'pre-networkSync',
+          phase: 'pre-sync',
         }
       );
 
@@ -1116,7 +1114,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           // Dynamically import SupabaseSync (code splitting)
           const SupabaseSyncClass = await loadSupabaseSync();
 
-          networkSync = new SupabaseSyncClass(
+          syncManager = new SupabaseSyncClass(
             ydoc,
             roomIdHash,
             (status) => {
@@ -1150,93 +1148,30 @@ export const useAppStore = create<ProjectState>((set, get) => ({
             }
           );
         } catch (loadError) {
-          // INTENTIONALLY FALLBACK: Supabase module load failure triggers WebSocket fallback
-          // Lazy loading failed (network/module error) - use NetworkSync as backup
+          // SupabaseSync load failed - log error and abort connection
           console.error('[SYNC DEBUG] Failed to load SupabaseSync:', loadError);
 
           // Emit telemetry
           const { emitTelemetry } = await import('@/lib/featureFlags');
           emitTelemetry('error_boundary_triggered', {
             context: {
-              error: 'supabase_lazy_load_failed',
+              error: 'supabase_load_failed',
               message: loadError instanceof Error ? loadError.message : String(loadError),
             },
           });
 
-          // Fall back to NetworkSync
-          networkSync = new NetworkSync(
-            ydoc,
-            SYNC_SERVER_URL,
-            roomIdHash,
-            (status) => {
-              set({ syncStatus: status });
-              if (status !== 'connected') set({ hasPeers: false });
-            },
-            () => {
-              const { syncFromYjs } = get();
-              syncFromYjs();
-              set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-            },
-            () => {
-              set({ hasPeers: true, lastPeerSeenAt: Date.now() });
-            },
-            () => {
-              set({ hasPeers: false });
-            },
-            (isEditing) => {
-              if (isEditing) {
-                set({ peerIsEditing: true });
-                if (peerEditingTimer) clearTimeout(peerEditingTimer);
-                peerEditingTimer = setTimeout(() => {
-                  set({ peerIsEditing: false });
-                  peerEditingTimer = null;
-                }, 3000);
-              }
-            }
-          );
+          connectToSyncServerInFlight = false;
+          set({ syncStatus: 'error' });
+          return;
         }
       } else {
-        // Use legacy NetworkSync (default)
-
-        networkSync = new NetworkSync(
-          ydoc,
-          SYNC_SERVER_URL,
-          roomIdHash,
-          (status) => {
-            set({ syncStatus: status });
-            if (status !== 'connected') set({ hasPeers: false });
-          },
-          () => {
-            // CRITICAL FIX: Force immediate state sync when checkpoint arrives
-            // The debounced observer may miss the initial document load due to cache/dirty tracking issues
-            const { syncFromYjs } = get();
-            syncFromYjs();
-            set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-          },
-          () => {
-            // Peer Presence pulse
-            set({ hasPeers: true, lastPeerSeenAt: Date.now() });
-          },
-          () => {
-            // Explicit Peer Disconnect
-            set({ hasPeers: false });
-          },
-          (isEditing) => {
-            // --- TURN-BASED LOCKING (STRICT MODE) ---
-            if (isEditing) {
-              set({ peerIsEditing: true });
-              if (peerEditingTimer) clearTimeout(peerEditingTimer);
-              peerEditingTimer = setTimeout(() => {
-                set({ peerIsEditing: false });
-                peerEditingTimer = null;
-              }, 3000); // 3-Second Turn Reservation
-            }
-          }
-        );
+        // Supabase sync disabled via feature flag
+        connectToSyncServerInFlight = false;
+        return;
       }
 
       // Mark this ydoc as having sync attached for diagnostics
-      markNetworkSyncAttached(ydoc, (useSupabase ? 'supabase-sync-' : 'network-sync-') + Date.now());
+      markNetworkSyncAttached(ydoc, 'supabase-sync-' + Date.now());
 
       // Presence Watchdog: Revert to "Alone" if no pulse for 12 seconds
       if ((window as any)._presenceWatchdog) clearInterval((window as any)._presenceWatchdog);
@@ -1248,67 +1183,29 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }, 3000);
 
       try {
-        await networkSync.connect(syncKey);
-        transitionToPhase('networkSync_connecting', { ydocId: getInstanceId(ydoc) });
+        await syncManager.connect(syncKey);
+        transitionToPhase('sync_connecting', { ydocId: getInstanceId(ydoc) });
       } catch (connectError) {
-        // INTENTIONALLY FALLBACK: Primary transport connection failed
-        // Trigger automatic WebSocket fallback for resilience
-        if (useSupabase && networkSync) {
-
-          // Emit telemetry for fallback
+        // Connection failed - log and abort
+        console.error('[SYNC DEBUG] Connection failed:', connectError);
+        
+        if (useSupabase && syncManager) {
+          // Emit telemetry for connection failure
           const { emitTelemetry } = await import('@/lib/featureFlags');
-          emitTelemetry('transport_switched', {
+          emitTelemetry('sync_connection_failed', {
             from: 'supabase',
             to: 'websocket',
             context: { reason: 'supabase_connection_failed' },
           });
 
           // Clean up failed Supabase connection
-          networkSync.disconnect();
+          syncManager.disconnect();
 
-          // Create NetworkSync fallback
-          networkSync = new NetworkSync(
-            ydoc,
-            SYNC_SERVER_URL,
-            roomIdHash,
-            (status) => {
-              set({ syncStatus: status });
-              if (status !== 'connected') set({ hasPeers: false });
-            },
-            () => {
-              const { syncFromYjs } = get();
-              syncFromYjs();
-              set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-            },
-            () => {
-              set({ hasPeers: true, lastPeerSeenAt: Date.now() });
-            },
-            () => {
-              set({ hasPeers: false });
-            },
-            (isEditing) => {
-              if (isEditing) {
-                set({ peerIsEditing: true });
-                if (peerEditingTimer) clearTimeout(peerEditingTimer);
-                peerEditingTimer = setTimeout(() => {
-                  set({ peerIsEditing: false });
-                  peerEditingTimer = null;
-                }, 3000);
-              }
-            }
-          );
-
-          // Try WebSocket connection
-          await networkSync.connect(syncKey);
-
-          // Update telemetry
-          emitTelemetry('transport_switched', {
-            from: 'supabase',
-            to: 'websocket',
-            context: { result: 'fallback_successful' },
-          });
+          connectToSyncServerInFlight = false;
+          set({ syncStatus: 'error' });
+          return;
         } else {
-          // Not Supabase or no networkSync, rethrow
+          // Not Supabase or no syncManager, rethrow
           throw connectError;
         }
       }
@@ -1316,7 +1213,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!(window as any)._unloadListenerBound) {
         (window as any)._unloadListenerBound = true;
         window.addEventListener('beforeunload', () => {
-          networkSync?.sendDisconnectSignal();
+          syncManager?.sendDisconnectSignal();
         });
       }
 
@@ -1338,9 +1235,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       clearTimeout(idleCheckpointTimer);
       idleCheckpointTimer = null;
     }
-    if (networkSync) {
-      networkSync.disconnect();
-      networkSync = null;
+    if (syncManager) {
+      syncManager.disconnect();
+      syncManager = null;
     }
     if ((window as any)._presenceWatchdog) {
       clearInterval((window as any)._presenceWatchdog);
@@ -1352,9 +1249,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   flushSyncNow: async () => {
-    if (!networkSync) return;
+    if (!syncManager) return;
     const fullState = Y.encodeStateAsUpdate(ydoc);
-    await networkSync.broadcastCheckpoint(fullState);
+    await syncManager.broadcastCheckpoint(fullState);
     set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
   },
 
@@ -1567,9 +1464,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       
       // Immediate genesis checkpoint broadcast for test environments
       // This ensures Device B can sync immediately without waiting for idle timer
-      if (isTestEnvironment && networkSync) {
+      if (isTestEnvironment && syncManager) {
         const genesisState = Y.encodeStateAsUpdate(ydoc);
-        networkSync.broadcastCheckpoint(genesisState);
+        syncManager.broadcastCheckpoint(genesisState);
       }
     }
 
@@ -2002,9 +1899,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // The "Logout Nuke" Data Vector Fix: 
     // We MUST sever the network connection BEFORE destroying local CRDT states 
     // to prevent broadcasting an encrypted tombstone massacre to the P2P cloud.
-    if (networkSync) {
-      networkSync.disconnect();
-      networkSync = null;
+    if (syncManager) {
+      syncManager.disconnect();
+      syncManager = null;
     }
     if (idleCheckpointTimer) {
       clearTimeout(idleCheckpointTimer);

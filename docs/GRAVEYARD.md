@@ -48,6 +48,34 @@ Yjs updates not reaching peer despite WebSocket connection:
 
 ---
 
+## DELETED COMPONENTS (Legacy System Removal)
+
+### Legacy NetworkSync System
+**Status:** 🗑️ DELETED — April 26, 2026  
+**Reason:** Replaced by Supabase Realtime per ADR-001  
+**Deletion Commit:** `chore: Remove legacy sync system and fix unit tests`
+
+#### Components Removed
+- `src/lib/networkSync.ts` — Custom WebSocket E2EE sync implementation
+- `sync-server/` — Node.js relay server for WebSocket connections
+- `tests/e2e/sync.spec.ts` — Legacy E2E sync tests
+- `src/app/sync-test/page.tsx` — NetworkSync diagnostic page
+
+#### Rationale
+The custom WebSocket-based sync system was complex, difficult to maintain, and unreliable in production. Supabase Realtime provides:
+- Managed infrastructure (no custom relay server)
+- Better scalability
+- Official support and documentation
+- PostgreSQL-backed persistence
+
+#### Migration Path
+- Supabase Realtime is now the only supported sync transport
+- Feature flag `USE_SUPABASE_SYNC` controls sync enablement
+- All sync infrastructure now uses `syncManager` variable instead of `networkSync`
+- Fallback logic simplified: Supabase failure = no sync (no WebSocket fallback)
+
+---
+
 ## RESOLVED ISSUES (Lessons Learned)
 
 ### SYNC-002: The Closure Issue in waitForFunction
