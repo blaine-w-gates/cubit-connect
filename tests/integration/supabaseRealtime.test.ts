@@ -137,10 +137,9 @@ describe.skipIf(!hasSupabaseCredentials)('Supabase Realtime Runtime Verification
 
   beforeAll(async () => {
     // Create Yjs document with unique client ID
-    ydoc = new Y.Doc({
-      clientID: generateUniqueClientId(),
-      gc: false,
-    });
+    ydoc = new Y.Doc({ gc: false });
+    // clientID is set via internal property (not in public types)
+    (ydoc as { clientID: number }).clientID = generateUniqueClientId();
 
     // Generate E2EE key
     derivedKey = await deriveTestKey('test-passphrase');

@@ -7,21 +7,22 @@
  * @component
  */
 
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 describe('ErrorBoundary Component', () => {
   it('should exist as a React component', () => {
-    expect(() => import('./ErrorBoundary')).not.toThrow();
+    expect(() => import('@/components/ErrorBoundary')).not.toThrow();
   });
 
   it('should export ErrorBoundary class', async () => {
-    const module = await import('./ErrorBoundary');
-    expect(module.ErrorBoundary).toBeDefined();
-    expect(typeof module.ErrorBoundary).toBe('function');
+    const ErrorBoundary = await import('@/components/ErrorBoundary');
+    expect(ErrorBoundary).toBeDefined();
+    expect(typeof ErrorBoundary.default).toBe('function');
   });
 
   it('should have proper React error boundary structure', async () => {
-    const { ErrorBoundary } = await import('./ErrorBoundary');
+    const ErrorBoundaryMod = await import('@/components/ErrorBoundary');
+    const ErrorBoundary = ErrorBoundaryMod.default;
     const prototype = ErrorBoundary.prototype;
 
     expect(prototype.componentDidCatch).toBeDefined();
@@ -30,11 +31,21 @@ describe('ErrorBoundary Component', () => {
     expect(typeof prototype.render).toBe('function');
   });
 
-  it('should have reset functionality', async () => {
-    const { ErrorBoundary } = await import('./ErrorBoundary');
+  it('should have handleReload method', async () => {
+    const ErrorBoundaryMod = await import('@/components/ErrorBoundary');
+    const ErrorBoundary = ErrorBoundaryMod.default;
     const prototype = ErrorBoundary.prototype;
 
-    expect(prototype.reset).toBeDefined();
-    expect(typeof prototype.reset).toBe('function');
+    expect(prototype.handleReload).toBeDefined();
+    expect(typeof prototype.handleReload).toBe('function');
+  });
+
+  it('should have handleResetData method', async () => {
+    const ErrorBoundaryMod = await import('@/components/ErrorBoundary');
+    const ErrorBoundary = ErrorBoundaryMod.default;
+    const prototype = ErrorBoundary.prototype;
+
+    expect(prototype.handleResetData).toBeDefined();
+    expect(typeof prototype.handleResetData).toBe('function');
   });
 });

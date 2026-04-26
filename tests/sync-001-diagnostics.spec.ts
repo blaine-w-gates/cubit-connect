@@ -154,9 +154,9 @@ function analyzeDiagnosticReport(report: DiagnosticReport): string[] {
     }
   }
   
-  // Check 6: NetworkSync attached
-  if (activeInstance && !activeInstance.networkSyncAttached) {
-    issues.push(`❌ Peer ${report.peerName}: NetworkSync NOT attached to active ydoc`);
+  // Check 6: Sync attached
+  if (activeInstance && !activeInstance.syncAttached) {
+    issues.push(`❌ Peer ${report.peerName}: Sync NOT attached to active ydoc`);
   }
   
   // Check 7: Phase sequence validity
@@ -192,8 +192,8 @@ function generateRootCauseAnalysis(peerA: DiagnosticReport, peerB: DiagnosticRep
     lines.push(`\n  Active A: ${activeA.id.slice(0, 16)}... (created by ${activeA.createdBy})`);
     lines.push(`  Active B: ${activeB.id.slice(0, 16)}... (created by ${activeB.createdBy})`);
     
-    lines.push(`\n  Peer A - Observer: ${activeA.observerRegistered ? '✓' : '✗'}, NetworkSync: ${activeA.networkSyncAttached ? '✓' : '✗'}`);
-    lines.push(`  Peer B - Observer: ${activeB.observerRegistered ? '✓' : '✗'}, NetworkSync: ${activeB.networkSyncAttached ? '✓' : '✗'}`);
+    lines.push(`\n  Peer A - Observer: ${activeA.observerRegistered ? '✓' : '✗'}, Sync: ${activeA.syncAttached ? '✓' : '✗'}`);
+    lines.push(`  Peer B - Observer: ${activeB.observerRegistered ? '✓' : '✗'}, Sync: ${activeB.syncAttached ? '✓' : '✗'}`);
     
     lines.push(`\n  Peer A - Updates: ${activeA.updatesReceived} received, ${activeA.observerCallbacksFired} callbacks, ${activeA.zustandUpdatesTriggered} Zustand updates`);
     lines.push(`  Peer B - Updates: ${activeB.updatesReceived} received, ${activeB.observerCallbacksFired} callbacks, ${activeB.zustandUpdatesTriggered} Zustand updates`);

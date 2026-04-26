@@ -45,8 +45,7 @@ test.describe('Feature Flags E2E', () => {
 
     // Verify window global reflects persisted value
     const windowValue = await page.evaluate(() => {
-      // @ts-expect-error - Accessing DevTools global
-      return window.__USE_SUPABASE_SYNC__;
+      return (window as { __USE_SUPABASE_SYNC__?: boolean }).__USE_SUPABASE_SYNC__;
     });
     expect(windowValue).toBe(true);
   });
