@@ -16,7 +16,10 @@ describe('PrintableReport Component', () => {
 
   it('should export a React component', async () => {
     const { PrintableReport } = await import('@/components/PrintableReport');
-    expect(typeof PrintableReport).toBe('function');
+    // forwardRef returns a special React object (forwardRef render function)
+    expect(PrintableReport).toBeDefined();
+    expect(typeof PrintableReport === 'function' || typeof PrintableReport === 'object').toBe(true);
+    expect(PrintableReport.$$typeof?.toString()).toContain('Symbol');
   });
 
   it('should be a forwardRef component', async () => {

@@ -290,6 +290,7 @@ export function setUseSupabaseSync(value: boolean, force: boolean = false): bool
 
   // Debouncing: Prevent rapid toggles (only when value changes)
   if (!force && isDebouncing()) {
+    console.warn('[FEATURE FLAGS] Toggle debounced: Please wait before toggling again');
     return false;
   }
 

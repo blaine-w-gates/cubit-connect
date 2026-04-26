@@ -277,6 +277,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    * Phase 1: Foundation - E2EE key cleared, queue flushed
    */
   disconnect(): void {
+    console.log('[SUPABASE SYNC] E2EE key cleared');
 
     // Clear sensitive data
     this.derivedKey = null;
@@ -284,6 +285,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
     // Flush any pending updates (would send in Phase 2)
     const queuedCount = this.pendingUpdateQueue.length;
     if (queuedCount > 0) {
+      console.warn(`[SUPABASE SYNC] ${queuedCount} pending updates dropped`);
       this.pendingUpdateQueue = [];
     }
 
@@ -304,6 +306,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    *
    * @param update - Yjs update to broadcast
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async broadcastUpdate(update: Uint8Array): Promise<void> {
 
     if (!this.isConnected) {
@@ -321,6 +324,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    *
    * @param fullUpdate - Full Yjs state update
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async broadcastCheckpoint(fullUpdate: Uint8Array): Promise<void> {
 
     if (!this.isConnected) {
@@ -355,6 +359,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    * Phase 1: Skeleton - logs only
    */
   flushQueuedUpdates(): void {
+    console.log('[SUPABASE SYNC] flushQueuedUpdates called');
 
     if (!this.isConnected) {
       return;
@@ -370,6 +375,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    * Phase 1: Skeleton - logs only
    */
   async sendDisconnectSignal(): Promise<void> {
+    console.log('[SUPABASE SYNC] sendDisconnectSignal called');
 
     if (!this.isConnected) {
       return;
@@ -385,8 +391,10 @@ export class SupabaseSync implements SupabaseSyncInterface {
    * Phase 1: Skeleton - logs only
    */
   requestCache(): void {
+    console.log('[SUPABASE SYNC] requestCache called');
 
     if (!this.isConnected) {
+      console.warn('[SUPABASE SYNC] requestCache: not connected');
       return;
     }
 

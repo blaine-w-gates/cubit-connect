@@ -34,18 +34,19 @@ describe('ErrorBoundary Component', () => {
   it('should have handleReload method', async () => {
     const ErrorBoundaryMod = await import('@/components/ErrorBoundary');
     const ErrorBoundary = ErrorBoundaryMod.default;
-    const prototype = ErrorBoundary.prototype;
-
-    expect(prototype.handleReload).toBeDefined();
-    expect(typeof prototype.handleReload).toBe('function');
+    // handleReload is a class property (arrow function), not on prototype
+    // Check it's defined by creating an instance and checking the property exists
+    const instance = new ErrorBoundary({ children: null });
+    expect(instance.handleReload).toBeDefined();
+    expect(typeof instance.handleReload).toBe('function');
   });
 
   it('should have handleResetData method', async () => {
     const ErrorBoundaryMod = await import('@/components/ErrorBoundary');
     const ErrorBoundary = ErrorBoundaryMod.default;
-    const prototype = ErrorBoundary.prototype;
-
-    expect(prototype.handleResetData).toBeDefined();
-    expect(typeof prototype.handleResetData).toBe('function');
+    // handleResetData is a class property (arrow function), not on prototype
+    const instance = new ErrorBoundary({ children: null });
+    expect(instance.handleResetData).toBeDefined();
+    expect(typeof instance.handleResetData).toBe('function');
   });
 });
