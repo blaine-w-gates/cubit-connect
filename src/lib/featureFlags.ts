@@ -152,12 +152,12 @@ function safeLocalStorageGet<T>(key: string, defaultValue: T): T {
     // Parse as JSON if possible
     try {
       return JSON.parse(item) as T;
-    } catch (e) {
+    } catch {
       // INTENTIONALLY FALLBACK: Not valid JSON, return as raw string
       // Legacy values may be stored as plain strings
       return item as unknown as T;
     }
-  } catch (e) {
+  } catch {
     // INTENTIONALLY FALLBACK: Storage read failure returns default
     // Could be quota exceeded, corruption, or private mode
     return defaultValue;
