@@ -60,26 +60,27 @@ Since this is a client-side application, you can run it locally or host it on an
 Cubit Connect supports real-time synchronization across devices using end-to-end encryption.
 
 ### Current Implementation
-- **Transport:** WebSocket via custom relay server
-- **Security:** E2EE with passphrase-derived keys
+- **Transport:** Supabase Realtime (PostgreSQL-backed)
+- **Security:** E2EE with passphrase-derived keys (AES-256-GCM)
 - **Status:** Production-ready
 
-### Supabase Migration (Phase 1 Complete)
-We are migrating to Supabase Realtime for improved reliability and scalability.
+### Legacy System Removed
+The custom WebSocket relay server has been deleted (see ADR-004). All sync now uses Supabase Realtime for improved reliability and scalability.
 
-**Phase 1 Features (Active):**
-- Feature flag system for safe rollback
-- Supabase client with retry logic
-- Skeleton SupabaseSync class
-- Error recovery and auto-rollback
+**Features:**
+- End-to-end encryption via Web Crypto API
+- Automatic reconnection with exponential backoff
+- Checkpoint persistence with compression
+- Feature flag system for sync enablement
 
-**Enable Experimental Supabase Mode:**
+**DevTools:**
 ```javascript
-// In browser console (DevTools)
+// Toggle sync in browser console
 window.__toggleSupabaseSync__()
-```
 
-⚠️ **Note:** Supabase mode is currently a skeleton implementation. It logs to console but does not yet perform actual sync. Full implementation coming in Phase 2.
+// View telemetry
+window.__SYNC_TELEMETRY__
+```
 
 ## 🧪 Testing & Quality
 

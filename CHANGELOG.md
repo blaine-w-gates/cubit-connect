@@ -37,7 +37,7 @@ All notable changes to the Cube It Connect synchronization system.
 - Security audit (docs/SECURITY_AUDIT.md)
 - Deployment guide (docs/DEPLOYMENT.md)
 - Troubleshooting guide (docs/TROUBLESHOOTING.md)
-- Architecture Decision Records (3 ADRs)
+- Architecture Decision Records (4 ADRs)
 - This changelog
 
 #### Monitoring
@@ -53,6 +53,17 @@ All notable changes to the Cube It Connect synchronization system.
 - Migrated to TypeScript strict mode
 - Implemented comprehensive error handling
 - Added 44+ INTENTIONAL comments for error documentation
+
+### Removed
+
+- **Legacy Sync System**: Deleted custom WebSocket sync implementation (ADR-004)
+  - Removed `src/lib/networkSync.ts` (1,847 lines)
+  - Removed `sync-server/` directory (Node.js relay server)
+  - Removed `tests/e2e/sync.spec.ts` (legacy E2E tests)
+  - Removed `src/app/sync-test/page.tsx` (diagnostic page)
+  - Archived `DEPLOY_SYNC_SERVER.md` to GRAVEYARD.md
+  - Migration: Supabase Realtime is now the only sync transport
+  - Rationale: Simplified architecture, reduced maintenance burden, better reliability
 
 ### Fixed
 
