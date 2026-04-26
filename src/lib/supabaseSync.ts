@@ -347,6 +347,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
    * Phase 1: Skeleton - logs only
    */
   async flush(): Promise<void> {
+    console.log('[SUPABASE SYNC] flush called');
 
     if (!this.isConnected) {
       return;
