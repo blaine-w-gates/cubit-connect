@@ -135,6 +135,7 @@ export class SupabaseSync implements SupabaseSyncInterface {
     this.onPeerDisconnect = onPeerDisconnect;
     this.onPeerEditing = onPeerEditing;
 
+    console.warn('[SUPABASE SYNC] Experimental: This is a skeleton implementation');
 
     emitTelemetry('supabase_auth_attempt', {
       context: { phase: 'skeleton', roomIdHash: roomIdHash.slice(0, 8) },
@@ -308,10 +309,12 @@ export class SupabaseSync implements SupabaseSyncInterface {
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async broadcastUpdate(update: Uint8Array): Promise<void> {
-
     if (!this.isConnected) {
+      console.warn('[SUPABASE SYNC] broadcastUpdate: not connected');
       return;
     }
+
+    console.log('[SUPABASE SYNC] broadcastUpdate called');
 
     // Phase 1: No actual broadcast yet
     // Phase 2: Will implement Supabase Realtime broadcast
