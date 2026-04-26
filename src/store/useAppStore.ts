@@ -1435,7 +1435,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         // Heuristic: Is the first item a simple string? (Level 2 Migration)
         // We cast to 'any' purely for the check because Typescript expects strict CubitStep[]
         if (typeof (t.sub_steps[0] as unknown) === 'string') {
-          if (process.env.NODE_ENV === 'development')
           const legacySteps = t.sub_steps as unknown as string[];
           const newSubSteps: CubitStep[] = legacySteps.map((text: string) => ({
             id: crypto.randomUUID(),
@@ -1450,8 +1449,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           if (subStep.sub_steps && subStep.sub_steps.length > 0) {
             const firstChild = subStep.sub_steps[0] as unknown;
             if (typeof firstChild === 'string') {
-              if (process.env.NODE_ENV === 'development')
-
               // Convert ["Micro A", "Micro B"] -> [{id, text, sub_steps: []}, ...]
               const legacyMicro = subStep.sub_steps as unknown as string[];
               const newMicroSteps: CubitStep[] = legacyMicro.map((text: string) => ({
@@ -1495,7 +1492,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       };
       todoProjects = [defaultProject];
       activeProjectId = defaultProject.id;
-      if (process.env.NODE_ENV === 'development')
     }
 
     // If no projects exist at all, create an empty default
@@ -2373,10 +2369,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }));
 
     // Show browser notification if enabled and permitted
-      enabled: state.todayPreferences.notificationEnabled,
-      apiAvailable: typeof Notification !== 'undefined',
-      permission: typeof Notification !== 'undefined' ? Notification.permission : 'N/A',
-    });
     if (state.todayPreferences.notificationEnabled && typeof Notification !== 'undefined') {
       if (Notification.permission === 'granted') {
         new Notification('Pomodoro Complete!', {
