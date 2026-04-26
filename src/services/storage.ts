@@ -1,6 +1,7 @@
 import { get, set, del, keys } from 'idb-keyval';
 import { ProjectDataSchema, StoredProjectData, TaskItem, TodoProject, TimerSession, TodayPreferences } from '@/schemas/storage';
 import { getUnoWorkspaceId, getDeviceId, getStorageKey } from '@/lib/identity';
+import { getStorageEstimate } from '@/lib/storageMonitor';
 import type { WorkspaceType } from '@/lib/identity';
 
 const LEGACY_KEY = 'cubit_connect_project_v1';
@@ -359,26 +360,11 @@ export const storageService = {
   },
 
   /**
-   * Estimate storage usage and quota for this origin.
-   * Returns null if Storage API is unavailable (e.g. non-secure context).
-   */
-  async getStorageEstimate(): Promise<{ usage: number; quota: number } | null> {
-    if (typeof navigator === 'undefined' || !navigator.storage?.estimate) return null;
-    try {
-      const { usage = 0, quota = 0 } = await navigator.storage.estimate();
-      return { usage, quota };
-    } catch {
-      // INTENTIONALLY FALLBACK: Storage estimation unavailable (non-secure context)
-      // Return null allows UI to hide storage indicator gracefully
-      return null;
-    }
-  },
-
-  /**
-   * Returns true if storage usage is above 80% of quota (warn user).
+   * Returns true if storage usage is above 80% of quota (legacy check).
+   * @deprecated Use storageMonitor.getStorageInfo() for fixed thresholds
    */
   async isStorageNearLimit(): Promise<boolean> {
-    const est = await this.getStorageEstimate();
+    const est = await getStorageEstimate();
     if (!est || est.quota <= 0) return false;
     return est.usage / est.quota >= 0.8;
   },
