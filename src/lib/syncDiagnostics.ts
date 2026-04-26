@@ -80,9 +80,9 @@ export type YDocInstance = {
   observerRegistered: boolean;
   observerRegisteredAt?: number;
   observerRegisteredBy?: string;
-  networkSyncAttached: boolean;
-  networkSyncAttachedAt?: number;
-  networkSyncId?: string;
+  syncAttached: boolean;
+  syncAttachedAt?: number;
+  syncId?: string;
   updatesReceived: number;
   updatesApplied: number;
   observerCallbacksFired: number;
@@ -108,7 +108,7 @@ export function registerYDocInstance(
     createdAt: Date.now(),
     createdBy,
     observerRegistered: false,
-    networkSyncAttached: false,
+    syncAttached: false,
     updatesReceived: 0,
     updatesApplied: 0,
     observerCallbacksFired: 0,
@@ -194,21 +194,21 @@ export function markObserverRegistered(
   }
 }
 
-export function markNetworkSyncAttached(
+export function markSyncAttached(
   ydoc: Y.Doc,
-  networkSyncId: string
+  syncId: string
 ): void {
   const id = ydocToInstanceId.get(ydoc);
   if (id) {
     const instance = instanceRegistry.get(id);
     if (instance) {
-      instance.networkSyncAttached = true;
-      instance.networkSyncAttachedAt = Date.now();
-      instance.networkSyncId = networkSyncId;
+      instance.syncAttached = true;
+      instance.syncAttachedAt = Date.now();
+      instance.syncId = syncId;
       
-      logCausalEvent('connect', id, 'network_sync_attached', {
-        networkSyncId,
-        timeSinceCreation: instance.networkSyncAttachedAt - instance.createdAt,
+      logCausalEvent('connect', id, 'sync_attached', {
+        syncId,
+        timeSinceCreation: instance.syncAttachedAt! - instance.createdAt,
         observerAlreadyRegistered: instance.observerRegistered,
       });
     }
@@ -271,7 +271,7 @@ ${active.map(i => `
   ID: ${i.id}
   Created: ${new Date(i.createdAt).toISOString()} by ${i.createdBy}
   Observer registered: ${i.observerRegistered} ${i.observerRegisteredAt ? `at ${new Date(i.observerRegisteredAt).toISOString()}` : ''}
-  NetworkSync attached: ${i.networkSyncAttached} ${i.networkSyncId ? `(${i.networkSyncId})` : ''}
+  Sync attached: ${i.syncAttached} ${i.syncId ? `(${i.syncId})` : ''}
   Updates received: ${i.updatesReceived}
   Observer callbacks: ${i.observerCallbacksFired}
   Zustand updates: ${i.zustandUpdatesTriggered}
@@ -402,8 +402,8 @@ export type SyncPhase =
   | 'ydoc_reset'
   | 'loadProject_start'
   | 'loadProject_complete'
-  | 'networkSync_creating'
-  | 'networkSync_connecting'
+  | 'sync_creating'
+  | 'sync_connecting'
   | 'catchup_pending'
   | 'catchup_complete'
   | 'live'
@@ -413,7 +413,7 @@ export type SyncStateMachine = {
   currentPhase: SyncPhase;
   phaseHistory: Array<{ phase: SyncPhase; enteredAt: number; ydocId?: string }>;
   currentYdocId?: string;
-  networkSyncId?: string;
+  syncManagerId?: string;
   observerRegistered: boolean;
   error?: string;
 };
@@ -426,7 +426,7 @@ const stateMachine: SyncStateMachine = {
 
 export function transitionToPhase(
   newPhase: SyncPhase,
-  context: { ydocId?: string; networkSyncId?: string; error?: string } = {}
+  context: { ydocId?: string; syncManagerId?: string; error?: string } = {}
 ): void {
   const previousPhase = stateMachine.currentPhase;
   stateMachine.currentPhase = newPhase;
@@ -439,8 +439,8 @@ export function transitionToPhase(
   if (context.ydocId) {
     stateMachine.currentYdocId = context.ydocId;
   }
-  if (context.networkSyncId) {
-    stateMachine.networkSyncId = context.networkSyncId;
+  if (context.syncManagerId) {
+    stateMachine.syncManagerId = context.syncManagerId;
   }
   if (context.error) {
     stateMachine.error = context.error;
@@ -477,9 +477,9 @@ export function validateStateMachine(): string[] {
       errors.push(`Invalid sequence: ${prev.phase} → ${curr.phase} (expected ydoc_reset before loadProject_start)`);
     }
     
-    // Rule: observer must be registered before networkSync_creating
-    if (curr.phase === 'networkSync_creating' && !stateMachine.observerRegistered) {
-      errors.push('Observer not registered before NetworkSync creation');
+    // Rule: observer must be registered before sync_creating
+    if (curr.phase === 'sync_creating' && !stateMachine.observerRegistered) {
+      errors.push('Observer not registered before sync manager creation');
     }
     
     // Rule: ydocId should not change mid-sequence without reset
@@ -510,7 +510,7 @@ STATE MACHINE:
   Current Phase: ${stateMachine.currentPhase}
   Observer Registered: ${stateMachine.observerRegistered}
   Current YDoc ID: ${stateMachine.currentYdocId || 'UNKNOWN'}
-  NetworkSync ID: ${stateMachine.networkSyncId || 'UNKNOWN'}
+  Sync Manager ID: ${stateMachine.syncManagerId || 'UNKNOWN'}
   Phase History (${stateMachine.phaseHistory.length} transitions):
 ${stateMachine.phaseHistory.map(h => `    ${new Date(h.enteredAt).toISOString()}: ${h.phase}${h.ydocId ? ` (${h.ydocId.slice(0, 8)}...)` : ''}`).join('\n')}
 
@@ -523,7 +523,7 @@ ${instances.filter(i => !i.destroyedAt).map(i => `
   📄 ${i.id}
      Created: ${new Date(i.createdAt).toISOString()} by ${i.createdBy}
      Observer: ${i.observerRegistered ? '✓' : '✗'} ${i.observerRegisteredAt ? `(${new Date(i.observerRegisteredAt).toISOString()})` : ''}
-     NetworkSync: ${i.networkSyncAttached ? '✓' : '✗'} ${i.networkSyncId ? `(${i.networkSyncId.slice(0, 8)})` : ''}
+     Sync: ${i.syncAttached ? '✓' : '✗'} ${i.syncId ? `(${i.syncId.slice(0, 8)})` : ''}
      Updates: ${i.updatesReceived} received, ${i.observerCallbacksFired} callbacks, ${i.zustandUpdatesTriggered} Zustand updates
 `).join('')}
 

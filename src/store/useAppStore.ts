@@ -8,7 +8,7 @@ import {
   registerYDocInstance,
   markInstanceDestroyed,
   markObserverRegistered,
-  markNetworkSyncAttached,
+  markSyncAttached as markNetworkSyncAttached,
   transitionToPhase,
   markObserverRegisteredInStateMachine,
   enableDiagnostics,
@@ -1192,9 +1192,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         if (useSupabase && syncManager) {
           // Emit telemetry for connection failure
           const { emitTelemetry } = await import('@/lib/featureFlags');
-          emitTelemetry('sync_connection_failed', {
+          emitTelemetry('transport_switched', {
             from: 'supabase',
-            to: 'websocket',
+            to: 'offline',
             context: { reason: 'supabase_connection_failed' },
           });
 
