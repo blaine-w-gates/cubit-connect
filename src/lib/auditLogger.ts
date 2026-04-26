@@ -12,6 +12,36 @@ import { emitTelemetry } from './featureFlags';
 import { getSupabaseClient } from './supabaseClient';
 
 // ============================================================================
+// SAFE JSON SERIALIZATION
+// ============================================================================
+
+/**
+ * Safely serialize to JSON, handling circular references
+ * Used for audit events that may contain Error objects or other circular structures
+ */
+function safeJSONStringify(value: unknown): string {
+  const seen = new WeakSet();
+  return JSON.stringify(value, (_key, val) => {
+    if (typeof val === 'object' && val !== null) {
+      if (seen.has(val)) {
+        return '[Circular Reference]';
+      }
+      seen.add(val);
+
+      // Handle Error objects
+      if (val instanceof Error) {
+        return {
+          name: val.name,
+          message: val.message,
+          stack: val.stack,
+        };
+      }
+    }
+    return val;
+  });
+}
+
+// ============================================================================
 // TYPES
 // ============================================================================
 
@@ -232,6 +262,7 @@ class AuditLogger {
       } catch (supabaseError) {
         // INTENTIONALLY HANDLING: Supabase unavailable, fall back to localStorage
         // This is graceful degradation - audit continues working locally
+        console.error('[AUDIT] Supabase client error:', supabaseError);
         this.storeInLocalStorage(eventsToFlush);
       }
 
@@ -243,7 +274,7 @@ class AuditLogger {
         await fetch(this.config.endpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(eventsToFlush),
+          body: safeJSONStringify(eventsToFlush),
         });
       }
     } catch (error) {
@@ -270,7 +301,7 @@ class AuditLogger {
 
     // Limit size
     const trimmed = filtered.slice(-1000);
-    localStorage.setItem('audit_log', JSON.stringify(trimmed));
+    localStorage.setItem('audit_log', safeJSONStringify(trimmed));
   }
 
   /**
@@ -309,7 +340,7 @@ class AuditLogger {
     const filtered = stored.filter((e: AuditEvent) => e.userId !== userId);
     const deleted = stored.length - filtered.length;
 
-    localStorage.setItem('audit_log', JSON.stringify(filtered));
+    localStorage.setItem('audit_log', safeJSONStringify(filtered));
 
     this.log('admin', 'info', 'gdpr_delete', { userId: userId.slice(0, 8), deletedCount: deleted }, true);
 

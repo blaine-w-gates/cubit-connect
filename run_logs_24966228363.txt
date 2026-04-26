@@ -1,0 +1,1593 @@
+Unit Tests	Run npx vitest run	﻿2026-04-26T20:24:58.5624747Z ##[group]Run npx vitest run
+Unit Tests	Run npx vitest run	2026-04-26T20:24:58.5625341Z [36;1mnpx vitest run[0m
+Unit Tests	Run npx vitest run	2026-04-26T20:24:58.5646927Z shell: /usr/bin/bash -e {0}
+Unit Tests	Run npx vitest run	2026-04-26T20:24:58.5647163Z ##[endgroup]
+Unit Tests	Run npx vitest run	2026-04-26T20:24:59.1659164Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:24:59.1662217Z [1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/work/cubit-connect/cubit-connect[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:24:59.1663121Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:00.3738090Z [90mstderr[2m | tests/unit/featureFlags.test.ts[2m > [22m[2mfeatureFlags[2m > [22m[2mdebouncing[2m > [22m[2mshould block rapid toggles within 300ms
+Unit Tests	Run npx vitest run	2026-04-26T20:25:00.3739869Z [22m[39m[FEATURE FLAGS] Toggle debounced: Please wait before toggling again
+Unit Tests	Run npx vitest run	2026-04-26T20:25:00.3740836Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:00.4695969Z  [2m[90m↓[39m[22m tests/integration/chaosEngineering.test.ts [2m([22m[2m23 tests[22m[2m | [22m[33m23 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0837732Z [90mstderr[2m | tests/unit/featureFlags.test.ts[2m > [22m[2mfeatureFlags[2m > [22m[2mlocalStorage unavailable[2m > [22m[2mshould return false from setUseSupabaseSync when localStorage is disabled
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0840311Z [22m[39m[FEATURE FLAGS] BLOCKED: Cannot toggle sync while unsaved changes exist
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0865984Z  [32m✓[39m tests/unit/featureFlags.test.ts [2m([22m[2m33 tests[22m[2m)[22m[33m 730[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0867378Z [FEATURE FLAGS] Use setUseSupabaseSync(value, true) to force (may lose data)
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0895208Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.0992363Z        [33m[2m✓[22m[39m should block rapid toggles within 300ms [33m 351[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.1016062Z        [33m[2m✓[22m[39m should allow toggle after 300ms debounce period [33m 351[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.2073329Z  [2m[90m↓[39m[22m tests/integration/errorHandling.test.ts [2m([22m[2m32 tests[22m[2m | [22m[33m32 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:01.9287291Z  [2m[90m↓[39m[22m tests/integration/supabaseSyncProd.test.ts [2m([22m[2m29 tests[22m[2m | [22m[33m29 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:02.0515225Z  [2m[90m↓[39m[22m tests/integration/supabaseRealtime.test.ts [2m([22m[2m8 tests[22m[2m | [22m[33m8 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:02.7505296Z  [32m✓[39m tests/integration/syncPerformanceMonitor.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:02.8670418Z  [2m[90m↓[39m[22m tests/integration/checkpointRoundtrip.test.ts [2m([22m[2m7 tests[22m[2m | [22m[33m7 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.5078891Z  [32m✓[39m tests/integration/healthEndpoint.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.5391274Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mE2EE integration[2m > [22m[2mshould clear E2EE key on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.5393480Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.5394200Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.5394489Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:03.8026588Z  [32m✓[39m tests/integration/e2eeRuntime.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 147[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:04.2836052Z  [32m✓[39m tests/unit/featureFlagTargeting.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:04.6397831Z  [32m✓[39m tests/unit/alarmSchema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.0201205Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mE2EE integration[2m > [22m[2mshould log queued updates on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.0203012Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.0203786Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.0512473Z  [32m✓[39m tests/integration/retryVerification.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.4999192Z  [32m✓[39m tests/integration/performanceRuntime.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 74[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8629524Z [90mstderr[2m | tests/integration/cleanupJobs.test.ts[2m > [22m[2mCleanupJobSystem[2m > [22m[2mjob execution[2m > [22m[2mshould execute all jobs
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8632683Z [22m[39m[CHECKPOINT] Cleanup error: Error: [SUPABASE CLIENT] Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8634171Z Please check your .env.local file and ensure the Supabase URL is configured.
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8636723Z     at validateEnvironment [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/supabaseClient.ts:95:11[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8638691Z     at getSupabaseClient [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/supabaseClient.ts:205:3[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8641174Z     at CheckpointService.cleanupOldCheckpoints [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/checkpointService.ts:321:22[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8643217Z     at Object.run [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/cleanupJobs.ts:121:49[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8645744Z     at CleanupJobSystem.executeJob [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/cleanupJobs.ts:249:32[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8647937Z     at CleanupJobSystem.executeAllJobs [90m(/home/runner/work/cubit-connect/cubit-connect/[39msrc/lib/cleanupJobs.ts:288:33[90m)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8649688Z [90m    at processTicksAndRejections (node:internal/process/task_queues:95:5)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8651148Z     at [90m/home/runner/work/cubit-connect/cubit-connect/[39mtests/integration/cleanupJobs.test.ts:97:23
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8652932Z     at [90mfile:///home/runner/work/cubit-connect/cubit-connect/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:20
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8653807Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8706920Z [90mstderr[2m | tests/integration/cleanupJobs.test.ts[2m > [22m[2mCleanupJobSystem[2m > [22m[2mjob lifecycle[2m > [22m[2mshould handle starting unknown job gracefully
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8708789Z [22m[39m[CLEANUP] Job not found: unknown-job
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8720834Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8739238Z [90mstderr[2m | tests/integration/cleanupJobs.test.ts[2m > [22m[2mCleanupJobSystem[2m > [22m[2merror handling[2m > [22m[2mshould handle job that throws error
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8741098Z [22m[39m[CLEANUP] Job failing-job failed: Test error
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8741807Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8748432Z [90mstderr[2m | tests/integration/cleanupJobs.test.ts[2m > [22m[2mCleanupJobSystem[2m > [22m[2merror handling[2m > [22m[2mshould track error count in stats
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8750455Z [22m[39m[CLEANUP] Job failing-job-2 failed: Test error
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8751225Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:05.8775240Z  [32m✓[39m tests/integration/cleanupJobs.test.ts [2m([22m[2m20 tests[22m[2m)[22m[32m 31[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3765093Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould open circuit after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3767260Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3768445Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3769561Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3770514Z   lastFailureTime: [32m'2026-04-26T20:25:06.372Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3771678Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3782116Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3783883Z [FALLBACK MANAGER] Fallback triggered: { reason: [32m'circuit_open'[39m, errorMessage: [32m'Error 4'[39m, attemptCount: [33m5[39m }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3785723Z [ALERT] CRITICAL: Fallback to WebSocket: circuit_open - Error 4 {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3786925Z   reason: [32m'circuit_open'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3787800Z   errorMessage: [32m'Error 4'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3788600Z   attemptCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3789406Z   from: [32m'supabase'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3790186Z   to: [32m'websocket'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3790840Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3791681Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3793828Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould block operations when circuit is open
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3796032Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3797163Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3798207Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3799137Z   lastFailureTime: [32m'2026-04-26T20:25:06.376Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3800072Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3800999Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3801363Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3802959Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould reset circuit breaker
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3804732Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3806174Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3807273Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3808235Z   lastFailureTime: [32m'2026-04-26T20:25:06.377Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3809126Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3809736Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3810101Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3829830Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mfallback[2m > [22m[2mshould support manual fallback
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3831446Z [22m[39m[FALLBACK MANAGER] Fallback triggered: {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3832395Z   reason: [32m'manual_override'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3833329Z   errorMessage: [32m'Manual override'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3834107Z   attemptCount: [33m0[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3834689Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3835273Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:06.3903206Z  [32m✓[39m tests/unit/transportFallback.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 22[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.0305456Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.0306829Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.0307160Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1843693Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1844524Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1844731Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1911020Z  [32m✓[39m tests/unit/syncErrorRecovery.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1963212Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1964663Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.1965500Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.3401253Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.3402726Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.3403108Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4097109Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4098516Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4098869Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4952773Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4954227Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.4954590Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:07.9012294Z  [32m✓[39m tests/unit/auditLogger.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.2474127Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.2475669Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.2475873Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.3880354Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.3881803Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.3882169Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.5530442Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.5532232Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.5532593Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6092800Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6094491Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6095254Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6097426Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mcircuit breaker chaos[2m > [22m[2mshould handle rapid failures and open circuit
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6099279Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6100270Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6101062Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6101487Z   lastFailureTime: [32m'2026-04-26T20:25:08.605Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6101897Z   error: [32m'Chaos error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6102161Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6102442Z [CIRCUIT BREAKER] OPENED after 6 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6102958Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6103412Z   failureCount: [33m6[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6103803Z   lastFailureTime: [32m'2026-04-26T20:25:08.607Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6104191Z   error: [32m'Chaos error 5'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6104451Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6104705Z [CIRCUIT BREAKER] OPENED after 7 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6105508Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6105980Z   failureCount: [33m7[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6106365Z   lastFailureTime: [32m'2026-04-26T20:25:08.607Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6106749Z   error: [32m'Chaos error 6'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6106991Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6107241Z [CIRCUIT BREAKER] OPENED after 8 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6107737Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6108377Z   failureCount: [33m8[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6109101Z   lastFailureTime: [32m'2026-04-26T20:25:08.607Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6109853Z   error: [32m'Chaos error 7'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6110269Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6110673Z [CIRCUIT BREAKER] OPENED after 9 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6111365Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6111843Z   failureCount: [33m9[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6112203Z   lastFailureTime: [32m'2026-04-26T20:25:08.607Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6112550Z   error: [32m'Chaos error 8'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6112768Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6112990Z [CIRCUIT BREAKER] OPENED after 10 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6113463Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6113863Z   failureCount: [33m10[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6114208Z   lastFailureTime: [32m'2026-04-26T20:25:08.608Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6114549Z   error: [32m'Chaos error 9'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6114771Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6115022Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6115877Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mcircuit breaker chaos[2m > [22m[2mshould recover from circuit open after timeout
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6116699Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6117160Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6117835Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6118191Z   lastFailureTime: [32m'2026-04-26T20:25:08.610Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6118512Z   error: [32m'Failure'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6118709Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6118791Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6898581Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6899578Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.6899872Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.7422887Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.7424222Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.7424491Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.8038060Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.8039085Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.8039340Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.9675557Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.9676546Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:08.9676788Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0399103Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0400669Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0401001Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0863065Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0864021Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.0864263Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.2499842Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.2500956Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.2501233Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4286752Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4287843Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4288120Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4379938Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4381527Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.4381934Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.6665219Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.6666249Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:09.6666541Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.0765112Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.0766203Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.0766455Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.1847242Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.1848343Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.1848593Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3752351Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3753355Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3753603Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3915499Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3916756Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.3916970Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.5160523Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.5161520Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.5161775Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.6915273Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.6916416Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.6916617Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7437958Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7438952Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7439227Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7901470Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7902466Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:10.7902719Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.1209019Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.1209857Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.1210059Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3356082Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3356932Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3357139Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3589150Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3590111Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.3590363Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7239669Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7240601Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7240833Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7252886Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7253779Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.7254039Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.8608180Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.8609152Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.8609422Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.9671584Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.9672665Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:11.9672935Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.1296659Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.1297551Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.1297755Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4103325Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4104204Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4104412Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4246576Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4247646Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.4248255Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.7231476Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.7232335Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.7232558Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.8284657Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.8285774Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:12.8286005Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.0912736Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.0913847Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.0914183Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.1457577Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.1459003Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.1459322Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.2141438Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.2142268Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.2142479Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.4628918Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.4630020Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.4630296Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.5060980Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.5061965Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.5062222Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.6987278Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.6988705Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.6989038Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.7430206Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.7431283Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:13.7431557Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.1802013Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.1803785Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.1804216Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.2555362Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.2556358Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.2556597Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4410198Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 10 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4411530Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4411885Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4946065Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4947384Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.4947741Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5057292Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5058303Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5058565Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5610448Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5611778Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.5611967Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6103505Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6104370Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6104581Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6566870Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6568112Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.6568360Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7080121Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7080930Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7081149Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7443944Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7444724Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.7445192Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.8037371Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.8038238Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.8038460Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9401492Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9402499Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9402757Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9624687Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9626052Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9626309Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9847930Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9848897Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:15.9849150Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0671131Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0671949Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0672152Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0844683Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0847574Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.0848310Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.1538400Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.1539216Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.1539429Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2342624Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2343600Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2343858Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2966302Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2967118Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.2967315Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3048322Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3049854Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3050122Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3151315Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3152187Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3152396Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3545886Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3546819Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.3547523Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4308702Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4309784Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4310053Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4615406Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mdisconnect[2m > [22m[2mshould disconnect when connected
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4616866Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4617214Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4627891Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mdisconnect[2m > [22m[2mshould handle disconnect when not connected
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4628786Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4629003Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4649832Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4650609Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.4650805Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5072826Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5073659Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5073890Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5326328Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5327360Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5327617Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5439910Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5440882Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.5441103Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6033924Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6035312Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6035588Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6117190Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6118191Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6118458Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6240291Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6241226Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.6241484Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7005902Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7006781Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7007013Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7067145Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7068114Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7068366Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7189223Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7190193Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7190430Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7893077Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7894070Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.7894384Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8495948Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8497109Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8497317Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8498037Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8498767Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8498954Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8721059Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8722090Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.8722349Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9084635Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9086075Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9086358Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9176218Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9177044Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9177249Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9459693Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9460643Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9460861Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9603143Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9604142Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9604402Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9746390Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9748069Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9748434Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9749257Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9750033Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:16.9750244Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0071055Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0071966Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0072189Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0194106Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0195540Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0195822Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0226767Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0227721Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.0227960Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1041288Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1042379Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1042594Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1243234Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1244024Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1244375Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1807288Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1808580Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1808824Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1891648Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1892724Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.1892931Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2003834Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2004685Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2005159Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2186894Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2187869Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2188115Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2250321Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2251285Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2251524Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2403963Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2404752Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2405343Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2738361Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2739233Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2739434Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2829956Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2830872Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.2831135Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.4045540Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.4046534Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.4046728Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5309085Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5310003Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5310238Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5942734Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5943734Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5943992Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5995623Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5996685Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.5996938Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6530719Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6532180Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6532791Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6562180Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6562968Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6563203Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6765615Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6766561Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.6766807Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.7919931Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.7921315Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.7921579Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.8471898Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.8472888Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.8473129Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9086015Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9086925Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9087148Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9139503Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9140512Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9140806Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9771142Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9771942Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9772149Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9995799Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9996911Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:17.9997167Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0408275Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0409123Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0409321Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0860977Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0861752Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0861955Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0964457Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0965859Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.0966106Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2138875Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2139868Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2140117Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2181584Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2182469Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2182698Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2234273Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2235622Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2235866Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2717739Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2719186Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2719441Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2751073Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2752142Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2752419Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2843758Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2845062Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2845286Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2946811Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2947810Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.2948079Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3019970Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3020998Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3021257Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3343202Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3344124Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3344328Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3836942Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3837979Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.3838242Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4120612Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4121702Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4121975Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4343683Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4345066Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4345349Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4456479Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4457275Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4457495Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4480158Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4481166Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4481434Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4923378Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4924420Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.4924691Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5246151Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5246978Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5247180Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5439967Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5440932Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5441177Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5532754Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5534008Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5534259Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5945140Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5946158Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.5946422Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6209302Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6210072Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6210529Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6491282Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6492280Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6492534Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6624177Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6625451Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6625722Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6906972Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6907965Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6908221Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6989808Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6990927Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.6991182Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7043068Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7044025Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7044286Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7305358Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7306224Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7306474Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7809912Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7810941Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.7811204Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.8482729Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.8483709Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.8483929Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.9236743Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.9237719Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:18.9237961Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1193210Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1194255Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1194513Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1896809Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1897860Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.1898138Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2008706Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2009669Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2009920Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2132019Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2133362Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2133616Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2184595Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2185783Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2186025Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2618064Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2619375Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2619627Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2951221Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2952165Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2952390Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2984312Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2985714Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.2985979Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3005653Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3006515Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3006732Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3198699Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3199649Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3199904Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3260094Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3260906Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3261108Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3494516Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3495810Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3496087Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3568421Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3570110Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3570534Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3701640Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3702669Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.3702946Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4034477Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4035833Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4036113Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4317444Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4318492Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4318764Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4910867Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4911832Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.4912080Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5092951Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5094031Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5094238Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5468363Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5469340Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5469596Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5601978Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5603063Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5603757Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5614060Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5615053Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.5615264Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6578923Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6580010Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6580271Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6992001Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6992993Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.6993251Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.7876188Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.7877264Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.7877527Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.8348241Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.8349194Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.8349461Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9132788Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9133748Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9133950Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9265516Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9266539Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:19.9266810Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0150138Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0151194Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0151465Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0543364Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0544431Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0544692Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0846629Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0847653Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.0847909Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.1250001Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.1251024Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.1251328Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.2534631Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.2535945Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.2536509Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3047882Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3048861Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3049104Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3471134Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3472069Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.3472284Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.5686962Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.5688528Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.5688795Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6249807Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6250962Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6251232Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6783735Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6785050Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.6785324Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.7356671Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.7357646Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.7357910Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.8360243Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.8361188Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.8361397Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.9074072Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.9075303Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:20.9075551Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0307638Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0308578Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0308816Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0910001Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0911137Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.0911373Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2806875Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2807933Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2808203Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2979719Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2980535Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.2980748Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.4736835Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.4737870Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.4738138Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5249779Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5250872Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5251146Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5611629Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5612879Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.5613122Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.7527158Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.7528102Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.7528340Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.9382088Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.9383387Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:21.9383585Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:22.3311514Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:22.3312392Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:22.3312614Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:22.3827325Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:22.3828307Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0436341Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0438190Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould handle 50 concurrent users
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0439189Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0439448Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0547506Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0548568Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.0548830Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1330340Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1331373Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1331579Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1422289Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1423199Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.1423430Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3052861Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3053861Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3054148Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3375807Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3376820Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.3377072Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.5802955Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.5803999Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.5804254Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.6086063Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.6087676Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.6088091Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7600435Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7601468Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7601717Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7733432Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7734463Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7735562Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7745576Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7746455Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.7746676Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9751063Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9751904Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9752107Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9864281Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9865984Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:23.9866232Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.3204394Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.3205919Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.3206200Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.4899286Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.4900842Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.4901243Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5411987Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5412800Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5413020Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5515270Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5516253Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5516496Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5819179Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5820220Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.5820480Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.6552238Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.6553306Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.6553577Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.7586145Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.7587130Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:24.7587373Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2716679Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2718307Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2718703Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2837892Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2838956Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2839227Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2990413Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2991472Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.2991752Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.3654219Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.3655669Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.3655943Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4147778Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4149135Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4149410Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4480109Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4481063Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4481306Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4663185Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4664417Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.4664661Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6068893Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6069939Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6070215Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6241757Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6242689Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6242934Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6474140Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6475688Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6475957Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6617872Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6618942Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6619202Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6950886Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6951893Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.6952152Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7484329Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7485780Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7486040Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7677115Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7678130Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.7678409Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.8200581Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.8201585Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.8201842Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9435319Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9436443Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9436685Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9626519Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9643162Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:25.9643391Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.1753622Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.1754614Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.1755196Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2500139Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mrequestCache[2m > [22m[2mshould call onSyncActivity callback (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2501268Z [22m[39m[SUPABASE SYNC] requestCache called
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2501896Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2511158Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mrequestCache[2m > [22m[2mshould warn when not connected
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2512055Z [22m[39m[SUPABASE SYNC] requestCache called
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.2512270Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3257346Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3258211Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3258412Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3500789Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3501732Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.3501987Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4445385Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4446591Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4446863Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4578297Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4579260Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.4579514Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.6242625Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.6243667Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.6243931Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7706761Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7707912Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7708222Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7739130Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7740075Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.7740314Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.8082072Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.8083061Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.8083318Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.9599022Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.9600118Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:26.9600393Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0251310Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0252358Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0252607Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0785861Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0786923Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.0787178Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.1108637Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.1109588Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.1109817Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4237153Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4238151Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4238401Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4408409Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4409772Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.4410016Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.5132536Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.5133585Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.5133854Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.6516552Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.6517916Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:27.6518184Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.2176107Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.2177018Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.2177252Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.3630959Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.3631928Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.3632172Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.4995110Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.4995982Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.4996175Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.7851247Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.7852041Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:28.7852240Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1215298Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mtransport cleanup[2m > [22m[2mshould clear E2EE key on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1216754Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1217115Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1909822Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mtransport cleanup[2m > [22m[2mshould log warning for pending updates on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1911510Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.1911881Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.6940325Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mtransport cleanup[2m > [22m[2mshould emit telemetry on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.6941981Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.6942336Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.7906366Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.7907473Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:29.7907771Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.3386722Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.3387734Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.3387988Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.4811909Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mscalability[2m > [22m[2mshould report acceptable latency
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.4813342Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:30.4813659Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6107430Z [90mstdout[2m | tests/unit/supabaseSync.test.ts[2m > [22m[2msupabaseSync[2m > [22m[2mstatus[2m > [22m[2mshould return current status
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6108921Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6109279Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6123972Z  [31m❯[39m tests/unit/supabaseSync.test.ts [2m([22m[2m31 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 31232[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6126199Z        [33m[2m✓[22m[39m should store derivedKey on connect [33m 2284[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6127445Z        [32m✓[39m should throw error when connecting without key[32m 3[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6128730Z        [32m✓[39m should throw error when connecting with invalid key[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6130019Z        [33m[2m✓[22m[39m should clear E2EE key on disconnect [33m 870[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6130739Z        [33m[2m✓[22m[39m should log queued updates on disconnect [33m 1480[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6132165Z        [33m[2m✓[22m[39m should track connection time [33m 2672[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6133610Z        [33m[2m✓[22m[39m should detect cold start (connection > 2s) [33m 2017[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6135182Z        [33m[2m✓[22m[39m should provide extended timeout for cold start [33m 1283[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6136431Z        [32m✓[39m should create instance with all callbacks[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6137628Z        [32m✓[39m should create instance with minimal callbacks[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6138832Z [31m       [31m×[31m should log experimental warning[39m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6139916Z        [32m✓[39m should emit telemetry on creation[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6141088Z        [33m[2m✓[22m[39m should connect successfully (skeleton) [33m 838[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6142457Z        [33m[2m✓[22m[39m should transition through connecting state [33m 491[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6143721Z        [33m[2m✓[22m[39m should emit telemetry on success [33m 2471[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6145146Z        [33m[2m✓[22m[39m should disconnect when connected [33m 1664[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6146746Z        [32m✓[39m should handle disconnect when not connected[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6148071Z [31m       [31m×[31m should log when broadcasting (skeleton)[39m[33m 1378[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6149226Z [31m       [31m×[31m should warn when not connected[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6150371Z        [32m✓[39m should call onSyncActivity callback (skeleton)[32m 169[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6151644Z [31m       [31m×[31m should log when flushing (skeleton)[39m[33m 2891[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6153000Z        [33m[2m✓[22m[39m should log when flushing queued updates (skeleton) [33m 1881[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6154423Z        [33m[2m✓[22m[39m should log when sending disconnect signal (skeleton) [33m 785[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6156139Z        [33m[2m✓[22m[39m should call onSyncActivity callback (skeleton) [33m 2680[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6157331Z        [32m✓[39m should warn when not connected[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6158416Z        [32m✓[39m should implement SupabaseSyncInterface[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6159614Z        [33m[2m✓[22m[39m should clear E2EE key on disconnect [33m 2869[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6160841Z        [32m✓[39m should log warning for pending updates on disconnect[32m 70[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6161980Z        [33m[2m✓[22m[39m should emit telemetry on disconnect [33m 503[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6163093Z        [33m[2m✓[22m[39m should return current status [33m 1916[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:31.6164157Z      [32m✓[39m should accept valid status values[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:32.3163255Z  [32m✓[39m tests/integration/checkpointService.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0173428Z  [31m❯[39m tests/unit/sentryIntegration.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 23[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0174698Z [31m       [31m×[31m should initialize sentry[39m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0175884Z        [32m✓[39m should not capture when disabled[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0176410Z        [32m✓[39m should capture exception[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0176973Z        [32m✓[39m should capture exception with extra data[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0177995Z        [32m✓[39m should store exception with stack trace[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0178981Z        [32m✓[39m should capture message[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0179904Z        [32m✓[39m should capture different levels[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0181006Z        [32m✓[39m should set user[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0181735Z        [32m✓[39m should set tags[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0182423Z        [32m✓[39m should clear user[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0183183Z        [32m✓[39m should limit stored events to 100[32m 8[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0183953Z        [32m✓[39m should return same instance[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0184747Z        [32m✓[39m should create new instance after destroy[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.0185912Z        [32m✓[39m should expose sentry on window[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4646610Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4648172Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4648521Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4828614Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4830103Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.4830447Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.5363740Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.5365629Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.5366001Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.6954466Z  [32m✓[39m tests/unit/rateLimiter.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7409972Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7410818Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7411009Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7541609Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7542481Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:33.7542691Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0008885Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0009756Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0009962Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0241034Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0241954Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.0242179Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2488697Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2490128Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2490484Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2851725Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2852748Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.2853382Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3296309Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3297776Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3298129Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3665227Z  [32m✓[39m tests/unit/middleware/rateLimit.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3849522Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3851314Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.3851646Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.6446580Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.6447452Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.6447683Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7752249Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7753719Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7754043Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7824441Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7826480Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.7827018Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9101342Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9102751Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9103084Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9985948Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9987376Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:34.9987707Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1020132Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1021258Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1021518Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1422663Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1423801Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.1424043Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2536630Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2537645Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2537926Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2839352Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2840423Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2840684Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2961914Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2962909Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.2963117Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3054349Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3056021Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3056279Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3678958Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3680494Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.3680777Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.4551886Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.4552988Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.4553258Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5335797Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5337355Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5337634Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5356762Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5357939Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5358202Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5701301Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5702340Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5702595Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5984694Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5986139Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.5986433Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.6838450Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.6839553Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.6839821Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.7812760Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.7814258Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.7814613Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8045825Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8046895Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8047144Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8149786Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8150938Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8151216Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8291470Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8292359Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.8292579Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.9355687Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.9356760Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:35.9356977Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0549661Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0550631Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0550890Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0821366Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0822197Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0822397Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0996336Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0998005Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.0998273Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1328241Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1329155Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1329347Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1501417Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1502701Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.1502940Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2095250Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2096373Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2096638Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2616540Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2617364Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.2617572Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.4311429Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.4312418Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.4312677Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.5245804Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.5246745Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.5246960Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6198499Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6199579Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6199832Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6862805Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6863889Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.6864156Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.7156031Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.7157217Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.7157476Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.8480260Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.8481122Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.8481328Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.9906318Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.9907957Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:36.9908360Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.2122101Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.2123172Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.2123451Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.3095373Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.3096489Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.3096725Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.4349547Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.4350714Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.4350985Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5794718Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5796026Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5796221Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5826734Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5827828Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5828025Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5828765Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5829511Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.5829695Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6931197Z [90mstdout[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mmemory pressure[2m > [22m[2mshould handle burst of many sync instances
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6933037Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6933704Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6934288Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6935185Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6935777Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6936375Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6936936Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6937500Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6937962Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6938306Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6938857Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6939375Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6939900Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6940386Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6940848Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6941298Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6941756Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6942211Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6942664Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6943115Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6943569Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6943981Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6944250Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6944525Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6945104Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6945422Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6945695Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6945964Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6946227Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6946494Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6946761Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6947019Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6947283Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6947553Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6947815Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6948071Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6948324Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6948579Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6948842Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6949110Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6949365Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6949624Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6949878Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6950132Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6950637Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6950891Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6951150Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6951407Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6951871Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6952322Z [SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6952587Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6953487Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mnetwork partition[2m > [22m[2mshould handle transport switching under chaos
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6954466Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6955485Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6956276Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6956948Z   lastFailureTime: [32m'2026-04-26T20:25:37.693Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6957619Z   error: [32m'Network partition'[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6958053Z }
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6958199Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6958983Z  [32m✓[39m tests/unit/chaosEngineering.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 29092[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.6960290Z        [33m[2m✓[22m[39m should survive rapid connect/disconnect cycles [33m 29059[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.7453884Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.7455678Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.7456194Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9200051Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9201437Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9201760Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9432021Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9433506Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9433839Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9584169Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9586054Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:37.9586581Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.0581574Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.0583226Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.0583605Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1746242Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1747271Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1747502Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1948167Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1949030Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.1949243Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2030546Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2031577Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2031822Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2132751Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2133576Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.2133773Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3018948Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3020243Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3020469Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3576437Z  [32m✓[39m tests/unit/middleware/securityHeaders.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3722922Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3724415Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.3725391Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.4206558Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.4208072Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.4208435Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.7224556Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.7226399Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.7226757Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.9209611Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.9211128Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:38.9211498Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0222104Z  [32m✓[39m tests/unit/selector_optimization.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0283066Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0284731Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0285660Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0466762Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0467681Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.0467896Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1652825Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1653872Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1654127Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1745220Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1747040Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.1747583Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.2951765Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.2952698Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.2952917Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.3105895Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.3107240Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.3107453Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.4441752Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.4443236Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.4443637Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6676575Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6677457Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6677661Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6828652Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6829740Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6829936Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6891424Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6892234Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.6892434Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.7486850Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.7488390Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.7488903Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:39.9691594Z  [32m✓[39m tests/unit/store_reproduction.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 14[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0532557Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0533429Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0533630Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0735594Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0736537Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0736755Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0908029Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0909023Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.0909253Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.3825935Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.3826822Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.3827020Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.6243540Z  [32m✓[39m tests/unit/lib/storageMonitor.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.9723222Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.9725072Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:40.9725446Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0367263Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0368841Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0369204Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0800136Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0801664Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.0802032Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.1233730Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.1235511Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.1235868Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.2741920Z  [32m✓[39m tests/unit/prompts/analysis.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.4031242Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.4032309Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.4032553Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.6537781Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.6539280Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.6539541Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:41.9213249Z  [32m✓[39m tests/unit/exportUtils.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3368407Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3369282Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3369484Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3932138Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3933580Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.3933833Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4165675Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4167244Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4167568Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4900220Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4901190Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.4901408Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.5472842Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.5473672Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.5473911Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.6191581Z  [2m[90m↓[39m[22m tests/integration/e2eeRoundTrip.test.ts [2m([22m[2m3 tests[22m[2m | [22m[33m3 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.6547169Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.6548711Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.6549056Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8494078Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8495797Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8496158Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8936526Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8938064Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:42.8938479Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.2855519Z  [32m✓[39m tests/unit/supabaseClient.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.3253325Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.3255141Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.3255514Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.6690298Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.6691157Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:43.6691370Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:44.1048429Z  [32m✓[39m tests/unit/components/ErrorBoundary.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[32m 175[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0119031Z [90mstdout[2m | tests/unit/loadTesting.test.ts[2m > [22m[2mLoad Testing[2m > [22m[2mperformance baseline[2m > [22m[2mshould have acceptable memory usage
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0120406Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0120858Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0133048Z  [32m✓[39m tests/unit/loadTesting.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 38214[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0135108Z        [33m[2m✓[22m[39m should handle 10 concurrent users [33m 8643[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0137103Z        [33m[2m✓[22m[39m should handle 50 concurrent users [33m 7602[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0138554Z        [33m[2m✓[22m[39m should report acceptable latency [33m 7438[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0140062Z        [33m[2m✓[22m[39m should survive burst traffic [33m 2957[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.0165905Z        [33m[2m✓[22m[39m should have acceptable memory usage [33m 11572[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.2324243Z  [32m✓[39m tests/unit/hooks/useStorageMonitor.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 465[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.2376042Z      [33m[2m✓[22m[39m should exist and be importable [33m 447[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.8350563Z [90mstdout[2m | tests/unit/gemini_rate_limit.test.ts[2m > [22m[2mGeminiService Rate Limit[2m > [22m[2mshould enforce rate limit for concurrent calls
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.8352661Z [22m[39mCompletion times: [ [33m0[39m, [33m2000[39m, [33m4000[39m ]
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.8353471Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.8368675Z  [32m✓[39m tests/unit/gemini_rate_limit.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 22[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:45.9934154Z  [32m✓[39m tests/unit/prompts/scout.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:46.6540434Z [90mstdout[2m | tests/unit/storage_perf.test.ts[2m > [22m[2mStorage Service Performance[2m > [22m[2mmeasures getProject performance with large data (50MB)
+Unit Tests	Run npx vitest run	2026-04-26T20:25:46.6542028Z [22m[39mgetProject took 3.35ms for 50MB data
+Unit Tests	Run npx vitest run	2026-04-26T20:25:46.6542451Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:25:46.6555416Z  [32m✓[39m tests/unit/storage_perf.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:46.8021590Z  [32m✓[39m tests/unit/validation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:47.5887199Z  [32m✓[39m tests/unit/components/PrintableReport.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:47.9131963Z  [31m❯[39m tests/unit/components/TaskEditor.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 492[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:47.9136424Z      [33m[2m✓[22m[39m should exist and be importable [33m 485[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:47.9165869Z      [32m✓[39m should export a React component[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:47.9178441Z [31m     [31m×[31m should have component name[39m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:48.5336926Z  [32m✓[39m tests/unit/components/WaitlistSignature.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 183[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:48.9884009Z  [32m✓[39m tests/unit/components/WorkspaceSelector.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 301[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:49.6364076Z  [32m✓[39m tests/unit/components/OfflineIndicator.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 344[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:49.6367359Z      [33m[2m✓[22m[39m should exist and be importable [33m 341[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:49.9980114Z  [32m✓[39m tests/unit/components/SyncDebugOverlay.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 225[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:50.7979828Z  [32m✓[39m tests/unit/components/SettingsDialog.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 345[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:50.7981226Z      [33m[2m✓[22m[39m should exist and be importable [33m 342[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:51.0798013Z  [32m✓[39m tests/unit/components/SyncSetupModal.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 307[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:51.0799930Z      [33m[2m✓[22m[39m should exist and be importable [33m 305[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:51.8926883Z  [32m✓[39m tests/unit/components/ManifestoGrid.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 19[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:52.0487666Z  [32m✓[39m tests/unit/components/ExportControl.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 468[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:52.0489727Z      [33m[2m✓[22m[39m should exist and be importable [33m 465[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:53.0087658Z  [32m✓[39m tests/unit/components/ProcessingLog.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 311[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:53.0089149Z      [33m[2m✓[22m[39m should exist and be importable [33m 308[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:53.1871614Z  [32m✓[39m tests/unit/components/ThemeSelector.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 387[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:53.1873575Z      [33m[2m✓[22m[39m should exist and be importable [33m 385[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:53.9956073Z  [32m✓[39m tests/unit/components/HeroCarousel.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 200[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:54.3338900Z  [32m✓[39m tests/unit/components/IgnitionForm.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 369[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:54.3349853Z      [33m[2m✓[22m[39m should exist and be importable [33m 366[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:55.1871087Z  [32m✓[39m tests/unit/components/StatusPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 77[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:55.3518528Z  [32m✓[39m tests/unit/components/ResultsFeed.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 578[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:55.3520113Z      [33m[2m✓[22m[39m should exist and be importable [33m 576[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:56.4476785Z  [32m✓[39m tests/unit/components/UploadZone.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 512[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:56.4503015Z      [33m[2m✓[22m[39m should exist and be importable [33m 509[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:56.5536842Z  [32m✓[39m tests/unit/components/VideoInput.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 460[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:56.5538362Z      [33m[2m✓[22m[39m should exist and be importable [33m 457[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:57.3146837Z  [32m✓[39m tests/unit/prompts/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:57.6045128Z  [32m✓[39m tests/unit/components/ScoutView.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 417[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:57.6046606Z      [33m[2m✓[22m[39m should exist and be importable [33m 415[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:58.6226867Z  [32m✓[39m tests/unit/components/TaskFeed.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 527[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:58.6230039Z      [33m[2m✓[22m[39m should exist and be importable [33m 525[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:58.8156672Z  [32m✓[39m tests/unit/components/Manifesto.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 454[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:58.8158663Z      [33m[2m✓[22m[39m should exist and be importable [33m 452[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:25:59.8190751Z  [32m✓[39m tests/unit/components/GlobalErrorListener.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 219[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:26:00.0100011Z  [32m✓[39m tests/unit/components/Header.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 601[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:26:00.0101803Z      [33m[2m✓[22m[39m should exist and be importable [33m 598[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:26:00.6638204Z  [32m✓[39m tests/unit/components/AppReadyIndicator.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 150[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:26:52.9844734Z [90mstdout[2m | tests/unit/memoryLeak.test.ts[2m > [22m[2mSupabaseSync Memory Leak[2m > [22m[2mshould clean up event listeners on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:26:52.9846750Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:26:52.9847299Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:26:54.8322522Z [90mstdout[2m | tests/unit/memoryLeak.test.ts[2m > [22m[2mSupabaseSync Memory Leak[2m > [22m[2mshould clean up E2EE key on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T20:26:54.8323462Z [22m[39m[SUPABASE SYNC] E2EE key cleared
+Unit Tests	Run npx vitest run	2026-04-26T20:26:54.8323681Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4386939Z  [32m✓[39m tests/unit/memoryLeak.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 108403[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4388194Z      [33m[2m✓[22m[39m should not leak after 50 create/destroy cycles [33m 76933[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4388872Z      [33m[2m✓[22m[39m should clean up event listeners on disconnect [33m 1015[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4389500Z      [33m[2m✓[22m[39m should clean up E2EE key on disconnect [33m 1848[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4390124Z      [33m[2m✓[22m[39m should handle rapid create/destroy cycles [33m 28605[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4439269Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4440129Z [31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 6 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4441023Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4444410Z [41m[1m FAIL [22m[49m tests/unit/sentryIntegration.test.ts[2m > [22msentryIntegration[2m > [22minitialization[2m > [22mshould initialize sentry
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4449542Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "SENTRY" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4450192Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4450451Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4450844Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4451403Z [36m [2m❯[22m tests/unit/sentryIntegration.test.ts:[2m37:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4486521Z     [90m 35| [39m      })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4486989Z     [90m 36| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4487785Z     [90m 37| [39m      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4488662Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4489917Z     [90m 38| [39m      [34mexpect[39m([34mgetSentry[39m()[33m.[39m[34misEnabled[39m())[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4490882Z     [90m 39| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4491073Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4491469Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4491805Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4492977Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mconstructor[2m > [22mshould log experimental warning
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4494144Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "Experimental" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4494586Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4494720Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4495299Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4495705Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m197:27[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4540717Z     [90m195| [39m      [35mnew[39m [33mSupabaseSync[39m(ydoc[33m,[39m [32m'test-room-hash'[39m[33m,[39m mockStatusChange)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4542101Z     [90m196| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4543199Z     [90m197| [39m      expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4544372Z     [90m   | [39m                          [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4545591Z     [90m198| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4546650Z     [90m199| [39m      consoleWarn[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4547471Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4548053Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4548433Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4549776Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mbroadcastUpdate[2m > [22mshould log when broadcasting (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4551722Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "broadcastUpdate" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4552473Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4552721Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4553114Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4553823Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m289:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4555130Z     [90m287| [39m      [35mawait[39m sync[33m.[39m[34mbroadcastUpdate[39m(update)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4555897Z     [90m288| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4556714Z     [90m289| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4557848Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4558328Z     [90m290| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4558995Z     [90m291| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4559449Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4559837Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4560148Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4561353Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mbroadcastUpdate[2m > [22mshould warn when not connected
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4563173Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "not connected" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4564087Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4564324Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4564704Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4565619Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m301:27[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4566690Z     [90m299| [39m      [35mawait[39m sync[33m.[39m[34mbroadcastUpdate[39m(update)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4567434Z     [90m300| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4568217Z     [90m301| [39m      expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4569092Z     [90m   | [39m                          [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4569580Z     [90m302| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4570236Z     [90m303| [39m      consoleWarn[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4570690Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4571078Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4571388Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4572528Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mflush[2m > [22mshould log when flushing (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4574284Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "flush" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4575134Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4575363Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4575749Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4576441Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m343:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4577377Z     [90m341| [39m      [35mawait[39m sync[33m.[39m[34mflush[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4578009Z     [90m342| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4578817Z     [90m343| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4579732Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4580240Z     [90m344| [39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4580918Z     [90m345| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4581404Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4581791Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4582132Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4583288Z [41m[1m FAIL [22m[49m tests/unit/components/TaskEditor.test.tsx[2m > [22mTaskEditor Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4585119Z [31m[1mAssertionError[22m: expected 'TaskEditor2' to be 'TaskEditor' // Object.is equality[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4585773Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4586073Z Expected: [32m"TaskEditor"[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4586697Z Received: [31m"TaskEditor[7m2[27m"[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4587023Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4587628Z [36m [2m❯[22m tests/unit/components/TaskEditor.test.tsx:[2m31:41[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4588698Z     [90m 29| [39m    // Access type property through unknown to bypass TypeScript restr…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4589806Z     [90m 30| [39m    const typeName = (TaskEditor as unknown as { type?: { name?: strin…
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4591365Z     [90m 31| [39m    [34mexpect[39m([33mTaskEditor[39m[33m.[39mname [33m||[39m typeName)[33m.[39m[34mtoBe[39m([32m'TaskEditor'[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4592619Z     [90m   | [39m                                        [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4593212Z     [90m 32| [39m  })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4593694Z     [90m 33| [39m})[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4594168Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4594569Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/6]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4595116Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4595178Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4596206Z [2m Test Files [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m55 passed[39m[22m[2m | [22m[33m6 skipped[39m[90m (64)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4597949Z [2m      Tests [22m [1m[31m6 failed[39m[22m[2m | [22m[1m[32m448 passed[39m[22m[2m | [22m[33m102 skipped[39m[90m (556)[39m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4598983Z [2m   Start at [22m 20:24:59
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4600073Z [2m   Duration [22m 144.26s[2m (transform 1.30s, setup 0ms, import 2.89s, tests 216.79s, environment 36.81s)[22m
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4604119Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4617713Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4648810Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "SENTRY" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/sentryIntegration.test.ts:37:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4660268Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4663069Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "Experimental" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:197:27
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4665098Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4667672Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "broadcastUpdate" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:289:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4669434Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4671887Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "not connected" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:301:27
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4673643Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4676164Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "flush" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:343:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4677806Z 
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.4680537Z ##[error]AssertionError: expected 'TaskEditor2' to be 'TaskEditor' // Object.is equality
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Expected: "TaskEditor"
+Unit Tests	Run npx vitest run	Received: "TaskEditor2"
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/components/TaskEditor.test.tsx:31:41
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T20:27:23.5007984Z ##[error]Process completed with exit code 1.
