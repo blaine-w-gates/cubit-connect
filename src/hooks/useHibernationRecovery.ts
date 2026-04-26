@@ -65,13 +65,7 @@ export function useHibernationRecovery(
     const wallClockElapsed = now - activeTimerSession.startedAt - activeTimerSession.totalPausedMs;
     const remainingMs = Math.max(0, activeTimerSession.durationMs - wallClockElapsed);
     const remainingSeconds = Math.ceil(remainingMs / 1000);
-    
-      wallClockElapsed,
-      remainingMs,
-      remainingSeconds,
-      originalRemaining: timerRemainingSeconds,
-    });
-    
+
     // Check if timer expired during hibernation
     if (remainingSeconds <= 0) {
       
@@ -141,7 +135,7 @@ export function useHibernationRecovery(
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, [enabled, timerStatus, activeTimerSession]);
-  
+
   return {
     isRecovering: isRecoveringRef.current,
     lastHibernationDuration: lastHibernationDurationRef.current,

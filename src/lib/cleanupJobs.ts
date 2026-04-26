@@ -254,9 +254,6 @@ class CleanupJobSystem {
       this.stats.totalItemsProcessed += result.itemsProcessed;
       this.stats.lastRun = Date.now();
 
-        `[CLEANUP] Job ${jobName} completed: ${result.itemsProcessed} items in ${result.durationMs}ms`
-      );
-
       return result;
     } catch (error) {
       // INTENTIONALLY HANDLING: Cleanup job failure tracked but doesn't crash system

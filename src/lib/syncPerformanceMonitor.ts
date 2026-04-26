@@ -226,10 +226,7 @@ class SyncPerformanceMonitor {
 
     stats.forEach((s) => {
       if (s.count > 0) {
-          `  ${s.operation}: ${s.count} ops, avg=${s.avgLatencyMs}ms, ` +
-            `p95=${s.p95LatencyMs}ms, errors=${(s.errorRate * 100).toFixed(1)}%, ` +
-            `slo=${(s.sloCompliance * 100).toFixed(1)}%`
-        );
+        // Metrics logged via audit system below if degraded
       }
     });
 

@@ -48,10 +48,7 @@ export function logCausalEvent(
   
   // Always log to console in development
   if (typeof window !== 'undefined' && (window as unknown as { __SYNC_DIAGNOSTICS?: boolean }).__SYNC_DIAGNOSTICS) {
-      `[CAUSAL] #${event.sequence} [${phase}] ${instanceId}: ${action}`,
-      details,
-      `at ${event.stackTrace}`
-    );
+    // Causal event logged via audit system
   }
   
   return event;

@@ -1,0 +1,1005 @@
+Lint & Typecheck	Run npx tsc --noEmit	﻿2026-04-26T14:20:55.9634576Z ##[group]Run npx tsc --noEmit
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:55.9634912Z [36;1mnpx tsc --noEmit[0m
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:55.9657439Z shell: /usr/bin/bash -e {0}
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:55.9657706Z ##[endgroup]
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5275432Z ##[error]src/hooks/useHibernationRecovery.ts(72,24): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5286098Z ##[error]src/hooks/useHibernationRecovery.ts(73,5): error TS1109: Expression expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5287576Z ##[error]src/hooks/useHibernationRecovery.ts(96,4): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5288739Z ##[error]src/hooks/useHibernationRecovery.ts(96,119): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5289991Z ##[error]src/hooks/useHibernationRecovery.ts(149,1): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5291319Z ##[error]src/lib/cleanupJobs.ts(258,7): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5292565Z ##[error]src/lib/syncDiagnostics.ts(54,5): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5293811Z ##[error]src/lib/syncPerformanceMonitor.ts(232,9): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5295375Z ##[error]src/lib/syncPerformanceMonitor.ts(234,6): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5296651Z ##[error]src/lib/syncPerformanceMonitor.ts(245,3): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5297868Z ##[error]src/lib/syncPerformanceMonitor.ts(250,12): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5298937Z ##[error]src/lib/syncPerformanceMonitor.ts(251,13): error TS1005: ',' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5299970Z ##[error]src/lib/syncPerformanceMonitor.ts(251,28): error TS1005: ',' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5301123Z ##[error]src/lib/syncPerformanceMonitor.ts(251,30): error TS1136: Property assignment expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5302318Z ##[error]src/lib/syncPerformanceMonitor.ts(255,3): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5303455Z ##[error]src/lib/syncPerformanceMonitor.ts(260,10): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5304796Z ##[error]src/lib/syncPerformanceMonitor.ts(261,9): error TS1005: ':' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5305889Z ##[error]src/lib/syncPerformanceMonitor.ts(261,22): error TS1005: ',' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5306945Z ##[error]src/lib/syncPerformanceMonitor.ts(267,15): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5308229Z ##[error]src/lib/syncPerformanceMonitor.ts(267,35): error TS1011: An element access expression should take an argument.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5309480Z ##[error]src/lib/syncPerformanceMonitor.ts(267,37): error TS1005: ';' expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5310697Z ##[error]src/lib/syncPerformanceMonitor.ts(270,1): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5311810Z ##[error]src/lib/timerMath.ts(156,5): error TS1109: Expression expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5312914Z ##[error]src/lib/timerMath.ts(156,6): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5313990Z ##[error]src/lib/timerMath.ts(170,1): error TS1128: Declaration or statement expected.
+Lint & Typecheck	Run npx tsc --noEmit	2026-04-26T14:20:59.5786029Z ##[error]Process completed with exit code 2.
+Focused Tests (Sync)	Run npm run build	﻿2026-04-26T14:21:26.9214468Z ##[group]Run npm run build
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:26.9214932Z [36;1mnpm run build[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:26.9236604Z shell: /usr/bin/bash -e {0}
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:26.9236896Z ##[endgroup]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.0429396Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.0429816Z > temp_app@0.1.0 build
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.0430315Z > next build
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.0430514Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4343411Z ⚠ No build cache found. Please configure build caching for faster rebuilds. Read more: https://nextjs.org/docs/messages/no-cache
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4440639Z Attention: Next.js now collects completely anonymous telemetry regarding usage.
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4442113Z This information is used to shape Next.js' roadmap and prioritize features.
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4444063Z You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4446070Z https://nextjs.org/telemetry
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4446311Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4602723Z ▲ Next.js 16.2.4 (Turbopack)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4603697Z - Environments: .env.production
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.4605546Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.5078383Z ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:27.5361385Z   Creating an optimized production build ...
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7164992Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7166107Z > Build error occurred
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7210996Z Error: Turbopack build failed with 6 errors:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7211870Z ./src/hooks/useHibernationRecovery.ts:72:24
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7212511Z Expected ';', '}' or <eof>
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7213420Z   [90m70 |[0m       remainingMs,
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7214148Z   [90m71 |[0m       remainingSeconds,
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7215665Z [31m[1m>[0m [90m72 |[0m       originalRemaining: timerRemainingSeconds,
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7216718Z   [90m   |[0m                        [31m[1m^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7217812Z   [90m73 |[0m     });
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7218352Z   [90m74 |[0m     
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7219255Z   [90m75 |[0m     [90m// Check if timer expired during hibernation[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7219889Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7220259Z Parsing ecmascript source code failed
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7220639Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7220795Z Import traces:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7221222Z   Client Component Browser:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7222052Z     ./src/hooks/useHibernationRecovery.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7223139Z     ./src/components/today/PomodoroTimer.tsx [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7224096Z     ./src/app/today/page.tsx [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7225104Z     ./src/app/today/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7225555Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7225751Z   Client Component SSR:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7226483Z     ./src/hooks/useHibernationRecovery.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7227559Z     ./src/components/today/PomodoroTimer.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7228471Z     ./src/app/today/page.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7229265Z     ./src/app/today/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7229705Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7229718Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7230022Z ./src/lib/cleanupJobs.ts:258:7
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7230557Z Expression expected
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7230952Z   [90m256 |[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7232052Z   [90m257 |[0m         [32m`[CLEANUP] Job [0m${jobName[32m} completed: [0m${result.itemsProcessed[32m} items in [0m${result.d...
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7232737Z [31m[1m>[0m [90m258 |[0m       );
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7233051Z   [90m    |[0m       [31m[1m^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7233335Z   [90m259 |[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7233621Z   [90m260 |[0m       [36mreturn[0m result;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7233993Z   [90m261 |[0m     } [36mcatch[0m (error) {
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7234182Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7234644Z Parsing ecmascript source code failed
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7234866Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7234944Z Import traces:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7235603Z   Client Component Browser:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7235941Z     ./src/lib/cleanupJobs.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7236348Z     ./src/store/useAppStore.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7236769Z     ./src/app/engine/page.tsx [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7237139Z     ./src/app/engine/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7237363Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7237452Z   Client Component SSR:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7237738Z     ./src/lib/cleanupJobs.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7238112Z     ./src/store/useAppStore.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7238475Z     ./src/app/today/page.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7238822Z     ./src/app/today/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7239029Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7239036Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7239184Z ./src/lib/syncDiagnostics.ts:54:5
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7239462Z Expression expected
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7239767Z   [90m52 |[0m       details,
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7240171Z   [90m53 |[0m       [32m`at [0m${event.stackTrace[32m}`[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7240628Z [31m[1m>[0m [90m54 |[0m     );
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7240933Z   [90m   |[0m     [31m[1m^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7241203Z   [90m55 |[0m   }
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7241408Z   [90m56 |[0m   
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7241660Z   [90m57 |[0m   [36mreturn[0m event;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7241833Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7241969Z Parsing ecmascript source code failed
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7242171Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7242247Z Import traces:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7242459Z   Client Component Browser:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7242789Z     ./src/lib/syncDiagnostics.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7243170Z     ./src/store/useAppStore.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7243559Z     ./src/app/sandbox/page.tsx [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7243902Z     ./src/app/sandbox/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7244096Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7244427Z   Client Component SSR:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7244770Z     ./src/lib/syncDiagnostics.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7245219Z     ./src/components/SyncDebugOverlay.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7245785Z     ./src/app/todo/page.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7246257Z     ./src/app/todo/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7246538Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7246543Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7246796Z ./src/lib/syncPerformanceMonitor.ts:232:9
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7247117Z Expression expected
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7247844Z   [90m230 |[0m             [32m`p95=[0m${s.p95LatencyMs[32m}ms, errors=[0m${(s.errorRate * [35m100[0m).toFixed([35m1[0m)[32m}%, `[0m +
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7248760Z   [90m231 |[0m             [32m`slo=[0m${(s.sloCompliance * [35m100[0m).toFixed([35m1[0m)[32m}%`[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7249329Z [31m[1m>[0m [90m232 |[0m         );
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7249674Z   [90m    |[0m         [31m[1m^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7249954Z   [90m233 |[0m       }
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7250221Z   [90m234 |[0m     });
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7250463Z   [90m235 |[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7250592Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7250744Z Parsing ecmascript source code failed
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7250932Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7251032Z Import traces:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7251241Z   Client Component Browser:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7251911Z     ./src/lib/syncPerformanceMonitor.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7252545Z     ./src/lib/supabaseSyncProd.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7253141Z     ./src/lib/supabaseSyncLoader.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7253603Z     ./src/store/useAppStore.ts [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7254026Z     ./src/app/engine/page.tsx [Client Component Browser]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7254800Z     ./src/app/engine/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7255050Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7255151Z   Client Component SSR:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7255534Z     ./src/lib/syncPerformanceMonitor.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7256228Z     ./src/lib/supabaseSyncProd.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7256681Z     ./src/lib/supabaseSyncLoader.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7257091Z     ./src/store/useAppStore.ts [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7257481Z     ./src/app/today/page.tsx [Client Component SSR]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7257902Z     ./src/app/today/page.tsx [Server Component]
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7258109Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7258116Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7258325Z ./src/components/StatusPage.tsx:10:27
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7259673Z You're importing a module that depends on `useEffect` into a React Server Component module. This API is only available in Client Components. To fix, mark the file (or its parent) with the `"use client"` directive.
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7260965Z     Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7261571Z   [90m 8 |[0m [90m */[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7261884Z   [90m 9 |[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7262666Z [31m[1m>[0m [90m10 |[0m [36mimport[0m [33mReact[0m, { useState, useEffect } [36mfrom[0m [32m'react'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7263228Z   [90m   |[0m                           [31m[1m^^^^^^^^^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7263842Z   [90m11 |[0m [36mimport[0m { getFallbackManager } [36mfrom[0m [32m'@/lib/transportFallback'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7264996Z   [90m12 |[0m [36mimport[0m { getAuditLogger } [36mfrom[0m [32m'@/lib/auditLogger'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7265806Z   [90m13 |[0m [36mimport[0m { getRateLimiter } [36mfrom[0m [32m'@/lib/rateLimiter'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266154Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266271Z Ecmascript file had an error
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266416Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266515Z Import trace:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266707Z   Server Component:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7266949Z     ./src/components/StatusPage.tsx
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7267246Z     ./src/app/status/page.tsx
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7267410Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7267417Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7267594Z ./src/components/StatusPage.tsx:10:17
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7268721Z You're importing a module that depends on `useState` into a React Server Component module. This API is only available in Client Components. To fix, mark the file (or its parent) with the `"use client"` directive.
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7269748Z     Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7270188Z   [90m 8 |[0m [90m */[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7270532Z   [90m 9 |[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7271380Z [31m[1m>[0m [90m10 |[0m [36mimport[0m [33mReact[0m, { useState, useEffect } [36mfrom[0m [32m'react'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7272443Z   [90m   |[0m                 [31m[1m^^^^^^^^[0m
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7273462Z   [90m11 |[0m [36mimport[0m { getFallbackManager } [36mfrom[0m [32m'@/lib/transportFallback'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7274999Z   [90m12 |[0m [36mimport[0m { getAuditLogger } [36mfrom[0m [32m'@/lib/auditLogger'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7275953Z   [90m13 |[0m [36mimport[0m { getRateLimiter } [36mfrom[0m [32m'@/lib/rateLimiter'[0m;
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7276498Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7276705Z Ecmascript file had an error
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7276930Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7277050Z Import trace:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7277396Z   Server Component:
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7277850Z     ./src/components/StatusPage.tsx
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7278688Z     ./src/app/status/page.tsx
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7278938Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7278944Z 
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7279302Z     at <unknown> (./src/hooks/useHibernationRecovery.ts:72:24)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7279994Z     at <unknown> (./src/lib/cleanupJobs.ts:258:7)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7280623Z     at <unknown> (./src/lib/syncDiagnostics.ts:54:5)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7281220Z     at <unknown> (./src/lib/syncPerformanceMonitor.ts:232:9)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7281846Z     at <unknown> (./src/components/StatusPage.tsx:10:27)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7282403Z     at <unknown> (./src/components/StatusPage.tsx:10:17)
+Focused Tests (Sync)	Run npm run build	2026-04-26T14:21:34.7604847Z ##[error]Process completed with exit code 1.
+Unit Tests	Run npx vitest run	﻿2026-04-26T14:20:54.8064232Z ##[group]Run npx vitest run
+Unit Tests	Run npx vitest run	2026-04-26T14:20:54.8064507Z [36;1mnpx vitest run[0m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:54.8080615Z shell: /usr/bin/bash -e {0}
+Unit Tests	Run npx vitest run	2026-04-26T14:20:54.8080875Z ##[endgroup]
+Unit Tests	Run npx vitest run	2026-04-26T14:20:55.3498381Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:20:55.3500223Z [1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/home/runner/work/cubit-connect/cubit-connect[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:55.3500710Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:20:56.5329527Z  [31m❯[39m tests/integration/chaosEngineering.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1701828Z [90mstderr[2m | tests/unit/featureFlags.test.ts[2m > [22m[2mfeatureFlags[2m > [22m[2mlocalStorage unavailable[2m > [22m[2mshould return false from setUseSupabaseSync when localStorage is disabled
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1704356Z [22m[39m[FEATURE FLAGS] BLOCKED: Cannot toggle sync while unsaved changes exist
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1705559Z [FEATURE FLAGS] Use setUseSupabaseSync(value, true) to force (may lose data)
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1706105Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1728003Z  [31m❯[39m tests/unit/featureFlags.test.ts [2m([22m[2m33 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 732[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1730482Z        [32m✓[39m should return default value (false) when localStorage is empty[32m 2[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1732070Z        [32m✓[39m should return value from localStorage when set[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1733710Z        [32m✓[39m should handle string "false" in localStorage[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1735398Z        [32m✓[39m should handle string "true" in localStorage[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1736811Z        [32m✓[39m should return default when localStorage has invalid value[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1738323Z        [32m✓[39m should persist value to localStorage[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1739970Z        [32m✓[39m should return false when localStorage is not available[32m 2[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1741253Z        [32m✓[39m should emit telemetry event[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1742740Z        [32m✓[39m should update window global[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1743968Z        [32m✓[39m should dispatch custom event[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1745218Z        [32m✓[39m should toggle from false to true[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1746510Z        [32m✓[39m should toggle from true to false[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1747786Z        [32m✓[39m should toggle from default (false) to true[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1749211Z        [32m✓[39m should reset to default value (false)[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1750669Z        [32m✓[39m should call callback when flag changes[32m 2[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1751856Z        [32m✓[39m should return unsubscribe function[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1753167Z        [32m✓[39m should not call callback after unsubscribe[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1754404Z        [32m✓[39m should emit telemetry event[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1755681Z        [32m✓[39m should include timestamp in event[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1757050Z        [32m✓[39m should limit telemetry to 100 events[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1758389Z        [32m✓[39m should sync across tabs via storage event[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1759921Z        [32m✓[39m should handle server-side rendering gracefully[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1761442Z        [33m[2m✓[22m[39m should block rapid toggles within 300ms [33m 352[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1762865Z        [33m[2m✓[22m[39m should allow toggle after 300ms debounce period [33m 351[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1764267Z        [32m✓[39m should allow rapid toggles with force parameter[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1766261Z [31m       [31m×[31m should emit warning when toggle is debounced[39m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1768116Z        [32m✓[39m should block toggle when unsaved changes exist[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1769725Z        [32m✓[39m should allow toggle with force parameter despite unsaved changes[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1771303Z        [32m✓[39m should allow toggle when no unsaved changes[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1772604Z        [32m✓[39m should emit telemetry when blocked[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1773547Z        [32m✓[39m should return current value when toggle blocked[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1774226Z        [32m✓[39m should return default when localStorage is disabled[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1775206Z        [32m✓[39m should return false from setUseSupabaseSync when localStorage is disabled[32m 2[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.1814899Z  [31m❯[39m tests/integration/errorHandling.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.9660885Z  [31m❯[39m tests/integration/supabaseSyncProd.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:57.9816045Z  [31m❯[39m tests/integration/supabaseRealtime.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:58.6583870Z  [31m❯[39m tests/integration/syncPerformanceMonitor.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:58.7333689Z  [2m[90m↓[39m[22m tests/integration/checkpointRoundtrip.test.ts [2m([22m[2m7 tests[22m[2m | [22m[33m7 skipped[39m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:59.3420522Z  [32m✓[39m tests/integration/healthEndpoint.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:20:59.5954803Z  [32m✓[39m tests/integration/e2eeRuntime.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 156[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:00.0849333Z  [32m✓[39m tests/unit/featureFlagTargeting.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:00.3821821Z  [32m✓[39m tests/unit/alarmSchema.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:00.7880663Z  [32m✓[39m tests/integration/retryVerification.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.0994495Z  [31m❯[39m tests/integration/performanceRuntime.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.4631396Z  [31m❯[39m tests/integration/cleanupJobs.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8438127Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould open circuit after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8440532Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8441957Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8451620Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8452957Z   lastFailureTime: [32m'2026-04-26T14:21:01.840Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8454339Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8454989Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8456398Z [FALLBACK MANAGER] Fallback triggered: { reason: [32m'circuit_open'[39m, errorMessage: [32m'Error 4'[39m, attemptCount: [33m5[39m }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8457734Z [ALERT] CRITICAL: Fallback to WebSocket: circuit_open - Error 4 {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8458659Z   reason: [32m'circuit_open'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8459517Z   errorMessage: [32m'Error 4'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8460153Z   attemptCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8460819Z   from: [32m'supabase'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8461356Z   to: [32m'websocket'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8461883Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8462121Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8463499Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould block operations when circuit is open
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8464992Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8465919Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8467399Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8468227Z   lastFailureTime: [32m'2026-04-26T14:21:01.843Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8468883Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8469555Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8469740Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8471095Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mcircuit breaker[2m > [22m[2mshould reset circuit breaker
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8472428Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8473450Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8474505Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8475246Z   lastFailureTime: [32m'2026-04-26T14:21:01.844Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8475896Z   error: [32m'Error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8476361Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8476561Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8497742Z [90mstderr[2m | tests/unit/transportFallback.test.ts[2m > [22m[2mtransportFallback[2m > [22m[2mfallback[2m > [22m[2mshould support manual fallback
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8500486Z [22m[39m[FALLBACK MANAGER] Fallback triggered: {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8501429Z   reason: [32m'manual_override'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8502370Z   errorMessage: [32m'Manual override'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8503133Z   attemptCount: [33m0[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8503717Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8504175Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:01.8556852Z  [32m✓[39m tests/unit/transportFallback.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 17[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:02.4940885Z  [32m✓[39m tests/unit/syncErrorRecovery.test.ts [2m([22m[2m18 tests[22m[2m)[22m[32m 13[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.1157803Z  [32m✓[39m tests/unit/auditLogger.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 9[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7575814Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mcircuit breaker chaos[2m > [22m[2mshould handle rapid failures and open circuit
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7576826Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7577469Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7577957Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7578399Z   lastFailureTime: [32m'2026-04-26T14:21:03.753Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7578854Z   error: [32m'Chaos error 4'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7579322Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7579768Z [CIRCUIT BREAKER] OPENED after 6 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7580380Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7580836Z   failureCount: [33m6[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7581248Z   lastFailureTime: [32m'2026-04-26T14:21:03.755Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7581693Z   error: [32m'Chaos error 5'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7581987Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7582293Z [CIRCUIT BREAKER] OPENED after 7 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7582775Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7583227Z   failureCount: [33m7[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7583623Z   lastFailureTime: [32m'2026-04-26T14:21:03.755Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7584060Z   error: [32m'Chaos error 6'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7584348Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7584619Z [CIRCUIT BREAKER] OPENED after 8 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7585125Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7585564Z   failureCount: [33m8[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7585983Z   lastFailureTime: [32m'2026-04-26T14:21:03.755Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7586406Z   error: [32m'Chaos error 7'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7586690Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7587000Z [CIRCUIT BREAKER] OPENED after 9 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7587560Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7588290Z   failureCount: [33m9[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7588756Z   lastFailureTime: [32m'2026-04-26T14:21:03.755Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7589315Z   error: [32m'Chaos error 8'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7589919Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7590245Z [CIRCUIT BREAKER] OPENED after 10 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7590694Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7591153Z   failureCount: [33m10[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7591593Z   lastFailureTime: [32m'2026-04-26T14:21:03.756Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7592026Z   error: [32m'Chaos error 9'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7592301Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7592439Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7593234Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mcircuit breaker chaos[2m > [22m[2mshould recover from circuit open after timeout
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7594153Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7594652Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7595159Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7595577Z   lastFailureTime: [32m'2026-04-26T14:21:03.758Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7595922Z   error: [32m'Failure'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7596241Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:03.7596382Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2862383Z  [31m❯[39m tests/unit/supabaseSync.test.ts [2m([22m[2m31 tests[22m[2m | [22m[31m10 failed[39m[2m)[22m[33m 31818[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2863870Z        [33m[2m✓[22m[39m should store derivedKey on connect [33m 548[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2864817Z        [32m✓[39m should throw error when connecting without key[32m 2[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2865908Z        [32m✓[39m should throw error when connecting with invalid key[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2867123Z [31m       [31m×[31m should clear E2EE key on disconnect[39m[33m 2042[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2868175Z        [33m[2m✓[22m[39m should log queued updates on disconnect [33m 878[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2869303Z        [33m[2m✓[22m[39m should track connection time [33m 2470[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2869937Z        [33m[2m✓[22m[39m should detect cold start (connection > 2s) [33m 2617[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2870571Z        [33m[2m✓[22m[39m should provide extended timeout for cold start [33m 868[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2871146Z        [32m✓[39m should create instance with all callbacks[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2871690Z        [32m✓[39m should create instance with minimal callbacks[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2872261Z [31m       [31m×[31m should log experimental warning[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2872756Z        [32m✓[39m should emit telemetry on creation[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2873291Z        [33m[2m✓[22m[39m should connect successfully (skeleton) [33m 2765[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2873882Z        [33m[2m✓[22m[39m should transition through connecting state [33m 2219[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2874436Z        [33m[2m✓[22m[39m should emit telemetry on success [33m 462[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2874969Z        [33m[2m✓[22m[39m should disconnect when connected [33m 1895[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2875504Z        [32m✓[39m should handle disconnect when not connected[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2876108Z [31m       [31m×[31m should log when broadcasting (skeleton)[39m[33m 374[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2876680Z [31m       [31m×[31m should warn when not connected[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2877257Z        [33m[2m✓[22m[39m should call onSyncActivity callback (skeleton) [33m 1614[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2877889Z [31m       [31m×[31m should log when flushing (skeleton)[39m[33m 1941[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2878551Z [31m       [31m×[31m should log when flushing queued updates (skeleton)[39m[33m 475[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2879410Z [31m       [31m×[31m should log when sending disconnect signal (skeleton)[39m[33m 2713[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2880402Z        [33m[2m✓[22m[39m should call onSyncActivity callback (skeleton) [33m 1305[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2881007Z [31m       [31m×[31m should warn when not connected[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2881529Z        [32m✓[39m should implement SupabaseSyncInterface[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2882111Z [31m       [31m×[31m should clear E2EE key on disconnect[39m[33m 1292[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2882762Z [31m       [31m×[31m should log warning for pending updates on disconnect[39m[33m 1516[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2883366Z        [33m[2m✓[22m[39m should emit telemetry on disconnect [33m 894[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2883993Z        [33m[2m✓[22m[39m should return current status [33m 2918[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.2884474Z      [32m✓[39m should accept valid status values[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:28.9141761Z  [32m✓[39m tests/integration/checkpointService.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5531233Z  [31m❯[39m tests/unit/sentryIntegration.test.ts [2m([22m[2m14 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 21[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5532140Z [31m       [31m×[31m should initialize sentry[39m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5532646Z        [32m✓[39m should not capture when disabled[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5533105Z        [32m✓[39m should capture exception[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5533593Z        [32m✓[39m should capture exception with extra data[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5534133Z        [32m✓[39m should store exception with stack trace[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5534595Z        [32m✓[39m should capture message[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5535039Z        [32m✓[39m should capture different levels[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5535453Z        [32m✓[39m should set user[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5535837Z        [32m✓[39m should set tags[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5536209Z        [32m✓[39m should clear user[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5536640Z        [32m✓[39m should limit stored events to 100[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5537095Z        [32m✓[39m should return same instance[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5537571Z        [32m✓[39m should create new instance after destroy[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:29.5538054Z        [32m✓[39m should expose sentry on window[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:30.1570703Z  [32m✓[39m tests/unit/rateLimiter.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:30.7717508Z  [32m✓[39m tests/unit/middleware/rateLimit.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5720852Z [90mstderr[2m | tests/unit/chaosEngineering.test.ts[2m > [22m[2mChaos Engineering[2m > [22m[2mnetwork partition[2m > [22m[2mshould handle transport switching under chaos
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5722322Z [22m[39m[CIRCUIT BREAKER] OPENED after 5 failures
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5723110Z [ALERT] CRITICAL: Circuit breaker opened - Supabase transport disabled {
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5723803Z   failureCount: [33m5[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5724413Z   lastFailureTime: [32m'2026-04-26T14:21:37.571Z'[39m,
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5725007Z   error: [32m'Network partition'[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5725393Z }
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5725542Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5730502Z  [32m✓[39m tests/unit/chaosEngineering.test.ts [2m([22m[2m8 tests[22m[2m)[22m[33m 33826[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:37.5731845Z        [33m[2m✓[22m[39m should survive rapid connect/disconnect cycles [33m 33750[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:38.1748844Z  [32m✓[39m tests/unit/middleware/securityHeaders.test.ts [2m([22m[2m12 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:38.7636587Z  [32m✓[39m tests/unit/selector_optimization.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:39.5615357Z  [31m❯[39m tests/unit/store_reproduction.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:40.1525165Z  [32m✓[39m tests/unit/lib/storageMonitor.test.ts [2m([22m[2m15 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:40.7422125Z  [32m✓[39m tests/unit/prompts/analysis.test.ts [2m([22m[2m16 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0413006Z  [32m✓[39m tests/unit/loadTesting.test.ts [2m([22m[2m7 tests[22m[2m)[22m[33m 38863[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0414368Z        [33m[2m✓[22m[39m should handle 10 concurrent users [33m 10798[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0415846Z        [33m[2m✓[22m[39m should handle 50 concurrent users [33m 6907[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0416850Z        [33m[2m✓[22m[39m should report acceptable latency [33m 7309[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0417829Z        [33m[2m✓[22m[39m should survive burst traffic [33m 2996[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.0418838Z        [33m[2m✓[22m[39m should have acceptable memory usage [33m 10849[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.4028196Z  [32m✓[39m tests/unit/exportUtils.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:41.7978349Z  [31m❯[39m tests/integration/e2eeRoundTrip.test.ts [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.1133347Z  [32m✓[39m tests/unit/supabaseClient.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9031683Z [90mstdout[2m | tests/unit/gemini_rate_limit.test.ts[2m > [22m[2mGeminiService Rate Limit[2m > [22m[2mshould enforce rate limit for concurrent calls
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9032976Z [22m[39mCompletion times: [ [33m0[39m, [33m2000[39m, [33m4000[39m ]
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9033233Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9046158Z  [32m✓[39m tests/unit/gemini_rate_limit.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 23[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9437326Z  [31m❯[39m tests/unit/hooks/useStorageMonitor.test.ts [2m([22m[2m7 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 480[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9439246Z      [32m✓[39m should exist and be importable[32m 32[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9440373Z      [32m✓[39m should export a React hook function[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9441586Z      [32m✓[39m should have correct hook name[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9442732Z      [32m✓[39m should export UseStorageMonitorReturn interface[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9443974Z [31m     [31m×[31m should exist and be importable[39m[33m 444[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9445209Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:42.9446374Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:43.6143273Z  [32m✓[39m tests/unit/prompts/scout.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:43.6783221Z [90mstdout[2m | tests/unit/storage_perf.test.ts[2m > [22m[2mStorage Service Performance[2m > [22m[2mmeasures getProject performance with large data (50MB)
+Unit Tests	Run npx vitest run	2026-04-26T14:21:43.6785102Z [22m[39mgetProject took 3.30ms for 50MB data
+Unit Tests	Run npx vitest run	2026-04-26T14:21:43.6785654Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:21:43.6798378Z  [32m✓[39m tests/unit/storage_perf.test.ts [2m([22m[2m1 test[22m[2m)[22m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:44.2896691Z  [31m❯[39m tests/unit/components/ErrorBoundary.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:44.4257927Z  [32m✓[39m tests/unit/validation.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:45.1565608Z  [32m✓[39m tests/unit/components/WaitlistSignature.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 158[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:45.2530134Z  [31m❯[39m tests/unit/components/WorkspaceSelector.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 122[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:45.2532611Z [31m     [31m×[31m should exist and be importable[39m[32m 119[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:45.2533884Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:45.2535177Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.0273468Z  [31m❯[39m tests/unit/components/PrintableReport.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 37[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.0274575Z      [32m✓[39m should exist and be importable[32m 29[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.0275702Z [31m     [31m×[31m should export a React component[39m[32m 7[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.0276396Z      [32m✓[39m should be a forwardRef component[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.1437647Z  [32m✓[39m tests/unit/components/OfflineIndicator.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 282[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.8502801Z  [31m❯[39m tests/unit/components/SyncDebugOverlay.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 142[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.8504303Z [31m     [31m×[31m should exist and be importable[39m[32m 140[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.8505344Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.8506467Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.9590902Z  [31m❯[39m tests/unit/components/SettingsDialog.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 133[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.9593337Z [31m     [31m×[31m should exist and be importable[39m[32m 131[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.9594552Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:46.9595690Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.6872494Z  [31m❯[39m tests/unit/components/SyncSetupModal.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 135[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.6874378Z [31m     [31m×[31m should exist and be importable[39m[32m 134[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.6875778Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.6876987Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.9416210Z  [31m❯[39m tests/unit/components/ExportControl.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 283[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.9430751Z [31m     [31m×[31m should exist and be importable[39m[32m 280[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.9440377Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:47.9441470Z [31m     [31m×[31m should have component name[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:48.4256507Z  [32m✓[39m tests/unit/components/ManifestoGrid.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 16[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:48.7593954Z  [31m❯[39m tests/unit/components/ProcessingLog.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 119[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:48.7595922Z [31m     [31m×[31m should exist and be importable[39m[32m 116[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:48.7601899Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:48.7630466Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:49.4377152Z  [32m✓[39m tests/unit/components/ThemeSelector.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 322[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:49.4378940Z      [33m[2m✓[22m[39m should exist and be importable [33m 319[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:49.6445865Z  [32m✓[39m tests/unit/components/HeroCarousel.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 189[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4413009Z  [31m❯[39m tests/unit/components/IgnitionForm.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 305[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4414918Z [31m     [31m×[31m should exist and be importable[39m[33m 302[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4416261Z [31m     [31m×[31m should export a React component[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4417537Z [31m     [31m×[31m should have component name[39m[32m 1[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4760488Z  [31m❯[39m tests/unit/components/ResultsFeed.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 118[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4762673Z [31m     [31m×[31m should exist and be importable[39m[32m 116[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4764075Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:50.4765117Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:51.2149985Z  [32m✓[39m tests/unit/components/StatusPage.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[32m 81[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:51.5768100Z  [31m❯[39m tests/unit/components/TaskEditor.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 423[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:51.5769618Z [31m     [31m×[31m should exist and be importable[39m[33m 420[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:51.5770211Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:51.5770943Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.3459927Z  [31m❯[39m tests/unit/components/UploadZone.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 405[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.3461815Z [31m     [31m×[31m should exist and be importable[39m[33m 402[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.3462953Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.3464048Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.3998426Z  [31m❯[39m tests/unit/components/VideoInput.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 142[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.4000073Z [31m     [31m×[31m should exist and be importable[39m[32m 140[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.4015322Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:52.4016587Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:53.0929540Z  [32m✓[39m tests/unit/prompts/index.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:53.1771331Z  [31m❯[39m tests/unit/components/ScoutView.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 141[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:53.1777950Z [31m     [31m×[31m should exist and be importable[39m[32m 139[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:53.1779438Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:53.1800445Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1232742Z  [31m❯[39m tests/unit/components/Manifesto.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[32m 280[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1260504Z [31m     [31m×[31m should exist and be importable[39m[32m 277[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1270238Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1310390Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1854897Z  [31m❯[39m tests/unit/components/TaskFeed.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 411[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1856844Z [31m     [31m×[31m should exist and be importable[39m[33m 409[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1858631Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:54.1860246Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.0260388Z  [31m❯[39m tests/unit/components/GlobalErrorListener.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 129[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.0263319Z [31m     [31m×[31m should exist and be importable[39m[32m 128[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.0330682Z [31m     [31m×[31m should export React components[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.1538369Z  [31m❯[39m tests/unit/components/Header.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m3 failed[39m[2m)[22m[33m 318[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.1540120Z [31m     [31m×[31m should exist and be importable[39m[33m 316[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.1541532Z [31m     [31m×[31m should export a React component[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.1542295Z [31m     [31m×[31m should have component name[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.7191679Z  [31m❯[39m tests/unit/components/AppReadyIndicator.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 95[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.7193242Z [31m     [31m×[31m should exist and be importable[39m[32m 94[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:21:55.7194307Z [31m     [31m×[31m should export React components[39m[32m 0[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2799473Z  [32m✓[39m tests/unit/memoryLeak.test.ts [2m([22m[2m4 tests[22m[2m)[22m[33m 118905[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2800783Z      [33m[2m✓[22m[39m should not leak after 50 create/destroy cycles [33m 92201[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2801567Z      [33m[2m✓[22m[39m should clean up event listeners on disconnect [33m 593[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2802171Z      [33m[2m✓[22m[39m should handle rapid create/destroy cycles [33m 25904[2mms[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2849803Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2851029Z [31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 10 [49m[22m[31m⎯⎯⎯⎯⎯⎯[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2851519Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2860624Z [41m[1m FAIL [22m[49m tests/integration/chaosEngineering.test.ts[2m [ tests/integration/chaosEngineering.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2862657Z [41m[1m FAIL [22m[49m tests/integration/e2eeRoundTrip.test.ts[2m [ tests/integration/e2eeRoundTrip.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2864192Z [41m[1m FAIL [22m[49m tests/integration/errorHandling.test.ts[2m [ tests/integration/errorHandling.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2865798Z [41m[1m FAIL [22m[49m tests/integration/performanceRuntime.test.ts[2m [ tests/integration/performanceRuntime.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2867490Z [41m[1m FAIL [22m[49m tests/integration/supabaseRealtime.test.ts[2m [ tests/integration/supabaseRealtime.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2869425Z [41m[1m FAIL [22m[49m tests/integration/supabaseSyncProd.test.ts[2m [ tests/integration/supabaseSyncProd.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2871226Z [41m[1m FAIL [22m[49m tests/integration/syncPerformanceMonitor.test.ts[2m [ tests/integration/syncPerformanceMonitor.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2872404Z [31m[1mError[22m: Transform failed with 1 error:
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2873734Z /home/runner/work/cubit-connect/cubit-connect/src/lib/syncPerformanceMonitor.ts:232:8: ERROR: Unexpected ")"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2874715Z   Plugin: [35mvite:esbuild[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2875739Z   File: [36m/home/runner/work/cubit-connect/cubit-connect/src/lib/syncPerformanceMonitor.ts[39m:232:8
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2876528Z [33m  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2876904Z   [33mUnexpected ")"[33m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2877606Z   230 |              `p95=${s.p95LatencyMs}ms, errors=${(s.errorRate * 100).toFixed(1)}%, ` +
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2878331Z   231 |              `slo=${(s.sloCompliance * 100).toFixed(1)}%`
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2878802Z   232 |          );
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2881307Z       |          ^
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2881594Z   233 |        }
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2882007Z   234 |      });
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2882380Z   [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2883312Z [90m [2m❯[22m failureErrorWithLog node_modules/esbuild/lib/main.js:[2m1748:15[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2884356Z [90m [2m❯[22m node_modules/esbuild/lib/main.js:[2m1017:50[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2885591Z [90m [2m❯[22m responseCallbacks.<computed> node_modules/esbuild/lib/main.js:[2m884:9[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2886873Z [90m [2m❯[22m handleIncomingPacket node_modules/esbuild/lib/main.js:[2m939:12[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2888596Z [90m [2m❯[22m Socket.readFromStdout node_modules/esbuild/lib/main.js:[2m862:7[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2889502Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2889942Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2890267Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2891099Z [41m[1m FAIL [22m[49m tests/integration/cleanupJobs.test.ts[2m [ tests/integration/cleanupJobs.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2892102Z [31m[1mError[22m: Transform failed with 1 error:
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2893165Z /home/runner/work/cubit-connect/cubit-connect/src/lib/cleanupJobs.ts:258:6: ERROR: Unexpected ")"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2894064Z   Plugin: [35mvite:esbuild[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2894961Z   File: [36m/home/runner/work/cubit-connect/cubit-connect/src/lib/cleanupJobs.ts[39m:258:6
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2895693Z [33m  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2896048Z   [33mUnexpected ")"[33m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2896400Z   256 |  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2897188Z   257 |          `[CLEANUP] Job ${jobName} completed: ${result.itemsProcessed} items in ${result.durationMs}ms`
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2898003Z   258 |        );
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2898276Z       |        ^
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2898547Z   259 |  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2898841Z   260 |        return result;
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2899393Z   [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2900303Z [90m [2m❯[22m failureErrorWithLog node_modules/esbuild/lib/main.js:[2m1748:15[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2901359Z [90m [2m❯[22m node_modules/esbuild/lib/main.js:[2m1017:50[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2902473Z [90m [2m❯[22m responseCallbacks.<computed> node_modules/esbuild/lib/main.js:[2m884:9[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2903761Z [90m [2m❯[22m handleIncomingPacket node_modules/esbuild/lib/main.js:[2m939:12[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2905043Z [90m [2m❯[22m Socket.readFromStdout node_modules/esbuild/lib/main.js:[2m862:7[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2905630Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2906040Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2906383Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2907258Z [41m[1m FAIL [22m[49m tests/unit/store_reproduction.test.ts[2m [ tests/unit/store_reproduction.test.ts ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2908270Z [31m[1mError[22m: Transform failed with 1 error:
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2909712Z /home/runner/work/cubit-connect/cubit-connect/src/lib/syncDiagnostics.ts:54:4: ERROR: Unexpected ")"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2910709Z   Plugin: [35mvite:esbuild[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2911643Z   File: [36m/home/runner/work/cubit-connect/cubit-connect/src/lib/syncDiagnostics.ts[39m:54:4
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2912415Z [33m  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2912767Z   [33mUnexpected ")"[33m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2913146Z   52 |        details,
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2913538Z   53 |        `at ${event.stackTrace}`
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2913939Z   54 |      );
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2914250Z      |      ^
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2914558Z   55 |    }
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2914850Z   56 |    
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2915174Z   [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2916067Z [90m [2m❯[22m failureErrorWithLog node_modules/esbuild/lib/main.js:[2m1748:15[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2917321Z [90m [2m❯[22m node_modules/esbuild/lib/main.js:[2m1017:50[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2918503Z [90m [2m❯[22m responseCallbacks.<computed> node_modules/esbuild/lib/main.js:[2m884:9[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2920033Z [90m [2m❯[22m handleIncomingPacket node_modules/esbuild/lib/main.js:[2m939:12[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2921639Z [90m [2m❯[22m Socket.readFromStdout node_modules/esbuild/lib/main.js:[2m862:7[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2922248Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2922701Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2924334Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2925280Z [41m[1m FAIL [22m[49m tests/unit/components/ErrorBoundary.test.tsx[2m [ tests/unit/components/ErrorBoundary.test.tsx ][22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2926329Z [31m[1mError[22m: Failed to resolve import "./ErrorBoundary" from "tests/unit/components/ErrorBoundary.test.tsx". Does the file exist?[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2926960Z   Plugin: [35mvite:import-analysis[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2927791Z   File: [36m/home/runner/work/cubit-connect/cubit-connect/tests/unit/components/ErrorBoundary.test.tsx[39m:14:24
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2928418Z [33m  2  |  describe("ErrorBoundary Component", () => {
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2928789Z   3  |    it("should exist as a React component", () => {
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2929462Z   4  |      expect(() => import("./ErrorBoundary")).not.toThrow();
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2929807Z      |                          ^
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2930036Z   5  |    });
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2930398Z   6  |    it("should export ErrorBoundary class", async () => {[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2931110Z [90m [2m❯[22m TransformPluginContext._formatLog node_modules/vite/dist/node/chunks/config.js:[2m29003:43[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2931959Z [90m [2m❯[22m TransformPluginContext.error node_modules/vite/dist/node/chunks/config.js:[2m29000:14[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2932703Z [90m [2m❯[22m normalizeUrl node_modules/vite/dist/node/chunks/config.js:[2m27123:18[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2933342Z [90m [2m❯[22m node_modules/vite/dist/node/chunks/config.js:[2m27181:32[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2934074Z [90m [2m❯[22m TransformPluginContext.transform node_modules/vite/dist/node/chunks/config.js:[2m27149:4[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2934946Z [90m [2m❯[22m EnvironmentPluginContainer.transform node_modules/vite/dist/node/chunks/config.js:[2m28801:14[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2935748Z [90m [2m❯[22m loadAndTransform node_modules/vite/dist/node/chunks/config.js:[2m22670:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936078Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936295Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936477Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936484Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936753Z [31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 65 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2936968Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2937600Z [41m[1m FAIL [22m[49m tests/unit/featureFlags.test.ts[2m > [22mfeatureFlags[2m > [22mdebouncing[2m > [22mshould emit warning when toggle is debounced
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2938537Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "debounced" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2938894Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2939139Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2939517Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2939884Z [36m [2m❯[22m tests/unit/featureFlags.test.ts:[2m346:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2961233Z     [90m344| [39m      [34msetUseSupabaseSync[39m([35mfalse[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2961920Z     [90m345| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2962631Z     [90m346| [39m      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2963438Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2963916Z     [90m347| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2964502Z     [90m348| [39m      consoleSpy[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2964946Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2965345Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2965688Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2966901Z [41m[1m FAIL [22m[49m tests/unit/sentryIntegration.test.ts[2m > [22msentryIntegration[2m > [22minitialization[2m > [22mshould initialize sentry
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2968614Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "SENTRY" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2969628Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2969883Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2970282Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2970989Z [36m [2m❯[22m tests/unit/sentryIntegration.test.ts:[2m37:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2990564Z     [90m 35| [39m      })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2991328Z     [90m 36| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2992107Z     [90m 37| [39m      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2992965Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2994188Z     [90m 38| [39m      [34mexpect[39m([34mgetSentry[39m()[33m.[39m[34misEnabled[39m())[33m.[39m[34mtoBe[39m([35mtrue[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2995317Z     [90m 39| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2995441Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2995675Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2995859Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2996481Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mE2EE integration[2m > [22mshould clear E2EE key on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2997432Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "E2EE key cleared" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2997814Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2997948Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2998253Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.2998912Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m88:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3048756Z     [90m 86| [39m      [35mconst[39m consoleLog [33m=[39m vi[33m.[39m[34mspyOn[39m(console[33m,[39m [32m'log'[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3050512Z     [90m 87| [39m      sync[33m.[39m[34mdisconnect[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3051776Z     [90m 88| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3052867Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3053599Z     [90m 89| [39m    })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3054220Z     [90m 90| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3054639Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3055400Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3055864Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3057238Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mconstructor[2m > [22mshould log experimental warning
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3059393Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "Experimental" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3060324Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3060702Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3061216Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3062044Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m197:27[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3063504Z     [90m195| [39m      [35mnew[39m [33mSupabaseSync[39m(ydoc[33m,[39m [32m'test-room-hash'[39m[33m,[39m mockStatusChange)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3064669Z     [90m196| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3065676Z     [90m197| [39m      expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3066789Z     [90m   | [39m                          [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3067464Z     [90m198| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3068309Z     [90m199| [39m      consoleWarn[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3068917Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3069615Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3070101Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3071555Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mbroadcastUpdate[2m > [22mshould log when broadcasting (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3073634Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "broadcastUpdate" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3074564Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3074944Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3075499Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3076359Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m289:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3077662Z     [90m287| [39m      [35mawait[39m sync[33m.[39m[34mbroadcastUpdate[39m(update)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3078869Z     [90m288| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3080019Z     [90m289| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3081061Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3081729Z     [90m290| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3082527Z     [90m291| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3083107Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3083638Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3084120Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3085439Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mbroadcastUpdate[2m > [22mshould warn when not connected
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3087665Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "not connected" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3088565Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3088943Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3089656Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3090524Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m301:27[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3091751Z     [90m299| [39m      [35mawait[39m sync[33m.[39m[34mbroadcastUpdate[39m(update)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3092677Z     [90m300| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3093659Z     [90m301| [39m      expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3094699Z     [90m   | [39m                          [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3095345Z     [90m302| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3096167Z     [90m303| [39m      consoleWarn[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3096786Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3097319Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3097777Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3098981Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mflush[2m > [22mshould log when flushing (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3124785Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3126296Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "flush" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3129170Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3158707Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3159292Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3159990Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m343:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3160987Z     [90m341| [39m      [35mawait[39m sync[33m.[39m[34mflush[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3161614Z     [90m342| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3162408Z     [90m343| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3163269Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3163784Z     [90m344| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3164477Z     [90m345| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3164933Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3165365Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3165728Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3167047Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mflushQueuedUpdates[2m > [22mshould log when flushing queued updates (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3168883Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining{…} ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3169691Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3169949Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3170364Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3171061Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m362:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3172002Z     [90m360| [39m      sync[33m.[39m[34mflushQueuedUpdates[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3172654Z     [90m361| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3173454Z     [90m362| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3174312Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3174788Z     [90m363| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3175410Z     [90m364| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3176220Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3176633Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3176980Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3178266Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22msendDisconnectSignal[2m > [22mshould log when sending disconnect signal (skeleton)
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3180694Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining{…} ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3181290Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3181559Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3182222Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3182905Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m381:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3184228Z [2m Test Files [22m [1m[31m32 failed[39m[22m[2m | [22m[1m[32m31 passed[39m[22m[2m | [22m[33m1 skipped[39m[90m (64)[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3185449Z     [90m379| [39m      [35mawait[39m sync[33m.[39m[34msendDisconnectSignal[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3186169Z     [90m380| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3186856Z     [90m381| [39m      expect(consoleLog).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3187646Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3188108Z     [90m382| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3188755Z     [90m383| [39m      consoleLog[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3189376Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3189775Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3190103Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3191168Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mrequestCache[2m > [22mshould warn when not connected
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3192816Z [2m      Tests [22m [1m[31m65 failed[39m[22m[2m | [22m[1m[32m332 passed[39m[22m[2m | [22m[33m7 skipped[39m[90m (404)[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3193733Z [2m   Start at [22m 14:20:55
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3194865Z [2m   Duration [22m 154.92s[2m (transform 1.38s, setup 0ms, import 1.80s, tests 229.76s, environment 33.45s)[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3195487Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3196479Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "not connected" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3197185Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3197442Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3197855Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3198490Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m413:27[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3199494Z     [90m411| [39m      sync[33m.[39m[34mrequestCache[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3200121Z     [90m412| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3200916Z     [90m413| [39m      expect(consoleWarn).toHaveBeenCalledWith(expect.stringContaining…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3201729Z     [90m   | [39m                          [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3202211Z     [90m414| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3202856Z     [90m415| [39m      consoleWarn[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3203575Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3203962Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3204265Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3205473Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mtransport cleanup[2m > [22mshould clear E2EE key on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3207274Z [31m[1mAssertionError[22m: expected "log" to be called with arguments: [ StringContaining "E2EE key cleared" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3207921Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3208171Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3208561Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3209575Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m453:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3210379Z     [90m451| [39m      sync[33m.[39m[34mdisconnect[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3210888Z     [90m452| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3211613Z     [90m453| [39m      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3212484Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3213233Z     [90m454| [39m      consoleSpy[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3213927Z     [90m455| [39m    })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3214207Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3214599Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3214897Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3216229Z [41m[1m FAIL [22m[49m tests/unit/supabaseSync.test.ts[2m > [22msupabaseSync[2m > [22mtransport cleanup[2m > [22mshould log warning for pending updates on disconnect
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3218032Z [31m[1mAssertionError[22m: expected "warn" to be called with arguments: [ StringContaining "pending updates" ][90m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3218770Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3219189Z Number of calls: [1m0[22m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3219586Z [31m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3220246Z [36m [2m❯[22m tests/unit/supabaseSync.test.ts:[2m471:26[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3221100Z     [90m469| [39m      sync[33m.[39m[34mdisconnect[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3221719Z     [90m470| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3222469Z     [90m471| [39m      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining(…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3223347Z     [90m   | [39m                         [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3224160Z     [90m472| [39m      consoleSpy[33m.[39m[34mmockRestore[39m()[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3224859Z     [90m473| [39m    })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3225139Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3225555Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3225899Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3227083Z [41m[1m FAIL [22m[49m tests/unit/components/AppReadyIndicator.test.tsx[2m > [22mAppReadyIndicator Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3229488Z [41m[1m FAIL [22m[49m tests/unit/components/AppReadyIndicator.test.tsx[2m > [22mAppReadyIndicator Component[2m > [22mshould export React components
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3231652Z [41m[1m FAIL [22m[49m tests/unit/components/ExportControl.test.tsx[2m > [22mExportControl Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3233758Z [41m[1m FAIL [22m[49m tests/unit/components/ExportControl.test.tsx[2m > [22mExportControl Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3235697Z [41m[1m FAIL [22m[49m tests/unit/components/ExportControl.test.tsx[2m > [22mExportControl Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3237933Z [41m[1m FAIL [22m[49m tests/unit/components/GlobalErrorListener.test.tsx[2m > [22mGlobalErrorListener Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3240433Z [41m[1m FAIL [22m[49m tests/unit/components/GlobalErrorListener.test.tsx[2m > [22mGlobalErrorListener Component[2m > [22mshould export React components
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3242462Z [41m[1m FAIL [22m[49m tests/unit/components/Header.test.tsx[2m > [22mHeader Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3244503Z [41m[1m FAIL [22m[49m tests/unit/components/Header.test.tsx[2m > [22mHeader Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3246191Z [41m[1m FAIL [22m[49m tests/unit/components/Header.test.tsx[2m > [22mHeader Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3248046Z [41m[1m FAIL [22m[49m tests/unit/components/IgnitionForm.test.tsx[2m > [22mIgnitionForm Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3250340Z [41m[1m FAIL [22m[49m tests/unit/components/IgnitionForm.test.tsx[2m > [22mIgnitionForm Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3252596Z [41m[1m FAIL [22m[49m tests/unit/components/IgnitionForm.test.tsx[2m > [22mIgnitionForm Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3254562Z [41m[1m FAIL [22m[49m tests/unit/components/Manifesto.test.tsx[2m > [22mManifesto Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3256542Z [41m[1m FAIL [22m[49m tests/unit/components/Manifesto.test.tsx[2m > [22mManifesto Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3258458Z [41m[1m FAIL [22m[49m tests/unit/components/Manifesto.test.tsx[2m > [22mManifesto Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3260686Z [41m[1m FAIL [22m[49m tests/unit/components/ProcessingLog.test.tsx[2m > [22mProcessingLog Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3262821Z [41m[1m FAIL [22m[49m tests/unit/components/ProcessingLog.test.tsx[2m > [22mProcessingLog Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3264905Z [41m[1m FAIL [22m[49m tests/unit/components/ProcessingLog.test.tsx[2m > [22mProcessingLog Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3266862Z [41m[1m FAIL [22m[49m tests/unit/components/ResultsFeed.test.tsx[2m > [22mResultsFeed Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3268924Z [41m[1m FAIL [22m[49m tests/unit/components/ResultsFeed.test.tsx[2m > [22mResultsFeed Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3271011Z [41m[1m FAIL [22m[49m tests/unit/components/ResultsFeed.test.tsx[2m > [22mResultsFeed Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3272785Z [41m[1m FAIL [22m[49m tests/unit/components/ScoutView.test.tsx[2m > [22mScoutView Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3274707Z [41m[1m FAIL [22m[49m tests/unit/components/ScoutView.test.tsx[2m > [22mScoutView Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3276651Z [41m[1m FAIL [22m[49m tests/unit/components/ScoutView.test.tsx[2m > [22mScoutView Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3278659Z [41m[1m FAIL [22m[49m tests/unit/components/SettingsDialog.test.tsx[2m > [22mSettingsDialog Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3280981Z [41m[1m FAIL [22m[49m tests/unit/components/SettingsDialog.test.tsx[2m > [22mSettingsDialog Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3283102Z [41m[1m FAIL [22m[49m tests/unit/components/SettingsDialog.test.tsx[2m > [22mSettingsDialog Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3285264Z [41m[1m FAIL [22m[49m tests/unit/components/SyncDebugOverlay.test.tsx[2m > [22mSyncDebugOverlay Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3287483Z [41m[1m FAIL [22m[49m tests/unit/components/SyncDebugOverlay.test.tsx[2m > [22mSyncDebugOverlay Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3289850Z [41m[1m FAIL [22m[49m tests/unit/components/SyncDebugOverlay.test.tsx[2m > [22mSyncDebugOverlay Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3292044Z [41m[1m FAIL [22m[49m tests/unit/components/SyncSetupModal.test.tsx[2m > [22mSyncSetupModal Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3294515Z [41m[1m FAIL [22m[49m tests/unit/components/SyncSetupModal.test.tsx[2m > [22mSyncSetupModal Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3296616Z [41m[1m FAIL [22m[49m tests/unit/components/SyncSetupModal.test.tsx[2m > [22mSyncSetupModal Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3298619Z [41m[1m FAIL [22m[49m tests/unit/components/TaskEditor.test.tsx[2m > [22mTaskEditor Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3300758Z [41m[1m FAIL [22m[49m tests/unit/components/TaskEditor.test.tsx[2m > [22mTaskEditor Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3302944Z [41m[1m FAIL [22m[49m tests/unit/components/TaskEditor.test.tsx[2m > [22mTaskEditor Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3304787Z [41m[1m FAIL [22m[49m tests/unit/components/TaskFeed.test.tsx[2m > [22mTaskFeed Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3306690Z [41m[1m FAIL [22m[49m tests/unit/components/TaskFeed.test.tsx[2m > [22mTaskFeed Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3308537Z [41m[1m FAIL [22m[49m tests/unit/components/TaskFeed.test.tsx[2m > [22mTaskFeed Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3310678Z [41m[1m FAIL [22m[49m tests/unit/components/UploadZone.test.tsx[2m > [22mUploadZone Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3312676Z [41m[1m FAIL [22m[49m tests/unit/components/UploadZone.test.tsx[2m > [22mUploadZone Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3314652Z [41m[1m FAIL [22m[49m tests/unit/components/UploadZone.test.tsx[2m > [22mUploadZone Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3316636Z [41m[1m FAIL [22m[49m tests/unit/components/VideoInput.test.tsx[2m > [22mVideoInput Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3318656Z [41m[1m FAIL [22m[49m tests/unit/components/VideoInput.test.tsx[2m > [22mVideoInput Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3320853Z [41m[1m FAIL [22m[49m tests/unit/components/VideoInput.test.tsx[2m > [22mVideoInput Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3322974Z [41m[1m FAIL [22m[49m tests/unit/components/WorkspaceSelector.test.tsx[2m > [22mWorkspaceSelector Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3325278Z [41m[1m FAIL [22m[49m tests/unit/components/WorkspaceSelector.test.tsx[2m > [22mWorkspaceSelector Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3327533Z [41m[1m FAIL [22m[49m tests/unit/components/WorkspaceSelector.test.tsx[2m > [22mWorkspaceSelector Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3329968Z [41m[1m FAIL [22m[49m tests/unit/hooks/useStorageMonitor.test.ts[2m > [22mStorageWarningBanner Component[2m > [22mshould exist and be importable
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3332210Z [41m[1m FAIL [22m[49m tests/unit/hooks/useStorageMonitor.test.ts[2m > [22mStorageWarningBanner Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3334394Z [41m[1m FAIL [22m[49m tests/unit/hooks/useStorageMonitor.test.ts[2m > [22mStorageWarningBanner Component[2m > [22mshould have component name
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3335726Z [31m[1mError[22m: Transform failed with 1 error:
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3336993Z /home/runner/work/cubit-connect/cubit-connect/src/lib/syncDiagnostics.ts:54:4: ERROR: Unexpected ")"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3338001Z   Plugin: [35mvite:esbuild[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3338956Z   File: [36m/home/runner/work/cubit-connect/cubit-connect/src/lib/syncDiagnostics.ts[39m:54:4
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3339928Z [33m  
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3340306Z   [33mUnexpected ")"[33m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3340712Z   52 |        details,
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3434241Z   53 |        `at ${event.stackTrace}`
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3434929Z   54 |      );
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3435224Z      |      ^
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3435495Z   55 |    }
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3435753Z   56 |    
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3436211Z   [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3437058Z [90m [2m❯[22m failureErrorWithLog node_modules/esbuild/lib/main.js:[2m1748:15[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3438072Z [90m [2m❯[22m node_modules/esbuild/lib/main.js:[2m1017:50[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3438978Z [90m [2m❯[22m responseCallbacks.<computed> node_modules/esbuild/lib/main.js:[2m884:9[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3440251Z [90m [2m❯[22m handleIncomingPacket node_modules/esbuild/lib/main.js:[2m939:12[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3441951Z [90m [2m❯[22m Socket.readFromStdout node_modules/esbuild/lib/main.js:[2m862:7[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3442425Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3442774Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3443038Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3444023Z [41m[1m FAIL [22m[49m tests/unit/components/PrintableReport.test.tsx[2m > [22mPrintableReport Component[2m > [22mshould export a React component
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3445375Z [31m[1mAssertionError[22m: expected 'object' to be 'function' // Object.is equality[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3445873Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3446178Z Expected: [32m"function"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3446606Z Received: [31m"object"[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3446828Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3447398Z [36m [2m❯[22m tests/unit/components/PrintableReport.test.tsx:[2m19:36[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3448659Z     [90m 17| [39m  [34mit[39m([32m'should export a React component'[39m[33m,[39m [35masync[39m () [33m=>[39m {
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3450269Z     [90m 18| [39m    const { PrintableReport } = await import('@/components/PrintableRe…
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3451661Z     [90m 19| [39m    [34mexpect[39m([35mtypeof[39m [33mPrintableReport[39m)[33m.[39m[34mtoBe[39m([32m'function'[39m)[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3452752Z     [90m   | [39m                                   [31m^[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3453327Z     [90m 20| [39m  })[33m;[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3453769Z     [90m 21| [39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3453969Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3454366Z [31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/75]⎯[22m[39m
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3454716Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3454734Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3482189Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "debounced" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/featureFlags.test.ts:346:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3493048Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3495960Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "SENTRY" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/sentryIntegration.test.ts:37:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3497479Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3498997Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "E2EE key cleared" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:88:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3500219Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3501778Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "Experimental" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:197:27
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3502767Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3504386Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "broadcastUpdate" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:289:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3505495Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3507555Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "not connected" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:301:27
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3517990Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3520864Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "flush" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:343:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3522563Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3524875Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining{…} ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:362:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3526942Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3529390Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining{…} ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:381:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3531100Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3533403Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "not connected" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:413:27
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3535091Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3537433Z ##[error]AssertionError: expected "log" to be called with arguments: [ StringContaining "E2EE key cleared" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:453:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3539518Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3541875Z ##[error]AssertionError: expected "warn" to be called with arguments: [ StringContaining "pending updates" ]
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Number of calls: 0
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/supabaseSync.test.ts:471:26
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3543601Z 
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3546100Z ##[error]AssertionError: expected 'object' to be 'function' // Object.is equality
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	Expected: "function"
+Unit Tests	Run npx vitest run	Received: "object"
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	 ❯ tests/unit/components/PrintableReport.test.tsx:19:36
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	
+Unit Tests	Run npx vitest run	2026-04-26T14:23:30.3673867Z ##[error]Process completed with exit code 1.
