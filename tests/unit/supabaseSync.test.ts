@@ -8,41 +8,8 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import * as Y from 'yjs';
 import { SupabaseSync, type SyncStatus } from '@/lib/supabaseSync';
 
-// Mock Supabase client to prevent network calls and rate limiting
-vi.mock('@/lib/supabaseClient', () => ({
-  // Direct export used by supabaseSyncProd.ts
-  signInAnonymously: vi.fn().mockResolvedValue({
-    success: true,
-    user: { id: 'test-user' },
-    session: { access_token: 'test-token' }
-  }),
-  // Client factory for other uses
-  getSupabaseClient: vi.fn(() => ({
-    channel: vi.fn(() => ({
-      subscribe: vi.fn((cb) => {
-        cb('SUBSCRIBED');
-        return () => {};
-      }),
-      on: vi.fn().mockReturnThis(),
-      send: vi.fn().mockResolvedValue('ok'),
-      unsubscribe: vi.fn()
-    })),
-    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
-    from: vi.fn().mockReturnThis(),
-    insert: vi.fn().mockResolvedValue({ error: null }),
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    order: vi.fn().mockReturnThis(),
-    limit: vi.fn().mockResolvedValue({ data: [], error: null })
-  }))
-}));
-
-// Mock featureFlags module
-vi.mock('@/lib/featureFlags', () => ({
-  emitTelemetry: vi.fn(),
-  setFlag: vi.fn(),
-  getFlag: vi.fn().mockReturnValue(false)
-}));
+// Note: Global mocks for @/lib/supabaseClient and @/lib/featureFlags
+// are provided by tests/unit/setup.ts via vitest.config.ts
 
 describe('supabaseSync', () => {
   let ydoc: Y.Doc;
