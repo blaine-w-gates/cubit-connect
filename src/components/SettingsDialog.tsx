@@ -66,6 +66,7 @@ export default function SettingsDialog() {
       setApiKey(inputKey);
       onOpenChange(false);
     } catch {
+      // INTENTIONALLY HANDLING: Validation failures should show error in dialog
       setError('Invalid Key or Quota Exceeded. Try a new key.');
     } finally {
       setIsValidating(false);

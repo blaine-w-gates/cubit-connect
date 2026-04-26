@@ -157,6 +157,7 @@ export default function SyncTestPage() {
       addLog('system', `Connected to room ${roomFingerprint}`);
       
     } catch (err: unknown) {
+      // INTENTIONALLY HANDLING: Connection failures should be logged to UI, not crash the test page
       const msg = err instanceof Error ? err.message : String(err);
       addLog('error', `Connection failed: ${msg}`);
       setSyncStatus('error');

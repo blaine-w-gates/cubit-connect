@@ -125,12 +125,13 @@ export function useAlarmEngine(): AlarmEngineState {
 
       if (now >= alarm.alarmTimeMs) {
         // Trigger alarm
-        console.log('[AlarmEngine] Triggering alarm:', alarm.id, alarm.stepText);
 
         // Play sound if enabled (with fallback for blocked AudioContext)
         try {
           playCompletionSound();
         } catch (audioError) {
+          // INTENTIONALLY HANDLING: Audio blocked by browser autoplay policy
+          // Show visual notification as fallback since audio can't play
           console.warn('[AlarmEngine] Audio blocked by browser policy:', audioError);
           toast.info('🔔 Alarm Triggered (Audio Blocked)', {
             description: `${alarm.taskText}: ${alarm.stepText}`,
@@ -165,7 +166,6 @@ export function useAlarmEngine(): AlarmEngineState {
               },
             };
             createAlarm?.(alarm._projectId, nextAlarm);
-            console.log('[AlarmEngine] Created next recurring instance:', nextAlarm.id, 'for', new Date(nextTimeMs).toLocaleString());
           }
         }
       }

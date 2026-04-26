@@ -60,6 +60,8 @@ export default function SyncSetupModal() {
         try {
             await connectToSyncServer(passphrase.trim());
         } catch (err) {
+            // INTENTIONALLY HANDLING: Connection failure shows user-friendly error
+            // Error state displayed in modal for user to retry or check passphrase
             setError('Failed to establish secure connection.');
         }
     };

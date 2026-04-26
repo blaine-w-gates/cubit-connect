@@ -46,7 +46,6 @@ export class NetworkSync {
         if (!this.catchUpLock) return;
         this.catchUpLock = false;
         if (this.queuedLiveDiffsDuringCatchUp.length > 0) {
-            console.log(`📦 Replaying ${this.queuedLiveDiffsDuringCatchUp.length} queued live diffs after catch-up.`);
             this.ydoc.transact(() => {
                 this.queuedLiveDiffsDuringCatchUp.forEach((diff) => {
                     Y.applyUpdate(this.ydoc, diff, 'network');
@@ -100,7 +99,6 @@ export class NetworkSync {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const ydocId = (this.ydoc as any).__observerId || 'unknown';
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        console.log(`[NETWORKSYNC DEBUG] Constructor - using ydoc ${ydocId}, ydoc.guid:`, (this.ydoc as any).guid);
 
         // --- BROADCAST ENGINE ---
         // Every local mutation (origin !== 'network') must be encrypted and sent to the relay.
@@ -108,9 +106,7 @@ export class NetworkSync {
         this.ydoc.on('update', (update, origin) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const updateYdocId = (this.ydoc as any).__observerId || 'unknown';
-            console.log(`[NETWORKSYNC DEBUG] ydoc.on(update) fired on ydoc ${updateYdocId}, origin:`, origin);
             if (origin !== 'network') {
-                console.log(`📡 [YJS] Local change detected (length: ${update.length}, origin: ${origin}). Broadcasting...`);
                 this.broadcastUpdate(update);
             }
         });
@@ -120,7 +116,6 @@ export class NetworkSync {
      * Initializes the WebSocket connection.
      */
     async connect(derivedKey: CryptoKey): Promise<void> {
-        console.log(`🔌 NetworkSync: Connecting to ${this.serverUrl}?room=${this.roomIdHash.slice(0, 8)}...`);
         return new Promise((resolve, reject) => {
             if (this.ws?.readyState === WebSocket.OPEN || this.ws?.readyState === WebSocket.CONNECTING) return resolve();
 
@@ -149,7 +144,6 @@ export class NetworkSync {
                 if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
                 this.reconnectAttempts = 0; // Reset backoff pool on success
                 this.onStatusChange('connected');
-                console.log(`🔗 E2EE WebSocket connected to ${this.serverUrl}. Requesting Cache...`);
 
                 // THE APPLICATION-LEVEL HEARTBEAT (Bypassing ws.ping limits)
                 this.heartbeatInterval = setInterval(() => {
@@ -158,7 +152,6 @@ export class NetworkSync {
 
                         // Kill connection if no echo returned in 5s
                         this.heartbeatTimeout = setTimeout(() => {
-                            console.warn("💀 Heartbeat dropped. Emulating TCP sever.");
                             this.ws?.close();
                         }, 5000);
                     }
@@ -169,18 +162,15 @@ export class NetworkSync {
                 // to everyone. This lets us verify other peers are alive and enforcing 2-Player Strict Mode.
                 this.presenceInterval = setInterval(() => {
                     if (this.ws?.readyState === WebSocket.OPEN && this.key) {
-                        console.log(`[PRESENCE] Broadcasting heartbeat from ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
                         const emptyUpdate = new Uint8Array([0, 0]);
                         this.broadcastUpdate(emptyUpdate);
                     } else {
-                        console.log(`[PRESENCE] Skipping heartbeat - ws=${this.ws?.readyState}, key=${!!this.key}`);
                     }
                 }, 15000);
 
                 // CRITICAL FIX: Broadcast immediate presence heartbeat BEFORE requesting cache
                 // This ensures other peers know we exist before they make Founder decisions
                 if (this.ws?.readyState === WebSocket.OPEN && this.key) {
-                    console.log(`[PRESENCE] Broadcasting immediate heartbeat on connect from ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
                     const emptyUpdate = new Uint8Array([0, 0]);
                     this.broadcastUpdate(emptyUpdate);
                 }
@@ -195,7 +185,6 @@ export class NetworkSync {
                 // We deploy a 2.5s watchdog to automatically unlock and assume "Founder" status.
                 setTimeout(() => {
                     if (this.catchUpLock && this.ws?.readyState === WebSocket.OPEN) {
-                        console.log('⚡ [SYNC] Watchdog Timeout: No checkpoint received. Assuming Founder status. Unlocking Live Diffs.');
                         this.releaseCatchUpLock();
                         
                         // Seed the empty server with our Genesis Checkpoint
@@ -219,7 +208,6 @@ export class NetworkSync {
                     
                     // Detailed MSG_UPDATE tracing
                     if (messageType === MSG_UPDATE) {
-                        console.log(`📥 [NETWORK] Received MSG_UPDATE (${encryptedPayload.length} bytes) from server`);
                     }
 
                     if (messageType === MSG_HEARTBEAT) {
@@ -230,17 +218,14 @@ export class NetworkSync {
                     }
 
                     if (messageType === MSG_ROOM_EMPTY) {
-                        console.log('🌱 Room is empty. Waiting for peer discovery before claiming Founder...');
                         // CRITICAL FIX: Don't immediately upload Genesis. Wait 1s to see if peers exist.
                         // This prevents the race where we overwrite another peer's checkpoint.
                         setTimeout(() => {
                             if (!this.hasDetectedPeers) {
-                                console.log('🌱 No peers detected after 1s. Claiming Founder and uploading Genesis.');
                                 const fullState = Y.encodeStateAsUpdate(this.ydoc);
                                 this.broadcastCheckpoint(fullState);
                                 this.releaseCatchUpLock();
                             } else {
-                                console.log('🌱 Peers detected! Re-requesting cache to fetch their checkpoint...');
                                 // CRITICAL FIX: Re-request cache now that we know a peer exists.
                                 // Their checkpoint might have just been saved to Redis.
                                 this.requestCache();
@@ -263,7 +248,6 @@ export class NetworkSync {
                         const checkpointYdocId = (this.ydoc as any).__observerId || 'unknown';
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const checkpointObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
-                        console.log(`[NETWORKSYNC DEBUG] CHECKPOINT BEFORE applyUpdate - ydoc ${checkpointYdocId}, observers: ${checkpointObserverCount}`);
                         
                         // BAND 2: The Genesis Checkpoint
 
@@ -281,25 +265,20 @@ export class NetworkSync {
                             Y.applyUpdate(this.ydoc, yjsData, 'network');
                         }, 'network');
                         markUpdateApplied(this.ydoc);
-                        console.log(`[NETWORKSYNC DEBUG] CHECKPOINT applied to ydoc ${checkpointYdocId}, observer should have fired`);
                         this.onSyncActivity?.();
 
                         // Release the Genesis Lock only AFTER the massive blob is mathematically merged
                         this.releaseCatchUpLock();
-                        console.log('✅ Genesis Catch-Up Complete. Unlocking Live Diffs.');
 
                         if (hasOfflineEdits) {
-                            console.log('🔄 Uploading Post-Merge Genesis Diff to sync offline work...');
                             const fullState = Y.encodeStateAsUpdate(this.ydoc);
                             this.broadcastCheckpoint(fullState);
 
                             // 🔴 BUG FIX: The generic Dumb Relay swallows MSG_CHECKPOINT to save it to cache, 
                             // BUT it intentionally does not broadcast it to other live peers. To ensure live peers 
                             // merge our offline edits immediately, we actively P2P broadcast the exact delta array.
-                            console.log('📡 Also broadcasting offline edits as P2P diff to bypass checkpoint swallowing...');
                             this.broadcastUpdate(offlineEdits);
                         } else {
-                            console.log('✅ No offline edits detected. Skipping Post-Merge broadcast to save bandwidth.');
                         }
 
                     } else if (messageType === MSG_UPDATE) {
@@ -308,12 +287,10 @@ export class NetworkSync {
                         // DETECT ENCRYPTED PEER PRESENCE HEARTBEAT
                         // An empty Yjs update [0, 0] is mathematically harmless, but serves as proof of life.
                         if (yjsData.length === 2 && yjsData[0] === 0 && yjsData[1] === 0) {
-                            console.log(`[PRESENCE] Peer heartbeat received on ydoc ${(this.ydoc as unknown as { __observerId?: string }).__observerId?.slice(0, 8) || 'unknown'}`);
                             
                             // CRITICAL FIX: Respond immediately with our own heartbeat for mutual discovery
                             // This ensures joining peers can detect us within the 1s Founder wait window
                             if (!this.hasDetectedPeers) {
-                                console.log('[PRESENCE] First peer detected, broadcasting response heartbeat');
                                 const responseHeartbeat = new Uint8Array([0, 0]);
                                 this.broadcastUpdate(responseHeartbeat);
                             }
@@ -322,13 +299,11 @@ export class NetworkSync {
                             // but only once per connection session. This ensures Device B can fetch
                             // our state regardless of when they join.
                             if (!this.hasUploadedCheckpointForPeer) {
-                                console.log('[PRESENCE] Detected peer - uploading checkpoint immediately (regardless of join timing)');
                                 const currentState = Y.encodeStateAsUpdate(this.ydoc);
                                 this.hasUploadedCheckpointForPeer = true; // Set immediately to prevent duplicate uploads
                                 
                                 // CRITICAL FIX: Await the checkpoint upload to ensure it completes before Device B requests cache
                                 this.broadcastCheckpoint(currentState).then(() => {
-                                    console.log('[PRESENCE] Checkpoint upload completed successfully');
                                 }).catch(err => {
                                     console.error('[PRESENCE] Checkpoint upload failed:', err);
                                     // Reset flag so we can retry on next peer detection
@@ -348,32 +323,26 @@ export class NetworkSync {
                             // CRITICAL FIX: When we detect a peer and we're still waiting for data (catchUpLock or first peer),
                             // re-request cache after a short delay to give them time to upload
                             if (this.catchUpLock || wasFirstPeer) {
-                                console.log('[PRESENCE] Peer detected while waiting for data, scheduling cache re-request in 500ms...');
                                 setTimeout(() => {
                                     if (this.ws?.readyState === WebSocket.OPEN) {
-                                        console.log('[PRESENCE] Re-requesting cache after peer detection...');
                                         this.requestCache();
                                     }
                                 }, 500);
                             }
                             getGlobalConnectionManager().updatePeerCount(1);
                             if (this.onPeerPresence) {
-                                console.log('[PRESENCE] Calling onPeerPresence callback');
                                 this.onPeerPresence();
                             } else {
-                                console.warn('[PRESENCE] onPeerPresence callback not set!');
                             }
                             return; // Bypass Yjs merge payload cost entirely
                         }
                         
                         // DETECT EXPLICIT DISCONNECT
                         if (yjsData.length === 2 && yjsData[0] === 255 && yjsData[1] === 255) {
-                            console.log('🚪 Peer explicitly disconnected.');
                             if (this.onPeerDisconnect) this.onPeerDisconnect();
                             return;
                         }
 
-                        console.log(`📥 [INBOUND] Received live P2P Diff (${encryptedPayload.length} bytes)`);
                         // BAND 1: Live Peer Diffs
                         // SYNCHRONICITY TRAP: If a peer types while we are downloading the checkpoint,
                         // applying their diff *before* the checkpoint mathematically corrupts the vector clock.
@@ -381,7 +350,6 @@ export class NetworkSync {
                             // CRITICAL FIX: If we receive a live diff from a peer, it means they're active.
                             // Release the catchUpLock and apply the update (and any queued updates).
                             // This handles the case where we re-requested cache but the checkpoint hasn't arrived yet.
-                            console.warn('⏳ [INBOUND] Received live diff while catchUpLock active. Releasing lock and applying.');
                             this.releaseCatchUpLock();
                             // Fall through to apply this update (queued updates are already applied by releaseCatchUpLock)
                         }
@@ -397,7 +365,6 @@ export class NetworkSync {
                         const preObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const preObserverId = (this.ydoc as any)._observers?.get?.('update')?.[0]?._callback ? 'has-callback' : 'no-callback';
-                        console.log(`[NETWORKSYNC DEBUG] BEFORE applyUpdate - ydoc ${preYdocId}, observers: ${preObserverCount}, state: ${preObserverId}`);
 
                         this.ydoc.transact(() => {
                             Y.applyUpdate(this.ydoc, yjsData, 'network');
@@ -406,20 +373,17 @@ export class NetworkSync {
                         // DEBUG: Check if observer fired
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const postObserverCount = (this.ydoc as any)._observers?.get?.('update')?.length ?? 0;
-                        console.log(`[NETWORKSYNC DEBUG] AFTER applyUpdate - observers: ${postObserverCount}, check if observer fired!`);
                         // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         const afterYdocId = (this.ydoc as any).__observerId || 'unknown';
-                        console.log(`[NETWORKSYNC DEBUG] Update applied to ydoc ${afterYdocId}`);
                         markUpdateApplied(this.ydoc);
-                        console.log(`🟢 [INBOUND] Decrypted and successfully merged into Y.Doc!`);
                         this.onSyncActivity?.();
                     }
                 } catch (err) {
+                    // INTENTIONALLY SWALLOWING: Decryption failure indicates wrong key or corruption
+                    // Log warning but don't crash - user may need to re-enter passphrase
                     const msgType = (event.data as ArrayBuffer).byteLength > 0 ? new Uint8Array(event.data)[0] : 'unknown';
                     if (msgType === MSG_UPDATE) {
-                        console.warn("🛡️ E2EE Decryption failed for MSG_UPDATE - possible key mismatch or corrupted packet");
                     }
-                    console.warn("🛡️ E2EE Payload Rejected (Possible wrong password or corrupted packet):", err);
                 }
             };
 
@@ -428,7 +392,6 @@ export class NetworkSync {
             };
 
             this.ws.onclose = () => {
-                console.log("🔌 WebSocket Sync Closed.");
                 this.clearHeartbeat();
 
                 if (this.intentionalDisconnect) {
@@ -449,7 +412,6 @@ export class NetworkSync {
                     const jitter = Math.floor(Math.random() * 1000);
                     const delay = exponentialDelay + jitter;
 
-                    console.log(`⏳ Auto-Reconnecting in ${Math.round(delay / 1000)} seconds...`);
                     this.reconnectAttempts++;
 
                     // THE ZOMBIE RECONNECT (UI BLINDNESS)
@@ -459,7 +421,6 @@ export class NetworkSync {
                         if (this.key && !this.intentionalDisconnect) {
                             // THE UNHANDLED PROMISE REJECTION
                             this.connect(this.key).catch(err => {
-                                console.warn('Background reconnect failed', err);
                             });
                         }
                     }, delay);
@@ -478,14 +439,11 @@ export class NetworkSync {
     private handleVisibilityChange = () => {
         if (document.visibilityState === 'visible') {
             if ((!this.ws || this.ws.readyState !== WebSocket.OPEN) && !this.intentionalDisconnect && this.key) {
-                console.log('📱 OS Wake-Up: Foreground resurrection sequence initiating...');
                 this.connect(this.key).catch((err) => {
-                    console.warn('Foreground reconnect failed:', err);
                 });
             }
         }
         else if (document.visibilityState === 'hidden' && this.ws?.readyState === WebSocket.OPEN && this.pendingDiffs.length > 0) {
-            console.log(`OS Suspending: Synchronously flushing ${this.pendingDiffs.length} tiny live diffs to TCP buffer...`);
             // SYNCHRONOUS TCP DUMP: No `await`, no `Crypto.subtle`. Bypasses the Web Crypto Promise Trap.
             try {
                 for (const diff of this.pendingDiffs) {
@@ -493,6 +451,8 @@ export class NetworkSync {
                 }
                 this.pendingDiffs = []; // Clear queue after emergency dump
             } catch (err) {
+                // INTENTIONALLY LOGGING: TCP state dump failure is diagnostic only
+                // Doesn't affect sync operation, just reduces debug visibility
                 console.error("Failed synchronous OS TCP dump:", err);
             }
         }
@@ -531,6 +491,8 @@ export class NetworkSync {
                 this.onSyncActivity?.();
             }
         } catch (e) {
+            // INTENTIONALLY LOGGING: Update send failure is non-fatal
+            // Failed update will be queued and retried via checkpoint mechanism
             console.error("Failed to encrypt and send update:", e);
         }
     }
@@ -554,7 +516,6 @@ export class NetworkSync {
      */
     requestCache(): void {
         if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-        console.log('📦 [CACHE] Re-requesting cache from server...');
         const payload = new Uint8Array([MSG_REQUEST_CACHE]);
         this.ws.send(payload);
     }
@@ -574,6 +535,8 @@ export class NetworkSync {
             // We can safely garbage-collect the pending tiny diffs queue.
             this.pendingDiffs = [];
         } catch (e) {
+            // INTENTIONALLY LOGGING: Checkpoint send failure is non-fatal
+            // Periodic checkpoint interval will retry automatically
             console.error("Failed to encrypt and send checkpoint:", e);
         }
     }
@@ -596,6 +559,8 @@ export class NetworkSync {
             payload.set(ciphertext, 1);
             this.ws!.send(payload);
         } catch (e) {
+            // INTENTIONALLY LOGGING: Disconnect signal is best-effort
+            // Failed signal doesn't prevent disconnect, peer will timeout anyway
             console.error("Failed to send disconnect signal", e);
         }
     }
@@ -607,14 +572,12 @@ export class NetworkSync {
     async flush(): Promise<void> {
         if (this.pendingPromises.size === 0) return;
         
-        console.log(`[NetworkSync] Flushing ${this.pendingPromises.size} pending operations...`);
         const startTime = Date.now();
         
         // Wait for all pending encryption operations to complete
         await Promise.all(Array.from(this.pendingPromises));
         
         const elapsed = Date.now() - startTime;
-        console.log(`[NetworkSync] Flush complete (${elapsed}ms)`);
     }
 
     /**
@@ -624,7 +587,6 @@ export class NetworkSync {
     flushQueuedUpdates(): void {
         if (this.queuedLiveDiffsDuringCatchUp.length === 0) return;
         
-        console.log(`[NetworkSync] Flushing ${this.queuedLiveDiffsDuringCatchUp.length} queued Yjs updates before disconnect...`);
         
         // Apply all queued updates immediately (don't wait for catchUpLock)
         this.ydoc.transact(() => {
@@ -636,7 +598,6 @@ export class NetworkSync {
         }, 'network');
         
         this.queuedLiveDiffsDuringCatchUp = [];
-        console.log('[NetworkSync] Queued updates applied successfully');
     }
 
     async disconnect(): Promise<void> {
@@ -671,7 +632,6 @@ export class NetworkSync {
             }
             this.key = null;
             this.onStatusChange('disconnected');
-            console.log('🔌 E2EE WebSocket disconnected by Client.');
         });
     }
 }

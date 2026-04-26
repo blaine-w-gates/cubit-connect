@@ -148,7 +148,6 @@ export class TimerYjsObserver {
       
       // If resolution differs from local, trigger callback
       if (result.winner === 'remote') {
-        console.log('[TimerConflict] Remote state won:', result.reason);
         this.onConflict(result);
       }
     };

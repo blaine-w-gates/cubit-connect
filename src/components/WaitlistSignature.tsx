@@ -38,8 +38,9 @@ export default function WaitlistSignature({ onUnlock, isUnlocked }: WaitlistSign
       localStorage.setItem('cubit_waitlist_signed', 'true');
       localStorage.setItem('cubit_user_email', cleanEmail);
     } catch (err) {
+      // INTENTIONALLY FALLBACK: Storage may be restricted in private mode
+      // Continue with session-only state, user can still use the app
       console.warn('Storage restricted (Private Mode?)', err);
-      // Fallback: Proceed anyway in session
     }
 
     onUnlock();

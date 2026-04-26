@@ -1,3 +1,10 @@
+/**
+ * Task Feed Component
+ *
+ * @module TaskFeed
+ * @description Virtualized task list with inline editing capabilities
+ */
+
 import { Virtuoso } from 'react-virtuoso';
 import { TaskItem } from '@/services/storage';
 import TaskEditor from '@/components/TaskEditor';

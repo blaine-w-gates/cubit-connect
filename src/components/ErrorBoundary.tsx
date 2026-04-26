@@ -38,6 +38,8 @@ export default class ErrorBoundary extends React.Component<
       if (existingLogs.length > 10) existingLogs.shift();
       localStorage.setItem('cubit_crash_logs', JSON.stringify(existingLogs));
     } catch (loggingError) {
+      // INTENTIONALLY HANDLING: Logging failure should not crash the error boundary
+      // If we can't write to localStorage, we still want to show the error UI
       console.error('Failed to write crash log to localStorage', loggingError);
     }
   }
@@ -52,6 +54,7 @@ export default class ErrorBoundary extends React.Component<
       await useAppStore.getState().resetProject();
       this.setState({ hasError: false, error: null });
     } catch {
+      // INTENTIONALLY RECOVERING: If reset fails, force reload as last resort
       window.location.reload();
     }
   };

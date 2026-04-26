@@ -111,7 +111,6 @@ export class SyncConnectionManager {
     
     // Detect peer loss (was > 0, now 0)
     if (previousCount > 0 && count === 0) {
-      console.log('[CONN MGR] Peer lost detected');
       this.onPeerLostCallback?.();
     }
     
@@ -158,7 +157,6 @@ export class SyncConnectionManager {
     const jitter = Math.floor(Math.random() * 1000);
     const delay = exponentialDelay + jitter;
 
-    console.log(`[CONN MGR] Scheduling reconnection in ${Math.round(delay / 1000)}s (attempt ${this.health.reconnectAttempts + 1})`);
 
     this.reconnectTimer = setTimeout(() => {
       this.health.reconnectAttempts++;
@@ -202,7 +200,6 @@ export class SyncConnectionManager {
       const timeSinceLastHeartbeat = now - this.health.lastHeartbeatReceived;
       
       if (timeSinceLastHeartbeat > this.config.heartbeatTimeout) {
-        console.warn(`[CONN MGR] Heartbeat timeout: ${timeSinceLastHeartbeat}ms since last heartbeat`);
         this.recordMissedHeartbeat();
       }
     }

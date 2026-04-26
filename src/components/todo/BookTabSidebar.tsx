@@ -383,7 +383,6 @@ export default function BookTabSidebar() {
             const from = todoProjects.findIndex((p) => p.id === active.id);
             const to = todoProjects.findIndex((p) => p.id === over.id);
             if (from === -1 || to === -1) {
-                console.warn('[BookTabSidebar] Invalid drag indices:', { from, to, active: active.id, over: over.id });
                 return;
             }
             // Prevent duplicate calls within 500ms (same from/to)
@@ -392,7 +391,6 @@ export default function BookTabSidebar() {
                 lastReorderRef.current.from === from &&
                 lastReorderRef.current.to === to &&
                 now - lastReorderRef.current.time < 500) {
-                console.log('[BookTabSidebar] Duplicate reorder prevented');
                 return;
             }
             lastReorderRef.current = { from, to, time: now };

@@ -1,3 +1,10 @@
+/**
+ * Scout View Component
+ *
+ * @module ScoutView
+ * @description AI-powered search and task discovery interface
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -58,6 +65,7 @@ export default function ScoutView() {
       addToScoutHistory(cleanTopic);
       setStoreResults(results);
     } catch (e: unknown) {
+      // INTENTIONALLY HANDLING: Scout failures should show specific guidance in toast
       console.error('Scout failed', e);
       const err = e as Error;
       if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {

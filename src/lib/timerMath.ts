@@ -149,7 +149,6 @@ export function correctDrift(
     // If timer is behind (drift < 0), we "paused more" than we should have
     const adjustedTotalPausedMs = state.totalPausedMs - drift;
     
-    console.log('[TimerMath] Drift detected and corrected:', {
       drift,
       expectedRemainingMs,
       actualRemainingMs,

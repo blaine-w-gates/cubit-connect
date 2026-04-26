@@ -48,6 +48,7 @@ export default function NotFound() {
         }
       }
     } catch {
+      // INTENTIONALLY HANDLING: Feedback submission failures should show toast, not crash
       toast.error('Signal Jammed.');
     } finally {
       setIsSubmitting(false);

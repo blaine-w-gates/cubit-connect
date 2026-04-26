@@ -131,6 +131,8 @@ export default function VideoInput({ videoRef, startProcessing }: VideoInputProp
           useAppStore.getState().setProcessing(false);
         }
       } catch (e: unknown) {
+        // INTENTIONALLY HANDLING: Video analysis failures show specific UI feedback
+        // Quota errors show settings dialog, overloaded shows retry message, others show generic error
         useAppStore.getState().setProcessing(false); // Stop spinning on error
         console.error('Engine Stalled', e);
 

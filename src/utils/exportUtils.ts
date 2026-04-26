@@ -1,3 +1,10 @@
+/**
+ * Export Utilities
+ *
+ * @module exportUtils
+ * @description Helper functions for data export and file operations
+ */
+
 import { TaskItem, CubitStep } from '@/services/storage';
 
 // Helper to sanitize filenames

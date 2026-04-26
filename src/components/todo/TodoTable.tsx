@@ -50,7 +50,8 @@ function parseGeminiError(err: Error): string {
             if (parsed.error && parsed.error.message) return parsed.error.message;
         }
     } catch {
-        // Fallback to original error string
+        // INTENTIONALLY HANDLING: JSON parsing failures fall back to original error string
+        // This is a best-effort parsing - if it fails, return the original message
     }
     return msg;
 }
@@ -444,6 +445,8 @@ export default function TodoTable() {
             ];
             setTodoSteps(rowId, steps);
         } catch (e) {
+            // INTENTIONALLY HANDLING: AI generation failures show toast with actionable guidance
+            // API key errors show settings button, other errors show generic message
             const err = e as Error;
             const parsedMsg = parseGeminiError(err);
             if (parsedMsg.includes('API key')) {
@@ -495,6 +498,7 @@ export default function TodoTable() {
             ];
             setTodoSteps(newRowId, steps);
         } catch (e) {
+            // INTENTIONALLY HANDLING: Deep Dive failures should show toast, not crash the UI
             const err = e as Error;
             const parsedMsg = parseGeminiError(err);
             if (parsedMsg.includes('API key')) {

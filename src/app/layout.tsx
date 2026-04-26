@@ -1,3 +1,10 @@
+/**
+ * Root Layout
+ *
+ * @module layout
+ * @description Next.js root layout with fonts and global styles
+ */
+
 import type { Metadata, Viewport } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';

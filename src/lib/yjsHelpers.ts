@@ -41,8 +41,9 @@ export function generateOrderKey(prevKey?: string, nextKey?: string): string {
         const normalizedNext = nextKey?.toLowerCase() ?? null;
         return generateKeyBetween(normalizedPrev, normalizedNext);
     } catch (err) {
+        // INTENTIONALLY FALLBACK: Fractional indexing library may fail on edge cases
+        // Use simple lexicographic fallback to maintain list functionality
         console.error('Fractional Indexing Error, falling back to lexicographical default', err);
-        // Fallback with lowercase key
         const fallbackBase = prevKey?.toLowerCase() ?? 'a0';
         return fallbackBase + 'n';
     }

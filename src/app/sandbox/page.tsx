@@ -1,3 +1,10 @@
+/**
+ * Sandbox Page
+ *
+ * @module sandbox/page
+ * @description Testing and development sandbox for Gemini models
+ */
+
 'use client';
 
 import React, { useState } from 'react';
@@ -82,6 +89,7 @@ export default function SandboxPage() {
         },
       }));
     } catch (error: unknown) {
+      // INTENTIONALLY HANDLING: API errors should be shown in UI, not crash the sandbox
       const endTime = performance.now();
       const errorMessage = error instanceof Error ? error.message : 'Unknown Error';
       setResults((prev) => ({
@@ -122,6 +130,7 @@ export default function SandboxPage() {
         setScanResult(JSON.stringify(data, null, 2));
       }
     } catch (error) {
+      // INTENTIONALLY HANDLING: Scan failures should show error in UI, not crash
       setScanResult(
         `Error scanning network: ${error instanceof Error ? error.message : String(error)}`,
       );

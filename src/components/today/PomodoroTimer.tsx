@@ -129,13 +129,10 @@ export function PomodoroTimer() {
     
     switch (timerStatus) {
       case 'idle':
-        console.log('[PomodoroTimer] Starting timer - isReady:', isReady, 'startWorker:', typeof startWorker);
         startTimer();
         if (isReady) {
-          console.log('[PomodoroTimer] Calling startWorker()');
           startWorker();
         } else {
-          console.log('[PomodoroTimer] Worker not ready, skipping startWorker');
         }
         break;
       case 'running':

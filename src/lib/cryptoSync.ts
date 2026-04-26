@@ -105,7 +105,9 @@ export async function decryptUpdate(payload: Uint8Array, key: CryptoKey): Promis
         );
 
         return new Uint8Array(decryptedBuffer);
-    } catch (error) {
+    } catch {
+        // INTENTIONALLY PROPAGATING: Decryption failure indicates wrong key or corruption
+        // Re-throw with user-friendly message for UI error handling
         throw new Error("E2EE Decryption Failure: Invalid passphrase or corrupted network payload.");
     }
 }

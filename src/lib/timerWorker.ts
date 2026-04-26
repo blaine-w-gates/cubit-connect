@@ -68,7 +68,6 @@ function startTimer(durationMs: number, startedAt: number, totalPausedMs = 0): v
   pausedDuration = totalPausedMs;
   isPaused = false;
   
-  console.log('[TimerWorker] Starting timer:', { duration, startTime, pausedDuration });
   
   // Send initial tick
   sendTick();
@@ -97,7 +96,6 @@ function pauseTimer(): void {
   if (!isPaused) {
     isPaused = true;
     pauseStartTime = performance.now();
-    console.log('[TimerWorker] Timer paused at:', pauseStartTime);
   }
 }
 
@@ -108,7 +106,6 @@ function resumeTimer(totalPausedMs: number): void {
     const additionalPausedDuration = now - pauseStartTime;
     pausedDuration = totalPausedMs + additionalPausedDuration;
     isPaused = false;
-    console.log('[TimerWorker] Timer resumed, additional pause duration:', additionalPausedDuration);
   }
 }
 
@@ -126,14 +123,12 @@ function stopTimer(): void {
   isPaused = false;
   pauseStartTime = 0;
   
-  console.log('[TimerWorker] Timer stopped');
 }
 
 // Complete the timer
 function completeTimer(): void {
   stopTimer();
   postMessageToMain({ type: 'COMPLETE' });
-  console.log('[TimerWorker] Timer completed');
 }
 
 // Send current status to main thread
@@ -244,7 +239,6 @@ self.onmessage = (e: MessageEvent<TimerMessage>) => {
     }
     
     default: {
-      console.warn('[TimerWorker] Unknown message type:', type);
     }
   }
 };

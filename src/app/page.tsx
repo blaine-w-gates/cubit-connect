@@ -1,3 +1,10 @@
+/**
+ * Landing Page
+ *
+ * @module page
+ * @description Application landing page with hero carousel and ignition form
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';

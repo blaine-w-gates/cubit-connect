@@ -71,8 +71,9 @@ export function useAudioContext(options: UseAudioContextOptions = {}): UseAudioC
       }
       
       audioContextRef.current = new AudioContextClass();
-      console.log('[AudioContext] Created, state:', audioContextRef.current.state);
     } catch (err) {
+      // INTENTIONALLY LOGGING: AudioContext creation may fail (browser policy, memory)
+      // Log error but don't crash - app continues without audio functionality
       console.error('[AudioContext] Failed to create:', err);
     }
     
@@ -92,12 +93,13 @@ export function useAudioContext(options: UseAudioContextOptions = {}): UseAudioC
     try {
       if (audioContextRef.current.state === 'suspended') {
         await audioContextRef.current.resume();
-        console.log('[AudioContext] Unlocked via resume()');
       }
       
       setIsUnlocked(true);
       return true;
     } catch (err) {
+      // INTENTIONALLY HANDLING: Audio unlock failure shouldn't crash app
+      // Return false to allow graceful fallback to silent mode
       console.error('[AudioContext] Failed to unlock:', err);
       return false;
     }
@@ -110,6 +112,8 @@ export function useAudioContext(options: UseAudioContextOptions = {}): UseAudioC
     try {
       createOscillatorTone(audioContextRef.current, frequency, duration, type, volume);
     } catch (err) {
+      // INTENTIONALLY SWALLOWING: Audio playback failure shouldn't crash app
+      // Silent failure acceptable - audio is enhancement, not critical feature
       console.error('[AudioContext] Failed to play oscillator:', err);
     }
   }, [enabled, isUnlocked, volume]);

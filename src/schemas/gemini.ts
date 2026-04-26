@@ -1,3 +1,10 @@
+/**
+ * Gemini API Schemas
+ *
+ * @module gemini
+ * @description Zod schemas for Gemini API request/response validation
+ */
+
 import { z } from 'zod';
 
 // --- Shared Types ---

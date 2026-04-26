@@ -48,7 +48,6 @@ export function logCausalEvent(
   
   // Always log to console in development
   if (typeof window !== 'undefined' && (window as unknown as { __SYNC_DIAGNOSTICS?: boolean }).__SYNC_DIAGNOSTICS) {
-    console.log(
       `[CAUSAL] #${event.sequence} [${phase}] ${instanceId}: ${action}`,
       details,
       `at ${event.stackTrace}`
@@ -457,7 +456,6 @@ export function transitionToPhase(
              stateMachine.phaseHistory[stateMachine.phaseHistory.length - 2].enteredAt,
   });
   
-  console.log(`[STATE MACHINE] ${previousPhase} → ${newPhase}`);
 }
 
 export function markObserverRegisteredInStateMachine(): void {
@@ -647,7 +645,6 @@ export function enableDiagnostics(): void {
         clearSnapshots();
       },
     };
-    console.log('🔧 Sync diagnostics enabled. Access via window.__SYNC_MONITOR');
   }
 }
 

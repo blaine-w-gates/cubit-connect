@@ -42,8 +42,9 @@ export function safeParseTasks(rawText: string) {
     const json = JSON.parse(repairJson(rawText));
     return TranscriptResponseSchema.parse(json);
   } catch (error) {
+    // INTENTIONALLY PROPAGATING: Task parsing failure is critical
+    // AI response must be valid for core functionality - show error to user
     console.error('Task Parse Failed:', error);
-    // Re-throw so the UI knows it failed (and can show error boundary/toast)
     throw new Error('Failed to parse AI response. The generated plan was invalid.');
   }
 }
@@ -53,8 +54,10 @@ export function safeParseSubSteps(rawText: string) {
     const json = JSON.parse(repairJson(rawText));
     return SubStepsResponseSchema.parse(json);
   } catch (error) {
+    // INTENTIONALLY RETURNING EMPTY: Sub-step parsing is best-effort
+    // Failure returns empty array so app continues without sub-steps
     console.warn('SubStep Parse Failed - Returning Empty Default', error);
-    return []; // Fail gracefully (app continues without sub-steps)
+    return [];
   }
 }
 
@@ -63,6 +66,8 @@ export function safeParseSearchQueries(rawText: string) {
     const json = JSON.parse(repairJson(rawText));
     return SearchQueriesResponseSchema.parse(json);
   } catch (error) {
+    // INTENTIONALLY RETURNING EMPTY: Search query parsing is best-effort
+    // Failure returns empty array so app continues without search queries
     console.warn('Scout Parse Failed - Returning Empty Default', error);
     return [];
   }

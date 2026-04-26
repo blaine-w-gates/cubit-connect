@@ -72,6 +72,8 @@ export const GeminiService = {
       try {
         return await fn(currentModel);
       } catch (error: unknown) {
+        // INTENTIONALLY HANDLING: Retry with fallback logic for rate limits/network errors
+        // 429/quota errors trigger model switch, network errors retry, others propagate
         const err = error as Error;
         const msg = err?.message?.toLowerCase() || '';
 
@@ -131,6 +133,8 @@ export const GeminiService = {
       await this.countTokens(apiKey, 'Test connection');
       return true;
     } catch {
+      // INTENTIONALLY PROPAGATING: Connection validation failure
+      // Re-throw with user-friendly message for settings dialog
       throw new Error('Invalid API Key');
     }
   },
@@ -221,6 +225,8 @@ export const GeminiService = {
         sub_steps: [],
       }));
     } catch (error: unknown) {
+      // INTENTIONALLY HANDLING: Transform safety errors to user-friendly messages
+      // Re-throw other errors (network, auth) for upstream handling
       const err = error as Error;
       console.error('Gemini Error:', err);
       if (err?.message?.includes('SAFETY') || err?.message?.includes('blocked')) {
@@ -265,6 +271,8 @@ export const GeminiService = {
       });
       return safeParseSearchQueries(result.response.text());
     } catch (e: unknown) {
+      // INTENTIONALLY TRANSFORMING: Convert safety errors to user-friendly messages
+      // Re-throws other errors for upstream handling
       const err = e as Error;
       console.warn('Scout Fail:', err);
       if (err?.message?.includes('SAFETY') || err?.message?.includes('blocked')) {
@@ -322,6 +330,8 @@ export const GeminiService = {
       });
       return safeParseSubSteps(result.response.text());
     } catch (e: unknown) {
+      // INTENTIONALLY LOGGING AND RE-THROWING: Log for debugging, pass to UI handler
+      // All errors re-thrown for upstream handling with specific error messages
       const err = e as Error;
       console.warn('SubStep Fail:', err);
       if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {
@@ -360,7 +370,10 @@ export const GeminiService = {
         generationConfig: { responseMimeType: 'application/json' },
       });
       await this.withTimeout(liteModel.generateContent(testPrompt), 15000);
-    } catch { /* ignore */ }
+    } catch {
+      // INTENTIONALLY IGNORING: Lite model test is timing comparison only
+      // Failure doesn't invalidate the API key, just means lite model unavailable
+    }
     const liteTime = Date.now() - liteStart;
     
     await this.enforceRateLimit();
@@ -374,7 +387,10 @@ export const GeminiService = {
         generationConfig: { responseMimeType: 'application/json' },
       });
       await this.withTimeout(fullModel.generateContent(testPrompt), 15000);
-    } catch { /* ignore */ }
+    } catch {
+      // INTENTIONALLY IGNORING: Full model test is timing comparison only
+      // Failure doesn't invalidate the API key, just means full model unavailable
+    }
     const fullTime = Date.now() - fullStart;
     
     return {

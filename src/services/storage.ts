@@ -144,7 +144,6 @@ export const storageService = {
           'tasks' in raw &&
           Array.isArray((raw as { tasks: unknown }).tasks)
         ) {
-          console.warn('Attempting legacy salvage of tasks...');
           return {
             tasks: (raw as { tasks: TaskItem[] }).tasks,
             todoRows: [],
@@ -191,6 +190,8 @@ export const storageService = {
 
       return migrated;
     } catch (error) {
+      // INTENTIONALLY FALLBACK: IndexedDB read failure returns empty state
+      // Data loss reported to user via console, app continues with fresh state
       console.error('Failed to load project from IndexedDB:', error);
       return emptyState();
     }
@@ -240,6 +241,8 @@ export const storageService = {
       };
       await set(key, payload);
     } catch (error: unknown) {
+      // INTENTIONALLY HANDLING: Storage errors with user-facing alerts
+      // Quota exceeded shows dialog, other errors propagate for upstream handling
       console.error('Failed to save project to IndexedDB:', error);
       const err = error as Error;
       if (err?.name === 'QuotaExceededError') {
@@ -265,6 +268,8 @@ export const storageService = {
     try {
       await del(key);
     } catch (error) {
+      // INTENTIONALLY LOGGING: Clear failure is cleanup-only
+      // Data already orphaned, log for debugging but don't crash
       console.error('Failed to clear project:', error);
     }
   },
@@ -316,9 +321,10 @@ export const storageService = {
       }
 
       localStorage.setItem(MIGRATION_FLAG, String(Date.now()));
-      console.log('✅ Migration complete: legacy data copied to personalUno namespace');
       return true;
     } catch (error) {
+      // INTENTIONALLY FALLBACK: Migration failure returns false
+      // Legacy data remains, app continues without namespace isolation
       console.error('Migration failed:', error);
       return false;
     }
@@ -335,9 +341,9 @@ export const storageService = {
     if (elapsed > MIGRATION_BACKUP_TTL) {
       try {
         await del(LEGACY_KEY);
-        console.log('🗑️ Legacy backup key removed after 30-day retention');
       } catch {
-        // Non-critical
+        // INTENTIONALLY IGNORING: Legacy cleanup is non-critical
+        // 30-day backup cleanup failure doesn't affect app functionality
       }
     }
   },
@@ -362,6 +368,8 @@ export const storageService = {
       const { usage = 0, quota = 0 } = await navigator.storage.estimate();
       return { usage, quota };
     } catch {
+      // INTENTIONALLY FALLBACK: Storage estimation unavailable (non-secure context)
+      // Return null allows UI to hide storage indicator gracefully
       return null;
     }
   },

@@ -11,6 +11,8 @@ export const cryptoUtils = {
       // Simple Base64 encoding with salt
       return btoa(SALT + text);
     } catch (e) {
+      // INTENTIONALLY FALLBACK: btoa may fail on Unicode/non-Latin1 chars
+      // Return plaintext rather than crash - obfuscation is best-effort
       console.error('Encryption failed', e);
       return text;
     }
@@ -26,7 +28,7 @@ export const cryptoUtils = {
       // If salt is missing, it might be a legacy raw key. Return as is.
       return cypherText;
     } catch {
-      // 🛡️ LEGACY FALLBACK:
+      // INTENTIONALLY FALLBACK: 🛡️ LEGACY FALLBACK
       // If atob throws (invalid chars), it's likely a raw API key from Tier 1.
       // Return it as-is so the app doesn't crash.
       return cypherText;

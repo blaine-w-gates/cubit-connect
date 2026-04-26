@@ -1,3 +1,10 @@
+/**
+ * Todo Page
+ *
+ * @module todo/page
+ * @description Main todo application page with task management
+ */
+
 'use client';
 
 import { useEffect, useState } from 'react';

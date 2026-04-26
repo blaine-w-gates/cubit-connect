@@ -1,3 +1,10 @@
+/**
+ * Global Type Definitions
+ *
+ * @module global.d.ts
+ * @description Type declarations for global window properties
+ */
+
 export {};
 
 declare global {

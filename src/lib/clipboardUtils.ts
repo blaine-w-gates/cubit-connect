@@ -13,7 +13,8 @@ export async function copyToClipboardSafe(text: string): Promise<boolean> {
       await navigator.clipboard.writeText(text);
       return true;
     } catch {
-      // Fall through to legacy fallback
+      // INTENTIONALLY FALLBACK: Modern Clipboard API may be unavailable
+      // (non-HTTPS, iframe, or permission denied) - try legacy method
     }
   }
 
@@ -47,6 +48,8 @@ export async function copyToClipboardSafe(text: string): Promise<boolean> {
     document.body.removeChild(textarea);
     return success;
   } catch {
+    // INTENTIONALLY NOTIFYING: Both clipboard methods failed
+    // Show user-friendly error with manual copy instructions
     toast.error('Copy Failed', {
       description: 'Could not access clipboard. Try selecting and copying the text manually.',
     });

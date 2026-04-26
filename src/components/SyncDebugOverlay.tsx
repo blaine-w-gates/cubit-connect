@@ -150,7 +150,6 @@ export function SyncDebugOverlay() {
         totalSnapshots: allSnaps.length,
       }, null, 2);
       setLastSnapshot(snapshot);
-      console.log('📸 SYNC SNAPSHOT:', snapshot);
     } else {
       const snapshot = JSON.stringify({
         timestamp: Date.now(),
@@ -158,7 +157,6 @@ export function SyncDebugOverlay() {
         totalSnapshots: allSnaps.length,
       }, null, 2);
       setLastSnapshot(snapshot);
-      console.log('📸 SYNC SNAPSHOT:', snapshot);
     }
   }, []);
 

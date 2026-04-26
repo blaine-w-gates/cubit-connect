@@ -91,10 +91,10 @@ export const useVideoProcessor = () => {
             // 5. Next Task (Recursive)
             await processNext(queue.slice(1));
           } catch (error) {
+            // INTENTIONALLY CONTINUING: Single frame failure shouldn't stop entire queue
+            // Log error and continue processing remaining tasks
             console.error('Frame capture failed:', error);
             addLog(`Error processing frame for task ${currentTask.id}`);
-            // Continue to next task even on error? Or stop?
-            // Usually safer to try next one
             await processNext(queue.slice(1));
           }
         }

@@ -56,7 +56,6 @@ export function useHibernationRecovery(
     // Only process if we were hidden for more than 2 seconds (actual hibernation, not just quick tab switch)
     if (hibernationDuration < 2000) return;
     
-    console.log('[HibernationRecovery] Detected resume after:', hibernationDuration, 'ms');
     isRecoveringRef.current = true;
     lastHibernationDurationRef.current = hibernationDuration;
     
@@ -67,7 +66,6 @@ export function useHibernationRecovery(
     const remainingMs = Math.max(0, activeTimerSession.durationMs - wallClockElapsed);
     const remainingSeconds = Math.ceil(remainingMs / 1000);
     
-    console.log('[HibernationRecovery] Recalculated:', {
       wallClockElapsed,
       remainingMs,
       remainingSeconds,
@@ -76,7 +74,6 @@ export function useHibernationRecovery(
     
     // Check if timer expired during hibernation
     if (remainingSeconds <= 0) {
-      console.log('[HibernationRecovery] Timer expired during hibernation, auto-completing');
       
       // Update UI to show 0:00 first
       tickTimer(0);
@@ -109,7 +106,6 @@ export function useHibernationRecovery(
       } else {
         // App going to background
         lastVisibleTimeRef.current = Date.now();
-        console.log('[HibernationRecovery] App hidden at:', lastVisibleTimeRef.current);
       }
     };
     
@@ -136,7 +132,6 @@ export function useHibernationRecovery(
       if (timerStatus === 'running' && activeTimerSession) {
         // Persist the exact moment we closed
         // The store's auto-save will handle this, but we ensure it's flushed
-        console.log('[HibernationRecovery] Before unload, timer was running');
       }
     };
     
@@ -179,7 +174,6 @@ export function useTimerLifecycle(): void {
       
       if (remainingMs <= 0) {
         // Timer expired while app was closed
-        console.log('[TimerLifecycle] Timer expired while app closed, showing completion');
         tickTimer(0);
         // Small delay to let UI settle before showing completion
         setTimeout(() => {

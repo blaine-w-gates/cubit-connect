@@ -1,3 +1,10 @@
+/**
+ * Engine Page
+ *
+ * @module engine/page
+ * @description Video processing and AI analysis engine page
+ */
+
 'use client';
 
 import { useEffect, useState, useRef } from 'react';

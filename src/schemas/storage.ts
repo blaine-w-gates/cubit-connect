@@ -1,3 +1,10 @@
+/**
+ * Storage Schemas
+ *
+ * @module storage
+ * @description Zod schemas for data validation and type safety
+ */
+
 import { z } from 'zod';
 
 // --- Recursive Step Schema ---

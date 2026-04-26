@@ -79,6 +79,7 @@ export default function ResultsFeed() {
           await updateTask(taskId, { sub_steps: objectSteps, isExpanded: true }); // Auto-expand
         }
       } catch (e: unknown) {
+        // INTENTIONALLY HANDLING: AI generation failures should show toast with specific guidance
         const err = e as Error;
         console.error(err);
         if (err.message?.includes('PROJECT_QUOTA_EXCEEDED')) {

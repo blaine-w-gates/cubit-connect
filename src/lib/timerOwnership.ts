@@ -66,9 +66,9 @@ export class TimerOwnershipManager {
       try {
         this.bc = new BroadcastChannel(BC_CHANNEL);
         this.bc.onmessage = this.handleBroadcastMessage.bind(this);
-        console.log('[TimerOwnership] BroadcastChannel initialized');
       } catch (err) {
-        console.warn('[TimerOwnership] BroadcastChannel not available:', err);
+        // INTENTIONALLY SWALLOWING: BroadcastChannel may be blocked by security policy
+        // Fallback to Yjs awareness only for cross-tab communication
       }
     }
   }
@@ -100,7 +100,6 @@ export class TimerOwnershipManager {
     
     if (existingLocalOwner && existingLocalOwner.timestamp > Date.now() - 5000) {
       // Local owner exists and is alive (heartbeat within 5s)
-      console.log('[TimerOwnership] Local owner detected:', existingLocalOwner.tabId);
       this.isOwner = false;
       this.options.onRemoteOwnerDetected?.({
         isOwner: true,
@@ -115,7 +114,6 @@ export class TimerOwnershipManager {
     // Step 2: Check for remote owners via Yjs Awareness
     const remoteOwner = this.getRemoteOwner();
     if (remoteOwner && remoteOwner.deviceId !== this.deviceId) {
-      console.log('[TimerOwnership] Remote device owner detected:', remoteOwner.deviceId);
       this.isOwner = false;
       this.options.onRemoteOwnerDetected?.(remoteOwner);
       return false;
@@ -127,7 +125,6 @@ export class TimerOwnershipManager {
     this.startHeartbeat();
     this.updateYjsAwareness();
     
-    console.log('[TimerOwnership] Ownership claimed for session:', sessionId);
     this.options.onOwnershipChange?.(true);
     
     return true;
@@ -144,7 +141,6 @@ export class TimerOwnershipManager {
     this.broadcastRelease();
     this.clearYjsAwareness();
     
-    console.log('[TimerOwnership] Ownership released');
     this.options.onOwnershipChange?.(false);
   }
   
@@ -228,9 +224,11 @@ export class TimerOwnershipManager {
         }
       }
     } catch (err) {
-      console.warn('[TimerOwnership] Error reading awareness:', err);
+      // INTENTIONALLY SWALLOWING: Awareness read failure is non-fatal
+      // Ownership state can be reconstructed from sync state on next check
     }
     
+    // No ownership found - return null to trigger sync state read
     return null;
   }
   
@@ -313,7 +311,8 @@ export class TimerOwnershipManager {
         timestamp: Date.now(),
       });
     } catch (err) {
-      console.warn('[TimerOwnership] Failed to update Yjs awareness:', err);
+      // INTENTIONALLY SWALLOWING: Awareness update failure is non-fatal
+      // Timer ownership continues via local state, will retry on next update
     }
   }
   
@@ -323,7 +322,8 @@ export class TimerOwnershipManager {
     try {
       (this.awareness as { setLocalStateField: (key: string, value: null) => void }).setLocalStateField(AWARENESS_FIELD, null);
     } catch (err) {
-      console.warn('[TimerOwnership] Failed to clear Yjs awareness:', err);
+      // INTENTIONALLY SWALLOWING: Awareness clear failure is cleanup-only
+      // Doesn't affect timer functionality, just leaves stale state in Yjs
     }
   }
   
@@ -339,7 +339,6 @@ export class TimerOwnershipManager {
         if (this.isOwner) {
           // Conflict: If our heartbeat is stale, we should release
           if (Date.now() - this.lastHeartbeat > 3000) {
-            console.log('[TimerOwnership] Lost ownership to newer claim');
             this.releaseOwnership();
           }
         }

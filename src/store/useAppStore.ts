@@ -29,6 +29,10 @@ import {
   applyUpdateToYText,
 } from '../lib/yjsHelpers';
 import { NetworkSync } from '@/lib/networkSync';
+import type { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
+import { getUseSupabaseSync } from '@/lib/featureFlags';
+import { loadSupabaseSync } from '@/lib/supabaseSyncLoader';
+import { getCleanupJobSystem } from '@/lib/cleanupJobs';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
 import { generateUniqueClientId } from '@/lib/yjsClientId';
@@ -40,10 +44,12 @@ const ydocOptions: { gc: boolean; clientID?: number } = {
   gc: false,
   clientID: generateUniqueClientId() // Always use unique ClientID per device
 };
-console.log(`[YJS DEBUG] Using unique ClientID: ${ydocOptions.clientID}`);
 
 let ydoc = new Y.Doc(ydocOptions);
 registerYDocInstance(ydoc, 'module_init');
+
+// Initialize cleanup jobs system (auto-starts registered jobs)
+const cleanupSystem = getCleanupJobSystem();
 
 // Type aliases for Yjs maps to avoid explicit any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,7 +77,6 @@ export function getYDoc() { return ydoc; }
  */
 async function resetYDoc(): Promise<Y.Doc> {
   const oldId = getInstanceId(ydoc);
-  console.log(`[YJS DEBUG] resetYDoc() called - destroying ydoc ${oldId || 'unknown'}`);
   
   // CRITICAL FIX: Check for pending updates before destroying
   // If updates were received but not applied, they will be lost
@@ -79,30 +84,23 @@ async function resetYDoc(): Promise<Y.Doc> {
     const instance = getInstance(oldId);
     if (instance && instance.updatesReceived > instance.updatesApplied) {
       const pending = instance.updatesReceived - instance.updatesApplied;
-      console.warn(`[YJS DEBUG] resetYDoc() - WARNING: Destroying ydoc with ${pending} pending updates!`);
     }
   }
   
   // CRITICAL FIX: Disconnect NetworkSync BEFORE syncing/destroying ydoc
   // This ensures queued updates are applied to the ydoc before we extract state
   if (networkSync) {
-    console.log('[YJS DEBUG] resetYDoc() - disconnecting existing NetworkSync (awaiting flush...)');
     await networkSync.disconnect();
-    console.log('[YJS DEBUG] resetYDoc() - NetworkSync disconnected and flushed');
     networkSync = null;
     
     // AFTER flush, sync any newly-applied data to Zustand
-    console.log('[YJS DEBUG] resetYDoc() - forcing syncFromYjs after flush');
     useAppStore.getState().syncFromYjs();
-    console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed after flush');
   } else if (oldId) {
     // NetworkSync is null but ydoc might still have unapplied updates
     // This handles the "Pre-Attachment Race" where updates arrived before networkSync was assigned
     const instance = getInstance(oldId);
     if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
-      console.log('[YJS DEBUG] resetYDoc() - ydoc has unapplied updates but networkSync is null, attempting syncFromYjs');
       useAppStore.getState().syncFromYjs();
-      console.log('[YJS DEBUG] resetYDoc() - syncFromYjs completed for pre-attached updates');
     }
   }
   if (idleCheckpointTimer) {
@@ -121,13 +119,11 @@ async function resetYDoc(): Promise<Y.Doc> {
     gc: false,
     clientID: generateUniqueClientId() // Always use unique ClientID per device
   };
-  console.log(`[YJS DEBUG] resetYDoc() - using unique ClientID: ${newYdocOptions.clientID}`);
   
   ydoc = new Y.Doc(newYdocOptions);
   const newId = registerYDocInstance(ydoc, 'resetYDoc');
   
   transitionToPhase('ydoc_reset', { ydocId: newId });
-  console.log(`[YJS DEBUG] resetYDoc() created new ydoc ${newId}`);
   
   // Reset the observer tracking on the new ydoc
   (ydoc as { __observerId?: string }).__observerId = undefined;
@@ -153,7 +149,6 @@ function registerYjsObserver(set: any, get: any) {
   markObserverRegisteredInStateMachine();
   
   const ydocId = getInstanceId(ydoc) || 'unknown';
-  console.log('[YJS DEBUG] registerYjsObserver called - registering on ydoc instance', ydocId);
   
   // ---------------------------------------------------------------------------
   // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
@@ -196,14 +191,11 @@ function registerYjsObserver(set: any, get: any) {
 
   ydoc.on('update', (update: Uint8Array, origin: any) => {
     // IMMEDIATE FIRST LOG - before ANY other logic
-    console.log('[YJS DEBUG] 🔥 OBSERVER ENTERED - origin:', origin, 'ydoc:', ydocId);
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    console.log('[YJS DEBUG] ydoc.on(update) fired on ydoc', ydocId, '- origin:', origin, 'update length:', update.length);
     
     // CRITICAL DEBUG: Log ALL origins to see if network updates trigger this
     if (origin === 'network') {
-      console.log('[YJS DEBUG] 🚨 NETWORK UPDATE RECEIVED - observer is working!');
     }
     
     // THE ECHO STORM PREVENTION (Outbound Broadcast)
@@ -216,7 +208,6 @@ function registerYjsObserver(set: any, get: any) {
       // Reset the inactivity timer every time the user types.
       if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
       idleCheckpointTimer = setTimeout(() => {
-        console.log(`Deep Idle Reached: Generating 1MB+ E2EE Checkpoint... (env: ${isTestEnvironment ? 'test' : 'prod'}, delay: ${IDLE_CHECKPOINT_DELAY}ms)`);
         const fullState = Y.encodeStateAsUpdate(ydoc);
         networkSync?.broadcastCheckpoint(fullState);
       }, IDLE_CHECKPOINT_DELAY);
@@ -232,14 +223,12 @@ function registerYjsObserver(set: any, get: any) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any)._crdtRenderDebounce = setTimeout(() => {
-      console.log('[YJS DEBUG] Executing debounced render from origin:', origin);
       // 1. Extract raw lists but filter out tombstones immediately
       const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
       const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
       
       // DEBUG: Log what observer is extracting
       const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
-      console.log('[SYNC DEBUG] Observer extracting:', rawYProjects.length, 'projects:', JSON.stringify(projectNamesDebug));
 
       // 2. Map through cache for Structural Sharing with O(1) dirty check early bail
       const sharedProjects = rawYProjects.map(yProj => {
@@ -272,7 +261,6 @@ function registerYjsObserver(set: any, get: any) {
       dirtyTaskIds.clear();
 
       const updatedProjects = sortYMapList(sharedProjects);
-      console.log('[YJS OBSERVER] Rendering:', updatedProjects.length, 'projects, origin:', origin);
 
       const currentActiveId = get().activeProjectId;
       const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
@@ -293,7 +281,9 @@ function registerYjsObserver(set: any, get: any) {
         const raw = yMetaMap.get('scoutResults');
         if (raw) {
           if (JSON.stringify(scoutResults) !== raw) {
-            try { scoutResults = JSON.parse(raw); } catch { }
+            try { scoutResults = JSON.parse(raw); } catch {
+              // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
+            }
           }
         }
       }
@@ -303,7 +293,9 @@ function registerYjsObserver(set: any, get: any) {
         const raw = yMetaMap.get('scoutHistory');
         if (raw) {
           if (JSON.stringify(scoutHistory) !== raw) {
-            try { scoutHistory = JSON.parse(raw); } catch { }
+            try { scoutHistory = JSON.parse(raw); } catch {
+              // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
+            }
           }
         }
       }
@@ -329,7 +321,6 @@ function registerYjsObserver(set: any, get: any) {
   });
   
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  console.log('[YJS DEBUG] ydoc.on(update) handler registered successfully on ydoc', ydocId);
 }
 
 // Book Tab color palette — cycles through these for new projects
@@ -509,8 +500,8 @@ const STORAGE_KEY_API = 'cubit_api_key';
 // MIGRATION MUTEX: Prevents React.StrictMode from double-booting legacy JSON into Yjs
 let isMigrating = false;
 
-// E2EE WEBSOCKET MANAGER
-let networkSync: NetworkSync | null = null;
+// E2EE SYNC MANAGER (NetworkSync or SupabaseSyncProd based on feature flag)
+let networkSync: NetworkSync | SupabaseSyncProd | null = null;
 const SYNC_SERVER_URL = (typeof window !== 'undefined' && localStorage.getItem('sync_server_url')) || process.env.NEXT_PUBLIC_SYNC_SERVER_URL || 'wss://cubit-sync-relay.onrender.com';
 let idleCheckpointTimer: NodeJS.Timeout | null = null;
 let loadProjectInFlight: Promise<void> | null = null;
@@ -599,7 +590,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   switchWorkspace: async (workspaceType: WorkspaceType, workspaceId?: string) => {
     const wsId = workspaceId || (workspaceType === 'personalUno' ? getUnoWorkspaceId() : '');
     if (!wsId) {
-      console.warn('switchWorkspace: no workspaceId for type', workspaceType);
       return;
     }
 
@@ -768,7 +758,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     };
 
     ydoc.transact(() => {
-      console.log('✅ addTodoRow: Transacting Yjs set for row', newRow.id);
       yRows.set(newRow.id, bindTodoRowToYMap(newRow, orderKey));
     });
 
@@ -1023,14 +1012,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   connectToSyncServer: async (passphrase: string) => {
     // RE-ENTRY GUARD: Prevent concurrent connectToSyncServer calls
     if (connectToSyncServerInFlight) {
-      console.log('[YJS DEBUG] connectToSyncServer - already in flight, skipping duplicate call');
       return;
     }
     connectToSyncServerInFlight = true;
 
     const { isHydrated } = get();
     if (!isHydrated) {
-      console.warn("E2EE Sync Blocked: Cannot connect to relay before local IndexedDB establishes genesis state.");
       connectToSyncServerInFlight = false;
       return;
     }
@@ -1061,17 +1048,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       const currentWsId = get().activeWorkspaceId;
       const isSameRoom = currentWsType === 'personalMulti' && currentWsId === roomIdHash;
       
-      console.log(`[YJS DEBUG] connectToSyncServer - currentWsType: ${currentWsType}, currentWsId: ${currentWsId?.slice(0,8)}, roomIdHash: ${roomIdHash?.slice(0,8)}, isSameRoom: ${isSameRoom}`);
 
       // Track if we already reset in this call to prevent double-reset
       let didResetInThisCall = false;
 
       if (!isSameRoom) {
-        console.log('[YJS DEBUG] connectToSyncServer - NOT same room, calling resetYDoc and loadProject');
         await resetYDoc();
         didResetInThisCall = true;
         const ydocAfterReset = getInstanceId(ydoc);
-        console.log(`[YJS DEBUG] connectToSyncServer - ydoc after reset: ${ydocAfterReset}`);
         isMigrating = false;
         loadProjectInFlight = null;
 
@@ -1082,13 +1066,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         });
 
         const { loadProject } = get();
-        console.log('[YJS DEBUG] connectToSyncServer - about to await loadProject()');
         transitionToPhase('loadProject_start', { ydocId: getInstanceId(ydoc) });
         await loadProject();
         transitionToPhase('loadProject_complete', { ydocId: getInstanceId(ydoc) });
-        console.log('[YJS DEBUG] connectToSyncServer - loadProject() completed');
       } else {
-        console.log('[YJS DEBUG] connectToSyncServer - SAME room, skipping resetYDoc and loadProject');
       }
 
       // CRITICAL: Check if ydoc is destroyed/missing and recreate it
@@ -1096,20 +1077,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       // BUT: Skip if we already reset in this call (prevents double-reset bug)
       const currentYdocId = getInstanceId(ydoc);
       if (!currentYdocId && !didResetInThisCall) {
-        console.log('[YJS DEBUG] connectToSyncServer - ydoc is null/destroyed, calling resetYDoc()');
         await resetYDoc();
       } else if (!currentYdocId && didResetInThisCall) {
-        console.log('[YJS DEBUG] connectToSyncServer - WARNING: ydoc destroyed immediately after reset, skipping second reset to prevent data loss');
       }
 
       // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
       // But if loadProject didn't run or skipped registration, register it now
       const finalYdocId = getInstanceId(ydoc);
       const observerYdocId = (ydoc as { __observerId?: string }).__observerId;
-      console.log(`[YJS DEBUG] connectToSyncServer - checking observer: current ydoc ${finalYdocId}, observer registered on: ${observerYdocId}`);
 
       if (observerYdocId !== finalYdocId) {
-        console.log(`[YJS DEBUG] connectToSyncServer - Registering observer directly on ydoc ${finalYdocId}`);
         registerYjsObserver(set, get);
         (ydoc as { __observerId?: string }).__observerId = finalYdocId;
       }
@@ -1129,48 +1106,137 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         }
       );
 
-      console.log(`[SYNC DEBUG] Connecting with roomIdHash: ${roomIdHash}, SYNC_SERVER_URL: ${SYNC_SERVER_URL}`);
+      // Check feature flag for transport selection
+      const useSupabase = getUseSupabaseSync();
 
-      networkSync = new NetworkSync(
-        ydoc,
-        SYNC_SERVER_URL,
-        roomIdHash,
-        (status) => {
-          set({ syncStatus: status });
-          if (status !== 'connected') set({ hasPeers: false });
-        },
-        () => {
-          // CRITICAL FIX: Force immediate state sync when checkpoint arrives
-          // The debounced observer may miss the initial document load due to cache/dirty tracking issues
-          const { syncFromYjs } = get();
-          syncFromYjs();
-          set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-        },
-        () => {
-          // Peer Presence pulse
-          console.log(`[PEER DISCOVERY] Received presence pulse, setting hasPeers=true`);
-          set({ hasPeers: true, lastPeerSeenAt: Date.now() });
-        },
-        () => {
-          // Explicit Peer Disconnect
-          console.log(`[PEER DISCOVERY] Peer disconnected, setting hasPeers=false`);
-          set({ hasPeers: false });
-        },
-        (isEditing) => {
-          // --- TURN-BASED LOCKING (STRICT MODE) ---
-          if (isEditing) {
-            set({ peerIsEditing: true });
-            if (peerEditingTimer) clearTimeout(peerEditingTimer);
-            peerEditingTimer = setTimeout(() => {
-              set({ peerIsEditing: false });
-              peerEditingTimer = null;
-            }, 3000); // 3-Second Turn Reservation
-          }
+      if (useSupabase) {
+        // Use SupabaseSync (experimental) - LAZY LOADED
+
+        try {
+          // Dynamically import SupabaseSync (code splitting)
+          const SupabaseSyncClass = await loadSupabaseSync();
+
+          networkSync = new SupabaseSyncClass(
+            ydoc,
+            roomIdHash,
+            (status) => {
+              set({ syncStatus: status });
+              if (status !== 'connected') set({ hasPeers: false });
+            },
+            () => {
+              // CRITICAL FIX: Force immediate state sync when checkpoint arrives
+              const { syncFromYjs } = get();
+              syncFromYjs();
+              set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+            },
+            () => {
+              // Peer Presence pulse
+              set({ hasPeers: true, lastPeerSeenAt: Date.now() });
+            },
+            () => {
+              // Explicit Peer Disconnect
+              set({ hasPeers: false });
+            },
+            (isEditing) => {
+              // --- TURN-BASED LOCKING (STRICT MODE) ---
+              if (isEditing) {
+                set({ peerIsEditing: true });
+                if (peerEditingTimer) clearTimeout(peerEditingTimer);
+                peerEditingTimer = setTimeout(() => {
+                  set({ peerIsEditing: false });
+                  peerEditingTimer = null;
+                }, 3000); // 3-Second Turn Reservation
+              }
+            }
+          );
+        } catch (loadError) {
+          // INTENTIONALLY FALLBACK: Supabase module load failure triggers WebSocket fallback
+          // Lazy loading failed (network/module error) - use NetworkSync as backup
+          console.error('[SYNC DEBUG] Failed to load SupabaseSync:', loadError);
+
+          // Emit telemetry
+          const { emitTelemetry } = await import('@/lib/featureFlags');
+          emitTelemetry('error_boundary_triggered', {
+            context: {
+              error: 'supabase_lazy_load_failed',
+              message: loadError instanceof Error ? loadError.message : String(loadError),
+            },
+          });
+
+          // Fall back to NetworkSync
+          networkSync = new NetworkSync(
+            ydoc,
+            SYNC_SERVER_URL,
+            roomIdHash,
+            (status) => {
+              set({ syncStatus: status });
+              if (status !== 'connected') set({ hasPeers: false });
+            },
+            () => {
+              const { syncFromYjs } = get();
+              syncFromYjs();
+              set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+            },
+            () => {
+              set({ hasPeers: true, lastPeerSeenAt: Date.now() });
+            },
+            () => {
+              set({ hasPeers: false });
+            },
+            (isEditing) => {
+              if (isEditing) {
+                set({ peerIsEditing: true });
+                if (peerEditingTimer) clearTimeout(peerEditingTimer);
+                peerEditingTimer = setTimeout(() => {
+                  set({ peerIsEditing: false });
+                  peerEditingTimer = null;
+                }, 3000);
+              }
+            }
+          );
         }
-      );
+      } else {
+        // Use legacy NetworkSync (default)
 
-      // Mark this ydoc as having NetworkSync attached for diagnostics
-      markNetworkSyncAttached(ydoc, 'network-sync-' + Date.now());
+        networkSync = new NetworkSync(
+          ydoc,
+          SYNC_SERVER_URL,
+          roomIdHash,
+          (status) => {
+            set({ syncStatus: status });
+            if (status !== 'connected') set({ hasPeers: false });
+          },
+          () => {
+            // CRITICAL FIX: Force immediate state sync when checkpoint arrives
+            // The debounced observer may miss the initial document load due to cache/dirty tracking issues
+            const { syncFromYjs } = get();
+            syncFromYjs();
+            set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+          },
+          () => {
+            // Peer Presence pulse
+            set({ hasPeers: true, lastPeerSeenAt: Date.now() });
+          },
+          () => {
+            // Explicit Peer Disconnect
+            set({ hasPeers: false });
+          },
+          (isEditing) => {
+            // --- TURN-BASED LOCKING (STRICT MODE) ---
+            if (isEditing) {
+              set({ peerIsEditing: true });
+              if (peerEditingTimer) clearTimeout(peerEditingTimer);
+              peerEditingTimer = setTimeout(() => {
+                set({ peerIsEditing: false });
+                peerEditingTimer = null;
+              }, 3000); // 3-Second Turn Reservation
+            }
+          }
+        );
+      }
+
+      // Mark this ydoc as having sync attached for diagnostics
+      markNetworkSyncAttached(ydoc, (useSupabase ? 'supabase-sync-' : 'network-sync-') + Date.now());
 
       // Presence Watchdog: Revert to "Alone" if no pulse for 12 seconds
       if ((window as any)._presenceWatchdog) clearInterval((window as any)._presenceWatchdog);
@@ -1181,9 +1247,72 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         }
       }, 3000);
 
-      await networkSync.connect(syncKey);
-      transitionToPhase('networkSync_connecting', { ydocId: getInstanceId(ydoc) });
-      
+      try {
+        await networkSync.connect(syncKey);
+        transitionToPhase('networkSync_connecting', { ydocId: getInstanceId(ydoc) });
+      } catch (connectError) {
+        // INTENTIONALLY FALLBACK: Primary transport connection failed
+        // Trigger automatic WebSocket fallback for resilience
+        if (useSupabase && networkSync) {
+
+          // Emit telemetry for fallback
+          const { emitTelemetry } = await import('@/lib/featureFlags');
+          emitTelemetry('transport_switched', {
+            from: 'supabase',
+            to: 'websocket',
+            context: { reason: 'supabase_connection_failed' },
+          });
+
+          // Clean up failed Supabase connection
+          networkSync.disconnect();
+
+          // Create NetworkSync fallback
+          networkSync = new NetworkSync(
+            ydoc,
+            SYNC_SERVER_URL,
+            roomIdHash,
+            (status) => {
+              set({ syncStatus: status });
+              if (status !== 'connected') set({ hasPeers: false });
+            },
+            () => {
+              const { syncFromYjs } = get();
+              syncFromYjs();
+              set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
+            },
+            () => {
+              set({ hasPeers: true, lastPeerSeenAt: Date.now() });
+            },
+            () => {
+              set({ hasPeers: false });
+            },
+            (isEditing) => {
+              if (isEditing) {
+                set({ peerIsEditing: true });
+                if (peerEditingTimer) clearTimeout(peerEditingTimer);
+                peerEditingTimer = setTimeout(() => {
+                  set({ peerIsEditing: false });
+                  peerEditingTimer = null;
+                }, 3000);
+              }
+            }
+          );
+
+          // Try WebSocket connection
+          await networkSync.connect(syncKey);
+
+          // Update telemetry
+          emitTelemetry('transport_switched', {
+            from: 'supabase',
+            to: 'websocket',
+            context: { result: 'fallback_successful' },
+          });
+        } else {
+          // Not Supabase or no networkSync, rethrow
+          throw connectError;
+        }
+      }
+
       if (!(window as any)._unloadListenerBound) {
         (window as any)._unloadListenerBound = true;
         window.addEventListener('beforeunload', () => {
@@ -1194,12 +1323,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
       transitionToPhase('live', { ydocId: getInstanceId(ydoc) });
     } catch (err) {
+      // INTENTIONALLY HANDLING: E2EE connection failure reported to user
+      // Error state set for UI to display, connection flag cleared
       console.error("Failed to connect to E2EE Relay:", err);
       transitionToPhase('error', { ydocId: getInstanceId(ydoc), error: String(err) });
       set({ syncStatus: 'error', roomFingerprint: null });
     } finally {
       connectToSyncServerInFlight = false;
-      console.log('[YJS DEBUG] connectToSyncServer - in-flight flag cleared');
     }
   },
 
@@ -1263,7 +1393,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   loadProject: async () => {
     const entryYdocId = (ydoc as any).__observerId || 'no-id';
-    console.log(`[YJS DEBUG] loadProject() called - isHydrated: ${get().isHydrated}, ydoc: ${entryYdocId}`);
     
     // CRITICAL: Always ensure observer is registered on the current ydoc instance
     // This must happen BEFORE any early returns to prevent observer loss on reconnection
@@ -1271,7 +1400,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const observerId = (ydoc as { __observerId?: string }).__observerId;
     
     if (observerId !== currentYdocId) {
-      console.log(`[YJS DEBUG] Observer not registered on current ydoc (observerId: ${observerId}, current: ${currentYdocId}), registering now...`);
       registerYjsObserver(set, get);
       (ydoc as { __observerId?: string }).__observerId = currentYdocId;
     }
@@ -1279,18 +1407,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // BUG-3 fix: single-flight lock avoids race when loadProject is called twice
     // before hydration state flips true.
     if (loadProjectInFlight) {
-      console.log('[YJS DEBUG] loadProject() - waiting for existing loadProjectInFlight');
       await loadProjectInFlight;
       return;
     }
 
     loadProjectInFlight = (async () => {
-    console.log(`[YJS DEBUG] loadProject() - inside async block, isHydrated: ${get().isHydrated}`);
     
     // Note: Observer registration moved to BEFORE loadProjectInFlight check
     // to ensure it's always registered regardless of hydration state
     if (get().isHydrated) {
-      console.log('[YJS DEBUG] loadProject() - EARLY RETURN because isHydrated is true');
       return;
     }
 
@@ -1311,7 +1436,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         // We cast to 'any' purely for the check because Typescript expects strict CubitStep[]
         if (typeof (t.sub_steps[0] as unknown) === 'string') {
           if (process.env.NODE_ENV === 'development')
-            console.warn(`Migrating Legacy Task [${t.task_name}] to Recursive Schema`);
           const legacySteps = t.sub_steps as unknown as string[];
           const newSubSteps: CubitStep[] = legacySteps.map((text: string) => ({
             id: crypto.randomUUID(),
@@ -1327,7 +1451,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
             const firstChild = subStep.sub_steps[0] as unknown;
             if (typeof firstChild === 'string') {
               if (process.env.NODE_ENV === 'development')
-                console.warn(`Migrating Legacy Level 3 [${subStep.text}] to Objects`);
 
               // Convert ["Micro A", "Micro B"] -> [{id, text, sub_steps: []}, ...]
               const legacyMicro = subStep.sub_steps as unknown as string[];
@@ -1373,7 +1496,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoProjects = [defaultProject];
       activeProjectId = defaultProject.id;
       if (process.env.NODE_ENV === 'development')
-        console.warn('Migrated flat todoRows into default TodoProject (Book Tabs).');
     }
 
     // If no projects exist at all, create an empty default
@@ -1410,7 +1532,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       // 1. BINARY PERSISTENCE: The Highest Authority
       // If we have a binary history, we decode it. It overwrites ALL legacy JSON logic.
       Y.applyUpdate(ydoc, data.yjsState);
-      if (process.env.NODE_ENV === 'development') console.log('✅ Y.Doc Booted from Binary IDB History');
 
       // 🔴 BUG FIX: Filter out Yjs 'isDeleted' tombstones during first-boot structural hydration!
       // Previously, we mapped ALL history, meaning ghosts would render until the first CRDT update wiped them out all at once.
@@ -1426,7 +1547,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     } else if (!isMigrating) {
       // 2. THE GENESIS BOOT (Legacy JSON -> Yjs)
       isMigrating = true;
-      if (process.env.NODE_ENV === 'development') console.warn('🧬 Executing Genesis Boot: Migrating JSON to Y.Doc');
 
       ydoc.transact(() => {
         // Map legacy Tasks
@@ -1448,12 +1568,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         if (data.scoutHistory && data.scoutHistory.length > 0) yMetaMap.set('scoutHistory', JSON.stringify(data.scoutHistory));
         if (data.transcript) applyUpdateToYText(yTranscript, data.transcript);
       });
-      console.log('🧬 Genesis Boot Complete.');
       
       // Immediate genesis checkpoint broadcast for test environments
       // This ensures Device B can sync immediately without waiting for idle timer
       if (isTestEnvironment && networkSync) {
-        console.log('🚀 [TEST MODE] Immediate Genesis checkpoint broadcast');
         const genesisState = Y.encodeStateAsUpdate(ydoc);
         networkSync.broadcastCheckpoint(genesisState);
       }
@@ -1463,10 +1581,14 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (yMetaMap.has('projectType')) data.projectType = yMetaMap.get('projectType');
     if (yMetaMap.has('projectTitle')) data.projectTitle = yMetaMap.get('projectTitle');
     if (yMetaMap.has('scoutResults')) {
-      try { data.scoutResults = JSON.parse(yMetaMap.get('scoutResults')); } catch { }
+      try { data.scoutResults = JSON.parse(yMetaMap.get('scoutResults')); } catch {
+        // INTENTIONALLY IGNORING: Export with corrupted scoutResults continues
+      }
     }
     if (yMetaMap.has('scoutHistory')) {
-      try { data.scoutHistory = JSON.parse(yMetaMap.get('scoutHistory')); } catch { }
+      try { data.scoutHistory = JSON.parse(yMetaMap.get('scoutHistory')); } catch {
+        // INTENTIONALLY IGNORING: Export with corrupted scoutHistory continues
+      }
     }
     const safeTranscript = yTranscript.toString();
     if (safeTranscript !== "") data.transcript = safeTranscript;
@@ -1483,7 +1605,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!activeProjectId || !todoProjects.find(p => p.id === activeProjectId)) {
         activeProjectId = todoProjects[0]?.id || null;
       }
-      console.log(`[YJS DEBUG] loadProject() - Using ${todoProjects.length} projects from ydoc (network-synced)`);
     }
     const finalActiveProject = todoProjects.find(p => p.id === activeProjectId) || todoProjects[0];
 
@@ -1529,7 +1650,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
         // Session expired while away - add to history and clear active
         if (elapsed >= session.durationMs) {
-          console.log('[Timer] Session expired during absence, auto-completing and adding to history');
           const completedSession = {
             ...session,
             status: 'completed' as const,
@@ -1583,7 +1703,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const finalYdocId = getInstanceId(ydoc);
     const finalObserverId = (ydoc as { __observerId?: string }).__observerId;
     if (finalObserverId !== finalYdocId) {
-      console.log(`[YJS DEBUG] loadProject() - Final observer check failed, re-registering (observerId: ${finalObserverId}, current: ${finalYdocId})`);
       registerYjsObserver(set, get);
       (ydoc as { __observerId?: string }).__observerId = finalYdocId;
     }
@@ -1828,7 +1947,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const observerId = (ydoc as { __observerId?: string }).__observerId;
 
     if (observerId !== currentYdocId) {
-      console.log(`[YJS DEBUG] resetProject - Observer not registered (observerId: ${observerId}, current: ${currentYdocId}), registering now...`);
       registerYjsObserver(set, get);
       (ydoc as { __observerId?: string }).__observerId = currentYdocId;
     }
@@ -1950,7 +2068,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     
     // DEBUG: Log what we're extracting
     const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
-    console.log('[SYNC DEBUG] syncFromYjs extracting:', rawYProjects.length, 'projects:', JSON.stringify(projectNamesDebug));
 
     // Map through cache for Structural Sharing (simple version without cache for now)
     const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
@@ -1975,7 +2092,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (yMetaMap.has('scoutResults')) {
       const raw = yMetaMap.get('scoutResults');
       if (raw) {
-        try { scoutResults = JSON.parse(raw); } catch { }
+        try { scoutResults = JSON.parse(raw); } catch {
+          // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
+        }
       }
     }
 
@@ -1983,7 +2102,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (yMetaMap.has('scoutHistory')) {
       const raw = yMetaMap.get('scoutHistory');
       if (raw) {
-        try { scoutHistory = JSON.parse(raw); } catch { }
+        try { scoutHistory = JSON.parse(raw); } catch {
+          // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
+        }
       }
     }
 
@@ -2003,7 +2124,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // Track that Zustand state was synced from Yjs
     recordZustandUpdate(ydoc);
     
-    console.log('🔄 syncFromYjs: Extracted', updatedProjects.length, 'projects,', actProj?.todoRows?.length || 0, 'rows');
   },
 
   // UI State
@@ -2043,13 +2163,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const task = activeProject?.todoRows.find(r => r.id === taskId);
     
     if (!task) {
-      console.warn('[Timer] Task not found for Today:', taskId);
       return;
     }
     
     // If there's already a task, queue the new one (don't replace)
     if (state.todayTaskId && state.todayTaskId !== taskId) {
-      console.log('[Timer] Queuing new task for Today (existing:', state.todayTaskId, 'new:', taskId + ')');
     }
     
     set({
@@ -2059,7 +2177,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerRemainingSeconds: state.todayPreferences.defaultDuration * 60,
     });
     
-    console.log('[Timer] Task selected for Today:', taskId, 'from dial:', dialSource);
   },
 
   clearTodayTask: () => {
@@ -2085,18 +2202,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerStatus: 'idle',
       timerRemainingSeconds: get().todayPreferences.defaultDuration * 60,
     });
-    console.log('[Timer] Today task cleared');
   },
 
   startTimer: () => {
     const state = get();
     if (!state.todayTaskId) {
-      console.warn('[Timer] Cannot start timer: no task selected');
       return;
     }
     // L6 Fix: Guard against double-start
     if (state.activeTimerSession?.status === 'running') {
-      console.warn('[Timer] Timer already running, ignoring duplicate start');
       return;
     }
 
@@ -2125,18 +2239,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerRemainingSeconds: state.todayPreferences.defaultDuration * 60,
     });
     
-    console.log('[Timer] Session started:', newSession.id);
   },
 
   pauseTimer: () => {
     const state = get();
     if (state.timerStatus !== 'running' || !state.activeTimerSession) {
-      console.warn('[Timer] Cannot pause: timer not running');
       return;
     }
     // L6 Fix: Guard against double-pause
     if (state.activeTimerSession.status === 'paused') {
-      console.warn('[Timer] Timer already paused, ignoring duplicate pause');
       return;
     }
 
@@ -2158,18 +2269,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerStatus: 'paused',
     });
     
-    console.log('[Timer] Timer paused at:', now);
   },
 
   resumeTimer: () => {
     const state = get();
     if (state.timerStatus !== 'paused' || !state.activeTimerSession) {
-      console.warn('[Timer] Cannot resume: timer not paused');
       return;
     }
     // L6 Fix: Guard against double-resume
     if (state.activeTimerSession.status === 'running') {
-      console.warn('[Timer] Timer already running, ignoring duplicate resume');
       return;
     }
 
@@ -2198,13 +2306,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerStatus: 'running',
     });
     
-    console.log('[Timer] Timer resumed, paused duration:', pausedDuration);
   },
 
   stopTimer: () => {
     const state = get();
     if (!state.activeTimerSession) {
-      console.warn('[Timer] No active session to stop');
       return;
     }
     
@@ -2230,7 +2336,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       yMetaMap.delete('timerRemainingSeconds');
     }, 'local');
     
-    console.log('[Timer] Timer stopped, session abandoned:', abandonedSession.id);
   },
 
   resetTimer: () => {
@@ -2241,13 +2346,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       timerRemainingSeconds: s.todayPreferences.defaultDuration * 60,
     }));
     
-    console.log('[Timer] Timer reset');
   },
 
   completeTimer: () => {
     const state = get();
     if (!state.activeTimerSession) {
-      console.warn('[Timer] No active session to complete');
       return;
     }
     
@@ -2270,14 +2373,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }));
 
     // Show browser notification if enabled and permitted
-    console.log('[Timer] Notification check:', {
       enabled: state.todayPreferences.notificationEnabled,
       apiAvailable: typeof Notification !== 'undefined',
       permission: typeof Notification !== 'undefined' ? Notification.permission : 'N/A',
     });
     if (state.todayPreferences.notificationEnabled && typeof Notification !== 'undefined') {
       if (Notification.permission === 'granted') {
-        console.log('[Timer] Showing notification - permission granted');
         new Notification('Pomodoro Complete!', {
           body: 'Time for a break!',
           icon: '/favicon.ico',
@@ -2286,10 +2387,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           requireInteraction: true,
         });
       } else if (Notification.permission !== 'denied') {
-        console.log('[Timer] Requesting notification permission...');
         // Request permission and show if granted
         Notification.requestPermission().then((permission) => {
-          console.log('[Timer] Permission result:', permission);
           if (permission === 'granted') {
             new Notification('Pomodoro Complete!', {
               body: 'Time for a break!',
@@ -2301,10 +2400,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           }
         });
       } else {
-        console.log('[Timer] Notification permission denied, not showing');
       }
     } else {
-      console.log('[Timer] Notifications disabled or API not available');
     }
 
     // Persist completion to yMetaMap (for history tracking)
@@ -2323,7 +2420,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }, 'local');
     }, 5000);
     
-    console.log('[Timer] Timer completed:', updatedSession.id);
   },
 
   tickTimer: (remainingSeconds: number) => {
@@ -2333,14 +2429,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set((s) => ({
       todayPreferences: { ...s.todayPreferences, ...prefs },
     }));
-    console.log('[Timer] Preferences updated:', prefs);
   },
 
   addTimerSession: (session: import('@/schemas/storage').TimerSession) => {
     set((s) => ({
       timerSessions: [...s.timerSessions, session],
     }));
-    console.log('[Timer] Session added to history:', session.id);
   },
 
   // --- Alarm System Actions (V1) ---
@@ -2348,7 +2442,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   createAlarm: (projectId: string, alarm: import('@/schemas/storage').AlarmRecord) => {
     const yProj = yProjectsMap.get(projectId);
     if (!yProj) {
-      console.warn('[Alarm] Cannot create alarm: project not found', projectId);
       return;
     }
 
@@ -2365,25 +2458,21 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       yAlarms.set(alarm.id, bindAlarmToYMap(alarm));
     });
 
-    console.log('[Alarm] Created:', alarm.id, alarm.stepText);
   },
 
   updateAlarmStatus: (projectId: string, alarmId: string, status: import('@/schemas/storage').AlarmStatus, updates?: Partial<import('@/schemas/storage').AlarmRecord>) => {
     const yProj = yProjectsMap.get(projectId);
     if (!yProj) {
-      console.warn('[Alarm] Cannot update alarm: project not found', projectId);
       return;
     }
 
     const yAlarms = yProj.get('alarms') as Y.Map<any>;
     if (!yAlarms) {
-      console.warn('[Alarm] Cannot update alarm: no alarms map', projectId);
       return;
     }
 
     const yAlarm = yAlarms.get(alarmId);
     if (!yAlarm) {
-      console.warn('[Alarm] Cannot update alarm: alarm not found', alarmId);
       return;
     }
 
@@ -2400,19 +2489,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }
     });
 
-    console.log('[Alarm] Updated status:', alarmId, status);
   },
 
   deleteAlarm: (projectId: string, alarmId: string) => {
     const yProj = yProjectsMap.get(projectId);
     if (!yProj) {
-      console.warn('[Alarm] Cannot delete alarm: project not found', projectId);
       return;
     }
 
     const yAlarms = yProj.get('alarms') as Y.Map<any>;
     if (!yAlarms) {
-      console.warn('[Alarm] Cannot delete alarm: no alarms map', projectId);
       return;
     }
 
@@ -2424,7 +2510,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }
     });
 
-    console.log('[Alarm] Deleted (soft):', alarmId);
   },
 }));
 
@@ -2473,6 +2558,8 @@ useAppStore.subscribe((state) => {
           todayTaskDialSource: state.todayTaskDialSource,
         });
       } catch (err) {
+        // INTENTIONALLY LOGGING: Auto-save failure shouldn't crash app
+        // Data remains in memory; will retry on next debounced call
         console.error('Auto-Save Failed:', err);
       }
     }

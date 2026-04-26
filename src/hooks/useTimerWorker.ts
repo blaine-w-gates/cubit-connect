@@ -60,6 +60,8 @@ export function useTimerWorker(options: { onComplete?: () => void } = {}): UseTi
         setHasWorker(true);
         setIsReady(true);
       } catch {
+        // INTENTIONALLY HANDLING: Worker creation failure falls back to setInterval
+        // Show user warning and continue with less accurate timing
         setHasWorker(false);
         setIsReady(true);
         toast.warning('Timer using fallback mode', {

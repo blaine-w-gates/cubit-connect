@@ -28,6 +28,8 @@ export function NotificationPermissionBanner() {
         });
       }
     } catch (error) {
+      // INTENTIONALLY LOGGING: Notification permission may be denied by user or policy
+      // Log for debugging but don't crash - app works without notifications
       console.error('Failed to request notification permission:', error);
     }
   };

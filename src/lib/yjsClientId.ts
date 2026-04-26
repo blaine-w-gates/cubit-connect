@@ -31,7 +31,6 @@ export function generateUniqueClientId(): number {
   
   const clientId = high + low;
   
-  console.log(`[YJS DEBUG] Generated unique ClientID: ${clientId} (device: ${deviceId.slice(0, 8)}...)`);
   return clientId;
 }
 
@@ -48,7 +47,6 @@ function getOrCreateDeviceId(): string {
   if (!deviceId) {
     deviceId = `device-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
     localStorage.setItem(key, deviceId);
-    console.log(`[YJS DEBUG] Created new device ID: ${deviceId}`);
   }
   
   return deviceId;

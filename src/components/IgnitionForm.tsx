@@ -25,6 +25,7 @@ export default function IgnitionForm() {
       setApiKey(key); // Save to Store (LocalStorage)
       router.push('/engine'); // Redirect to Engine
     } catch (e: unknown) {
+      // INTENTIONALLY HANDLING: API key validation failures should show UI feedback, not crash
       console.error('Ignition Failed', e);
 
       // Check specific error strings from Gemini SDK

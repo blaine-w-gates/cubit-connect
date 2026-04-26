@@ -1,0 +1,26 @@
+build	Build with Next.js	﻿2026-04-25T04:59:00.1626364Z ##[group]Run npx --no-install next build
+build	Build with Next.js	2026-04-25T04:59:00.1626910Z [36;1mnpx --no-install next build[0m
+build	Build with Next.js	2026-04-25T04:59:00.1667026Z shell: /usr/bin/bash -e {0}
+build	Build with Next.js	2026-04-25T04:59:00.1667424Z env:
+build	Build with Next.js	2026-04-25T04:59:00.1667696Z   GITHUB_PAGES: true
+build	Build with Next.js	2026-04-25T04:59:00.1668037Z ##[endgroup]
+build	Build with Next.js	2026-04-25T04:59:00.8780040Z ▲ Next.js 16.2.4 (Turbopack)
+build	Build with Next.js	2026-04-25T04:59:00.8780864Z - Environments: .env.production
+build	Build with Next.js	2026-04-25T04:59:00.8782804Z 
+build	Build with Next.js	2026-04-25T04:59:00.9515041Z   Creating an optimized production build ...
+build	Build with Next.js	2026-04-25T04:59:06.7502765Z ✓ Compiled successfully in 5.6s
+build	Build with Next.js	2026-04-25T04:59:06.7583040Z   Running TypeScript ...
+build	Build with Next.js	2026-04-25T04:59:14.7810957Z Failed to type check.
+build	Build with Next.js	2026-04-25T04:59:14.7811579Z 
+build	Build with Next.js	2026-04-25T04:59:14.7812602Z ./src/store/useAppStore.ts:97:29
+build	Build with Next.js	2026-04-25T04:59:14.7815838Z Type error: Cannot find name 'get'.
+build	Build with Next.js	2026-04-25T04:59:14.7816186Z 
+build	Build with Next.js	2026-04-25T04:59:14.7817189Z   [90m 95 |[0m     [90m// The flush applied updates to the Y.Doc, but the debounced observer may not fire be...[0m
+build	Build with Next.js	2026-04-25T04:59:14.7818486Z   [90m 96 |[0m     console.log([32m'[YJS DEBUG] resetYDoc() - forcing immediate syncFromYjs before destroy'[0m);
+build	Build with Next.js	2026-04-25T04:59:14.7819531Z [31m[1m>[0m [90m 97 |[0m     [36mconst[0m { syncFromYjs } = get();
+build	Build with Next.js	2026-04-25T04:59:14.7820333Z   [90m    |[0m                             [31m[1m^[0m
+build	Build with Next.js	2026-04-25T04:59:14.7820881Z   [90m 98 |[0m     syncFromYjs();
+build	Build with Next.js	2026-04-25T04:59:14.7821679Z   [90m 99 |[0m     console.log([32m'[YJS DEBUG] resetYDoc() - syncFromYjs completed'[0m);
+build	Build with Next.js	2026-04-25T04:59:14.7822471Z   [90m100 |[0m   }
+build	Build with Next.js	2026-04-25T04:59:14.8483848Z Next.js build worker exited with code: 1 and signal: null
+build	Build with Next.js	2026-04-25T04:59:14.8731570Z ##[error]Process completed with exit code 1.
