@@ -240,8 +240,8 @@ export class SupabaseSyncProd {
   // ============================================================================
 
   private handleYdocUpdate(update: Uint8Array, origin: unknown): void {
-    // Don't broadcast updates from remote (prevent echo)
-    if (origin === 'remote') return;
+    // Don't broadcast updates from network (prevent echo)
+    if (origin === 'network') return;
 
     // Debounce broadcasts
     if (this.broadcastDebounceTimer) {
@@ -260,8 +260,8 @@ export class SupabaseSyncProd {
       const encrypted = new Uint8Array(payload.encrypted);
       const decrypted = await decryptUpdate(encrypted, this.derivedKey);
 
-      // Apply update without triggering broadcast (origin = 'remote')
-      Y.applyUpdate(this.ydoc, decrypted, 'remote');
+      // Apply update without triggering broadcast (origin = 'network')
+      Y.applyUpdate(this.ydoc, decrypted, 'network');
 
       this.onSyncActivity?.();
 
@@ -285,7 +285,7 @@ export class SupabaseSyncProd {
       const decrypted = await decryptUpdate(encrypted, this.derivedKey);
 
       // Apply checkpoint
-      Y.applyUpdate(this.ydoc, decrypted, 'remote');
+      Y.applyUpdate(this.ydoc, decrypted, 'network');
 
       this.onSyncActivity?.();
 

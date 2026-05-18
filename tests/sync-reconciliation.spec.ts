@@ -36,34 +36,50 @@ test.describe('Multi-Device Sync Reconciliation', () => {
 
     test('E2E Sync Flow: Convergence & Dynamic Locking', async ({ browser }) => {
         test.setTimeout(120000);
-        
+
         const PASSPHRASE = `test-passphrase-${Date.now()}`;
-        
+        console.log(`[TEST] Using passphrase: ${PASSPHRASE}`);
+
         // 1. Setup Peer A (The Seeder/Owner)
         const contextA = await browser.newContext();
         const pageA = await contextA.newPage();
-        
+
         await pageA.goto('/todo', { waitUntil: 'networkidle' });
         await pageA.evaluate(() => {
             localStorage.setItem('sync_server_url', 'ws://localhost:8080');
             localStorage.setItem('theme', 'dark');
         });
         await pageA.reload({ waitUntil: 'networkidle' });
-        
+
         // Wait for Sync button to be available
         await pageA.getByRole('button', { name: 'Sync', exact: true }).waitFor({ state: 'visible', timeout: 15000 });
-        
+
         // Connect Peer A
         await pageA.getByRole('button', { name: 'Sync', exact: true }).click();
         await pageA.getByPlaceholder('Enter a shared secret...').fill(PASSPHRASE);
         await pageA.getByRole('button', { name: 'Establish Secure Connection' }).click();
         await expect(pageA.getByText('Securely Connected')).toBeVisible({ timeout: 10000 });
         await pageA.getByRole('button', { name: 'Close', exact: false }).or(pageA.locator('button:has(svg.lucide-x)')).click();
-        
+
+        // [DIAGNOSTIC] Extract Peer A state after connection
+        const peerAState = await pageA.evaluate(() => {
+            const store = (window as any).__STORE__;
+            const state = store.getState();
+            return {
+                projects: state.projects.map((p: any) => ({ id: p.id, name: p.name })),
+                todoRows: state.todoRows.length,
+                hasPeers: state.hasPeers,
+                peerCount: state.peerCount,
+                roomId: state.roomId,
+                projectId: state.currentProjectId,
+            };
+        });
+        console.log('[DIAGNOSTIC] Peer A State:', JSON.stringify(peerAState, null, 2));
+
         // 2. Setup Peer B (The Joiner)
         const contextB = await browser.newContext();
         const pageB = await contextB.newPage();
-        
+
         await pageB.goto('/todo', { waitUntil: 'networkidle' });
         await pageB.evaluate(() => {
             localStorage.setItem('sync_server_url', 'ws://localhost:8080');
@@ -73,7 +89,7 @@ test.describe('Multi-Device Sync Reconciliation', () => {
 
         // Wait for Sync button to be available
         await pageB.getByRole('button', { name: 'Sync', exact: true }).waitFor({ state: 'visible', timeout: 15000 });
-        
+
         // Connect Peer B
         await pageB.getByRole('button', { name: 'Sync', exact: true }).click();
         await pageB.getByPlaceholder('Enter a shared secret...').fill(PASSPHRASE);
@@ -83,10 +99,73 @@ test.describe('Multi-Device Sync Reconciliation', () => {
 
         await pageB.waitForFunction(() => (window as any).__STORE__.getState().hasPeers === true, { timeout: 15000 });
         await expect(pageB.getByText('👥 2+')).toBeVisible();
-        
+
+        // [DIAGNOSTIC] Extract Peer B state after connection
+        const peerBState = await pageB.evaluate(() => {
+            const store = (window as any).__STORE__;
+            const state = store.getState();
+            return {
+                projects: state.projects.map((p: any) => ({ id: p.id, name: p.name })),
+                todoRows: state.todoRows.length,
+                hasPeers: state.hasPeers,
+                peerCount: state.peerCount,
+                roomId: state.roomId,
+                projectId: state.currentProjectId,
+            };
+        });
+        console.log('[DIAGNOSTIC] Peer B State:', JSON.stringify(peerBState, null, 2));
+
+        // [DIAGNOSTIC] Compare room IDs - they should match
+        if (peerAState.roomId !== peerBState.roomId) {
+            console.error(`[CRITICAL] Room ID Mismatch! A: ${peerAState.roomId}, B: ${peerBState.roomId}`);
+        } else {
+            console.log(`[OK] Room IDs match: ${peerAState.roomId}`);
+        }
+
+        // [DIAGNOSTIC] Compare project IDs - they should match after sync
+        if (peerAState.projectId !== peerBState.projectId) {
+            console.error(`[CRITICAL] Project ID Mismatch! A: ${peerAState.projectId}, B: ${peerBState.projectId}`);
+        } else {
+            console.log(`[OK] Project IDs match: ${peerAState.projectId}`);
+        }
+
         // 5. AC1: Bidirectional Convergence (B -> A)
         // Peer B adds a task; Peer A must see it.
         await pageB.getByRole('button', { name: 'Task', exact: true }).click();
+
+        // [DIAGNOSTIC] Check Peer B's tasks immediately after adding
+        const peerBAfterAdd = await pageB.evaluate(() => {
+            const store = (window as any).__STORE__;
+            return {
+                todoRows: store.getState().todoRows.map((t: any) => ({ id: t.id, task: t.task })),
+            };
+        });
+        console.log('[DIAGNOSTIC] Peer B tasks after add:', JSON.stringify(peerBAfterAdd, null, 2));
+
+        // Wait for sync with diagnostic polling
+        let syncAttempts = 0;
+        const maxAttempts = 20;
+        const pollInterval = 500; // ms
+
+        while (syncAttempts < maxAttempts) {
+            const peerAState = await pageA.evaluate(() => {
+                const store = (window as any).__STORE__;
+                return {
+                    todoRows: store.getState().todoRows.map((t: any) => ({ id: t.id, task: t.task })),
+                    hasPeers: store.getState().hasPeers,
+                };
+            });
+            console.log(`[SYNC POLL ${syncAttempts + 1}/${maxAttempts}] Peer A tasks: ${peerAState.todoRows.length}, hasPeers: ${peerAState.hasPeers}`);
+
+            if (peerAState.todoRows.length > 0) {
+                console.log('[SUCCESS] Sync completed - Peer A received task');
+                break;
+            }
+
+            await pageA.waitForTimeout(pollInterval);
+            syncAttempts++;
+        }
+
         await pageA.waitForFunction(() => (window as any).__STORE__.getState().todoRows.length > 0, { timeout: 10000 });
         await expect(pageA.getByText('New Task')).toBeVisible();
         console.log('✅ AC1: Bidirectional Sync (B -> A) confirmed.');

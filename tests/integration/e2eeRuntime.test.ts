@@ -106,7 +106,7 @@ describe('E2EE Runtime Verification', () => {
 
       // Create new Yjs doc from decrypted data
       const ydoc2 = new Y.Doc({ gc: false });
-      Y.applyUpdate(ydoc2, decrypted, 'remote');
+      Y.applyUpdate(ydoc2, decrypted, 'network');
 
       // Verify data integrity
       const ymap2 = ydoc2.getMap('test');
@@ -180,7 +180,7 @@ describe('E2EE Runtime Verification', () => {
 
       // Verify can apply to new document
       const ydoc2 = new Y.Doc({ gc: false });
-      Y.applyUpdate(ydoc2, decrypted, 'remote');
+      Y.applyUpdate(ydoc2, decrypted, 'network');
       const ytext2 = ydoc2.getText('large');
       expect(ytext2.toString()).toBe(largeText);
 
