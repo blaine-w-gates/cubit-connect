@@ -45,6 +45,7 @@ next-env.d.ts
 serve.log
 playwright-report/
 test-results/
+test-logs/
 # Supabase environment variables (contains secrets)
 .env.local
 
