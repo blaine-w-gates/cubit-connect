@@ -6,9 +6,23 @@ This file tracks the active plan and phase of the Cubit Connect project.
 
 ## Current State
 
-**Phase:** Maintenance & Feature Expansion (Phase 5)
-**IDE:** Google Antigravity
-**AI Model:** `gemini-2.5-flash` (Primary) + `gemini-2.5-flash-lite` (Fallback)
+**Phase:** Maintenance & Feature Expansion (Phase 5) + AI Tooling Setup
+**IDE:** VS Code + Continue.dev
+**AI Model:** Kimi K2.6 (via Moonshot API at api.moonshot.ai)
+**Last Updated:** 2026-05-19
+
+## Calibration Status
+
+| Component | Status |
+|-----------|--------|
+| `.continue/rules/` (9 files) | ✅ Active |
+| `.continue/config.yaml` (workspace) | ✅ Active — overrides global French flashcard prompt |
+| `.continue/memory/decisions.md` | ✅ Active — 5 architecture decisions |
+| `.continue/memory/lessons.md` | ✅ Active — lessons from graveyard |
+| `.continue/memory/active-issues.md` | ✅ Active — SYNC-001 full context |
+| `.continue/prompts/system.prompt` | ✅ Active — auto-calibration on chat open |
+| `~/.continue/config.yaml` (global) | ✅ Fixed — generic prompt, Kimi K2.6, API key via .env |
+| `~/.continue/.env` | ✅ Active — MOONSHOT_API_KEY stored securely |
 
 ## Completed Phases
 
@@ -65,3 +79,28 @@ This file tracks the active plan and phase of the Cubit Connect project.
 - [x] Pre-commit Hooks (`husky`).
 - [x] Performance Monitoring (IDB size warning at 50MB/55MB).
 - [x] Centralized AI Prompts (`src/prompts/`).
+
+### Phase 5.5: Auth & Identity (Supabase) — Unit Tests Pass ✅
+- [x] Anonymous identity architecture (ADR-006).
+- [x] Supabase client with retry logic and error resilience.
+- [x] Feature flag system (USE_SUPABASE_SYNC defaults to false — Safe Mode).
+- [x] SupabaseSync skeleton matching NetworkSync interface.
+- [x] Error Recovery & Auto-Rollback.
+- [x] Lazy Loading Support.
+- [x] Comprehensive unit testing (66 tests — Phase 1 complete per [MIGRATION_STATUS.md](file:///Users/jamesgates/Documents/cube%20it%20connect/cube%20it%20connect%20b/docs/MIGRATION_STATUS.md)).
+- [ ] Manual browser verification of sign-in/sign-up flow (PENDING).
+- [ ] Supabase Phase 2 (Live Sync) — status: READY per [MIGRATION_STATUS.md](file:///Users/jamesgates/Documents/cube%20it%20connect/cube%20it%20connect%20b/docs/MIGRATION_STATUS.md).
+
+## Active Issues
+
+See `.continue/memory/active-issues.md` for full context.
+
+- **QUOTA-001:** Gemini API rate limits — mitigated by circuit breaker (MIN_DELAY_MS = 2000)
+
+## Next Up (Priority Order)
+
+1. [ ] Manual browser test: verify sign-in/sign-up flow at localhost:3000
+2. [ ] Manual browser verification of SYNC-001 fix (two tabs, same passphrase, verify live sync)
+3. [ ] Supabase Phase 2: Live Sync implementation
+4. [ ] Clean up root directory pollution (30+ debug log files)
+5. [ ] Deduplicate `.cursor/rules/` and `.continue/rules/`

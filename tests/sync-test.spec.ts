@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Sync Test Page', () => {
+// TODO: TECH DEBT - /sync-test page was deleted, tests obsolete
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.describe.skip('Sync Test Page [PAGE DELETED]', () => {
   test.setTimeout(120000);
   
   test('page loads with all diagnostic elements', async ({ page }) => {

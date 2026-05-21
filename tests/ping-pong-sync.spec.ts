@@ -1,8 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { test, expect, type Browser, type Page, type BrowserContext } from '@playwright/test';
 
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
 /**
- * Specification Engineering: Ping-Pong Bidirectional Sync Test
+ * [SKIP - ARCHITECTURE MISMATCH] Specification Engineering: Ping-Pong Bidirectional Sync Test
  * Goal: Verify strict alternating A→B→A→B convergence across all Cubit Connect operations.
  * 
  * This test validates that:

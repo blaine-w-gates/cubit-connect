@@ -8,6 +8,9 @@
  * @production
  */
 
+// Required for static export (GitHub Pages deployment)
+export const dynamic = 'force-static';
+
 import { NextResponse } from 'next/server';
 import { getFallbackManager } from '@/lib/transportFallback';
 import { getAuditLogger } from '@/lib/auditLogger';

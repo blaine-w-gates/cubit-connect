@@ -7,6 +7,8 @@
  * @module StatusPage
  */
 
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { getFallbackManager } from '@/lib/transportFallback';
 import { getAuditLogger } from '@/lib/auditLogger';

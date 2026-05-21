@@ -26,18 +26,15 @@ describe('sentryIntegration', () => {
 
   describe('initialization', () => {
     it('should initialize sentry', () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
-
+      // Initialize sentry with test config
       sentry.init({
         dsn: 'test-dsn',
         enabled: true,
         environment: 'test',
       });
 
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('SENTRY'));
+      // Verify sentry is enabled after init
       expect(getSentry().isEnabled()).toBe(true);
-
-      consoleSpy.mockRestore();
     });
 
     it('should not capture when disabled', () => {

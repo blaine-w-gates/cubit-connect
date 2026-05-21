@@ -11,6 +11,7 @@ import {
   getUserFriendlyErrorMessage,
   withErrorHandling,
 } from '@/lib/syncErrorRecovery';
+import { emitTelemetry } from '@/lib/featureFlags';
 
 describe('syncErrorRecovery', () => {
   beforeEach(() => {
@@ -69,8 +70,18 @@ describe('syncErrorRecovery', () => {
         operation: 'testOp',
       });
 
-      const telemetry = window.__SYNC_TELEMETRY__;
-      expect(telemetry?.some((e) => e.event === 'error_boundary_triggered')).toBe(true);
+      // Verify emitTelemetry was called with error_boundary_triggered event
+      // Note: emitTelemetry is mocked in setup.ts, so we check it was called
+      expect(emitTelemetry).toHaveBeenCalledWith(
+        'error_boundary_triggered',
+        expect.objectContaining({
+          context: expect.objectContaining({
+            severity: 'warning',
+            phase: 'test',
+            operation: 'testOp',
+          }),
+        })
+      );
 
       consoleSpy.mockRestore();
     });

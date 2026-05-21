@@ -63,6 +63,7 @@ import StorageWarningBanner from '@/components/StorageWarningBanner';
 import { AppReadyIndicator } from '@/components/AppReadyIndicator';
 
 import SyncSetupModal from '@/components/SyncSetupModal';
+import { AuthInitializer } from '@/components/AuthInitializer';
 
 // ... existing imports ...
 
@@ -77,6 +78,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
+        <AuthInitializer />
         <AppReadyIndicator />
         <StorageWarningBanner />
         <OfflineIndicator />

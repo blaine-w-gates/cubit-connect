@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
-import { Key, Menu, X, Compass, ListTodo, Network } from 'lucide-react';
+import { Key, Menu, X, Compass, ListTodo, Network, User } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ExportControl from '@/components/ExportControl';
 import { useAppStore } from '@/store/useAppStore';
 import ThemeSelector from './ThemeSelector';
+import { AuthModal } from './AuthModal';
+import { useShallow } from 'zustand/react/shallow';
 import { usePathname, useRouter } from 'next/navigation';
 
 interface HeaderProps {
@@ -25,7 +27,16 @@ export default function Header({
 }: HeaderProps) {
   const isOnline = useNetworkStatus();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { setInputMode, setIsSettingsOpen, syncStatus, setIsSyncModalOpen, hasPeers, activeWorkspaceType } = useAppStore();
+
+  // Auth state with shallow selector for performance
+  const { authStatus, authEmail } = useAppStore(
+    useShallow((state) => ({
+      authStatus: state.authStatus,
+      authEmail: state.authEmail,
+    }))
+  );
   
   const isLocked = activeWorkspaceType === 'personalMulti' && !hasPeers;
   const pathname = usePathname();
@@ -169,6 +180,29 @@ export default function Header({
           {/* Theme Toggle (Right Aligned) */}
           <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
           <ThemeSelector />
+
+          {/* Auth Button */}
+          <div className="h-4 w-[1px] bg-zinc-200 dark:bg-stone-600 mx-1" />
+          {authStatus === 'authenticated' ? (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors min-h-[44px] px-2"
+              title={authEmail || 'Authenticated'}
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden lg:inline max-w-[100px] truncate">
+                {authEmail?.split('@')[0] || 'Account'}
+              </span>
+            </button>
+          ) : (
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors min-h-[44px] px-2 font-medium"
+            >
+              <User className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign In</span>
+            </button>
+          )}
         </div>
 
         {/* MOBILE - CLEANED UP FOR "MOBILE SMASH" */}
@@ -298,6 +332,9 @@ export default function Header({
           </div>
         </div>
       )}
+
+      {/* Auth Modal */}
+      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </header>
   );
 }

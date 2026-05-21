@@ -246,8 +246,8 @@ describe('E2EE Runtime Verification', () => {
 
       // Apply decrypted updates to fresh document
       const ydoc2 = new Y.Doc({ gc: false });
-      Y.applyUpdate(ydoc2, decrypted1, 'remote');
-      Y.applyUpdate(ydoc2, decrypted2, 'remote');
+      Y.applyUpdate(ydoc2, decrypted1, 'network');
+      Y.applyUpdate(ydoc2, decrypted2, 'network');
 
       // Verify final state
       expect(ydoc2.getText('collaborative').toString()).toBe('Hello World');

@@ -7,7 +7,9 @@ import * as path from 'path';
  * This test captures detailed logs to identify why observer isn't firing.
  */
 
-test('Diagnostic: Capture full console logs for sync failure analysis', async ({ browser }) => {
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.skip('Diagnostic: Capture full console logs for sync failure analysis [ARCHITECTURE MISMATCH]', async ({ browser }) => {
   const timestamp = Date.now();
   const logDir = path.join(process.cwd(), 'test-logs');
   fs.mkdirSync(logDir, { recursive: true });

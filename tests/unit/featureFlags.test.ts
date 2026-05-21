@@ -5,6 +5,10 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+
+// Unmock featureFlags to test actual implementation
+vi.unmock('@/lib/featureFlags');
+
 import {
   getUseSupabaseSync,
   setUseSupabaseSync,

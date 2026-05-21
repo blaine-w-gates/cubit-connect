@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { GeminiService } from '@/services/gemini';
 import { getStorageInfo, formatStorageSize, type StorageStatus } from '@/lib/storageMonitor';
-import { LogOut, HardDrive, Download, AlertCircle } from 'lucide-react';
+import { LogOut, HardDrive, Download, AlertCircle, User } from 'lucide-react';
+import { IdentitySettings } from './IdentitySettings';
 import { useRouter } from 'next/navigation';
 
 const Spinner = ({ className }: { className?: string }) => (
@@ -172,6 +173,15 @@ export default function SettingsDialog() {
             </button>
           </div>
         )}
+
+        {/* Identity Section */}
+        <div className="pt-6 border-t border-zinc-200 dark:border-stone-700">
+          <div className="flex items-center gap-2 mb-4 text-zinc-700 dark:text-stone-300">
+            <User className="w-4 h-4" />
+            <span className="text-sm font-medium">Identity & Account</span>
+          </div>
+          <IdentitySettings />
+        </div>
 
         {/* Disconnect Section */}
         {apiKey && (

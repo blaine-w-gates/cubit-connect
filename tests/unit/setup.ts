@@ -71,25 +71,32 @@ vi.mock('@/lib/supabaseClient', () => ({
       return Promise.resolve({ data: null, error: null });
     }),
 
-    from: vi.fn(() => ({
-      insert: vi.fn((data: unknown) => {
-        const mockId = (i: number) => `mock-id-${i}`;
-        if (Array.isArray(data)) {
-          return Promise.resolve({
-            data: data.map((item, i) => ({ ...(item as object), id: mockId(i) })),
-            error: null,
-          });
-        }
-        return Promise.resolve({
-          data: { ...(data as object), id: mockId(0) },
-          error: null,
-        });
-      }),
-      select: vi.fn().mockReturnThis(),
-      eq: vi.fn().mockReturnThis(),
-      order: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue({ data: [], error: null }),
-    })),
+    from: vi.fn(() => {
+      const mockChain = {
+        insert: vi.fn((data: unknown) => {
+          const mockId = (i: number) => `mock-id-${i}`;
+          const resultData = Array.isArray(data)
+            ? data.map((item, i) => ({ ...(item as object), id: mockId(i) }))
+            : { ...(data as object), id: mockId(0) };
+
+          const insertChain = {
+            select: vi.fn().mockReturnThis(),
+            eq: vi.fn().mockReturnThis(),
+            order: vi.fn().mockReturnThis(),
+            limit: vi.fn().mockReturnThis(),
+            single: vi.fn().mockReturnThis(),
+            then: (resolve: any) => resolve({ data: resultData, error: null }),
+          };
+          return insertChain;
+        }),
+        select: vi.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        limit: vi.fn().mockResolvedValue({ data: [], error: null }),
+        then: (resolve: any) => resolve({ data: [], error: null }),
+      };
+      return mockChain;
+    }),
 
     auth: {
       getSession: vi.fn().mockResolvedValue({
@@ -114,6 +121,7 @@ vi.mock('@/lib/supabaseClient', () => ({
 
 /**
  * Mock featureFlags module to prevent real telemetry
+ * Tests that need the real implementation should use vi.unmock('@/lib/featureFlags')
  */
 vi.mock('@/lib/featureFlags', () => ({
   emitTelemetry: vi.fn(),
@@ -152,5 +160,4 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// Log test mode for debugging
-console.log('[VITEST SETUP] Unit test environment initialized with mocks');
+// Test environment mock setup complete

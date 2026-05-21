@@ -4,7 +4,9 @@ import { test, expect } from '@playwright/test';
  * Minimal Sync Isolation Test
  * Goal: Isolate the sync layer to verify room joining works correctly
  */
-test.describe('Sync Isolation Test', () => {
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.describe.skip('Sync Isolation Test [SKIP - ARCHITECTURE MISMATCH]', () => {
 
     test('Room ID determinism check', async () => {
         // Verify that deriveRoomId produces the same room ID for the same passphrase

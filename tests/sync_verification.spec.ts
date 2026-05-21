@@ -7,7 +7,9 @@ import * as path from 'path';
  * Verified isolation using separate browser contexts.
  */
 
-test('Verify Yjs Sync Fix via Automated Multi-Context Testing', async ({ browser }) => {
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.skip('Verify Yjs Sync Fix via Automated Multi-Context Testing [ARCHITECTURE MISMATCH]', async ({ browser }) => {
   const timestamp = Date.now();
   const logPath = path.join(process.cwd(), 'test-logs', `sync-verification-${timestamp}.log`);
   const screenshotA = path.join(process.cwd(), 'test-logs', `sync-verification-A-${timestamp}.png`);

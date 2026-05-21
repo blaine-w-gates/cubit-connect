@@ -5,7 +5,9 @@ import { test, expect } from '@playwright/test';
  * Theory: Peers might be in different rooms due to roomId mismatch
  */
 
-test('SYNC-001 Debug: Verify room ID derivation', async ({ browser }) => {
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.skip('SYNC-001 Debug: Verify room ID derivation [ARCHITECTURE MISMATCH]', async ({ browser }) => {
   test.setTimeout(60000);
   const room = `roomid-test-${Date.now()}`;
   

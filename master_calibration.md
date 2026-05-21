@@ -249,7 +249,7 @@ For each feature, create `tasks/feature_{name}.md`:
 Copy and paste this into the chat to initialize:
 
 ```
-Read the `.cursorrules` and `master_calibration.md` files to load project constraints and intent. Confirm you understand:
+Read `.continue/rules/` and `master_calibration.md` to load project constraints and intent. Confirm you understand:
 
 1. The three most critical constraints that will dictate your execution
 2. The current active issue (SYNC-001: Yjs propagation failing)

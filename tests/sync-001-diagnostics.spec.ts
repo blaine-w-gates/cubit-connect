@@ -2,8 +2,10 @@
 import { test, expect, type Browser, type BrowserContext, type Page } from '@playwright/test';
 import type { CausalEvent, YDocInstance, SyncStateMachine, InvariantViolation } from '@/lib/syncDiagnostics';
 
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
 /**
- * SYNC-001 Deep Diagnostic Test
+ * [SKIP - ARCHITECTURE MISMATCH] SYNC-001 Deep Diagnostic Test
  * 
  * This test uses the comprehensive monitoring infrastructure to:
  * 1. Trace every ydoc instance lifecycle

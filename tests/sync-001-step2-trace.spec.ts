@@ -6,7 +6,9 @@ import { test, expect } from '@playwright/test';
  * Add console logging to trace: ydoc.on('update') → broadcastUpdate → WebSocket
  */
 
-test('SYNC-001 Step 2: Trace update propagation', async ({ browser }) => {
+// TODO: TECH DEBT - Sync architecture migrated to Supabase Realtime
+// See: docs/TECH_DEBT.md#sync-test-refactor
+test.skip('SYNC-001 Step 2: Trace update propagation [ARCHITECTURE MISMATCH]', async ({ browser }) => {
   test.setTimeout(60000);
   const room = `trace-${Date.now()}`;
   

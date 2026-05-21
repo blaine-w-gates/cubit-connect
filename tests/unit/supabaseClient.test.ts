@@ -9,6 +9,9 @@
 
 import { describe, it, expect, vi } from 'vitest';
 
+// Unmock supabaseClient to test actual implementation
+vi.unmock('@/lib/supabaseClient');
+
 // Test the module can be imported
 import {
   MAX_RETRY_ATTEMPTS,

@@ -33,6 +33,8 @@ import { getUseSupabaseSync } from '@/lib/featureFlags';
 import { loadSupabaseSync } from '@/lib/supabaseSyncLoader';
 import { getCleanupJobSystem } from '@/lib/cleanupJobs';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
+import { signUp as authSignUp, signIn as authSignIn, signOut as authSignOut, getAuthState, linkDeviceToUser } from '@/lib/auth';
+import { migrateAnonymousData, getMigrationMetadata } from '@/lib/migration';
 
 import { generateUniqueClientId } from '@/lib/yjsClientId';
 
@@ -484,6 +486,18 @@ export interface ProjectState {
   selectedStepId: { projectId: string; rowId: string; stepIndex: number } | null;
   selectStep: (projectId: string, rowId: string, stepIndex: number) => void;
   clearSelectedStep: () => void;
+
+  // --- Auth & Identity State (Phase 6) ---
+  authUserId: string | null;
+  authStatus: 'anonymous' | 'authenticated' | 'pending';
+  migrationStatus: 'idle' | 'exporting' | 'migrating' | 'complete' | 'error';
+  authEmail: string | null;
+
+  // Auth Actions
+  signUp: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signIn: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  signOut: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
 }
 
 export interface LogEntry {
@@ -579,6 +593,245 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   selectedStepId: null,
   selectStep: (projectId, rowId, stepIndex) => set({ selectedStepId: { projectId, rowId, stepIndex } }),
   clearSelectedStep: () => set({ selectedStepId: null }),
+
+  // --- Auth & Identity State (Phase 6) ---
+  authUserId: null,
+  authStatus: 'anonymous',
+  migrationStatus: 'idle',
+  authEmail: null,
+
+  // Auth Actions
+  signUp: async (email: string, password: string) => {
+    // INTENTIONALLY SETTING: pending status before async operation
+    // This prevents UI race conditions and double-submits
+    set({ authStatus: 'pending' });
+
+    try {
+      const result = await authSignUp(email, password);
+
+      if (result.success && result.userId) {
+        // INTENTIONALLY UPDATING: state on successful auth
+        // Must set all auth fields atomically to prevent partial state
+        set({
+          authUserId: result.userId,
+          authEmail: email.toLowerCase(),
+          authStatus: 'authenticated',
+        });
+
+        // Trigger migration of anonymous data to user account
+        // INTENTIONALLY IGNORING: migration errors don't fail auth
+        // Migration is best-effort; user can retry later
+        set({ migrationStatus: 'exporting' });
+
+        try {
+          const migrationResult = await migrateAnonymousData(result.userId, (stage, _progress) => {
+            // Update migration status based on progress stage
+            if (stage === 'exporting') {
+              set({ migrationStatus: 'exporting' });
+            } else if (stage === 'migrating') {
+              set({ migrationStatus: 'migrating' });
+            }
+          });
+
+          // Set final migration status
+          set({
+            migrationStatus: migrationResult.success ? 'complete' : 'error',
+          });
+        } catch (migrationError) {
+          // INTENTIONALLY HANDLING: Migration failure is non-fatal
+          // Auth succeeded, but migration failed - user can retry later
+          console.error('[STORE] Migration failed after signUp:', migrationError);
+          set({ migrationStatus: 'error' });
+        }
+
+        return { success: true };
+      } else {
+        // INTENTIONALLY REVERTING: state on auth failure
+        // Must restore anonymous state so UI shows correct status
+        set({ authStatus: 'anonymous' });
+        return { success: false, error: result.error };
+      }
+    } catch (error) {
+      // INTENTIONALLY HANDLING: Unexpected errors during signUp
+      // Revert to anonymous and return error to UI
+      console.error('[STORE] Unexpected error in signUp:', error);
+      set({ authStatus: 'anonymous' });
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  },
+
+  signIn: async (email: string, password: string) => {
+    // INTENTIONALLY SETTING: pending status before async operation
+    // This prevents UI race conditions and double-submits
+    set({ authStatus: 'pending' });
+
+    try {
+      const result = await authSignIn(email, password);
+
+      if (result.success && result.userId) {
+        const deviceId = getDeviceId();
+
+        // Check if this device already has a completed migration
+        const existingMigration = getMigrationMetadata();
+        const alreadyMigrated = existingMigration?.status === 'completed' &&
+                                existingMigration?.userId === result.userId;
+
+        if (alreadyMigrated) {
+          // Device already linked and migrated, just update state
+          // Still link device to update last_seen_at
+          await linkDeviceToUser(result.userId, deviceId);
+
+          set({
+            authUserId: result.userId,
+            authEmail: email.toLowerCase(),
+            authStatus: 'authenticated',
+            migrationStatus: 'complete',
+          });
+        } else {
+          // First sign in on this device, need full migration flow
+          // INTENTIONALLY UPDATING: state on successful auth
+          // Must set all auth fields atomically to prevent partial state
+          set({
+            authUserId: result.userId,
+            authEmail: email.toLowerCase(),
+            authStatus: 'authenticated',
+          });
+
+          // Link device first (needed for migration)
+          await linkDeviceToUser(result.userId, deviceId);
+
+          // Trigger migration of anonymous data to user account
+          // INTENTIONALLY IGNORING: migration errors don't fail auth
+          // Migration is best-effort; user can retry later
+          set({ migrationStatus: 'exporting' });
+
+          try {
+            const migrationResult = await migrateAnonymousData(result.userId, (stage, _progress) => {
+              // Update migration status based on progress stage
+              if (stage === 'exporting') {
+                set({ migrationStatus: 'exporting' });
+              } else if (stage === 'migrating') {
+                set({ migrationStatus: 'migrating' });
+              }
+            });
+
+            // Set final migration status
+            set({
+              migrationStatus: migrationResult.success ? 'complete' : 'error',
+            });
+          } catch (migrationError) {
+            // INTENTIONALLY HANDLING: Migration failure is non-fatal
+            // Auth succeeded, but migration failed - user can retry later
+            console.error('[STORE] Migration failed after signIn:', migrationError);
+            set({ migrationStatus: 'error' });
+          }
+        }
+
+        return { success: true };
+      } else {
+        // INTENTIONALLY REVERTING: state on auth failure
+        // Must restore anonymous state so UI shows correct status
+        set({ authStatus: 'anonymous' });
+        return { success: false, error: result.error };
+      }
+    } catch (error) {
+      // INTENTIONALLY HANDLING: Unexpected errors during signIn
+      // Revert to anonymous and return error to UI
+      console.error('[STORE] Unexpected error in signIn:', error);
+      set({ authStatus: 'anonymous' });
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      };
+    }
+  },
+
+  signOut: async () => {
+    // INTENTIONALLY SETTING: pending status during sign out
+    // This prevents UI race conditions during logout
+    set({ authStatus: 'pending' });
+
+    try {
+      // Call auth module signOut to clear Supabase session
+      await authSignOut();
+
+      // INTENTIONALLY CLEARING: all auth state
+      // Return to anonymous state - this is the expected behavior
+      set({
+        authUserId: null,
+        authEmail: null,
+        authStatus: 'anonymous',
+        migrationStatus: 'idle',
+      });
+
+      // Note: Anonymous data in IndexedDB/localStorage is preserved
+      // User can still access their device-based projects
+    } catch (error) {
+      // INTENTIONALLY HANDLING: Sign out errors are non-fatal
+      // Still clear state even if server session remains
+      console.error('[STORE] Error during signOut:', error);
+
+      set({
+        authUserId: null,
+        authEmail: null,
+        authStatus: 'anonymous',
+        migrationStatus: 'idle',
+      });
+    }
+  },
+
+  initializeAuth: async () => {
+    // SSR safety
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    try {
+      // Get current auth state from Supabase
+      const authState = await getAuthState();
+
+      if (authState.status === 'authenticated' && authState.userId) {
+        // Check if migration was previously completed for this user
+        const migrationMetadata = getMigrationMetadata();
+        const migrationComplete = migrationMetadata?.status === 'completed' &&
+                                migrationMetadata?.userId === authState.userId;
+
+        // User has an active session - restore authenticated state
+        set({
+          authUserId: authState.userId,
+          authEmail: authState.email,
+          authStatus: 'authenticated',
+          migrationStatus: migrationComplete ? 'complete' : 'idle',
+        });
+
+        // Link current device to user (updates last_seen_at)
+        const deviceId = getDeviceId();
+        await linkDeviceToUser(authState.userId, deviceId);
+      } else {
+        // No active session - ensure we're in anonymous state
+        set({
+          authUserId: null,
+          authEmail: null,
+          authStatus: 'anonymous',
+          migrationStatus: 'idle',
+        });
+      }
+    } catch (error) {
+      // INTENTIONALLY HANDLING: Auth initialization failure
+      // Fail gracefully to anonymous state - user can still use app
+      console.error('[STORE] Error initializing auth:', error);
+
+      set({
+        authUserId: null,
+        authEmail: null,
+        authStatus: 'anonymous',
+        migrationStatus: 'idle',
+      });
+    }
+  },
 
   // --- Workspace State (ADR-001) ---
   activeWorkspaceType: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_type') as WorkspaceType : null) || 'personalUno',

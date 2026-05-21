@@ -11,6 +11,7 @@ import {
   destroyFallbackManager,
   type FallbackEvent,
 } from '@/lib/transportFallback';
+import { emitTelemetry } from '@/lib/featureFlags';
 
 describe('transportFallback', () => {
   let manager: TransportFallbackManager;
@@ -164,8 +165,15 @@ describe('transportFallback', () => {
         manager.recordSupabaseFailure(new Error(`Error ${i}`));
       }
 
-      const telemetry = window.__SYNC_TELEMETRY__;
-      expect(telemetry?.some((e) => e.event === 'transport_switched')).toBe(true);
+      // Verify emitTelemetry was called with transport_switched event
+      // Note: emitTelemetry is mocked in setup.ts, so we check it was called
+      expect(emitTelemetry).toHaveBeenCalledWith(
+        'transport_switched',
+        expect.objectContaining({
+          from: 'supabase',
+          to: expect.any(String),
+        })
+      );
 
       consoleSpy.mockRestore();
     });

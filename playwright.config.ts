@@ -119,22 +119,12 @@ export default defineConfig({
       fullyParallel: false,
     },
   ],
-  webServer: [
-    {
-      command: 'npx serve -s out -l 3000',
-      url: 'http://localhost:3000',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'pipe',
-      stderr: 'pipe',
-      timeout: 120000,
-    },
-    {
-      command: 'SYNC_MODE=memory node sync-server/server.js',
-      url: 'http://localhost:8080/health',
-      reuseExistingServer: !process.env.CI,
-      stdout: 'pipe',
-      stderr: 'pipe',
-      timeout: 120000,
-    },
-  ],
+  webServer: {
+    command: 'npx serve -s out -l 3000',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+    stdout: 'ignore',
+    stderr: 'pipe',
+    timeout: 120000,
+  },
 });

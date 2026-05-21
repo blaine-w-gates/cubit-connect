@@ -1,0 +1,74 @@
+# Continue.dev Ignore
+# Patterns here are excluded from vector indexing
+# They still appear in file tree; just not embedded
+
+# Dependencies
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+vendor/
+
+# Build outputs
+build/
+dist/
+.next/
+out/
+target/
+.gradle/
+Pods/
+DerivedData/
+
+# Version control
+.git/
+.svn/
+
+# Logs & temp
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+
+# Media & binaries (never index these)
+*.mp3
+*.mp4
+*.wav
+*.mov
+*.avi
+*.pdf
+*.zip
+*.tar.gz
+*.dmg
+*.exe
+
+# Test artifacts
+coverage/
+.pytest_cache/
+.mypy_cache/
+.nyc_output/
+junit.xml
+
+# IDE
+.idea/
+.vscode/settings.json  # machine-specific
+*.code-workspace
+
+# Environment
+.env
+.env.local
+.env.*.local
+secrets.yaml
+secrets.json
+
+# Large data files
+*.csv      # if > 1MB
+*.parquet
+*.sqlite
+*.db
+*.ndjson   # newline-delimited JSON logs
+
+# Documentation that shouldn't be indexed
+CHANGELOG.md   # often too large, low semantic value
+LICENSE        # legal text, not code
+CONTRIBUTING.md # process, not logic
