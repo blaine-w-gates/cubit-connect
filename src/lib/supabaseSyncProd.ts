@@ -477,16 +477,20 @@ export class SupabaseSyncProd {
         const checkpointService = getCheckpointService();
         const checkpoint = await checkpointService.loadLatestCheckpoint(this.roomIdHash);
 
-        if (checkpoint) {
-          // Apply checkpoint to ydoc
+        if (checkpoint && checkpoint.length > 0) {
+          // Apply checkpoint to ydoc (guard against empty array — Y.applyUpdate throws on empty)
           Y.applyUpdate(this.ydoc, checkpoint, 'checkpoint');
           audit.sync('checkpoint_applied', this.roomIdHash, true, { size: checkpoint.length });
         }
       } catch (error) {
         // INTENTIONALLY SWALLOWING: Checkpoint load failure is non-fatal
         // Missing checkpoint means fresh sync state, app continues normally
-        console.error('[SUPABASE SYNC PROD] Failed to load checkpoint:', error);
-        audit.sync('checkpoint_load', this.roomIdHash, false, { error: String(error) });
+        // Downgrade to warn — expected on first connect to new room
+        const err = error instanceof Error ? error.message : String(error);
+        if (!err.includes('Unexpected end')) {
+          console.warn('[SUPABASE SYNC PROD] No checkpoint found (new room):', err.slice(0, 80));
+        }
+        audit.sync('checkpoint_load', this.roomIdHash, false, { error: err });
       }
     }, this.roomIdHash);
   }

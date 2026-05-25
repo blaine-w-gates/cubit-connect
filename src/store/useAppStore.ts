@@ -1437,7 +1437,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
       try {
         await syncManager.connect(syncKey);
-        transitionToPhase('sync_connecting', { ydocId: getInstanceId(ydoc) });
+        transitionToPhase('sync_connecting', { ydocId: getInstanceId(ydoc), roomHash: roomIdHash });
       } catch (connectError) {
         // Connection failed - log and abort
         console.error('[SYNC DEBUG] Connection failed:', connectError);
@@ -1471,7 +1471,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }
 
       set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-      transitionToPhase('live', { ydocId: getInstanceId(ydoc) });
+      transitionToPhase('live', { ydocId: getInstanceId(ydoc), roomHash: roomIdHash });
     } catch (err) {
       // INTENTIONALLY HANDLING: E2EE connection failure reported to user
       // Error state set for UI to display, connection flag cleared

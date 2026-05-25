@@ -464,6 +464,10 @@ export async function linkDeviceToUser(
     });
 
     if (error) {
+      // Schema not deployed yet — silently skip. Auth still works without device linking.
+      if ((error as { code?: string }).code === 'PGRST202') {
+        return false;
+      }
       // INTENTIONALLY HANDLING: Device linking failure is non-fatal
       // Auth still succeeds, device will retry linking on next auth check
       console.warn('[AUTH] Device linking failed:', error);
@@ -505,6 +509,10 @@ async function checkDeviceLinked(userId: string, deviceId: string): Promise<bool
       .maybeSingle();
 
     if (error) {
+      // Schema not deployed yet — silently skip
+      if ((error as { code?: string }).code === 'PGRST205') {
+        return false;
+      }
       // INTENTIONALLY HANDLING: Query failure returns false
       // Device may need re-linking
       console.warn('[AUTH] Error checking device link:', error);

@@ -414,6 +414,7 @@ export type SyncStateMachine = {
   phaseHistory: Array<{ phase: SyncPhase; enteredAt: number; ydocId?: string }>;
   currentYdocId?: string;
   syncManagerId?: string;
+  roomHash?: string;
   observerRegistered: boolean;
   error?: string;
 };
@@ -426,7 +427,7 @@ const stateMachine: SyncStateMachine = {
 
 export function transitionToPhase(
   newPhase: SyncPhase,
-  context: { ydocId?: string; syncManagerId?: string; error?: string } = {}
+  context: { ydocId?: string; syncManagerId?: string; roomHash?: string; error?: string } = {}
 ): void {
   const previousPhase = stateMachine.currentPhase;
   stateMachine.currentPhase = newPhase;
@@ -441,6 +442,9 @@ export function transitionToPhase(
   }
   if (context.syncManagerId) {
     stateMachine.syncManagerId = context.syncManagerId;
+  }
+  if (context.roomHash) {
+    stateMachine.roomHash = context.roomHash;
   }
   if (context.error) {
     stateMachine.error = context.error;
@@ -509,6 +513,7 @@ export function generateDiagnosticReport(): string {
 STATE MACHINE:
   Current Phase: ${stateMachine.currentPhase}
   Observer Registered: ${stateMachine.observerRegistered}
+  Room Hash: ${stateMachine.roomHash || 'NOT SET'}
   Current YDoc ID: ${stateMachine.currentYdocId || 'UNKNOWN'}
   Sync Manager ID: ${stateMachine.syncManagerId || 'UNKNOWN'}
   Phase History (${stateMachine.phaseHistory.length} transitions):
