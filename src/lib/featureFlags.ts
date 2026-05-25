@@ -20,9 +20,11 @@
 const USE_SUPABASE_SYNC_KEY = 'USE_SUPABASE_SYNC';
 
 /**
- * Default value for the feature flag (false = use legacy WebSocket)
+ * Default value for the feature flag.
+ * Production builds default to true (Supabase Realtime).
+ * Local dev without env vars can override via localStorage.
  */
-const DEFAULT_USE_SUPABASE_SYNC = false;
+const DEFAULT_USE_SUPABASE_SYNC = process.env.NODE_ENV === 'production';
 
 // ============================================================================
 // TELEMETRY SYSTEM

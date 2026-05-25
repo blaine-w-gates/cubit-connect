@@ -85,37 +85,29 @@ export interface AuthResult {
  *
  * @throws Error if required environment variables are missing
  */
-function validateEnvironment(): void {
+function validateEnvironment(): boolean {
   if (typeof window === 'undefined') {
-    // SSR - don't throw, just return
-    return;
+    // SSR - skip validation
+    return false;
   }
 
-  if (!SUPABASE_URL) {
-    throw new Error(
-      '[SUPABASE CLIENT] Missing required environment variable: NEXT_PUBLIC_SUPABASE_URL\n' +
-        'Please check your .env.local file and ensure the Supabase URL is configured.'
-    );
-  }
-
-  if (!SUPABASE_ANON_KEY) {
-    throw new Error(
-      '[SUPABASE CLIENT] Missing required environment variable: NEXT_PUBLIC_SUPABASE_ANON_KEY\n' +
-        'Please check your .env.local file and ensure the Supabase anonymous key is configured.'
-    );
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    // Production builds MUST have env vars. Log once, return false for graceful fallback.
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[SUPABASE CLIENT] Missing Supabase env vars. Sync unavailable.');
+    }
+    return false;
   }
 
   // Validate URL format
   try {
     new URL(SUPABASE_URL);
   } catch {
-    // INTENTIONALLY PROPAGATING: Invalid URL must prevent client creation
-    // Throw with descriptive message for developer to fix configuration
-    throw new Error(
-      `[SUPABASE CLIENT] Invalid Supabase URL format: ${SUPABASE_URL}\n` +
-        'Please ensure the URL is valid (e.g., https://your-project.supabase.co)'
-    );
+    console.error(`[SUPABASE CLIENT] Invalid Supabase URL format: ${SUPABASE_URL}`);
+    return false;
   }
+
+  return true;
 }
 
 // ============================================================================
@@ -201,12 +193,19 @@ export function getSupabaseClient(options: SupabaseClientOptions = {}): Supabase
     return supabaseInstance;
   }
 
-  // Validate environment
-  validateEnvironment();
+  // Validate environment — if missing, throw with clear message
+  const isValid = validateEnvironment();
+  if (!isValid) {
+    throw new Error(
+      '[SUPABASE CLIENT] Supabase not configured. ' +
+      'Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY ' +
+      'in your build environment (GitHub Secrets or .env.local).'
+    );
+  }
 
-  // Create new instance
+  // Guard: validation passed but types still undefined — satisfy TypeScript
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('[SUPABASE CLIENT] Missing required environment variables');
+    throw new Error('[SUPABASE CLIENT] Unexpected null env vars after validation');
   }
 
   supabaseInstance = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
