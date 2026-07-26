@@ -9,7 +9,7 @@ export default defineConfig({
     reporters: ['dot'],
     environment: 'jsdom',
     globals: true,
-    dangerouslyIgnoreUnhandledErrors: true, // jsdom throws UND_ERR_INVALID_ARG on aborted fetches
+    dangerouslyIgnoreUnhandledErrors: true, // jsdom throws UND_ERR_INVALID_ARG on aborted fetches — Supabase SDK doesn't natively support AbortSignal on signInAnonymously
     setupFiles: ['./tests/integration/setup.ts'],
     include: ['tests/integration/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'tests/e2e/**/*', 'tests/*.spec.ts', 'dist', '.next'],

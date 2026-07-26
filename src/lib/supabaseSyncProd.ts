@@ -158,7 +158,7 @@ export class SupabaseSyncProd {
           throw new DOMException('Operation aborted', 'AbortError');
         }
         // Authenticate with Supabase
-        const authResult = await signInAnonymously();
+        const authResult = await signInAnonymously(signal);
       if (!authResult.success) {
         throw new Error(`Auth failed: ${authResult.error}`);
       }
