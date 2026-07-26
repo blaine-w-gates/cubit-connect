@@ -4,6 +4,7 @@ import { storageService, TaskItem, CubitStep, TodoRow, PriorityDials, TodoProjec
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
 import { createTimerSlice } from './slices/timerSlice';
+import { createUISlice } from './slices/uiSlice';
 import * as Y from 'yjs';
 import {
   registerYDocInstance,
@@ -542,8 +543,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ apiKey: safeKey });
   },
   isHydrated: false,
-  hasVideoHandle: false, // Default: Force re-selection on reload
-  isProcessing: false,
   tasks: [],
   transcript: null,
   scoutResults: [],
@@ -551,19 +550,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   projectType: 'video', // Default
   projectTitle: 'New Project', // Default
 
-  // Strike 17.5: Defaults
-  inputMode: 'video',
-  setInputMode: (mode) => {
-    set({ inputMode: mode });
-  },
-  scoutTopic: '',
-  setScoutTopic: (topic) => {
-    set({ scoutTopic: topic });
-  },
-  scoutPlatform: 'instagram',
-  setScoutPlatform: (platform) => {
-    set({ scoutPlatform: platform });
-  },
+  // --- UI Slice (extracted to uiSlice.ts) ---
+  ...createUISlice(set, get),
+
   hasPeers: false,
   lastPeerSeenAt: 0,
   addToScoutHistory: (topic: string) =>
@@ -583,17 +572,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // Derived getters — resolved from active project
   todoRows: [],
   priorityDials: { left: '', right: '', focusedSide: 'none' as const },
-  activeMode: null,
-  setActiveMode: (mode) => set({ activeMode: mode }),
-  processingRowId: null,
-  setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
-  lastAddedRowId: null,
-  setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
 
-  // --- Alarm UI State (V1) ---
-  selectedStepId: null,
-  selectStep: (projectId, rowId, stepIndex) => set({ selectedStepId: { projectId, rowId, stepIndex } }),
-  clearSelectedStep: () => set({ selectedStepId: null }),
+  // --- Todo UI state and alarm UI state moved to uiSlice.ts ---
 
   // --- Auth & Identity State (Phase 6) ---
   authUserId: null,
@@ -1523,10 +1503,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // --- Today Page / Pomodoro Timer (extracted to timerSlice) ---
   ...createTimerSlice(set, get, { ydoc, yMetaMap }),
 
-  // Actions
-  setVideoHandleState: (hasHandle: boolean) => {
-    set({ hasVideoHandle: hasHandle });
-  },
+  // setVideoHandleState moved to uiSlice.ts
 
   loadProject: async () => {
     const entryYdocId = (ydoc as any).__observerId || 'no-id';
@@ -2176,19 +2153,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     get().forceSyncUpdate();
   },
 
-  setProcessing: (isProcessing: boolean) => {
-    set({ isProcessing });
-  },
-
-  // Contextual Loading State (Electric UI)
-  activeProcessingId: null,
-  setActiveProcessingId: (id: string | null) => set({ activeProcessingId: id }),
-
-  peerIsEditing: false,
-  setPeerIsEditing: (isEditing: boolean) => set({ peerIsEditing: isEditing }),
-
-  _syncToggle: false,
-  forceSyncUpdate: () => set((s) => ({ _syncToggle: !s._syncToggle })),
+  // setProcessing, activeProcessingId, peerIsEditing, _syncToggle moved to uiSlice.ts
 
   /**
    * Syncs Zustand state from Yjs document.
@@ -2259,14 +2224,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     
   },
 
-  // UI State
-  isSettingsOpen: false,
-  settingsVariant: 'default',
-  setIsSettingsOpen: (isOpen: boolean, variant: 'default' | 'quota' = 'default') =>
-    set({ isSettingsOpen: isOpen, settingsVariant: variant }),
-
-  isSyncModalOpen: false,
-  setIsSyncModalOpen: (isOpen: boolean) => set({ isSyncModalOpen: isOpen }),
+  // isSettingsOpen, isSyncModalOpen moved to uiSlice.ts
 
   addLog: (message: string) => {
     set((state) => {
