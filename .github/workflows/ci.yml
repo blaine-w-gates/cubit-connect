@@ -59,8 +59,8 @@ jobs:
       - run: npx vitest run tests/unit --no-file-parallelism --reporter=verbose
       - name: Verify minimum test count
         run: |
-          RESULT=$(npx vitest run tests/unit --no-file-parallelism --reporter=json 2>/dev/null)
-          COUNT=$(echo "$RESULT" | grep -o '"numTotalTests":[0-9]*' | grep -o '[0-9]*')
+          npx vitest run tests/unit --no-file-parallelism --reporter=json --outputFile=/tmp/test-results.json 2>&1 || true
+          COUNT=$(grep -o '"numTotalTests":[0-9]*' /tmp/test-results.json | grep -o '[0-9]*')
           echo "Unit test count: $COUNT"
           if [ "$COUNT" -lt 450 ]; then
             echo "❌ FAIL: Only $COUNT unit tests ran (expected ≥450). Tests may be silently skipping."
@@ -86,8 +86,8 @@ jobs:
       - run: npm run test:integration -- --reporter=verbose --maxWorkers=2
       - name: Verify integration test count
         run: |
-          RESULT=$(npm run test:integration -- --reporter=json --maxWorkers=2 2>/dev/null)
-          COUNT=$(echo "$RESULT" | grep -o '"numTotalTests":[0-9]*' | grep -o '[0-9]*')
+          npm run test:integration -- --reporter=json --maxWorkers=2 --outputFile=/tmp/integration-results.json 2>&1 || true
+          COUNT=$(grep -o '"numTotalTests":[0-9]*' /tmp/integration-results.json | grep -o '[0-9]*')
           echo "Integration test count: $COUNT"
           if [ "$COUNT" -lt 90 ]; then
             echo "❌ FAIL: Only $COUNT integration tests ran (expected ≥90). Supabase secrets may be missing."
