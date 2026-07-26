@@ -86,14 +86,15 @@ export default function Header({
         {/* DESKTOP */}
         <div className="hidden md:flex items-center gap-4">
           <div className="flex items-center gap-2">
-            {/* SCOUT BUTTON (Ghost Style) - Only on Engine page */}
+            {/* SCOUT BUTTON (Prominent) - Only on Engine page */}
             {isEnginePage && (
               <button
                 onClick={() => {
                   setInputMode('scout');
                   document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
                 }}
-                className="flex items-center gap-2 text-xs text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100 transition-colors"
+                className="flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-fuchsia-100 dark:bg-fuchsia-950/40 text-fuchsia-700 dark:text-fuchsia-300 hover:bg-fuchsia-200 dark:hover:bg-fuchsia-900 transition-colors font-semibold"
+                title="Search social media for topics and discover content"
               >
                 <Compass className="w-4 h-4" />
                 <span>Scout</span>
@@ -154,6 +155,7 @@ export default function Header({
             {/* SYNC BUTTON */}
             <button
               onClick={() => setIsSyncModalOpen(true)}
+              title={`Sync: ${syncStatus === 'connected' ? 'Connected' : syncStatus === 'connecting' ? 'Connecting...' : syncStatus === 'error' ? 'Error' : 'Not connected'}. Click to manage real-time collaboration.`}
               className={`flex items-center gap-2 text-xs transition-colors ${syncStatus === 'connected' ? 'text-emerald-500' :
                   syncStatus === 'connecting' ? 'text-amber-500 animate-pulse' :
                     syncStatus === 'error' ? 'text-red-500' :
@@ -248,10 +250,11 @@ export default function Header({
                     document.getElementById('ignition')?.scrollIntoView({ behavior: 'smooth' });
                     setIsMobileMenuOpen(false);
                   }}
-                  className="w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100"
+                  className="w-full justify-start rounded-lg hover:bg-fuchsia-50 dark:hover:bg-fuchsia-950/30 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 text-fuchsia-700 dark:text-fuchsia-300 bg-fuchsia-100/50 dark:bg-fuchsia-950/20"
                 >
                   <Compass className="w-4 h-4" />
                   Scout
+                  <span className="ml-auto text-[10px] font-mono text-fuchsia-400">NEW</span>
                 </button>
               )}
               <button

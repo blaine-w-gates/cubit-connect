@@ -8,9 +8,43 @@ import {
   testPrompt,
 } from '@/prompts';
 
-// MODELS
-const PRIMARY_MODEL = 'gemini-2.5-flash-lite';
-const FALLBACK_MODEL = 'gemini-2.5-flash';
+// MODELS — Configurable via env var or localStorage
+const DEFAULT_PRIMARY_MODEL = 'gemini-2.5-flash-lite';
+const DEFAULT_FALLBACK_MODEL = 'gemini-2.5-flash';
+const STORAGE_KEY_MODEL = 'cubit_gemini_model';
+
+export type GeminiModelTier = 'fast' | 'balanced';
+
+function getPrimaryModel(): string {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_KEY_MODEL);
+    if (stored === 'balanced') return DEFAULT_FALLBACK_MODEL;
+    if (stored === 'fast') return DEFAULT_PRIMARY_MODEL;
+  }
+  const envModel = process.env.NEXT_PUBLIC_GEMINI_PRIMARY_MODEL;
+  return envModel || DEFAULT_PRIMARY_MODEL;
+}
+
+function getFallbackModel(): string {
+  const primary = getPrimaryModel();
+  return primary === DEFAULT_PRIMARY_MODEL ? DEFAULT_FALLBACK_MODEL : DEFAULT_PRIMARY_MODEL;
+}
+
+export function getGeminiModelTier(): GeminiModelTier {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_KEY_MODEL);
+    if (stored === 'balanced') return 'balanced';
+    if (stored === 'fast') return 'fast';
+  }
+  const envModel = process.env.NEXT_PUBLIC_GEMINI_PRIMARY_MODEL;
+  return envModel === DEFAULT_FALLBACK_MODEL ? 'balanced' : 'fast';
+}
+
+export function setGeminiModelTier(tier: GeminiModelTier) {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY_MODEL, tier);
+  }
+}
 
 // CIRCUIT BREAKER STATE
 const COOLDOWN_DURATION = 60000; // 60 Seconds
@@ -67,7 +101,7 @@ export const GeminiService = {
 
     while (true) {
       // 1. Determine which model to start with
-      const currentModel = this.isPrimaryCool() ? PRIMARY_MODEL : FALLBACK_MODEL;
+      const currentModel = this.isPrimaryCool() ? getPrimaryModel() : getFallbackModel();
 
       // Log the start if it's the first attempt (heuristic)
       if (currentRetries === 3) {
@@ -86,10 +120,10 @@ export const GeminiService = {
         // 429 DETECTION & FALLBACK LOGIC
         if (msg.includes('429') || msg.includes('quota') || msg.includes('resource_exhausted')) {
           // Scenario A: We are on PRIMARY and hit a limit.
-          if (currentModel === PRIMARY_MODEL) {
+          if (currentModel === getPrimaryModel()) {
             primaryCooldownUntil = Date.now() + COOLDOWN_DURATION;
             emitLog(
-              `⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${FALLBACK_MODEL}`,
+              `⚠️ Rate Limit Hit on Primary. Cooling down... Switching to ${getFallbackModel()}`,
               'warning',
             );
 
@@ -99,7 +133,7 @@ export const GeminiService = {
           }
 
           // Scenario B: We are already on FALLBACK and hit a limit.
-          if (currentModel === FALLBACK_MODEL) {
+          if (currentModel === getFallbackModel()) {
             emitLog(`🔴 Project Quota Exceeded. Both models exhausted.`, 'error');
             throw new Error('PROJECT_QUOTA_EXCEEDED: Please update your API Key.');
           }
@@ -149,7 +183,7 @@ export const GeminiService = {
     await this.enforceRateLimit();
     const genAI = new GoogleGenerativeAI(apiKey);
     // Use Primary for token counting, fallback doesn't matter much here
-    const model = genAI.getGenerativeModel({ model: PRIMARY_MODEL });
+    const model = genAI.getGenerativeModel({ model: getPrimaryModel() });
     const { totalTokens } = await model.countTokens(text);
     return totalTokens;
   },

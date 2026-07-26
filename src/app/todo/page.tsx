@@ -97,10 +97,10 @@ export default function TodoPage() {
             )}
 
             {/* Main Content — flex row: sidebar + content with gap */}
-            <div className="flex flex-1 w-full max-w-7xl mx-auto gap-6">
-                {/* Book Tab Sidebar — sticky to header */}
+            <div className="flex flex-1 w-full max-w-7xl mx-auto gap-6 pb-24">
+                {/* Book Tab Sidebar — sticky to header, overlays on mobile */}
                 {isHydrated && (
-                    <div className="sticky top-0 self-start h-fit">
+                    <div className="sticky top-0 self-start h-fit z-20">
                         <BookTabSidebar />
                     </div>
                 )}
