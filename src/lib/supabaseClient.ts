@@ -241,9 +241,10 @@ export function resetSupabaseClient(): void {
 /**
  * Sign in anonymously with retry logic and timeout
  *
+ * @param signal - Optional AbortSignal to cancel the auth attempt
  * @returns Auth result with success status and session
  */
-export async function signInAnonymously(): Promise<AuthResult> {
+export async function signInAnonymously(signal?: AbortSignal): Promise<AuthResult> {
   // SSR safety
   if (typeof window === 'undefined') {
     return {
@@ -277,6 +278,13 @@ export async function signInAnonymously(): Promise<AuthResult> {
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    if (signal?.aborted) {
+      return {
+        success: false,
+        error: 'Authentication aborted',
+        attempts: attempt,
+      };
+    }
     try {
       emitTelemetry('supabase_auth_attempt', { attempt: attempt + 1 });
 
