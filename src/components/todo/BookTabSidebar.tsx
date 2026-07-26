@@ -431,6 +431,21 @@ export default function BookTabSidebar() {
                 )}
             </AnimatePresence>
 
+            {/* Mobile backdrop — tap to close sidebar overlay */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        key="backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        onClick={() => setIsOpen(false)}
+                        className="fixed inset-0 bg-black/30 z-40 sm:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
             {/* Expanded sidebar — absolute on mobile (overlay), relative on desktop */}
             <AnimatePresence mode="wait">
                 {isOpen && (
