@@ -1,13 +1,13 @@
-# Sample workflow for building and deploying a Next.js site to GitHub Pages
-#
-# To get started with Next.js see: https://nextjs.org/docs/getting-started
-#
+# Deploy Next.js site to GitHub Pages
+# Gated on CI Quality Gate workflow success — deploy only runs after CI passes
 name: Deploy Next.js site to Pages
 
 on:
-  # Runs on pushes targeting the default branch
-  push:
-    branches: ['main']
+  # Trigger deploy only after CI Quality Gate completes successfully on main
+  workflow_run:
+    workflows: ['CI Quality Gate']
+    types: [completed]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -25,8 +25,31 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  # Guard: Only proceed if CI Quality Gate succeeded (not cancelled/failed)
+  ci-gate:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      should_deploy: ${{ steps.check.outputs.should_deploy }}
+    steps:
+      - name: Check CI conclusion
+        id: check
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "Manual dispatch — proceeding with deploy"
+          elif [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
+            echo "should_deploy=true" >> $GITHUB_OUTPUT
+            echo "CI Quality Gate passed — proceeding with deploy"
+          else
+            echo "should_deploy=false" >> $GITHUB_OUTPUT
+            echo "CI Quality Gate conclusion: ${{ github.event.workflow_run.conclusion }} — skipping deploy"
+            exit 1
+          fi
+
   # Build job
   build:
+    needs: ci-gate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -90,7 +113,26 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      page_url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Post-deploy smoke test
+  smoke-test:
+    runs-on: ubuntu-latest
+    needs: deploy
+    steps:
+      - name: Verify site is live
+        run: |
+          URL="${{ needs.deploy.outputs.page_url }}"
+          echo "Smoke testing: $URL"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+          echo "HTTP status: $STATUS"
+          if [ "$STATUS" != "200" ]; then
+            echo "::error::Deploy verification failed — site returned $STATUS"
+            exit 1
+          fi
+          echo "::notice::Site is live and returning 200"
