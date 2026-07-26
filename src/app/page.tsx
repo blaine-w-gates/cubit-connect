@@ -67,6 +67,9 @@ export default function LandingPage() {
           <br />
           into micro learning
         </h2>
+        <p className="text-lg md:text-xl text-zinc-600 max-w-2xl mx-auto mt-4">
+          Paste a video or search social media — AI distills it into step-by-step recipes you can act on, share, and refine.
+        </p>
       </section>
 
       {/* 3. Hero Carousel (The Hook) */}

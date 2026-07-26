@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Key, Menu, X, Compass, ListTodo, Network, User } from 'lucide-react';
+import { Key, Menu, X, Compass, ListTodo, Network, User, Timer } from 'lucide-react';
 import { useNetworkStatus } from '@/hooks/useNetworkStatus';
 import ExportControl from '@/components/ExportControl';
 import { useAppStore } from '@/store/useAppStore';
@@ -43,7 +43,8 @@ export default function Header({
   const router = useRouter();
   const isEnginePage = pathname === '/engine';
   const isTodoPage = pathname === '/todo';
-  const badgeText = isTodoPage ? 'Todo' : 'Engine';
+  const isTodayPage = pathname === '/today';
+  const badgeText = isTodoPage ? 'Todo' : isTodayPage ? 'Today' : 'Engine';
 
   // Close mobile menu when clicking/touching outside
   const menuRef = useRef<HTMLDivElement>(null);
@@ -111,6 +112,18 @@ export default function Header({
             >
               <ListTodo className="w-4 h-4" />
               <span>To Do</span>
+            </button>
+
+            {/* TODAY BUTTON */}
+            <button
+              onClick={() => router.push('/today')}
+              className={`flex items-center gap-2 text-xs transition-colors ${isTodayPage
+                ? 'text-black dark:text-white font-bold'
+                : 'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                }`}
+            >
+              <Timer className="w-4 h-4" />
+              <span>Today</span>
             </button>
 
             {/* ENGINE BUTTON - Only when NOT on engine page */}
@@ -253,6 +266,19 @@ export default function Header({
               >
                 <ListTodo className="w-4 h-4" />
                 To Do
+              </button>
+              <button
+                onClick={() => {
+                  router.push('/today');
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full justify-start rounded-lg hover:bg-zinc-100 dark:hover:bg-stone-800 mb-2 text-xs px-3 py-3 min-h-[44px] transition-colors font-bold flex items-center gap-2 active:scale-95 ${isTodayPage
+                  ? 'text-black dark:text-white'
+                  : 'text-zinc-600 dark:text-stone-400 hover:text-black dark:hover:text-stone-100'
+                  }`}
+              >
+                <Timer className="w-4 h-4" />
+                Today
               </button>
               {!isEnginePage && (
                 <button
