@@ -10,6 +10,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { useVideoProcessor } from '@/hooks/useVideoProcessor';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { ShortcutsHelpOverlay } from '@/components/ShortcutsHelpOverlay';
 import { useReactToPrint } from 'react-to-print';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
@@ -58,6 +60,7 @@ export default function EnginePage() {
 
   const [mounted, setMounted] = useState(false);
   const [confirmingReset, setConfirmingReset] = useState(false);
+  const { showHelp, setShowHelp } = useKeyboardShortcuts();
   // isSettingsOpen moved to Global Store
   const [resetKey, setResetKey] = useState(0);
 
@@ -146,6 +149,7 @@ export default function EnginePage() {
   }
 
   return (
+    <>
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
       <OfflineIndicator />
       <SettingsDialog />
@@ -224,5 +228,7 @@ export default function EnginePage() {
         projectType={projectType}
       />
     </main>
+    <ShortcutsHelpOverlay isOpen={showHelp} onClose={() => setShowHelp(false)} page="engine" />
+    </>
   );
 }

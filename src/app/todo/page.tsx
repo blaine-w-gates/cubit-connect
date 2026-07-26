@@ -9,6 +9,8 @@
 
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { ShortcutsHelpOverlay } from '@/components/ShortcutsHelpOverlay';
 
 import Header from '@/components/Header';
 import SettingsDialog from '@/components/SettingsDialog';
@@ -36,6 +38,7 @@ export default function TodoPage() {
 
     const [mounted, setMounted] = useState(false);
     const [confirmingReset, setConfirmingReset] = useState(false);
+    const { showHelp, setShowHelp } = useKeyboardShortcuts();
 
     // Hydrate on mount
     useEffect(() => {
@@ -190,6 +193,7 @@ export default function TodoPage() {
             </div>
         </main>
         <SyncDebugOverlay />
+        <ShortcutsHelpOverlay isOpen={showHelp} onClose={() => setShowHelp(false)} page="todo" />
         </ErrorBoundary>
     );
 }
