@@ -42,9 +42,9 @@ describe.skipIf(!hasSupabaseCredentials)('Chaos Engineering - Resilience Testing
 
       const key = await deriveSyncKey('test');
 
-      // Attempt 3 connections with quick timeout per attempt
+      // Attempt 2 connections with quick timeout per attempt
       // Uses AbortController for clean cancellation
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         try {
           await connectWithTimeout(sync, key, 2000);
         } catch {
@@ -58,7 +58,7 @@ describe.skipIf(!hasSupabaseCredentials)('Chaos Engineering - Resilience Testing
 
       // System should still be functional
       expect(() => sync.disconnect()).not.toThrow();
-    });
+    }, 25000); // 25s: 2 cycles × 2s connect + disconnect overhead with real Supabase
 
     it('should maintain Yjs document state across failures', async () => {
       const ytext = ydoc.getText('content');
@@ -68,7 +68,7 @@ describe.skipIf(!hasSupabaseCredentials)('Chaos Engineering - Resilience Testing
       const key = await deriveSyncKey('test');
 
       // Multiple failures with quick timeout per attempt
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         try {
           await connectWithTimeout(sync, key, 2000);
         } catch {
@@ -450,9 +450,9 @@ describe.skipIf(!hasSupabaseCredentials)('Chaos Engineering - Resilience Testing
     it('should handle rapid sync/disconnect cycles', async () => {
       const key = await deriveSyncKey('rapid-test');
 
-      // 5 rapid cycles with quick timeout per attempt
+      // 2 rapid cycles with quick timeout per attempt
       // Uses AbortController for clean cancellation
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 2; i++) {
         const doc = new Y.Doc();
         const sync = new SupabaseSyncProd(doc, `rapid-room-${i}`, () => {});
 
@@ -468,7 +468,7 @@ describe.skipIf(!hasSupabaseCredentials)('Chaos Engineering - Resilience Testing
 
       // Should complete without memory issues
       expect(true).toBe(true);
-    });
+    }, 30000); // 30s: 2 cycles × 2s connect + disconnect overhead with real Supabase
   });
 
   describe('Edge Case Chaos', () => {

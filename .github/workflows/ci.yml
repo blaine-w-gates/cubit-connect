@@ -56,10 +56,10 @@ jobs:
           node-version: 20
           cache: 'npm'
       - run: npm ci
-      - run: npx vitest run tests/unit --reporter=verbose
+      - run: npx vitest run tests/unit --no-file-parallelism --reporter=verbose
       - name: Verify minimum test count
         run: |
-          RESULT=$(npx vitest run tests/unit --reporter=json 2>/dev/null)
+          RESULT=$(npx vitest run tests/unit --no-file-parallelism --reporter=json 2>/dev/null)
           COUNT=$(echo "$RESULT" | grep -o '"numTotalTests":[0-9]*' | grep -o '[0-9]*')
           echo "Unit test count: $COUNT"
           if [ "$COUNT" -lt 450 ]; then

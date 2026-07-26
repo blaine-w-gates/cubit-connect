@@ -13,6 +13,6 @@ export default defineConfig({
     setupFiles: ['./tests/integration/setup.ts'],
     include: ['tests/integration/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'tests/e2e/**/*', 'tests/*.spec.ts', 'dist', '.next'],
-    testTimeout: 30000,
+    testTimeout: 60000,
   },
 });
