@@ -12,6 +12,7 @@ import * as Y from 'yjs';
 import { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
 import { deriveSyncKey } from '@/lib/cryptoSync';
 import { getRateLimiter } from '@/lib/rateLimiter';
+import { connectWithTimeout } from './setup';
 import { getAuditLogger } from '@/lib/auditLogger';
 import { getFallbackManager } from '@/lib/transportFallback';
 
@@ -43,9 +44,10 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       const key = await deriveSyncKey('test-passphrase');
 
-      // Connection will fail without real Supabase, but should not crash
+      // Connection will fail or timeout, but should not crash
+      // Uses AbortController for clean cancellation
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected to fail
       }
@@ -96,8 +98,9 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       const key = await deriveSyncKey('test-passphrase');
 
+      // Uses AbortController for clean cancellation
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected
       }
@@ -334,10 +337,17 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       const empty = new Uint8Array(0);
 
-      // Should not throw
-      expect(() => {
+      // Y.applyUpdate throws on empty array - verify it doesn't crash the process
+      try {
         Y.applyUpdate(ydoc, empty);
-      }).not.toThrow();
+      } catch {
+        // Expected: Yjs throws "Unexpected end of array" on empty input
+      }
+
+      // Document should still be usable
+      const text = ydoc.getText('test');
+      text.insert(0, 'works');
+      expect(text.toString()).toBe('works');
     });
 
     it('should handle large document state', () => {
@@ -375,7 +385,7 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       // Should handle gracefully
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected
       }
@@ -393,7 +403,7 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       // Should handle gracefully
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected
       }
@@ -456,7 +466,7 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
 
       // Should not crash even if callback throws
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected
       }
@@ -477,7 +487,7 @@ describe.skipIf(!hasSupabaseCredentials)('Error Handling', () => {
       const key = await deriveSyncKey('test');
 
       try {
-        await sync.connect(key);
+        await connectWithTimeout(sync, key, 5000);
       } catch {
         // Expected
       }

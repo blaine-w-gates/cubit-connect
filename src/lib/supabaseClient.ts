@@ -254,6 +254,26 @@ export async function signInAnonymously(): Promise<AuthResult> {
   }
 
   const client = getSupabaseClient();
+
+  // Check if we already have a valid session — reuse it instead of re-authenticating
+  // This prevents rate limiting when multiple sync instances connect in quick succession
+  try {
+    const { data: sessionData } = await client.auth.getSession();
+    if (sessionData.session) {
+      emitTelemetry('supabase_auth_success', {
+        attempt: 0,
+        context: { userId: sessionData.session.user?.id, reused: true },
+      });
+      return {
+        success: true,
+        session: sessionData.session,
+        attempts: 0,
+      };
+    }
+  } catch {
+    // Session check failed — proceed to fresh auth
+  }
+
   let lastError: Error | null = null;
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {

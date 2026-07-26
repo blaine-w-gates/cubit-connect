@@ -101,14 +101,19 @@ export class SupabaseSyncProd {
   /**
    * Retry an operation with exponential backoff
    * Delays: 1s, 2s, 4s (exponential: base * 2^attempt)
+   * Supports optional AbortSignal for clean cancellation
    */
   private async retryWithBackoff<T>(
     operation: () => Promise<T>,
-    operationName: string
+    operationName: string,
+    signal?: AbortSignal
   ): Promise<T> {
     let lastError: Error | undefined;
 
     for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      if (signal?.aborted) {
+        throw new DOMException('Operation aborted', 'AbortError');
+      }
       try {
         return await operation();
       } catch (error) {
@@ -119,7 +124,15 @@ export class SupabaseSyncProd {
         if (attempt < MAX_RETRIES - 1) {
           // Exponential backoff: delay = base * 2^attempt
           const delayMs = BASE_RETRY_DELAY_MS * Math.pow(2, attempt);
-          await new Promise(resolve => setTimeout(resolve, delayMs));
+          await new Promise((resolve, reject) => {
+            const timer = setTimeout(resolve, delayMs);
+            if (signal) {
+              signal.addEventListener('abort', () => {
+                clearTimeout(timer);
+                reject(new DOMException('Operation aborted', 'AbortError'));
+              }, { once: true });
+            }
+          });
         }
       }
     }
@@ -127,7 +140,7 @@ export class SupabaseSyncProd {
     throw lastError;
   }
 
-  async connect(derivedKey: CryptoKey): Promise<void> {
+  async connect(derivedKey: CryptoKey, signal?: AbortSignal): Promise<void> {
     return measureAsync('connect', async () => {
 
       // Validate E2EE key
@@ -141,6 +154,9 @@ export class SupabaseSyncProd {
 
       // Retry connection with exponential backoff
       return this.retryWithBackoff(async () => {
+        if (signal?.aborted) {
+          throw new DOMException('Operation aborted', 'AbortError');
+        }
         // Authenticate with Supabase
         const authResult = await signInAnonymously();
       if (!authResult.success) {
@@ -207,7 +223,7 @@ export class SupabaseSyncProd {
         context: { phase: 'production', coldStart: this.isColdStart, connectionTime },
       });
 
-      }, 'connect'); // End retryWithBackoff - handles retries with exponential backoff (1s, 2s, 4s)
+      }, 'connect', signal); // End retryWithBackoff - handles retries with exponential backoff (1s, 2s, 4s)
     }, this.roomIdHash); // End measureAsync
   }
 

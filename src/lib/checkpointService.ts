@@ -160,13 +160,19 @@ export class CheckpointService {
       // Get next sequence number if not provided
       const sequenceNumber = checkpoint.sequenceNumber ?? (await this.getNextSequence(checkpoint.roomHash));
 
+      // Convert Uint8Array to PostgreSQL hex format for BYTEA column
+      // PostgREST expects \x-prefixed hex string for BYTEA, not base64
+      const hexData = '\\x' + (typeof Buffer !== 'undefined'
+        ? Buffer.from(dataToStore).toString('hex')
+        : Array.from(dataToStore).map(b => b.toString(16).padStart(2, '0')).join(''));
+
       // Insert checkpoint
       const { data, error } = await client
         .from('yjs_checkpoints')
         .insert({
           room_hash: checkpoint.roomHash,
           client_id: checkpoint.clientId || this.clientId,
-          checkpoint_data: dataToStore,
+          checkpoint_data: hexData,
           sequence_number: sequenceNumber,
           is_compressed: shouldCompress,
           original_size: shouldCompress ? originalSize : null,
@@ -214,10 +220,13 @@ export class CheckpointService {
     try {
       const client = getSupabaseClient();
 
-      // Use the database function for efficiency
-      const { data, error } = await client.rpc('get_latest_checkpoint', {
-        p_room_hash: roomHash,
-      });
+      // Use direct query instead of RPC for better BYTEA handling
+      const { data, error } = await client
+        .from('yjs_checkpoints')
+        .select('id, client_id, checkpoint_data, sequence_number, created_at, is_compressed, original_size')
+        .eq('room_hash', roomHash)
+        .order('sequence_number', { ascending: false })
+        .limit(1);
 
       if (error) {
         console.error('[CHECKPOINT] Load failed:', error);
@@ -230,7 +239,43 @@ export class CheckpointService {
       }
 
       const checkpoint = data[0];
-      let checkpointData = new Uint8Array(checkpoint.checkpoint_data);
+      let checkpointData: Uint8Array;
+
+      // Supabase/PostgREST returns BYTEA as hex string with \x prefix, or base64
+      const rawData = checkpoint.checkpoint_data;
+      if (typeof rawData === 'string') {
+        if (rawData.startsWith('\\x')) {
+          // PostgreSQL bytea hex format from PostgREST
+          const hexStr = rawData.slice(2);
+          if (typeof Buffer !== 'undefined') {
+            checkpointData = new Uint8Array(Buffer.from(hexStr, 'hex'));
+          } else {
+            const bytes = new Uint8Array(hexStr.length / 2);
+            for (let i = 0; i < hexStr.length; i += 2) {
+              bytes[i / 2] = parseInt(hexStr.substr(i, 2), 16);
+            }
+            checkpointData = bytes;
+          }
+        } else if (typeof Buffer !== 'undefined') {
+          // Base64-encoded string
+          checkpointData = new Uint8Array(Buffer.from(rawData, 'base64'));
+        } else {
+          const binaryString = atob(rawData);
+          checkpointData = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) {
+            checkpointData[i] = binaryString.charCodeAt(i);
+          }
+        }
+      } else if (rawData instanceof ArrayBuffer) {
+        checkpointData = new Uint8Array(rawData);
+      } else if (rawData instanceof Uint8Array) {
+        checkpointData = rawData;
+      } else if (rawData && typeof rawData === 'object' && 'data' in rawData) {
+        // Handle { type: 'Buffer', data: number[] } format
+        checkpointData = new Uint8Array((rawData as { data: number[] }).data);
+      } else {
+        checkpointData = new Uint8Array(rawData as ArrayBuffer);
+      }
 
       // Decompress if needed
       if (checkpoint.is_compressed) {
