@@ -18,6 +18,7 @@ import PriorityDials from '@/components/todo/PriorityDials';
 import TodoTable from '@/components/todo/TodoTable';
 import ActionBar from '@/components/todo/ActionBar';
 import BookTabSidebar from '@/components/todo/BookTabSidebar';
+import OnboardingOverlay from '@/components/OnboardingOverlay';
 import { SyncDebugOverlay } from '@/components/SyncDebugOverlay';
 import { Network, ShieldCheck, Loader2, Monitor } from 'lucide-react';
 
@@ -61,6 +62,7 @@ export default function TodoPage() {
         <ErrorBoundary>
         <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
             <SettingsDialog />
+            <OnboardingOverlay />
 
             {/* Header — fully wired with reset + task count */}
             <Header
