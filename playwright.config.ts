@@ -20,46 +20,46 @@ export default defineConfig({
     {
       name: 'Desktop Chrome',
       use: { ...devices['Desktop Chrome'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
     },
     {
       name: 'Desktop Firefox',
       use: { ...devices['Desktop Firefox'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
     },
     {
       name: 'Desktop Safari',
       use: { ...devices['Desktop Safari'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
     },
     {
       name: 'Desktop Edge',
       use: { ...devices['Desktop Edge'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
     },
     // --- iPad / Tablet Browsers ---
     {
       name: 'iPad Safari',
       use: { ...devices['iPad (gen 7)'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
       name: 'iPad Safari Landscape',
       use: { ...devices['iPad (gen 7) landscape'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
       name: 'iPad Pro Safari',
       use: { ...devices['iPad Pro 11'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
       name: 'iPad Pro Safari Landscape',
       use: { ...devices['iPad Pro 11 landscape'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     // Android tablet (Chromium-based — covers Chrome, Edge, Samsung Internet layout)
@@ -72,26 +72,26 @@ export default defineConfig({
         hasTouch: true,
         userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-X200) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
       },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     // --- Mobile Phone Browsers ---
     {
       name: 'Mobile Safari',
       use: { ...devices['iPhone 12'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
       name: 'Mobile Safari Mini',
       use: { ...devices['iPhone SE'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
       name: 'Mobile Chrome',
       use: { ...devices['Pixel 5'] },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     {
@@ -103,7 +103,7 @@ export default defineConfig({
         hasTouch: true,
         userAgent: 'Mozilla/5.0 (Linux; Android 13; SM-G991B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
       },
-      testIgnore: ['**/performance/**', '**/unit/**'],
+      testIgnore: ['**/performance/**', '**/unit/**', '**/integration/**'],
       timeout: 120000,
     },
     // --- Performance ---

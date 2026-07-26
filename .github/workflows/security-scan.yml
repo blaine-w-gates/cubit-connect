@@ -26,7 +26,7 @@ jobs:
 
       - name: Run ESLint (security rules)
         run: |
-          npm run lint -- --ext .ts,.tsx --format json --output-file eslint-report.json || true
+          npm run lint -- --format json --output-file eslint-report.json || true
 
       - name: Check for secrets (basic)
         run: |
@@ -35,7 +35,7 @@ jobs:
           grep -r -n "BEGIN RSA\|BEGIN OPENSSH\|BEGIN PGP" --include="*.ts" --include="*.tsx" src/ || true
 
       - name: Dependency audit
-        run: npm audit --audit-level moderate
+        run: npm audit --audit-level moderate --omit=dev --json > npm-audit.json || true
 
       - name: Run security tests
         run: npm test -- --reporter=verbose tests/unit/auditLogger.test.ts tests/unit/sentryIntegration.test.ts

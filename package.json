@@ -17,6 +17,7 @@
     "test:manual": "node scripts/manual-test.js",
     "test:full": "for proj in 'Desktop Chrome' 'Desktop Firefox' 'Desktop Safari' 'Desktop Edge' 'iPad Safari' 'iPad Safari Landscape' 'iPad Pro Safari' 'iPad Pro Safari Landscape' 'Galaxy Tab' 'Mobile Safari' 'Mobile Safari Mini' 'Mobile Chrome' 'Galaxy S21'; do npx playwright test --project=\"$proj\" --ignore-snapshots --reporter=line --workers=2 || exit 1; done",
     "test:perf": "playwright test --project=Lighthouse",
+    "test:integration": "vitest run -c vitest.integration.config.ts tests/integration",
     "prepare": "husky"
   },
   "dependencies": {

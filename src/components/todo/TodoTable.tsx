@@ -709,7 +709,7 @@ export default function TodoTable() {
                 modifiers={activeRabbitId ? [restrictToHorizontalAxis, restrictToWindowEdges] : []}
             >
                 <div className="border border-zinc-300 dark:border-stone-700 rounded-xl overflow-hidden">
-                    <table className="w-full min-w-[900px] table-fixed border-collapse">
+                    <table className="w-full min-w-[600px] sm:min-w-[900px] table-fixed border-collapse">
                         <thead>
                             <tr>
                                 {/* Command Column Header */}

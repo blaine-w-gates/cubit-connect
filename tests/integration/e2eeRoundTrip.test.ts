@@ -12,6 +12,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import * as Y from 'yjs';
 import { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
 import { deriveSyncKey } from '@/lib/cryptoSync';
+import { connectWithTimeout } from './setup';
 
 // Check if Supabase credentials are available
 const hasSupabaseCredentials = process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -43,9 +44,9 @@ describe.skipIf(!hasSupabaseCredentials)('E2EE Round-Trip', () => {
       () => {}  // onPeerEditing
     );
 
-    // Connect with E2EE key
+    // Connect with E2EE key (with timeout to avoid hanging)
     try {
-      await sync.connect(derivedKey);
+      await connectWithTimeout(sync, derivedKey, 10000);
       expect(sync.isConnectedToServer()).toBe(true);
     } catch {
       // Expected to fail in test environment without Supabase

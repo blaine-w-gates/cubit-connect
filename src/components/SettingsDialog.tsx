@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAppStore } from '@/store/useAppStore';
-import { GeminiService } from '@/services/gemini';
+import { GeminiService, getGeminiModelTier, setGeminiModelTier, type GeminiModelTier } from '@/services/gemini';
 import { getStorageInfo, formatStorageSize, type StorageStatus } from '@/lib/storageMonitor';
-import { LogOut, HardDrive, Download, AlertCircle, User } from 'lucide-react';
+import { LogOut, HardDrive, Download, AlertCircle, User, Zap } from 'lucide-react';
 import { IdentitySettings } from './IdentitySettings';
 import { useRouter } from 'next/navigation';
 
@@ -34,6 +34,7 @@ export default function SettingsDialog() {
   const [mounted, setMounted] = useState(false);
   const [confirmDisconnect, setConfirmDisconnect] = useState(false);
   const [storageEst, setStorageEst] = useState<{ usage: number; quota: number; status: StorageStatus } | null>(null);
+  const [modelTier, setModelTier] = useState<GeminiModelTier>('fast');
   const router = useRouter();
 
   useEffect(() => {
@@ -42,6 +43,7 @@ export default function SettingsDialog() {
 
   useEffect(() => {
     if (!open) return;
+    setModelTier(getGeminiModelTier());
     getStorageInfo().then((info) => {
       if (info) {
         setStorageEst({
@@ -149,6 +151,55 @@ export default function SettingsDialog() {
             Google AI Studio
           </a>
         </p>
+
+        {/* AI Model Section */}
+        <div className="mb-6 pt-6 border-t border-zinc-200 dark:border-stone-700">
+          <div className="flex items-center gap-2 mb-3 text-zinc-700 dark:text-stone-300">
+            <Zap className="w-4 h-4" />
+            <span className="text-sm font-medium">AI Model</span>
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => {
+                setModelTier('fast');
+                setGeminiModelTier('fast');
+                GeminiService.resetState();
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                modelTier === 'fast'
+                  ? 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30'
+                  : 'bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 hover:bg-zinc-200 dark:hover:bg-stone-700'
+              }`}
+            >
+              <div className="flex flex-col items-center gap-0.5">
+                <span>Fast</span>
+                <span className="text-[10px] opacity-70 font-mono">flash-lite</span>
+              </div>
+            </button>
+            <button
+              onClick={() => {
+                setModelTier('balanced');
+                setGeminiModelTier('balanced');
+                GeminiService.resetState();
+              }}
+              className={`flex-1 py-2.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                modelTier === 'balanced'
+                  ? 'bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/30'
+                  : 'bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 hover:bg-zinc-200 dark:hover:bg-stone-700'
+              }`}
+            >
+              <div className="flex flex-col items-center gap-0.5">
+                <span>Balanced</span>
+                <span className="text-[10px] opacity-70 font-mono">flash</span>
+              </div>
+            </button>
+          </div>
+          <p className="mt-2 text-[10px] text-zinc-500 dark:text-stone-400">
+            {modelTier === 'fast'
+              ? 'Faster responses, lower quota usage. Best for simple tasks.'
+              : 'Better reasoning for complex transcripts. Uses more quota.'}
+          </p>
+        </div>
 
         {/* Storage Section */}
         {storageEst && storageEst.quota > 0 && (

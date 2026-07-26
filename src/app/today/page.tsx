@@ -18,6 +18,7 @@ import { PomodoroTimer } from '@/components/today/PomodoroTimer';
 import { TaskFocusCard } from '@/components/today/TaskFocusCard';
 import { AlarmDashboard } from '@/components/alarm/AlarmDashboard';
 import { NotificationPermissionBanner } from '@/components/alarm/NotificationPermissionBanner';
+import Header from '@/components/Header';
 import { Settings, X, Bell, Volume2, VolumeX } from 'lucide-react';
 
 export default function TodayPage() {
@@ -39,6 +40,14 @@ export default function TodayPage() {
       className="min-h-screen w-full bg-background text-foreground transition-colors duration-500"
       aria-label="Today - Pomodoro Focus"
     >
+      <Header
+        confirmingReset={false}
+        setConfirmingReset={() => {}}
+        resetProject={() => {}}
+        mounted={true}
+        tasksLength={0}
+      />
+
       {/* Background gradient effect */}
       <div className="fixed inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-orange-500/5 dark:from-amber-900/10 dark:via-transparent dark:to-orange-900/10" />

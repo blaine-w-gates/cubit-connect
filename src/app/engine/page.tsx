@@ -23,6 +23,7 @@ import { PrintableReport } from '@/components/PrintableReport';
 import VideoInput from '@/components/VideoInput';
 import ResultsFeed from '@/components/ResultsFeed';
 import ProcessingLog from '@/components/ProcessingLog';
+import OnboardingOverlay from '@/components/OnboardingOverlay';
 import { FadeIn } from '@/components/ui/FadeIn';
 
 export default function EnginePage() {
@@ -148,6 +149,7 @@ export default function EnginePage() {
     <main className="min-h-[100dvh] text-[#111111] bg-[#FAFAFA] dark:bg-stone-950 dark:text-stone-200 flex flex-col font-sans transition-colors duration-300">
       <OfflineIndicator />
       <SettingsDialog />
+      <OnboardingOverlay />
 
       {/* Hidden Video Element for Processing */}
       <video

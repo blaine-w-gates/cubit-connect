@@ -431,7 +431,22 @@ export default function BookTabSidebar() {
                 )}
             </AnimatePresence>
 
-            {/* Expanded sidebar */}
+            {/* Mobile backdrop — tap to close sidebar overlay */}
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        key="backdrop"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        onClick={() => setIsOpen(false)}
+                        className="fixed inset-0 bg-black/30 z-40 sm:hidden"
+                    />
+                )}
+            </AnimatePresence>
+
+            {/* Expanded sidebar — absolute on mobile (overlay), relative on desktop */}
             <AnimatePresence mode="wait">
                 {isOpen && (
                     <motion.aside
@@ -448,7 +463,7 @@ export default function BookTabSidebar() {
                         animate={{ width: 192, opacity: 1, x: 0 }}
                         exit={{ width: 0, opacity: 0 }}
                         transition={{ duration: 0.2, ease: 'easeInOut' }}
-                        className="overflow-hidden border-r border-zinc-200 dark:border-stone-700 bg-zinc-50 dark:bg-stone-900 flex flex-col"
+                        className="absolute sm:relative h-screen sm:h-auto overflow-hidden border-r border-zinc-200 dark:border-stone-700 bg-zinc-50 dark:bg-stone-900 flex flex-col shadow-xl sm:shadow-none z-50"
                     >
                         {/* Workspace Switcher */}
                         <WorkspaceSelector />

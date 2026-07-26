@@ -1,6 +1,5 @@
 import { Compass, Layers, Share2 } from 'lucide-react';
 import { useAppStore } from '@/store/useAppStore';
-import { toast } from 'sonner';
 
 export function Manifesto() {
   const { setInputMode } = useAppStore();
@@ -60,11 +59,10 @@ export function Manifesto() {
 
         {/* EXPORT CARD */}
         <button
-          onClick={() =>
-            toast.warning('Start a Project First', {
-              description: 'Upload a video or paste text to unlock this tool.',
-            })
-          }
+          onClick={() => {
+            setInputMode('video');
+            scrollToIgnition();
+          }}
           className="group flex flex-col items-center gap-3 p-6 rounded-xl border border-transparent hover:border-green-500/50 hover:bg-green-50 dark:hover:bg-green-950/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all hover:scale-105 active:scale-95 text-left md:text-center w-full"
         >
           <div className="p-3 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 rounded-full group-hover:bg-green-100 dark:group-hover:bg-green-900 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors self-center">
