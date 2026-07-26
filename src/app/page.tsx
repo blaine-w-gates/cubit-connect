@@ -15,6 +15,7 @@ import IgnitionForm from '@/components/IgnitionForm';
 export default function LandingPage() {
   const router = useRouter();
   const [showHeader, setShowHeader] = useState(true);
+  const [checkedRedirect, setCheckedRedirect] = useState(false);
 
   // Auto-hide header after 2 seconds as per requirements
   useEffect(() => {
@@ -25,13 +26,14 @@ export default function LandingPage() {
   // Back Button Trap: If user has key, send them to Engine automatically
   // We check directly against LocalStorage here for speed, matching the Store key.
   useEffect(() => {
-    // Use the STORE_KEY defined in useAppStore (cubit_api_key)
     if (typeof window !== 'undefined' && localStorage.getItem('cubit_api_key')) {
       if (window.location.pathname === '/todo') {
         router.push('/todo');
       } else {
         router.push('/engine');
       }
+    } else {
+      setCheckedRedirect(true);
     }
   }, [router]);
 
@@ -50,6 +52,8 @@ export default function LandingPage() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  if (!checkedRedirect) return null;
 
   return (
     <main className="min-h-[100dvh] bg-[#FAFAFA] text-[#111111] flex flex-col font-sans overflow-x-hidden">
