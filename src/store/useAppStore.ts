@@ -7,6 +7,7 @@ import { createTimerSlice, type TimerSliceState } from './slices/timerSlice';
 import { createUISlice, type UISliceState } from './slices/uiSlice';
 import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import { createTaskSlice, type TaskSliceState } from './slices/taskSlice';
+import { createProjectMetaSlice, type ProjectMetaSliceState } from './slices/projectMetaSlice';
 import * as Y from 'yjs';
 import {
   markObserverRegistered,
@@ -234,30 +235,18 @@ function registerYjsObserver(set: any, get: any) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }
 
-export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceState, TimerSliceState {
+export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceState, TimerSliceState, ProjectMetaSliceState {
   apiKey: string;
   setApiKey: (key: string) => void;
   isHydrated: boolean;
   tasks: TaskItem[];
-  transcript: string | null;
-  scoutResults: string[];
-  scoutHistory: string[];
-  projectType: 'video' | 'text' | 'scout';
-  projectTitle: string;
 
-  // Project meta actions (will be extracted to projectMetaSlice later)
+  // Store-level actions (tightly coupled to observer/sync internals)
   syncFromYjs: () => void;
   loadProject: () => Promise<void>;
   resetProject: () => Promise<void>;
   exportAndClearData: () => Promise<void>;
   fullLogout: () => Promise<void>;
-  setTranscript: (text: string) => Promise<void>;
-  setScoutResults: (results: string[]) => Promise<void>;
-  addToScoutHistory: (topic: string) => void;
-  setProjectType: (type: 'video' | 'text' | 'scout') => Promise<void>;
-  setProjectTitle: (title: string) => Promise<void>;
-  startTextProject: (title: string, text: string) => Promise<void>;
-  startNewAnalysis: (type: 'video' | 'text', title: string) => Promise<void>;
 
   // Log Persistence (will be extracted to logSlice later)
   logs: LogEntry[];
@@ -322,26 +311,15 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
   isHydrated: false,
   tasks: [],
-  transcript: null,
-  scoutResults: [],
-  scoutHistory: [],
-  projectType: 'video', // Default
-  projectTitle: 'New Project', // Default
+
+  // --- Project Meta Slice (extracted to projectMetaSlice.ts) ---
+  ...createProjectMetaSlice(set, get),
 
   // --- UI Slice (extracted to uiSlice.ts) ---
   ...createUISlice(set),
 
   hasPeers: false,
   lastPeerSeenAt: 0,
-  addToScoutHistory: (topic: string) =>
-    set((state) => {
-      const current = state.scoutHistory;
-      if (!topic.trim()) return state;
-      const filtered = current.filter((t) => t !== topic);
-      const updated = [topic, ...filtered].slice(0, 5);
-      yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('scoutHistory', JSON.stringify(updated)); }, 'local');
-      return { scoutHistory: updated };
-    }),
 
   // --- Task Slice (extracted to taskSlice.ts) ---
   ...createTaskSlice(set, get),
@@ -965,73 +943,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
   }, // Close the loadProject function
 
-  // --- Task CRUD actions moved to taskSlice.ts ---
+  // --- Project meta actions moved to projectMetaSlice.ts ---
 
-  setTranscript: async (text: string) => {
-    yjsContext.ydoc.transact(() => { applyUpdateToYText(yjsContext.yTranscript, text || ''); }, 'local');
-    set({ transcript: text });
-  },
-
-  setScoutResults: async (results: string[]) => {
-    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('scoutResults', JSON.stringify(results)); }, 'local');
-    set({ scoutResults: results });
-  },
-
-  setProjectType: async (type: 'video' | 'text' | 'scout') => {
-    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('projectType', type); }, 'local');
-    set({ projectType: type });
-  },
-
-  setProjectTitle: async (title: string) => {
-    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('projectTitle', title); }, 'local');
-    set({ projectTitle: title });
-  },
-
-  // Atomic Action for Text Mode Initialization
-  startTextProject: async (title: string, text: string) => {
-    const type = 'text';
-    yjsContext.ydoc.transact(() => {
-      yjsContext.yMetaMap.set('projectType', type);
-      yjsContext.yMetaMap.set('projectTitle', title);
-      applyUpdateToYText(yjsContext.yTranscript, text || '');
-    }, 'local');
-    set({
-      projectType: type,
-      projectTitle: title,
-      transcript: text,
-    });
-  },
-
-  // ⚡️ GLITCH-FREE RESET: For "Start Analysis" workflow
-  startNewAnalysis: async (type: 'video' | 'text', title: string) => {
-    const { activeWorkspaceType, activeWorkspaceId } = get();
-    await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
-
-    // The Ghost Data Teardown:
-    yjsContext.ydoc.transact(() => {
-      yjsContext.yMetaMap.clear();
-      yjsContext.yTranscript.delete(0, yjsContext.yTranscript.length);
-
-      // Tombstone all active tasks and projects to prevent Zombie Resurrection
-      Array.from(yjsContext.yTasksMap.values()).forEach(t => t.set('isDeleted', true));
-      Array.from(yjsContext.yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
-    });
-
-    set({
-      tasks: [],
-      transcript: null,
-      scoutResults: [],
-      scoutHistory: [],
-      // Keep existing handle/key/processing/inputMode
-      projectType: type,
-      projectTitle: title,
-      logs: [],
-      isProcessing: true, // FORCE True (Prevent Manifesto Flash)
-      // Strike 17.5: Do we clear Scout on new analysis? Probably yes.
-      scoutTopic: '',
-      scoutPlatform: 'instagram',
-    });
-  },
   resetProject: async () => {
     const { activeWorkspaceType, activeWorkspaceId, deviceId: currentDeviceId } = get();
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
