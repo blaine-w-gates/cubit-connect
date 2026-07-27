@@ -1,10 +1,5 @@
 import type { TimerSession, TodayPreferences } from '@/schemas/storage';
-import type * as Y from 'yjs';
-
-export interface TimerSliceContext {
-  ydoc: Y.Doc;
-  yMetaMap: Y.Map<any>;
-}
+import { yjsContext } from '@/lib/yjsContext';
 
 export interface TimerSliceState {
   // Timer State
@@ -34,8 +29,7 @@ export interface TimerSliceState {
 
 export function createTimerSlice(
   set: (partial: any) => void,
-  get: () => any,
-  ctx: TimerSliceContext
+  get: () => any
 ): TimerSliceState {
   return {
     // Initial State
@@ -213,11 +207,11 @@ export function createTimerSlice(
         timerRemainingSeconds: s.todayPreferences.defaultDuration * 60,
       }));
 
-      ctx.ydoc.transact(() => {
-        ctx.yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, abandonedSession]));
-        ctx.yMetaMap.delete('activeTimerSession');
-        ctx.yMetaMap.delete('timerStatus');
-        ctx.yMetaMap.delete('timerRemainingSeconds');
+      yjsContext.ydoc.transact(() => {
+        yjsContext.yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, abandonedSession]));
+        yjsContext.yMetaMap.delete('activeTimerSession');
+        yjsContext.yMetaMap.delete('timerStatus');
+        yjsContext.yMetaMap.delete('timerRemainingSeconds');
       }, 'local');
     },
 
@@ -277,17 +271,17 @@ export function createTimerSlice(
         }
       }
 
-      ctx.ydoc.transact(() => {
-        ctx.yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, completedSession]));
-        ctx.yMetaMap.set('activeTimerSession', JSON.stringify(updatedSession));
-        ctx.yMetaMap.set('timerStatus', 'completed');
+      yjsContext.ydoc.transact(() => {
+        yjsContext.yMetaMap.set('timerSessions', JSON.stringify([...get().timerSessions, completedSession]));
+        yjsContext.yMetaMap.set('activeTimerSession', JSON.stringify(updatedSession));
+        yjsContext.yMetaMap.set('timerStatus', 'completed');
       }, 'local');
 
       setTimeout(() => {
-        ctx.ydoc.transact(() => {
-          ctx.yMetaMap.delete('activeTimerSession');
-          ctx.yMetaMap.delete('timerStatus');
-          ctx.yMetaMap.delete('timerRemainingSeconds');
+        yjsContext.ydoc.transact(() => {
+          yjsContext.yMetaMap.delete('activeTimerSession');
+          yjsContext.yMetaMap.delete('timerStatus');
+          yjsContext.yMetaMap.delete('timerRemainingSeconds');
         }, 'local');
       }, 5000);
     },
