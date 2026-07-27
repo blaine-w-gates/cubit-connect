@@ -9,7 +9,7 @@ import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import { createTaskSlice, type TaskSliceState } from './slices/taskSlice';
 import { createProjectMetaSlice, type ProjectMetaSliceState } from './slices/projectMetaSlice';
 import { createLogSlice, type LogSliceState, type LogEntry } from './slices/logSlice';
-import { registerYjsObserver } from './slices/yjsObserver';
+import { registerYjsObserver, syncFromYjsDirect } from './slices/yjsObserver';
 import * as Y from 'yjs';
 import {
   markSyncAttached as markNetworkSyncAttached,
@@ -17,7 +17,6 @@ import {
   enableDiagnostics,
   getInstanceId,
   assertInvariant,
-  recordZustandUpdate,
 } from '@/lib/syncDiagnostics';
 import {
   yjsContext,
@@ -851,67 +850,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   /**
    * Syncs Zustand state from Yjs document.
    * Called when network updates are received to ensure UI reflects CRDT state.
+   * Delegates to syncFromYjsDirect in yjsObserver.ts (shared with observer handler).
    */
   syncFromYjs: () => {
-    // Extract current state from Yjs (same logic as debounced handler in loadProject)
-    const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
-    const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
-    
-    // Map through cache for Structural Sharing (simple version without cache for now)
-    const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
-    const sharedTasks = rawYTasks.map(yTask => extractTaskItemFromYMap(yTask));
-
-    const updatedProjects = sortYMapList(sharedProjects);
-    const currentActiveId = get().activeProjectId;
-    const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
-
-    // Document State Render Engine
-    let transcript = get().transcript;
-    const textFromCRDT = yjsContext.yTranscript.toString();
-    transcript = textFromCRDT === "" ? null : textFromCRDT;
-
-    let projectType = get().projectType;
-    if (yjsContext.yMetaMap.has('projectType')) projectType = yjsContext.yMetaMap.get('projectType');
-
-    let projectTitle = get().projectTitle;
-    if (yjsContext.yMetaMap.has('projectTitle')) projectTitle = yjsContext.yMetaMap.get('projectTitle');
-
-    let scoutResults = get().scoutResults;
-    if (yjsContext.yMetaMap.has('scoutResults')) {
-      const raw = yjsContext.yMetaMap.get('scoutResults');
-      if (raw) {
-        try { scoutResults = JSON.parse(raw); } catch {
-          // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
-        }
-      }
-    }
-
-    let scoutHistory = get().scoutHistory;
-    if (yjsContext.yMetaMap.has('scoutHistory')) {
-      const raw = yjsContext.yMetaMap.get('scoutHistory');
-      if (raw) {
-        try { scoutHistory = JSON.parse(raw); } catch {
-          // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
-        }
-      }
-    }
-
-    set({
-      todoProjects: updatedProjects,
-      tasks: sharedTasks,
-      activeProjectId: actProj?.id || null,
-      todoRows: actProj ? actProj.todoRows : [],
-      priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
-      transcript,
-      projectType,
-      projectTitle,
-      scoutResults,
-      scoutHistory,
-    });
-    
-    // Track that Zustand state was synced from Yjs
-    recordZustandUpdate(yjsContext.ydoc);
-    
+    syncFromYjsDirect(set, get);
   },
 
   // isSettingsOpen, isSyncModalOpen moved to uiSlice.ts

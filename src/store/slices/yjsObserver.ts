@@ -25,6 +25,99 @@ import {
 } from '@/lib/syncDiagnostics';
 
 /**
+ * Shared Yjs→Zustand sync logic.
+ *
+ * Takes already-extracted project/task arrays (allowing the observer to pass
+ * cache-optimized values), sorts projects, resolves the active project,
+ * extracts document metadata (transcript, projectType, etc.), and calls set().
+ *
+ * Used by both the observer's debounced handler and syncFromYjs.
+ */
+export function syncYjsToZustand(
+  set: (partial: any) => void,
+  get: () => any,
+  sharedProjects: TodoProject[],
+  sharedTasks: TaskItem[],
+  useRaf: boolean = false
+) {
+  const updatedProjects = sortYMapList(sharedProjects);
+
+  const currentActiveId = get().activeProjectId;
+  const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
+
+  // --- Document State Render Engine ---
+  let transcript = get().transcript;
+  const textFromCRDT = yjsContext.yTranscript.toString();
+  transcript = textFromCRDT === "" ? null : textFromCRDT;
+
+  let projectType = get().projectType;
+  if (yjsContext.yMetaMap.has('projectType')) projectType = yjsContext.yMetaMap.get('projectType');
+
+  let projectTitle = get().projectTitle;
+  if (yjsContext.yMetaMap.has('projectTitle')) projectTitle = yjsContext.yMetaMap.get('projectTitle');
+
+  let scoutResults = get().scoutResults;
+  if (yjsContext.yMetaMap.has('scoutResults')) {
+    const raw = yjsContext.yMetaMap.get('scoutResults');
+    if (raw) {
+      if (JSON.stringify(scoutResults) !== raw) {
+        try { scoutResults = JSON.parse(raw); } catch {
+          // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
+        }
+      }
+    }
+  }
+
+  let scoutHistory = get().scoutHistory;
+  if (yjsContext.yMetaMap.has('scoutHistory')) {
+    const raw = yjsContext.yMetaMap.get('scoutHistory');
+    if (raw) {
+      if (JSON.stringify(scoutHistory) !== raw) {
+        try { scoutHistory = JSON.parse(raw); } catch {
+          // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
+        }
+      }
+    }
+  }
+
+  const stateUpdate = {
+    todoProjects: updatedProjects,
+    tasks: sharedTasks,
+    activeProjectId: actProj?.id || null,
+    todoRows: actProj ? actProj.todoRows : [],
+    priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
+    transcript,
+    projectType,
+    projectTitle,
+    scoutResults,
+    scoutHistory,
+  };
+
+  if (useRaf) {
+    requestAnimationFrame(() => {
+      set(stateUpdate);
+      recordZustandUpdate(yjsContext.ydoc);
+    });
+  } else {
+    set(stateUpdate);
+    recordZustandUpdate(yjsContext.ydoc);
+  }
+}
+
+/**
+ * Convenience wrapper for syncFromYjs — extracts without caching, then syncs.
+ */
+export function syncFromYjsDirect(set: (partial: any) => void, get: () => any) {
+  const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+  const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
+
+  const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
+  const sharedTasks = rawYTasks.map(yTask => extractTaskItemFromYMap(yTask));
+
+  syncYjsToZustand(set, get, sharedProjects, sharedTasks, false);
+}
+
+/**
  * Register the main Yjs update observer on the current yjsContext.ydoc instance.
  * This handles both outbound broadcast (for local changes) and inbound UI updates (for network changes).
  * Must be called whenever a new yjsContext.ydoc is created (in resetYDoc) to ensure the observer is on the correct instance.
@@ -135,63 +228,8 @@ export function registerYjsObserver(
       // Clear dirty tracker after processing
       dirtyTaskIds.clear();
 
-      const updatedProjects = sortYMapList(sharedProjects);
-
-      const currentActiveId = get().activeProjectId;
-      const actProj = updatedProjects.find(p => p.id === currentActiveId) || updatedProjects[0];
-
-      // --- Document State Render Engine ---
-      let transcript = get().transcript;
-      const textFromCRDT = yjsContext.yTranscript.toString();
-      transcript = textFromCRDT === "" ? null : textFromCRDT;
-
-      let projectType = get().projectType;
-      if (yjsContext.yMetaMap.has('projectType')) projectType = yjsContext.yMetaMap.get('projectType');
-
-      let projectTitle = get().projectTitle;
-      if (yjsContext.yMetaMap.has('projectTitle')) projectTitle = yjsContext.yMetaMap.get('projectTitle');
-
-      let scoutResults = get().scoutResults;
-      if (yjsContext.yMetaMap.has('scoutResults')) {
-        const raw = yjsContext.yMetaMap.get('scoutResults');
-        if (raw) {
-          if (JSON.stringify(scoutResults) !== raw) {
-            try { scoutResults = JSON.parse(raw); } catch {
-              // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
-            }
-          }
-        }
-      }
-
-      let scoutHistory = get().scoutHistory;
-      if (yjsContext.yMetaMap.has('scoutHistory')) {
-        const raw = yjsContext.yMetaMap.get('scoutHistory');
-        if (raw) {
-          if (JSON.stringify(scoutHistory) !== raw) {
-            try { scoutHistory = JSON.parse(raw); } catch {
-              // INTENTIONALLY IGNORING: Corrupted Yjs metadata - keep existing state
-            }
-          }
-        }
-      }
-
-      requestAnimationFrame(() => {
-        set({
-          todoProjects: updatedProjects,
-          tasks: sharedTasks,
-          activeProjectId: actProj?.id || null,
-          todoRows: actProj ? actProj.todoRows : [],
-          priorityDials: actProj ? actProj.priorityDials : { left: '', right: '', focusedSide: 'none' },
-          transcript,
-          projectType,
-          projectTitle,
-          scoutResults,
-          scoutHistory,
-        });
-
-        // Track that Zustand state was updated from Yjs
-        recordZustandUpdate(yjsContext.ydoc);
-      });
+      // 3. Sync to Zustand (with requestAnimationFrame for batched renders)
+      syncYjsToZustand(set, get, sharedProjects, sharedTasks, true);
     }, 100);
   });
 }
