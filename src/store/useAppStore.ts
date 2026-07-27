@@ -64,9 +64,6 @@ function registerYjsObserver(set: any, get: any) {
   markObserverRegistered(yjsContext.ydoc, 'registerYjsObserver');
   markObserverRegisteredInStateMachine();
   
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _ydocId = getInstanceId(yjsContext.ydoc) || 'unknown';
-  
   // ---------------------------------------------------------------------------
   // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
   // ---------------------------------------------------------------------------
@@ -332,7 +329,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   projectTitle: 'New Project', // Default
 
   // --- UI Slice (extracted to uiSlice.ts) ---
-  ...createUISlice(set, get),
+  ...createUISlice(set),
 
   hasPeers: false,
   lastPeerSeenAt: 0,
@@ -650,9 +647,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // setVideoHandleState moved to uiSlice.ts
 
   loadProject: async () => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const _entryYdocId = (yjsContext.ydoc as any).__observerId || 'no-id';
-    
     // CRITICAL: Always ensure observer is registered on the current yjsContext.ydoc instance
     // This must happen BEFORE any early returns to prevent observer loss on reconnection
     const currentYdocId = getInstanceId(yjsContext.ydoc);

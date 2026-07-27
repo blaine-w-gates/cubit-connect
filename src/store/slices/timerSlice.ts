@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { TimerSession, TodayPreferences } from '@/schemas/storage';
 import { yjsContext } from '@/lib/yjsContext';
 

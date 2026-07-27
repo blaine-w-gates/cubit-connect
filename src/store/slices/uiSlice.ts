@@ -59,8 +59,7 @@ export interface UISliceState {
 }
 
 export function createUISlice(
-  set: (partial: any) => void,
-  _get: () => any
+  set: (partial: any) => void
 ): UISliceState {
   return {
     // Input mode & Scout
