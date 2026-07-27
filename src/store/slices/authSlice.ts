@@ -32,7 +32,7 @@ export interface AuthSliceState {
   initializeAuth: () => Promise<void>;
 }
 
-export function createAuthSlice(set: any, _get: any): AuthSliceState { // eslint-disable-line @typescript-eslint/no-unused-vars
+export function createAuthSlice(set: any): AuthSliceState {
   return {
     // --- Auth & Identity State ---
     authUserId: null,
@@ -57,7 +57,7 @@ export function createAuthSlice(set: any, _get: any): AuthSliceState { // eslint
           set({ migrationStatus: 'exporting' });
 
           try {
-            const migrationResult = await migrateAnonymousData(result.userId, (stage, _progress: number) => {
+            const migrationResult = await migrateAnonymousData(result.userId, (stage) => {
               if (stage === 'exporting') {
                 set({ migrationStatus: 'exporting' });
               } else if (stage === 'migrating') {
@@ -122,7 +122,7 @@ export function createAuthSlice(set: any, _get: any): AuthSliceState { // eslint
             set({ migrationStatus: 'exporting' });
 
             try {
-              const migrationResult = await migrateAnonymousData(result.userId, (stage, _progress: number) => {
+              const migrationResult = await migrateAnonymousData(result.userId, (stage) => {
                 if (stage === 'exporting') {
                   set({ migrationStatus: 'exporting' });
                 } else if (stage === 'migrating') {

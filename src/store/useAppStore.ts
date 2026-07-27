@@ -8,8 +8,8 @@ import { createUISlice, type UISliceState } from './slices/uiSlice';
 import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import { createTaskSlice, type TaskSliceState } from './slices/taskSlice';
 import { createProjectMetaSlice, type ProjectMetaSliceState } from './slices/projectMetaSlice';
-import { createLogSlice, type LogSliceState, type LogEntry } from './slices/logSlice';
-import { registerYjsObserver, syncFromYjsDirect } from './slices/yjsObserver';
+import { createLogSlice, type LogSliceState } from './slices/logSlice';
+import { ensureObserverRegistered, syncFromYjsDirect } from './slices/yjsObserver';
 import * as Y from 'yjs';
 import {
   markSyncAttached as markNetworkSyncAttached,
@@ -86,9 +86,6 @@ export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceSta
   flushSyncNow: () => Promise<void>;
 }
 
-export type { LogEntry };
-
-
 
 const STORAGE_KEY_API = 'cubit_api_key';
 
@@ -136,7 +133,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   ...createTaskSlice(set, get),
 
   // --- Auth Slice (extracted to authSlice.ts) ---
-  ...createAuthSlice(set, get),
+  ...createAuthSlice(set),
 
   // --- Workspace State (ADR-001) ---
   activeWorkspaceType: (typeof window !== 'undefined' ? localStorage.getItem('active_workspace_type') as WorkspaceType : null) || 'personalUno',
@@ -254,13 +251,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
       // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
       // But if loadProject didn't run or skipped registration, register it now
-      const finalYdocId = getInstanceId(yjsContext.ydoc);
-      const observerYdocId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
-
-      if (observerYdocId !== finalYdocId) {
-        registerYjsObserver(set, get, IDLE_CHECKPOINT_DELAY);
-        (yjsContext.ydoc as { __observerId?: string }).__observerId = finalYdocId;
-      }
+      ensureObserverRegistered(set, get, IDLE_CHECKPOINT_DELAY);
 
       // CRITICAL INVARIANT: Observer must be registered before sync manager creation
       const finalObserverYdocId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
@@ -429,7 +420,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   // --- Log Slice (extracted to logSlice.ts) ---
-  ...createLogSlice(set, get),
+  ...createLogSlice(set),
 
   // --- Today Page / Pomodoro Timer (extracted to timerSlice) ---
   ...createTimerSlice(set, get),
@@ -439,13 +430,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   loadProject: async () => {
     // CRITICAL: Always ensure observer is registered on the current yjsContext.ydoc instance
     // This must happen BEFORE any early returns to prevent observer loss on reconnection
-    const currentYdocId = getInstanceId(yjsContext.ydoc);
-    const observerId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
-    
-    if (observerId !== currentYdocId) {
-      registerYjsObserver(set, get, IDLE_CHECKPOINT_DELAY);
-      (yjsContext.ydoc as { __observerId?: string }).__observerId = currentYdocId;
-    }
+    ensureObserverRegistered(set, get, IDLE_CHECKPOINT_DELAY);
 
     // BUG-3 fix: single-flight lock avoids race when loadProject is called twice
     // before hydration state flips true.
@@ -739,12 +724,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
 
     // Ensure observer is registered (already done at function start, but double-check)
-    const finalYdocId = getInstanceId(yjsContext.ydoc);
-    const finalObserverId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
-    if (finalObserverId !== finalYdocId) {
-      registerYjsObserver(set, get, IDLE_CHECKPOINT_DELAY);
-      (yjsContext.ydoc as { __observerId?: string }).__observerId = finalYdocId;
-    }
+    ensureObserverRegistered(set, get, IDLE_CHECKPOINT_DELAY);
 
     })();
 
@@ -757,19 +737,20 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // --- Project meta actions moved to projectMetaSlice.ts ---
 
+  // CROSS-SLICE COUPLING: resetProject's set() call writes to multiple slices:
+  //   - TaskSliceState: tasks, todoProjects, activeProjectId
+  //   - ProjectMetaSliceState: transcript, scoutResults, scoutHistory, projectType, projectTitle
+  //   - LogSliceState: logs
+  //   - UISliceState: hasVideoHandle, isProcessing, activeProcessingId, scoutTopic, scoutPlatform, inputMode
+  // This is acceptable in the root store (which owns all slices) and uses a single
+  // batched set() for atomic UI updates.
   resetProject: async () => {
     const { activeWorkspaceType, activeWorkspaceId, deviceId: currentDeviceId } = get();
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
     // CRITICAL: Ensure observer is registered on current yjsContext.ydoc before modifying state
     // This prevents observer loss when resetProject is called during test setup
-    const currentYdocId = getInstanceId(yjsContext.ydoc);
-    const observerId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
-
-    if (observerId !== currentYdocId) {
-      registerYjsObserver(set, get, IDLE_CHECKPOINT_DELAY);
-      (yjsContext.ydoc as { __observerId?: string }).__observerId = currentYdocId;
-    }
+    ensureObserverRegistered(set, get, IDLE_CHECKPOINT_DELAY);
 
     yjsContext.ydoc.transact(() => {
       yjsContext.yMetaMap.clear();

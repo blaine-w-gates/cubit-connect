@@ -22,7 +22,27 @@ import {
   markObserverRegistered,
   markObserverRegisteredInStateMachine,
   recordZustandUpdate,
+  getInstanceId,
 } from '@/lib/syncDiagnostics';
+
+/**
+ * Ensures the Yjs observer is registered on the current yjsContext.ydoc instance.
+ * Idempotent — only registers if the observer's ydoc ID doesn't match the current ydoc.
+ * Replaces the 4 duplicated 3-line patterns in useAppStore.ts.
+ */
+export function ensureObserverRegistered(
+  set: (partial: any) => void,
+  get: () => any,
+  idleCheckpointDelay: number
+) {
+  const currentYdocId = getInstanceId(yjsContext.ydoc);
+  const observerId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
+
+  if (observerId !== currentYdocId) {
+    registerYjsObserver(set, get, idleCheckpointDelay);
+    (yjsContext.ydoc as { __observerId?: string }).__observerId = currentYdocId;
+  }
+}
 
 /**
  * Shared Yjs→Zustand sync logic.
@@ -32,6 +52,12 @@ import {
  * extracts document metadata (transcript, projectType, etc.), and calls set().
  *
  * Used by both the observer's debounced handler and syncFromYjs.
+ *
+ * NOTE: This function does NOT do caching/dirty tracking itself. The observer
+ * applies micro-caches + dirty tracking BEFORE calling this function, achieving
+ * O(1) for unchanged items. syncFromYjsDirect calls this with fresh extractions
+ * (O(n) on every call) — do NOT add caching here, as syncFromYjs is called
+ * manually (not from an observer context with dirty tracking).
  */
 export function syncYjsToZustand(
   set: (partial: any) => void,

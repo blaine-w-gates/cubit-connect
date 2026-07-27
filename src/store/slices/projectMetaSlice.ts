@@ -92,6 +92,13 @@ export function createProjectMetaSlice(
     },
 
     // ⚡️ GLITCH-FREE RESET: For "Start Analysis" workflow
+    // CROSS-SLICE COUPLING: This set() call writes to multiple slices' state:
+    //   - TaskSliceState: tasks
+    //   - ProjectMetaSliceState: transcript, scoutResults, scoutHistory, projectType, projectTitle
+    //   - LogSliceState: logs
+    //   - UISliceState: isProcessing, scoutTopic, scoutPlatform
+    // This is intentional — a single batched set() ensures atomic UI updates.
+    // If slice field names change, this call must be updated manually (set is typed as any).
     startNewAnalysis: async (type: 'video' | 'text', title: string) => {
       const { activeWorkspaceType, activeWorkspaceId } = get();
       await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);

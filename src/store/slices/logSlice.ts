@@ -20,8 +20,7 @@ export interface LogSliceState {
 }
 
 export function createLogSlice(
-  set: (partial: any) => void,
-  _get: () => any
+  set: (partial: any) => void
 ): LogSliceState {
   return {
     logs: [],

@@ -9,6 +9,7 @@ export default defineConfig({
     reporters: ['dot'],
     environment: 'jsdom',
     globals: true,
+    testTimeout: 10000,
     setupFiles: ['./tests/unit/setup.ts'],
     include: ['tests/unit/**/*.{test,spec}.{ts,tsx}', 'src/**/*.{test,spec}.{ts,tsx}'],
     exclude: ['node_modules', 'tests/e2e/**/*', 'tests/*.spec.ts', 'dist', '.next'],
