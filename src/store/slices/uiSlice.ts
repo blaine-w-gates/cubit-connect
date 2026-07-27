@@ -50,8 +50,7 @@ export interface UISliceState {
   setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
   processingRowId: string | null;
   setProcessingRowId: (rowId: string | null) => void;
-  lastAddedRowId: string | null;
-  setLastAddedRowId: (rowId: string | null) => void;
+  // lastAddedRowId and setLastAddedRowId are owned by TaskSliceState
 
   // Alarm UI state
   selectedStepId: { projectId: string; rowId: string; stepIndex: number } | null;
@@ -107,8 +106,7 @@ export function createUISlice(
     setActiveMode: (mode) => set({ activeMode: mode }),
     processingRowId: null,
     setProcessingRowId: (rowId) => set({ processingRowId: rowId }),
-    lastAddedRowId: null,
-    setLastAddedRowId: (rowId) => set({ lastAddedRowId: rowId }),
+    // lastAddedRowId and setLastAddedRowId are owned by taskSlice
 
     // Alarm UI state
     selectedStepId: null,

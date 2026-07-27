@@ -3,8 +3,8 @@ import { create } from 'zustand';
 import { storageService, TaskItem, CubitStep, TodoProject } from '@/services/storage';
 import { GeminiEvents, GeminiService } from '@/services/gemini';
 import { cryptoUtils } from '@/lib/crypto';
-import { createTimerSlice } from './slices/timerSlice';
-import { createUISlice } from './slices/uiSlice';
+import { createTimerSlice, type TimerSliceState } from './slices/timerSlice';
+import { createUISlice, type UISliceState } from './slices/uiSlice';
 import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import { createTaskSlice, type TaskSliceState } from './slices/taskSlice';
 import * as Y from 'yjs';
@@ -40,11 +40,11 @@ import { getCleanupJobSystem } from '@/lib/cleanupJobs';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
 // Initialize cleanup jobs system (auto-starts registered jobs)
-const cleanupSystem = getCleanupJobSystem();
+getCleanupJobSystem();
 
 // --- Yjs Context ---
 // Mutable Yjs document state is now managed by yjsContext.ts.
-// Use yjsContext.yjsContext.ydoc, yjsContext.yjsContext.yProjectsMap, etc.
+// Use yjsContext.ydoc, yjsContext.yProjectsMap, etc.
 // resetYDoc is replaced by resetYjsContext(syncFromYjsCallback).
 
 // Wrapper to maintain the resetYDoc call site API
@@ -64,7 +64,8 @@ function registerYjsObserver(set: any, get: any) {
   markObserverRegistered(yjsContext.ydoc, 'registerYjsObserver');
   markObserverRegisteredInStateMachine();
   
-  const ydocId = getInstanceId(yjsContext.ydoc) || 'unknown';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ydocId = getInstanceId(yjsContext.ydoc) || 'unknown';
   
   // ---------------------------------------------------------------------------
   // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
@@ -143,9 +144,6 @@ function registerYjsObserver(set: any, get: any) {
       const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
       const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
       
-      // DEBUG: Log what observer is extracting
-      const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
-
       // 2. Map through cache for Structural Sharing with O(1) dirty check early bail
       const sharedProjects = rawYProjects.map(yProj => {
         const id = yProj.get('id');
@@ -239,72 +237,35 @@ function registerYjsObserver(set: any, get: any) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }
 
-export interface ProjectState extends AuthSliceState, TaskSliceState {
+export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceState, TimerSliceState {
   apiKey: string;
   setApiKey: (key: string) => void;
-  isHydrated: boolean; // New: Hydration Guard
-  hasVideoHandle: boolean;
-  isProcessing: boolean;
+  isHydrated: boolean;
   tasks: TaskItem[];
-  transcript: string | null; // New state
+  transcript: string | null;
   scoutResults: string[];
-  scoutHistory: string[]; // New: Scout feature persistence
-  projectType: 'video' | 'text' | 'scout'; // New: MVP Text Mode + Scout Mode
-  projectTitle: string; // New: Title Persistence
+  scoutHistory: string[];
+  projectType: 'video' | 'text' | 'scout';
+  projectTitle: string;
 
-  // Strike 17.5: Global Input Mode & Scout Persistence
-  inputMode: 'video' | 'text' | 'scout';
-  setInputMode: (mode: 'video' | 'text' | 'scout') => void;
-  scoutTopic: string;
-  setScoutTopic: (topic: string) => void;
-  scoutPlatform: string; // 'instagram' | 'reddit' | 'tiktok' | etc
-  setScoutPlatform: (platform: string) => void;
-
-  activeProcessingId: string | null; // Electric UI
-  setActiveProcessingId: (id: string | null) => void;
-
-  // --- COLLABORATION LOCKING (STRICT MODE) ---
-  peerIsEditing: boolean;
-  setPeerIsEditing: (isEditing: boolean) => void;
-
-  _syncToggle: boolean;
-  forceSyncUpdate: () => void;
+  // Project meta actions (will be extracted to projectMetaSlice later)
   syncFromYjs: () => void;
-
-  // UI State
-  isSettingsOpen: boolean;
-  settingsVariant: 'default' | 'quota';
-  setIsSettingsOpen: (isOpen: boolean, variant?: 'default' | 'quota') => void;
-
-  // New Sync Modal State
-  isSyncModalOpen: boolean;
-  setIsSyncModalOpen: (isOpen: boolean) => void;
-
-  // Actions (task-related actions are in TaskSliceState)
-  setVideoHandleState: (hasHandle: boolean) => void;
   loadProject: () => Promise<void>;
   resetProject: () => Promise<void>;
   exportAndClearData: () => Promise<void>;
   fullLogout: () => Promise<void>;
-  setProcessing: (isProcessing: boolean) => void;
   setTranscript: (text: string) => Promise<void>;
   setScoutResults: (results: string[]) => Promise<void>;
   addToScoutHistory: (topic: string) => void;
   setProjectType: (type: 'video' | 'text' | 'scout') => Promise<void>;
   setProjectTitle: (title: string) => Promise<void>;
   startTextProject: (title: string, text: string) => Promise<void>;
+  startNewAnalysis: (type: 'video' | 'text', title: string) => Promise<void>;
 
-  // Log Persistence
+  // Log Persistence (will be extracted to logSlice later)
   logs: LogEntry[];
   addLog: (message: string) => void;
   clearLogs: () => void;
-
-  // UI-only state (not persisted)
-  activeMode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null;
-  setActiveMode: (mode: 'cubit' | 'deepDive' | 'dialLeft' | 'dialRight' | null) => void;
-  processingRowId: string | null;
-  setProcessingRowId: (rowId: string | null) => void;
-
 
   // --- Workspace State (ADR-001) ---
   activeWorkspaceType: WorkspaceType;
@@ -322,43 +283,6 @@ export interface ProjectState extends AuthSliceState, TaskSliceState {
   connectToSyncServer: (passphrase: string) => Promise<void>;
   disconnectSyncServer: () => void;
   flushSyncNow: () => Promise<void>;
-
-  // --- Today Page / Pomodoro Timer State (P1-T2) ---
-  // Timer State
-  activeTimerSession: import('@/schemas/storage').TimerSession | null;
-  timerRemainingSeconds: number;
-  timerStatus: 'idle' | 'running' | 'paused' | 'completed';
-  
-  // Task Selection
-  todayTaskId: string | null;
-  todayTaskDialSource: 'left' | 'right' | null;
-  todayPreferences: import('@/schemas/storage').TodayPreferences;
-  timerSessions: import('@/schemas/storage').TimerSession[];
-  
-  // Timer Actions
-  selectTaskForToday: (taskId: string, dialSource: 'left' | 'right' | null) => void;
-  clearTodayTask: () => void;
-  startTimer: () => void;
-  pauseTimer: () => void;
-  resumeTimer: () => void;
-  stopTimer: () => void;
-  resetTimer: () => void;
-  completeTimer: () => void;
-  tickTimer: (remainingSeconds: number) => void;
-  updateTimerPreferences: (prefs: Partial<import('@/schemas/storage').TodayPreferences>) => void;
-  addTimerSession: (session: import('@/schemas/storage').TimerSession) => void;
-
-  // --- Alarm System Actions (V1) ---
-  createAlarm: (projectId: string, alarm: import('@/schemas/storage').AlarmRecord) => void;
-  updateAlarmStatus: (projectId: string, alarmId: string, status: import('@/schemas/storage').AlarmStatus, updates?: Partial<import('@/schemas/storage').AlarmRecord>) => void;
-  deleteAlarm: (projectId: string, alarmId: string) => void;
-
-  // --- Alarm UI State (V1) ---
-  selectedStepId: { projectId: string; rowId: string; stepIndex: number } | null;
-  selectStep: (projectId: string, rowId: string, stepIndex: number) => void;
-  clearSelectedStep: () => void;
-
-  // --- Auth & Identity State moved to authSlice.ts ---
 }
 
 export interface LogEntry {
@@ -517,7 +441,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!isSameRoom) {
         await resetYDoc();
         didResetInThisCall = true;
-        const ydocAfterReset = getInstanceId(yjsContext.ydoc);
         isMigrating = false;
         loadProjectInFlight = null;
 
@@ -727,7 +650,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // setVideoHandleState moved to uiSlice.ts
 
   loadProject: async () => {
-    const entryYdocId = (yjsContext.ydoc as any).__observerId || 'no-id';
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const _entryYdocId = (yjsContext.ydoc as any).__observerId || 'no-id';
     
     // CRITICAL: Always ensure observer is registered on the current yjsContext.ydoc instance
     // This must happen BEFORE any early returns to prevent observer loss on reconnection
@@ -1213,9 +1137,6 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
     const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
     
-    // DEBUG: Log what we're extracting
-    const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
-
     // Map through cache for Structural Sharing (simple version without cache for now)
     const sharedProjects = rawYProjects.map(yProj => extractTodoProjectFromYMap(yProj));
     const sharedTasks = rawYTasks.map(yTask => extractTaskItemFromYMap(yTask));
