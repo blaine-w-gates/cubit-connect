@@ -8,6 +8,7 @@ import { createUISlice, type UISliceState } from './slices/uiSlice';
 import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import { createTaskSlice, type TaskSliceState } from './slices/taskSlice';
 import { createProjectMetaSlice, type ProjectMetaSliceState } from './slices/projectMetaSlice';
+import { createLogSlice, type LogSliceState, type LogEntry } from './slices/logSlice';
 import * as Y from 'yjs';
 import {
   markObserverRegistered,
@@ -235,7 +236,7 @@ function registerYjsObserver(set: any, get: any) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 }
 
-export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceState, TimerSliceState, ProjectMetaSliceState {
+export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceState, TimerSliceState, ProjectMetaSliceState, LogSliceState {
   apiKey: string;
   setApiKey: (key: string) => void;
   isHydrated: boolean;
@@ -247,11 +248,6 @@ export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceSta
   resetProject: () => Promise<void>;
   exportAndClearData: () => Promise<void>;
   fullLogout: () => Promise<void>;
-
-  // Log Persistence (will be extracted to logSlice later)
-  logs: LogEntry[];
-  addLog: (message: string) => void;
-  clearLogs: () => void;
 
   // --- Workspace State (ADR-001) ---
   activeWorkspaceType: WorkspaceType;
@@ -271,11 +267,7 @@ export interface ProjectState extends AuthSliceState, TaskSliceState, UISliceSta
   flushSyncNow: () => Promise<void>;
 }
 
-export interface LogEntry {
-  id: string;
-  message: string;
-  timestamp: string;
-}
+export type { LogEntry };
 
 
 
@@ -617,7 +609,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
   },
 
-  logs: [],
+  // --- Log Slice (extracted to logSlice.ts) ---
+  ...createLogSlice(set, get),
 
   // --- Today Page / Pomodoro Timer (extracted to timerSlice) ---
   ...createTimerSlice(set, get),
@@ -1103,26 +1096,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // isSettingsOpen, isSyncModalOpen moved to uiSlice.ts
 
-  addLog: (message: string) => {
-    set((state) => {
-      const lastLog = state.logs[state.logs.length - 1];
-      if (lastLog && lastLog.message === message) return state; // De-dupe at source
-
-      const newEntry: LogEntry = {
-        id: crypto.randomUUID(),
-        message,
-        timestamp: new Date().toLocaleTimeString([], {
-          hour12: false,
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-        }),
-      };
-
-      return { logs: [...state.logs, newEntry].slice(-50) }; // Keep last 50
-    });
-  },
-  clearLogs: () => set({ logs: [] }),
+  // --- Log actions moved to logSlice.ts ---
 
   // --- Timer actions moved to timerSlice.ts ---
   // --- Alarm actions moved to taskSlice.ts ---
