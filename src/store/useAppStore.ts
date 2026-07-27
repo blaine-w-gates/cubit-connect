@@ -8,18 +8,22 @@ import { createUISlice } from './slices/uiSlice';
 import { createAuthSlice, type AuthSliceState } from './slices/authSlice';
 import * as Y from 'yjs';
 import {
-  registerYDocInstance,
-  markInstanceDestroyed,
   markObserverRegistered,
   markSyncAttached as markNetworkSyncAttached,
   transitionToPhase,
   markObserverRegisteredInStateMachine,
   enableDiagnostics,
   getInstanceId,
-  getInstance,
   assertInvariant,
   recordZustandUpdate,
 } from '@/lib/syncDiagnostics';
+import {
+  yjsContext,
+  getYDoc,
+  resetYjsContext,
+} from '@/lib/yjsContext';
+// Re-export getYDoc for backwards compatibility (SyncDebugOverlay imports from useAppStore)
+export { getYDoc };
 import {
   bindTodoProjectToYMap,
   extractTodoProjectFromYMap,
@@ -31,126 +35,37 @@ import {
   bindCubitStepToYMap,
   applyUpdateToYText,
 } from '../lib/yjsHelpers';
-import type { SupabaseSyncProd } from '@/lib/supabaseSyncProd';
 import { getUseSupabaseSync } from '@/lib/featureFlags';
 import { loadSupabaseSync } from '@/lib/supabaseSyncLoader';
 import { getCleanupJobSystem } from '@/lib/cleanupJobs';
 import { getDeviceId, getUnoWorkspaceId, type WorkspaceType } from '@/lib/identity';
 
-import { generateUniqueClientId } from '@/lib/yjsClientId';
-
-// --- Mutable Yjs Core (swapped on workspace switch) ---
-// gc: false required for E2EE so deeply-offline devices don't lose tombstones
-// Use deterministic ClientID based on device fingerprint to prevent collisions
-const ydocOptions: { gc: boolean; clientID?: number } = { 
-  gc: false,
-  clientID: generateUniqueClientId() // Always use unique ClientID per device
-};
-
-let ydoc = new Y.Doc(ydocOptions);
-registerYDocInstance(ydoc, 'module_init');
-
 // Initialize cleanup jobs system (auto-starts registered jobs)
 const cleanupSystem = getCleanupJobSystem();
 
-// Type aliases for Yjs maps to avoid explicit any
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type YAnyMap = Y.Map<any>;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type YAnyMeta = any;
+// --- Yjs Context ---
+// Mutable Yjs document state is now managed by yjsContext.ts.
+// Use yjsContext.yjsContext.ydoc, yjsContext.yjsContext.yProjectsMap, etc.
+// resetYDoc is replaced by resetYjsContext(syncFromYjsCallback).
 
-// Note: Observer uses local observerProjectCache/observerTaskCache for structural sharing
-// These are recreated per observer instance in registerYjsObserver()
-
-let yProjectsMap = ydoc.getMap<YAnyMap>('projects');
-let yTasksMap = ydoc.getMap<YAnyMap>('tasks');
-let yMetaMap = ydoc.getMap<YAnyMeta>('meta');
-let yTranscript = ydoc.getText('transcript');
-
-// Exported getter so Playwright tests can reach the active doc
-export function getYDoc() { return ydoc; }
-
-/**
- * Destroy the current Y.Doc and create a fresh one.
- * Called during workspace switching to guarantee data isolation.
- * personalUno data never bleeds into a personalMulti sync channel.
- * 
- * CRITICAL: Also resets NetworkSync so it uses the new ydoc reference.
- */
+// Wrapper to maintain the resetYDoc call site API
 async function resetYDoc(): Promise<Y.Doc> {
-  const oldId = getInstanceId(ydoc);
-  
-  // CRITICAL FIX: Check for pending updates before destroying
-  // If updates were received but not applied, they will be lost
-  if (oldId) {
-    const instance = getInstance(oldId);
-    if (instance && instance.updatesReceived > instance.updatesApplied) {
-      const pending = instance.updatesReceived - instance.updatesApplied;
-    }
-  }
-  
-  // CRITICAL FIX: Disconnect sync manager BEFORE syncing/destroying ydoc
-  // This ensures queued updates are applied to the ydoc before we extract state
-  if (syncManager) {
-    await syncManager.disconnect();
-    syncManager = null;
-    
-    // AFTER flush, sync any newly-applied data to Zustand
-    useAppStore.getState().syncFromYjs();
-  } else if (oldId) {
-    // Sync manager is null but ydoc might still have unapplied updates
-    // This handles the "Pre-Attachment Race" where updates arrived before sync was assigned
-    const instance = getInstance(oldId);
-    if (instance && instance.updatesReceived > 0 && instance.updatesApplied === 0) {
-      useAppStore.getState().syncFromYjs();
-    }
-  }
-  if (idleCheckpointTimer) {
-    clearTimeout(idleCheckpointTimer);
-    idleCheckpointTimer = null;
-  }
-  
-  markInstanceDestroyed(ydoc, 'resetYDoc');
-  ydoc.destroy();
-  
-  // Note: Observer caches are local to registerYjsObserver and are recreated
-  // when the observer is registered on the new ydoc instance
-  
-  // Create new Y.Doc with unique ClientID based on device fingerprint
-  const newYdocOptions: { gc: boolean; clientID?: number } = { 
-    gc: false,
-    clientID: generateUniqueClientId() // Always use unique ClientID per device
-  };
-  
-  ydoc = new Y.Doc(newYdocOptions);
-  const newId = registerYDocInstance(ydoc, 'resetYDoc');
-  
-  transitionToPhase('ydoc_reset', { ydocId: newId });
-  
-  // Reset the observer tracking on the new ydoc
-  (ydoc as { __observerId?: string }).__observerId = undefined;
-  
-  yProjectsMap = ydoc.getMap<Y.Map<any>>('projects'); // eslint-disable-line @typescript-eslint/no-explicit-any
-  yTasksMap = ydoc.getMap<Y.Map<any>>('tasks'); // eslint-disable-line @typescript-eslint/no-explicit-any
-  yMetaMap = ydoc.getMap<any>('meta'); // eslint-disable-line @typescript-eslint/no-explicit-any
-  yTranscript = ydoc.getText('transcript');
-  
-  return ydoc;
+  return resetYjsContext(() => useAppStore.getState().syncFromYjs());
 }
 // -------------------------
 
 /**
- * Register the main Yjs update observer on the current ydoc instance.
+ * Register the main Yjs update observer on the current yjsContext.ydoc instance.
  * This handles both outbound broadcast (for local changes) and inbound UI updates (for network changes).
- * Must be called whenever a new ydoc is created (in resetYDoc) to ensure the observer is on the correct instance.
+ * Must be called whenever a new yjsContext.ydoc is created (in resetYDoc) to ensure the observer is on the correct instance.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function registerYjsObserver(set: any, get: any) {
   // Track observer registration
-  markObserverRegistered(ydoc, 'registerYjsObserver');
+  markObserverRegistered(yjsContext.ydoc, 'registerYjsObserver');
   markObserverRegisteredInStateMachine();
   
-  const ydocId = getInstanceId(ydoc) || 'unknown';
+  const ydocId = getInstanceId(yjsContext.ydoc) || 'unknown';
   
   // ---------------------------------------------------------------------------
   // ⚛️ THE REACT OBSERVER PATTERN (One-Way Data Flow & Structural Sharing)
@@ -168,30 +83,30 @@ function registerYjsObserver(set: any, get: any) {
   const dirtyTaskIds = new Set<string>();
   
   // Listen for deep changes in projects
-  yProjectsMap.observeDeep((events) => {
+  yjsContext.yProjectsMap.observeDeep((events) => {
     events.forEach(event => {
       // If a child changed, the project ID is the first key in the path
       if (event.path.length > 0) dirtyProjectIds.add(event.path[0] as string);
       // If a project was added/removed from the root map
-      else if (event.target === yProjectsMap && 'keysChanged' in event) {
+      else if (event.target === yjsContext.yProjectsMap && 'keysChanged' in event) {
         (event.keysChanged as Set<string>).forEach((key: string) => dirtyProjectIds.add(key));
       }
     });
   });
   
   // Listen for deep changes in tasks
-  yTasksMap.observeDeep((events) => {
+  yjsContext.yTasksMap.observeDeep((events) => {
     events.forEach(event => {
       // If a child changed, the task ID is the first key in the path
       if (event.path.length > 0) dirtyTaskIds.add(event.path[0] as string);
       // If a task was added/removed from the root map
-      else if (event.target === yTasksMap && 'keysChanged' in event) {
+      else if (event.target === yjsContext.yTasksMap && 'keysChanged' in event) {
         (event.keysChanged as Set<string>).forEach((key: string) => dirtyTaskIds.add(key));
       }
     });
   });
 
-  ydoc.on('update', (update: Uint8Array, origin: any) => {
+  yjsContext.ydoc.on('update', (update: Uint8Array, origin: any) => {
     // IMMEDIATE FIRST LOG - before ANY other logic
     
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -201,17 +116,17 @@ function registerYjsObserver(set: any, get: any) {
     }
     
     // THE ECHO STORM PREVENTION (Outbound Broadcast)
-    if (origin !== 'network' && syncManager) {
+    if (origin !== 'network' && yjsContext.syncManager) {
       set({ hasUnsyncedChanges: true });
       // BAND 1: Instantly broadcast tiny live diffs
-      syncManager.broadcastUpdate(update);
+      yjsContext.syncManager.broadcastUpdate(update);
 
       // BAND 2: The Deep Idle Checkpoint (30 seconds)
       // Reset the inactivity timer every time the user types.
-      if (idleCheckpointTimer) clearTimeout(idleCheckpointTimer);
-      idleCheckpointTimer = setTimeout(() => {
-        const fullState = Y.encodeStateAsUpdate(ydoc);
-        syncManager?.broadcastCheckpoint(fullState);
+      if (yjsContext.idleCheckpointTimer) clearTimeout(yjsContext.idleCheckpointTimer);
+      yjsContext.idleCheckpointTimer = setTimeout(() => {
+        const fullState = Y.encodeStateAsUpdate(yjsContext.ydoc);
+        yjsContext.syncManager?.broadcastCheckpoint(fullState);
       }, IDLE_CHECKPOINT_DELAY);
     }
 
@@ -226,8 +141,8 @@ function registerYjsObserver(set: any, get: any) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (window as any)._crdtRenderDebounce = setTimeout(() => {
       // 1. Extract raw lists but filter out tombstones immediately
-      const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
-      const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+      const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+      const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
       
       // DEBUG: Log what observer is extracting
       const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
@@ -269,18 +184,18 @@ function registerYjsObserver(set: any, get: any) {
 
       // --- Document State Render Engine ---
       let transcript = get().transcript;
-      const textFromCRDT = yTranscript.toString();
+      const textFromCRDT = yjsContext.yTranscript.toString();
       transcript = textFromCRDT === "" ? null : textFromCRDT;
 
       let projectType = get().projectType;
-      if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
+      if (yjsContext.yMetaMap.has('projectType')) projectType = yjsContext.yMetaMap.get('projectType');
 
       let projectTitle = get().projectTitle;
-      if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
+      if (yjsContext.yMetaMap.has('projectTitle')) projectTitle = yjsContext.yMetaMap.get('projectTitle');
 
       let scoutResults = get().scoutResults;
-      if (yMetaMap.has('scoutResults')) {
-        const raw = yMetaMap.get('scoutResults');
+      if (yjsContext.yMetaMap.has('scoutResults')) {
+        const raw = yjsContext.yMetaMap.get('scoutResults');
         if (raw) {
           if (JSON.stringify(scoutResults) !== raw) {
             try { scoutResults = JSON.parse(raw); } catch {
@@ -291,8 +206,8 @@ function registerYjsObserver(set: any, get: any) {
       }
 
       let scoutHistory = get().scoutHistory;
-      if (yMetaMap.has('scoutHistory')) {
-        const raw = yMetaMap.get('scoutHistory');
+      if (yjsContext.yMetaMap.has('scoutHistory')) {
+        const raw = yjsContext.yMetaMap.get('scoutHistory');
         if (raw) {
           if (JSON.stringify(scoutHistory) !== raw) {
             try { scoutHistory = JSON.parse(raw); } catch {
@@ -317,7 +232,7 @@ function registerYjsObserver(set: any, get: any) {
         });
         
         // Track that Zustand state was updated from Yjs
-        recordZustandUpdate(ydoc);
+        recordZustandUpdate(yjsContext.ydoc);
       });
     }, 100);
   });
@@ -504,9 +419,7 @@ const STORAGE_KEY_API = 'cubit_api_key';
 // MIGRATION MUTEX: Prevents React.StrictMode from double-booting legacy JSON into Yjs
 let isMigrating = false;
 
-// E2EE SYNC MANAGER (Supabase Realtime - legacy NetworkSync removed)
-let syncManager: SupabaseSyncProd | null = null;
-let idleCheckpointTimer: NodeJS.Timeout | null = null;
+// yjsContext.syncManager and yjsContext.idleCheckpointTimer are now in yjsContext
 let loadProjectInFlight: Promise<void> | null = null;
 let peerEditingTimer: NodeJS.Timeout | null = null;
 let connectToSyncServerInFlight = false;
@@ -550,7 +463,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!topic.trim()) return state;
       const filtered = current.filter((t) => t !== topic);
       const updated = [topic, ...filtered].slice(0, 5);
-      ydoc.transact(() => { yMetaMap.set('scoutHistory', JSON.stringify(updated)); }, 'local');
+      yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('scoutHistory', JSON.stringify(updated)); }, 'local');
       return { scoutHistory: updated };
     }),
 
@@ -579,10 +492,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     // 1. If switching TO personalUno, disconnect sync (uno data never leaves browser)
-    if (workspaceType === 'personalUno' && syncManager) {
-      if (idleCheckpointTimer) { clearTimeout(idleCheckpointTimer); idleCheckpointTimer = null; }
-      syncManager.disconnect();
-      syncManager = null;
+    if (workspaceType === 'personalUno' && yjsContext.syncManager) {
+      if (yjsContext.idleCheckpointTimer) { clearTimeout(yjsContext.idleCheckpointTimer); yjsContext.idleCheckpointTimer = null; }
+      yjsContext.syncManager.disconnect();
+      yjsContext.syncManager = null;
       set({ syncStatus: 'disconnected', roomFingerprint: null });
     }
 
@@ -630,8 +543,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     };
 
     // Mutate Yjs Data Structure
-    ydoc.transact(() => {
-      yProjectsMap.set(newId, bindTodoProjectToYMap(newProject));
+    yjsContext.ydoc.transact(() => {
+      yjsContext.yProjectsMap.set(newId, bindTodoProjectToYMap(newProject));
     });
 
     // Update the local pointers for UI interaction
@@ -653,9 +566,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   renameTodoProject: (projectId: string, name: string) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (!yProj) return;
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yProj.set('name', new Y.Text(name));
     });
   },
@@ -663,8 +576,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   deleteTodoProject: (projectId: string) => {
     const { todoProjects, activeProjectId } = get();
     // Explicit Tombstones prevent orphaned items when offline architectures collide
-    ydoc.transact(() => {
-      const yProj = yProjectsMap.get(projectId);
+    yjsContext.ydoc.transact(() => {
+      const yProj = yjsContext.yProjectsMap.get(projectId);
       if (yProj) yProj.set('isDeleted', true);
     });
 
@@ -691,23 +604,23 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
     const newOrderKey = generateOrderKey(prevProj?.orderKey, nextProj?.orderKey);
 
-    const yProj = yProjectsMap.get(movedProject.id);
+    const yProj = yjsContext.yProjectsMap.get(movedProject.id);
     if (yProj) {
       yProj.set('orderKey', newOrderKey); // Emits change, triggers React sort
     }
   },
 
   changeProjectColor: (projectId: string, color: string) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (yProj) {
       yProj.set('color', color);
     }
   },
 
   transferOwnership: (projectId: string, newOwnerId: string) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (yProj) {
-      ydoc.transact(() => {
+      yjsContext.ydoc.transact(() => {
         yProj.set('ownerId', newOwnerId);
       });
     }
@@ -719,7 +632,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const { activeProjectId, todoRows } = get();
     if (!activeProjectId) return;
 
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) {
       console.error('❌ addTodoRow: yProj not found for activeProjectId', activeProjectId);
       return;
@@ -742,7 +655,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       orderKey,
     };
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRows.set(newRow.id, bindTodoRowToYMap(newRow, orderKey));
     });
 
@@ -753,12 +666,12 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   deleteTodoRow: (rowId: string) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const yRows = yProj.get('todoRows') as Y.Map<Y.Map<any>>;
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const yRow = yRows.get(rowId);
       if (yRow) yRow.set('isDeleted', true);
     });
@@ -767,7 +680,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   updateTodoCell: (rowId, field, value, stepIdx) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -775,7 +688,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yRow = yRows.get(rowId);
     if (!yRow) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       if (field === 'task') {
         const yText = yRow.get('task') as Y.Text;
         applyUpdateToYText(yText, value);
@@ -794,7 +707,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const { activeProjectId, todoRows } = get();
     if (!activeProjectId || todoRows.length === 0) return;
 
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -809,7 +722,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const lastKey = todoRows[todoRows.length - 1].orderKey;
     const newOrderKey = generateOrderKey(lastKey, undefined);
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRow.set('orderKey', newOrderKey);
     });
   },
@@ -819,7 +732,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (!activeProjectId) return;
     if (fromIdx < 0 || fromIdx >= todoRows.length || toIdx < 0 || toIdx >= todoRows.length) return;
 
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -834,7 +747,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
     const newOrderKey = generateOrderKey(prevRow?.orderKey, nextRow?.orderKey);
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRow.set('orderKey', newOrderKey);
     });
   },
@@ -842,7 +755,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setTodoSteps: (rowId: string, steps: [string, string, string, string]) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -850,7 +763,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yRow = yRows.get(rowId);
     if (!yRow) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
       steps.forEach((text, i) => {
         const yStep = ySteps.get(i);
@@ -865,7 +778,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   insertTodoRowAfter: (afterRowId: string, task: string, sourceStepId?: string) => {
     const { activeProjectId, todoRows } = get();
     if (!activeProjectId) return '';
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return '';
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -888,7 +801,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       orderKey,
     };
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRows.set(newId, bindTodoRowToYMap(newRow, orderKey));
     });
 
@@ -899,13 +812,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setDialPriority: (side, text) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     const yDials = yProj.get('priorityDials') as Y.Map<any>;
     if (!yDials) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const yText = yDials.get(side) as Y.Text;
       applyUpdateToYText(yText, text);
     });
@@ -914,13 +827,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   setDialFocus: (side) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     const yDials = yProj.get('priorityDials') as Y.Map<any>;
     if (!yDials) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yDials.set('focusedSide', side);
     });
   },
@@ -928,7 +841,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   toggleTodoRowCompletion: (rowId: string) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -936,7 +849,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yRow = yRows.get(rowId);
     if (!yRow) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRow.set('isCompleted', !yRow.get('isCompleted'));
     });
   },
@@ -944,7 +857,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   completeStepsUpTo: (rowId: string, maxStepIdx: number) => {
     const { activeProjectId } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -952,7 +865,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const yRow = yRows.get(rowId);
     if (!yRow) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const ySteps = yRow.get('steps') as Y.Array<Y.Map<any>>;
       let populatedCount = 0;
       let completeCount = 0;
@@ -978,7 +891,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   restoreTodoRow: (row: TodoRow, index: number) => {
     const { activeProjectId, todoRows } = get();
     if (!activeProjectId) return;
-    const yProj = yProjectsMap.get(activeProjectId);
+    const yProj = yjsContext.yProjectsMap.get(activeProjectId);
     if (!yProj) return;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -988,7 +901,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const nextKey = index < todoRows.length ? todoRows[index].orderKey : undefined;
     const orderKey = generateOrderKey(prevKey, nextKey);
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yRows.set(row.id, bindTodoRowToYMap({ ...row, orderKey }, orderKey));
     });
   },
@@ -1011,13 +924,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     transitionToPhase('initializing');
 
     try {
-      if (syncManager) {
-        syncManager.disconnect();
-        syncManager = null;
+      if (yjsContext.syncManager) {
+        yjsContext.syncManager.disconnect();
+        yjsContext.syncManager = null;
       }
-      if (idleCheckpointTimer) {
-        clearTimeout(idleCheckpointTimer);
-        idleCheckpointTimer = null;
+      if (yjsContext.idleCheckpointTimer) {
+        clearTimeout(yjsContext.idleCheckpointTimer);
+        yjsContext.idleCheckpointTimer = null;
       }
 
       const { deriveRoomId, deriveSyncKey } = await import('@/lib/cryptoSync');
@@ -1040,7 +953,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!isSameRoom) {
         await resetYDoc();
         didResetInThisCall = true;
-        const ydocAfterReset = getInstanceId(ydoc);
+        const ydocAfterReset = getInstanceId(yjsContext.ydoc);
         isMigrating = false;
         loadProjectInFlight = null;
 
@@ -1051,16 +964,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         });
 
         const { loadProject } = get();
-        transitionToPhase('loadProject_start', { ydocId: getInstanceId(ydoc) });
+        transitionToPhase('loadProject_start', { ydocId: getInstanceId(yjsContext.ydoc) });
         await loadProject();
-        transitionToPhase('loadProject_complete', { ydocId: getInstanceId(ydoc) });
+        transitionToPhase('loadProject_complete', { ydocId: getInstanceId(yjsContext.ydoc) });
       } else {
       }
 
-      // CRITICAL: Check if ydoc is destroyed/missing and recreate it
+      // CRITICAL: Check if yjsContext.ydoc is destroyed/missing and recreate it
       // This can happen when reconnecting to same room after disconnect
       // BUT: Skip if we already reset in this call (prevents double-reset bug)
-      const currentYdocId = getInstanceId(ydoc);
+      const currentYdocId = getInstanceId(yjsContext.ydoc);
       if (!currentYdocId && !didResetInThisCall) {
         await resetYDoc();
       } else if (!currentYdocId && didResetInThisCall) {
@@ -1068,20 +981,20 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
       // Yjs observer should be registered by loadProject() when it runs after resetYDoc()
       // But if loadProject didn't run or skipped registration, register it now
-      const finalYdocId = getInstanceId(ydoc);
-      const observerYdocId = (ydoc as { __observerId?: string }).__observerId;
+      const finalYdocId = getInstanceId(yjsContext.ydoc);
+      const observerYdocId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
 
       if (observerYdocId !== finalYdocId) {
         registerYjsObserver(set, get);
-        (ydoc as { __observerId?: string }).__observerId = finalYdocId;
+        (yjsContext.ydoc as { __observerId?: string }).__observerId = finalYdocId;
       }
 
       // CRITICAL INVARIANT: Observer must be registered before sync manager creation
-      const finalObserverYdocId = (ydoc as { __observerId?: string }).__observerId;
-      const actualYdocId = getInstanceId(ydoc);
+      const finalObserverYdocId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
+      const actualYdocId = getInstanceId(yjsContext.ydoc);
       
       assertInvariant(
-        'Observer registered on current ydoc before sync creation',
+        'Observer registered on current yjsContext.ydoc before sync creation',
         actualYdocId,
         finalObserverYdocId,
         { 
@@ -1101,8 +1014,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           // Dynamically import SupabaseSync (code splitting)
           const SupabaseSyncClass = await loadSupabaseSync();
 
-          syncManager = new SupabaseSyncClass(
-            ydoc,
+          yjsContext.syncManager = new SupabaseSyncClass(
+            yjsContext.ydoc,
             roomIdHash,
             (status) => {
               set({ syncStatus: status });
@@ -1157,8 +1070,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
         return;
       }
 
-      // Mark this ydoc as having sync attached for diagnostics
-      markNetworkSyncAttached(ydoc, 'supabase-sync-' + Date.now());
+      // Mark this yjsContext.ydoc as having sync attached for diagnostics
+      markNetworkSyncAttached(yjsContext.ydoc, 'supabase-sync-' + Date.now());
 
       // Presence Watchdog: Revert to "Alone" if no pulse for 12 seconds
       if ((window as any)._presenceWatchdog) clearInterval((window as any)._presenceWatchdog);
@@ -1170,13 +1083,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       }, 3000);
 
       try {
-        await syncManager.connect(syncKey);
-        transitionToPhase('sync_connecting', { ydocId: getInstanceId(ydoc), roomHash: roomIdHash });
+        await yjsContext.syncManager.connect(syncKey);
+        transitionToPhase('sync_connecting', { ydocId: getInstanceId(yjsContext.ydoc), roomHash: roomIdHash });
       } catch (connectError) {
         // Connection failed - log and abort
         console.error('[SYNC DEBUG] Connection failed:', connectError);
         
-        if (useSupabase && syncManager) {
+        if (useSupabase && yjsContext.syncManager) {
           // Emit telemetry for connection failure
           const { emitTelemetry } = await import('@/lib/featureFlags');
           emitTelemetry('transport_switched', {
@@ -1186,13 +1099,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
           });
 
           // Clean up failed Supabase connection
-          syncManager.disconnect();
+          yjsContext.syncManager.disconnect();
 
           connectToSyncServerInFlight = false;
           set({ syncStatus: 'error' });
           return;
         } else {
-          // Not Supabase or no syncManager, rethrow
+          // Not Supabase or no yjsContext.syncManager, rethrow
           throw connectError;
         }
       }
@@ -1200,17 +1113,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       if (!(window as any)._unloadListenerBound) {
         (window as any)._unloadListenerBound = true;
         window.addEventListener('beforeunload', () => {
-          syncManager?.sendDisconnectSignal();
+          yjsContext.syncManager?.sendDisconnectSignal();
         });
       }
 
       set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
-      transitionToPhase('live', { ydocId: getInstanceId(ydoc), roomHash: roomIdHash });
+      transitionToPhase('live', { ydocId: getInstanceId(yjsContext.ydoc), roomHash: roomIdHash });
     } catch (err) {
       // INTENTIONALLY HANDLING: E2EE connection failure reported to user
       // Error state set for UI to display, connection flag cleared
       console.error("Failed to connect to E2EE Relay:", err);
-      transitionToPhase('error', { ydocId: getInstanceId(ydoc), error: String(err) });
+      transitionToPhase('error', { ydocId: getInstanceId(yjsContext.ydoc), error: String(err) });
       set({ syncStatus: 'error', roomFingerprint: null });
     } finally {
       connectToSyncServerInFlight = false;
@@ -1218,13 +1131,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   disconnectSyncServer: () => {
-    if (idleCheckpointTimer) {
-      clearTimeout(idleCheckpointTimer);
-      idleCheckpointTimer = null;
+    if (yjsContext.idleCheckpointTimer) {
+      clearTimeout(yjsContext.idleCheckpointTimer);
+      yjsContext.idleCheckpointTimer = null;
     }
-    if (syncManager) {
-      syncManager.disconnect();
-      syncManager = null;
+    if (yjsContext.syncManager) {
+      yjsContext.syncManager.disconnect();
+      yjsContext.syncManager = null;
     }
     if ((window as any)._presenceWatchdog) {
       clearInterval((window as any)._presenceWatchdog);
@@ -1236,17 +1149,17 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   flushSyncNow: async () => {
-    if (!syncManager) return;
-    const fullState = Y.encodeStateAsUpdate(ydoc);
-    await syncManager.broadcastCheckpoint(fullState);
+    if (!yjsContext.syncManager) return;
+    const fullState = Y.encodeStateAsUpdate(yjsContext.ydoc);
+    await yjsContext.syncManager.broadcastCheckpoint(fullState);
     set({ lastSyncedAt: Date.now(), hasUnsyncedChanges: false });
   },
 
   // Actions
   toggleTaskExpansion: async (taskId: string) => {
-    const yTask = yTasksMap.get(taskId);
+    const yTask = yjsContext.yTasksMap.get(taskId);
     if (!yTask) return;
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yTask.set('isExpanded', !yTask.get('isExpanded'));
     });
   },
@@ -1254,21 +1167,21 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   logs: [],
 
   // --- Today Page / Pomodoro Timer (extracted to timerSlice) ---
-  ...createTimerSlice(set, get, { ydoc, yMetaMap }),
+  ...createTimerSlice(set, get, { ydoc: yjsContext.ydoc, yMetaMap: yjsContext.yMetaMap }),
 
   // setVideoHandleState moved to uiSlice.ts
 
   loadProject: async () => {
-    const entryYdocId = (ydoc as any).__observerId || 'no-id';
+    const entryYdocId = (yjsContext.ydoc as any).__observerId || 'no-id';
     
-    // CRITICAL: Always ensure observer is registered on the current ydoc instance
+    // CRITICAL: Always ensure observer is registered on the current yjsContext.ydoc instance
     // This must happen BEFORE any early returns to prevent observer loss on reconnection
-    const currentYdocId = getInstanceId(ydoc);
-    const observerId = (ydoc as { __observerId?: string }).__observerId;
+    const currentYdocId = getInstanceId(yjsContext.ydoc);
+    const observerId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
     
     if (observerId !== currentYdocId) {
       registerYjsObserver(set, get);
-      (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+      (yjsContext.ydoc as { __observerId?: string }).__observerId = currentYdocId;
     }
 
     // BUG-3 fix: single-flight lock avoids race when loadProject is called twice
@@ -1343,7 +1256,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       todoProjects.length === 0 &&
       data.todoRows &&
       data.todoRows.length > 0 &&
-      yProjectsMap.size === 0  // CRITICAL FIX: Don't migrate if network data already exists
+      yjsContext.yProjectsMap.size === 0  // CRITICAL FIX: Don't migrate if network data already exists
     ) {
       const defaultProject: TodoProject = {
         id: crypto.randomUUID(),
@@ -1362,9 +1275,9 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     // If no projects exist at all, create an empty default
-    // CRITICAL FIX: Check if ydoc already has network-synced projects before creating default
+    // CRITICAL FIX: Check if yjsContext.ydoc already has network-synced projects before creating default
     // This prevents loadProject from overwriting network data that arrived during initialization
-    if (todoProjects.length === 0 && yProjectsMap.size === 0) {
+    if (todoProjects.length === 0 && yjsContext.yProjectsMap.size === 0) {
       const emptyProject: TodoProject = {
         id: crypto.randomUUID(),
         name: 'My First Project',
@@ -1394,16 +1307,16 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     if (data.yjsState && data.yjsState instanceof Uint8Array) {
       // 1. BINARY PERSISTENCE: The Highest Authority
       // If we have a binary history, we decode it. It overwrites ALL legacy JSON logic.
-      Y.applyUpdate(ydoc, data.yjsState);
+      Y.applyUpdate(yjsContext.ydoc, data.yjsState);
 
       // 🔴 BUG FIX: Filter out Yjs 'isDeleted' tombstones during first-boot structural hydration!
       // Previously, we mapped ALL history, meaning ghosts would render until the first CRDT update wiped them out all at once.
-      todoProjects = Array.from(yProjectsMap.values())
+      todoProjects = Array.from(yjsContext.yProjectsMap.values())
         .filter(p => !p.get('isDeleted'))
         .map(extractTodoProjectFromYMap);
         
       migratedTasks.length = 0; // Clear legacy, Yjs is truth
-      migratedTasks.push(...Array.from(yTasksMap.values())
+      migratedTasks.push(...Array.from(yjsContext.yTasksMap.values())
         .filter(t => !t.get('isDeleted'))
         .map(extractTaskItemFromYMap));
 
@@ -1411,57 +1324,57 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       // 2. THE GENESIS BOOT (Legacy JSON -> Yjs)
       isMigrating = true;
 
-      ydoc.transact(() => {
+      yjsContext.ydoc.transact(() => {
         // Map legacy Tasks
         migratedTasks.forEach((task) => {
-          yTasksMap.set(task.id, bindTaskItemToYMap(task as TaskItem));
+          yjsContext.yTasksMap.set(task.id, bindTaskItemToYMap(task as TaskItem));
         });
 
         // Map legacy Projects
         todoProjects.forEach((proj, i) => {
           const orderKey = proj.orderKey || generateOrderKey(i === 0 ? undefined : (todoProjects[i - 1].orderKey || undefined));
           const yProj = bindTodoProjectToYMap({ ...proj, orderKey });
-          yProjectsMap.set(proj.id, yProj);
+          yjsContext.yProjectsMap.set(proj.id, yProj);
         });
 
         // Map primitive scalar Document State over to the CRDT
-        if (data.projectType) yMetaMap.set('projectType', data.projectType);
-        if (data.projectTitle) yMetaMap.set('projectTitle', data.projectTitle);
-        if (data.scoutResults && data.scoutResults.length > 0) yMetaMap.set('scoutResults', JSON.stringify(data.scoutResults));
-        if (data.scoutHistory && data.scoutHistory.length > 0) yMetaMap.set('scoutHistory', JSON.stringify(data.scoutHistory));
-        if (data.transcript) applyUpdateToYText(yTranscript, data.transcript);
+        if (data.projectType) yjsContext.yMetaMap.set('projectType', data.projectType);
+        if (data.projectTitle) yjsContext.yMetaMap.set('projectTitle', data.projectTitle);
+        if (data.scoutResults && data.scoutResults.length > 0) yjsContext.yMetaMap.set('scoutResults', JSON.stringify(data.scoutResults));
+        if (data.scoutHistory && data.scoutHistory.length > 0) yjsContext.yMetaMap.set('scoutHistory', JSON.stringify(data.scoutHistory));
+        if (data.transcript) applyUpdateToYText(yjsContext.yTranscript, data.transcript);
       });
       
       // Immediate genesis checkpoint broadcast for test environments
       // This ensures Device B can sync immediately without waiting for idle timer
-      if (isTestEnvironment && syncManager) {
-        const genesisState = Y.encodeStateAsUpdate(ydoc);
-        syncManager.broadcastCheckpoint(genesisState);
+      if (isTestEnvironment && yjsContext.syncManager) {
+        const genesisState = Y.encodeStateAsUpdate(yjsContext.ydoc);
+        yjsContext.syncManager.broadcastCheckpoint(genesisState);
       }
     }
 
     // --- Scalar Document State Hydration ---
-    if (yMetaMap.has('projectType')) data.projectType = yMetaMap.get('projectType');
-    if (yMetaMap.has('projectTitle')) data.projectTitle = yMetaMap.get('projectTitle');
-    if (yMetaMap.has('scoutResults')) {
-      try { data.scoutResults = JSON.parse(yMetaMap.get('scoutResults')); } catch {
+    if (yjsContext.yMetaMap.has('projectType')) data.projectType = yjsContext.yMetaMap.get('projectType');
+    if (yjsContext.yMetaMap.has('projectTitle')) data.projectTitle = yjsContext.yMetaMap.get('projectTitle');
+    if (yjsContext.yMetaMap.has('scoutResults')) {
+      try { data.scoutResults = JSON.parse(yjsContext.yMetaMap.get('scoutResults')); } catch {
         // INTENTIONALLY IGNORING: Export with corrupted scoutResults continues
       }
     }
-    if (yMetaMap.has('scoutHistory')) {
-      try { data.scoutHistory = JSON.parse(yMetaMap.get('scoutHistory')); } catch {
+    if (yjsContext.yMetaMap.has('scoutHistory')) {
+      try { data.scoutHistory = JSON.parse(yjsContext.yMetaMap.get('scoutHistory')); } catch {
         // INTENTIONALLY IGNORING: Export with corrupted scoutHistory continues
       }
     }
-    const safeTranscript = yTranscript.toString();
+    const safeTranscript = yjsContext.yTranscript.toString();
     if (safeTranscript !== "") data.transcript = safeTranscript;
 
-    // CRITICAL FIX: If ydoc has network-synced projects, extract them instead of using stale local vars
+    // CRITICAL FIX: If yjsContext.ydoc has network-synced projects, extract them instead of using stale local vars
     // This prevents loadProject from overwriting data that arrived during initialization
-    const hasNetworkProjects = yProjectsMap.size > 0;
+    const hasNetworkProjects = yjsContext.yProjectsMap.size > 0;
     if (hasNetworkProjects) {
       todoProjects = sortYMapList(
-        Array.from(yProjectsMap.values())
+        Array.from(yjsContext.yProjectsMap.values())
           .filter(p => !p.get('isDeleted'))
           .map(extractTodoProjectFromYMap)
       );
@@ -1563,11 +1476,11 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
 
     // Ensure observer is registered (already done at function start, but double-check)
-    const finalYdocId = getInstanceId(ydoc);
-    const finalObserverId = (ydoc as { __observerId?: string }).__observerId;
+    const finalYdocId = getInstanceId(yjsContext.ydoc);
+    const finalObserverId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
     if (finalObserverId !== finalYdocId) {
       registerYjsObserver(set, get);
-      (ydoc as { __observerId?: string }).__observerId = finalYdocId;
+      (yjsContext.ydoc as { __observerId?: string }).__observerId = finalYdocId;
     }
 
     })();
@@ -1582,24 +1495,24 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // ---------------------------------------------------------------------------
 
   saveTask: async (task: TaskItem) => {
-    ydoc.transact(() => {
-      yTasksMap.set(task.id, bindTaskItemToYMap(task));
+    yjsContext.ydoc.transact(() => {
+      yjsContext.yTasksMap.set(task.id, bindTaskItemToYMap(task));
     });
   },
 
   saveTasks: async (newTasksList: TaskItem[]) => {
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       newTasksList.forEach(task => {
-        yTasksMap.set(task.id, bindTaskItemToYMap(task));
+        yjsContext.yTasksMap.set(task.id, bindTaskItemToYMap(task));
       });
     });
   },
 
   updateTask: async (taskId: string, updates: Partial<TaskItem>) => {
-    const yTask = yTasksMap.get(taskId);
+    const yTask = yjsContext.yTasksMap.get(taskId);
     if (!yTask) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       if (updates.task_name !== undefined) {
         applyUpdateToYText(yTask.get('task_name') as Y.Text, updates.task_name);
       }
@@ -1631,18 +1544,18 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   deleteTask: async (taskId: string) => {
-    ydoc.transact(() => {
-      const yTaskObj = yTasksMap.get(taskId);
+    yjsContext.ydoc.transact(() => {
+      const yTaskObj = yjsContext.yTasksMap.get(taskId);
       if (yTaskObj) yTaskObj.set('isDeleted', true);
     });
   },
 
   // New Action: Specifically for adding Level 3 Micro-steps
   addMicroSteps: async (taskId: string, stepId: string, microSteps: string[]) => {
-    const yTask = yTasksMap.get(taskId);
+    const yTask = yjsContext.yTasksMap.get(taskId);
     if (!yTask) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
       // Helper to find the Y.Map step recursively
@@ -1678,10 +1591,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // New Action: Update text of any step (Level 2 or 3)
   updateDeepStep: async (taskId: string, stepId: string, newText: string) => {
-    const yTask = yTasksMap.get(taskId);
+    const yTask = yjsContext.yTasksMap.get(taskId);
     if (!yTask) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
       const updateStepTextRec = (array: Y.Array<Y.Map<any>>): boolean => {
@@ -1708,10 +1621,10 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
   // New Action: Toggle Checkbox (Level 2 or 3)
   toggleStepCompletion: async (taskId: string, stepId: string) => {
-    const yTask = yTasksMap.get(taskId);
+    const yTask = yjsContext.yTasksMap.get(taskId);
     if (!yTask) return;
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       const ySubList = yTask.get('sub_steps') as Y.Array<Y.Map<any>>;
 
       const toggleStepRec = (array: Y.Array<Y.Map<any>>): boolean => {
@@ -1736,32 +1649,32 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   setTranscript: async (text: string) => {
-    ydoc.transact(() => { applyUpdateToYText(yTranscript, text || ''); }, 'local');
+    yjsContext.ydoc.transact(() => { applyUpdateToYText(yjsContext.yTranscript, text || ''); }, 'local');
     set({ transcript: text });
   },
 
   setScoutResults: async (results: string[]) => {
-    ydoc.transact(() => { yMetaMap.set('scoutResults', JSON.stringify(results)); }, 'local');
+    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('scoutResults', JSON.stringify(results)); }, 'local');
     set({ scoutResults: results });
   },
 
   setProjectType: async (type: 'video' | 'text' | 'scout') => {
-    ydoc.transact(() => { yMetaMap.set('projectType', type); }, 'local');
+    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('projectType', type); }, 'local');
     set({ projectType: type });
   },
 
   setProjectTitle: async (title: string) => {
-    ydoc.transact(() => { yMetaMap.set('projectTitle', title); }, 'local');
+    yjsContext.ydoc.transact(() => { yjsContext.yMetaMap.set('projectTitle', title); }, 'local');
     set({ projectTitle: title });
   },
 
   // Atomic Action for Text Mode Initialization
   startTextProject: async (title: string, text: string) => {
     const type = 'text';
-    ydoc.transact(() => {
-      yMetaMap.set('projectType', type);
-      yMetaMap.set('projectTitle', title);
-      applyUpdateToYText(yTranscript, text || '');
+    yjsContext.ydoc.transact(() => {
+      yjsContext.yMetaMap.set('projectType', type);
+      yjsContext.yMetaMap.set('projectTitle', title);
+      applyUpdateToYText(yjsContext.yTranscript, text || '');
     }, 'local');
     set({
       projectType: type,
@@ -1776,13 +1689,13 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
     // The Ghost Data Teardown:
-    ydoc.transact(() => {
-      yMetaMap.clear();
-      yTranscript.delete(0, yTranscript.length);
+    yjsContext.ydoc.transact(() => {
+      yjsContext.yMetaMap.clear();
+      yjsContext.yTranscript.delete(0, yjsContext.yTranscript.length);
 
       // Tombstone all active tasks and projects to prevent Zombie Resurrection
-      Array.from(yTasksMap.values()).forEach(t => t.set('isDeleted', true));
-      Array.from(yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
+      Array.from(yjsContext.yTasksMap.values()).forEach(t => t.set('isDeleted', true));
+      Array.from(yjsContext.yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
     });
 
     set({
@@ -1804,22 +1717,22 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     const { activeWorkspaceType, activeWorkspaceId, deviceId: currentDeviceId } = get();
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
 
-    // CRITICAL: Ensure observer is registered on current ydoc before modifying state
+    // CRITICAL: Ensure observer is registered on current yjsContext.ydoc before modifying state
     // This prevents observer loss when resetProject is called during test setup
-    const currentYdocId = getInstanceId(ydoc);
-    const observerId = (ydoc as { __observerId?: string }).__observerId;
+    const currentYdocId = getInstanceId(yjsContext.ydoc);
+    const observerId = (yjsContext.ydoc as { __observerId?: string }).__observerId;
 
     if (observerId !== currentYdocId) {
       registerYjsObserver(set, get);
-      (ydoc as { __observerId?: string }).__observerId = currentYdocId;
+      (yjsContext.ydoc as { __observerId?: string }).__observerId = currentYdocId;
     }
 
-    ydoc.transact(() => {
-      yMetaMap.clear();
-      yTranscript.delete(0, yTranscript.length);
+    yjsContext.ydoc.transact(() => {
+      yjsContext.yMetaMap.clear();
+      yjsContext.yTranscript.delete(0, yjsContext.yTranscript.length);
 
-      Array.from(yTasksMap.values()).forEach(t => t.set('isDeleted', true));
-      Array.from(yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
+      Array.from(yjsContext.yTasksMap.values()).forEach(t => t.set('isDeleted', true));
+      Array.from(yjsContext.yProjectsMap.values()).forEach(p => p.set('isDeleted', true));
     });
 
     const defaultProject: TodoProject = {
@@ -1869,36 +1782,36 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // The "Logout Nuke" Data Vector Fix: 
     // We MUST sever the network connection BEFORE destroying local CRDT states 
     // to prevent broadcasting an encrypted tombstone massacre to the P2P cloud.
-    if (syncManager) {
-      syncManager.disconnect();
-      syncManager = null;
+    if (yjsContext.syncManager) {
+      yjsContext.syncManager.disconnect();
+      yjsContext.syncManager = null;
     }
-    if (idleCheckpointTimer) {
-      clearTimeout(idleCheckpointTimer);
-      idleCheckpointTimer = null;
+    if (yjsContext.idleCheckpointTimer) {
+      clearTimeout(yjsContext.idleCheckpointTimer);
+      yjsContext.idleCheckpointTimer = null;
     }
 
     const { activeWorkspaceType, activeWorkspaceId } = get();
     await storageService.clearProject(activeWorkspaceType, activeWorkspaceId);
     localStorage.removeItem(STORAGE_KEY_API);
 
-    // Hard physics wipe: Instead of mathematically manipulating ydoc, 
+    // Hard physics wipe: Instead of mathematically manipulating yjsContext.ydoc, 
     // we forcibly nuke the memory thread to guarantee Zero Knowledge deletion.
     window.location.reload();
   },
 
   importTasks: async (newTasks: TaskItem[]) => {
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       // Mark existing tasks as deleted to mirror the old "replacement" behavior,
       // generating tombstones to protect offline sync peers.
-      Array.from(yTasksMap.keys()).forEach(k => {
-        const yTask = yTasksMap.get(k);
+      Array.from(yjsContext.yTasksMap.keys()).forEach(k => {
+        const yTask = yjsContext.yTasksMap.get(k);
         if (yTask) yTask.set('isDeleted', true);
       });
 
       // Insert the imported tasks
       newTasks.forEach(task => {
-        yTasksMap.set(task.id, bindTaskItemToYMap(task));
+        yjsContext.yTasksMap.set(task.id, bindTaskItemToYMap(task));
       });
     });
 
@@ -1914,8 +1827,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
    */
   syncFromYjs: () => {
     // Extract current state from Yjs (same logic as debounced handler in loadProject)
-    const rawYProjects = Array.from(yProjectsMap.values()).filter(p => !p.get('isDeleted'));
-    const rawYTasks = Array.from(yTasksMap.values()).filter(t => !t.get('isDeleted'));
+    const rawYProjects = Array.from(yjsContext.yProjectsMap.values()).filter(p => !p.get('isDeleted'));
+    const rawYTasks = Array.from(yjsContext.yTasksMap.values()).filter(t => !t.get('isDeleted'));
     
     // DEBUG: Log what we're extracting
     const projectNamesDebug = rawYProjects.map(p => ({ id: p.get('id'), name: p.get('name') }));
@@ -1930,18 +1843,18 @@ export const useAppStore = create<ProjectState>((set, get) => ({
 
     // Document State Render Engine
     let transcript = get().transcript;
-    const textFromCRDT = yTranscript.toString();
+    const textFromCRDT = yjsContext.yTranscript.toString();
     transcript = textFromCRDT === "" ? null : textFromCRDT;
 
     let projectType = get().projectType;
-    if (yMetaMap.has('projectType')) projectType = yMetaMap.get('projectType');
+    if (yjsContext.yMetaMap.has('projectType')) projectType = yjsContext.yMetaMap.get('projectType');
 
     let projectTitle = get().projectTitle;
-    if (yMetaMap.has('projectTitle')) projectTitle = yMetaMap.get('projectTitle');
+    if (yjsContext.yMetaMap.has('projectTitle')) projectTitle = yjsContext.yMetaMap.get('projectTitle');
 
     let scoutResults = get().scoutResults;
-    if (yMetaMap.has('scoutResults')) {
-      const raw = yMetaMap.get('scoutResults');
+    if (yjsContext.yMetaMap.has('scoutResults')) {
+      const raw = yjsContext.yMetaMap.get('scoutResults');
       if (raw) {
         try { scoutResults = JSON.parse(raw); } catch {
           // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
@@ -1950,8 +1863,8 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     }
 
     let scoutHistory = get().scoutHistory;
-    if (yMetaMap.has('scoutHistory')) {
-      const raw = yMetaMap.get('scoutHistory');
+    if (yjsContext.yMetaMap.has('scoutHistory')) {
+      const raw = yjsContext.yMetaMap.get('scoutHistory');
       if (raw) {
         try { scoutHistory = JSON.parse(raw); } catch {
           // INTENTIONALLY IGNORING: Corrupted sync data - keep existing local state
@@ -1973,7 +1886,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     });
     
     // Track that Zustand state was synced from Yjs
-    recordZustandUpdate(ydoc);
+    recordZustandUpdate(yjsContext.ydoc);
     
   },
 
@@ -2005,7 +1918,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   // --- Alarm System Actions (V1) ---
   // Alarms are stored per-project in a nested Y.Map for Yjs sync
   createAlarm: (projectId: string, alarm: import('@/schemas/storage').AlarmRecord) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (!yProj) {
       return;
     }
@@ -2013,7 +1926,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
     // Import here to avoid circular dependency
     const { bindAlarmToYMap } = require('@/lib/yjsHelpers');
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       // CRITICAL: Initialize alarms map if it doesn't exist (legacy projects)
       let yAlarms = yProj.get('alarms') as Y.Map<any>;
       if (!yAlarms) {
@@ -2026,7 +1939,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   updateAlarmStatus: (projectId: string, alarmId: string, status: import('@/schemas/storage').AlarmStatus, updates?: Partial<import('@/schemas/storage').AlarmRecord>) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (!yProj) {
       return;
     }
@@ -2041,7 +1954,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       return;
     }
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       yAlarm.set('status', status);
       if (updates?.alarmTimeMs !== undefined) {
         yAlarm.set('alarmTimeMs', updates.alarmTimeMs);
@@ -2057,7 +1970,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
   },
 
   deleteAlarm: (projectId: string, alarmId: string) => {
-    const yProj = yProjectsMap.get(projectId);
+    const yProj = yjsContext.yProjectsMap.get(projectId);
     if (!yProj) {
       return;
     }
@@ -2067,7 +1980,7 @@ export const useAppStore = create<ProjectState>((set, get) => ({
       return;
     }
 
-    ydoc.transact(() => {
+    yjsContext.ydoc.transact(() => {
       // Soft delete using tombstone pattern (consistent with other entities)
       const yAlarm = yAlarms.get(alarmId);
       if (yAlarm) {
@@ -2098,7 +2011,7 @@ useAppStore.subscribe((state) => {
   saveTimeout = setTimeout(async () => {
     if (state.isHydrated) {
       try {
-        const yjsState = Y.encodeStateAsUpdate(ydoc);
+        const yjsState = Y.encodeStateAsUpdate(yjsContext.ydoc);
 
         await storageService.saveProject({
           tasks: state.tasks,
