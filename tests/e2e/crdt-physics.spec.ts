@@ -43,8 +43,6 @@ test.describe('CRDT Physics & Performance Verification', () => {
         // 1. Setup row
         await page.evaluate(() => {
             const store = (window as any).__STORE__.getState();
-            console.log('🧪 TEST 1 START: Active Project ID:', store.activeProjectId);
-            console.log('🧪 TEST 1 START: Todo Projects:', store.todoProjects.length);
             store.addTodoRow('Performance Test Row');
         });
 
@@ -55,17 +53,22 @@ test.describe('CRDT Physics & Performance Verification', () => {
             return store.todoRows.some((r: any) => r.task === 'Performance Test Row');
         });
 
-        // InlineEditableText requires double-click to enter edit mode.
-        // On tiny viewports (iPhone SE, Galaxy S21), scroll the element to the
-        // center of the viewport to avoid clipping by the fixed bottom action bar.
-        const rowText = page.getByText('Performance Test Row', { exact: false });
-        await rowText.first().evaluate((el: HTMLElement) => {
-            el.scrollIntoView({ block: 'center', behavior: 'instant' });
-        });
+        // Target the EditableCell span containing the row text
+        const rowText = page.getByText('Performance Test Row', { exact: true }).first();
+        await rowText.waitFor({ state: 'attached', timeout: 10000 });
+        await rowText.scrollIntoViewIfNeeded();
         await page.waitForTimeout(300);
-        await rowText.first().dblclick({ force: true });
 
+        // Enter edit mode: focus the span (EditableCell enters edit on focus or dblclick)
+        await rowText.focus();
+        await page.waitForTimeout(100);
+
+        // If focus didn't trigger edit mode, try dblclick
         const textareas = page.locator('textarea');
+        if (await textareas.count() === 0) {
+            await rowText.dblclick({ force: true });
+        }
+
         await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
         await textareas.first().evaluate((el: HTMLElement) => {
             el.scrollIntoView({ block: 'center', behavior: 'instant' });
@@ -105,14 +108,22 @@ test.describe('CRDT Physics & Performance Verification', () => {
             return store.todoRows.some((r: any) => r.task === 'The quick brown fox jumps.');
         });
 
-        const rowText = page.getByText('The quick brown fox jumps.', { exact: false });
-        await rowText.first().evaluate((el: HTMLElement) => {
-            el.scrollIntoView({ block: 'center', behavior: 'instant' });
-        });
+        // Target the EditableCell span containing the row text
+        const rowText = page.getByText('The quick brown fox jumps.', { exact: true }).first();
+        await rowText.waitFor({ state: 'attached', timeout: 10000 });
+        await rowText.scrollIntoViewIfNeeded();
         await page.waitForTimeout(300);
-        await rowText.first().dblclick({ force: true });
 
+        // Enter edit mode: focus the span (EditableCell enters edit on focus or dblclick)
+        await rowText.focus();
+        await page.waitForTimeout(100);
+
+        // If focus didn't trigger edit mode, try dblclick
         const textareas = page.locator('textarea');
+        if (await textareas.count() === 0) {
+            await rowText.dblclick({ force: true });
+        }
+
         await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
         await textareas.first().evaluate((el: HTMLElement) => {
             el.scrollIntoView({ block: 'center', behavior: 'instant' });

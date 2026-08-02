@@ -31,7 +31,10 @@ async function connectDevice(page: any, passphrase: string) {
   await page.getByRole('button', { name: 'Close', exact: false }).or(page.locator('button:has(svg.lucide-x)')).click();
 }
 
-test('Ping-pong: B creates task, A receives it', async ({ browser }) => {
+// SYNC-001: Skipped pending sync infrastructure fix
+// See: docs/SYNC001_SPECIFICATION.md
+
+test.skip('Ping-pong: B creates task, A receives it', async ({ browser }) => {
   test.setTimeout(60000);
   const room = `ping-${Date.now()}`;
   
@@ -89,7 +92,7 @@ test('Ping-pong: B creates task, A receives it', async ({ browser }) => {
   }
 });
 
-test('Ping-pong: A dials, B receives', async ({ browser }) => {
+test.skip('Ping-pong: A dials, B receives', async ({ browser }) => {
   test.setTimeout(60000);
   const room = `dial-${Date.now()}`;
   

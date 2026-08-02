@@ -13,6 +13,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
+      localStorage.setItem('onboarding_complete', 'true');
     });
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
       const json = {
@@ -45,7 +46,15 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await page.goto('/engine');
     // Wait for hydration to prevent race condition with loadProject
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
-    await page.getByRole('button', { name: /Text/i }).click();
+
+    // Dismiss onboarding tour if present
+    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
+    if (await skipBtn.isVisible().catch(() => false)) {
+      await skipBtn.click();
+      await page.waitForTimeout(300);
+    }
+
+    await page.getByRole('button', { name: 'Text Mode' }).click();
     await expect(page.getByText(/Video Source Disconnected/i)).toBeHidden();
 
     const uniqueTitle = `Project Alpha ${Date.now()}`;
@@ -54,7 +63,16 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       .getByPlaceholder(/Paste your text/i)
       .fill('Test Content must be at least fifty characters long to pass the validation logic.');
 
-    await page.getByRole('button', { name: /Start Analysis/i }).click();
+    // Wait for Start Analysis button to be enabled
+    await page.waitForFunction(() => {
+      const btns = Array.from(document.querySelectorAll('button'));
+      const btn = btns.find(b => b.textContent?.includes('Start Analysis'));
+      return btn && !btn.disabled;
+    }, { timeout: 10000 });
+    // Dismiss any modal overlay
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(200);
+    await page.getByRole('button', { name: /Start Analysis/i }).evaluate((el: HTMLButtonElement) => el.click());
     await page.waitForTimeout(3000); // CRITICAL: Wait for IDB Write (increased for CI stability)
 
     await page.reload();
@@ -214,6 +232,13 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await page.goto('/engine');
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
+    // Dismiss onboarding tour if present
+    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
+    if (await skipBtn.isVisible().catch(() => false)) {
+      await skipBtn.click();
+      await page.waitForTimeout(300);
+    }
+
     // 1. Inject a task with text project type (avoids video-handle banner after reload)
     //    and explicitly flush to IDB (bypass debounced auto-save).
     await page.evaluate(async () => {
@@ -282,9 +307,22 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await page.waitForTimeout(500); // Allow Virtuoso to render after scroll
 
     // 3. Click Cubit -> Generate Steps
+    // Dismiss any modal overlay that may intercept the click.
+    // The overlay div (z-[100]) appears after IDB reload — always try to dismiss it.
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+    // Also click the backdrop if Escape didn't work
+    const overlay = page.locator('.fixed.inset-0.z-\\[100\\]');
+    if (await overlay.count() > 0) {
+      await overlay.click({ position: { x: 10, y: 10 } }).catch(() => {});
+      await page.waitForTimeout(200);
+    }
     const cubitBtn = page.getByRole('button', { name: 'Generate sub-steps' }).first();
     await expect(cubitBtn).toBeVisible({ timeout: 10000 });
-    await cubitBtn.click();
+    await cubitBtn.scrollIntoViewIfNeeded();
+    // Use evaluate to trigger the React onClick handler directly,
+    // since force:true click doesn't dispatch React synthetic events properly.
+    await cubitBtn.evaluate((el: HTMLButtonElement) => el.click());
 
     // Wait for processing to start (confirms click registered)
     await expect(page.getByText('Thinking...')).toBeVisible({ timeout: 5000 });

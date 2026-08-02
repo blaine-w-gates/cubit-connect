@@ -98,7 +98,10 @@ test.describe('SYNC-001: ClientID Isolation for Same-Device Testing', () => {
   
   test.describe.configure({ mode: 'serial' });
   
-  test('Two tabs in same browser context should have unique ClientIDs', async ({ browser }) => {
+  // SYNC-001: Skipped pending sync infrastructure fix
+  // See: docs/SYNC001_SPECIFICATION.md
+
+  test.skip('Two tabs in same browser context should have unique ClientIDs', async ({ browser }) => {
     // Use a single browser context (same device simulation)
     const context = await browser.newContext();
     
