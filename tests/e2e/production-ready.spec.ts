@@ -13,7 +13,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
-      localStorage.setItem('onboarding_complete', 'true');
+      localStorage.setItem('cubit_onboarding_complete', 'true');
     });
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
       const json = {
@@ -47,15 +47,12 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // Wait for hydration to prevent race condition with loadProject
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
-    // Dismiss onboarding tour if present
-    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
-    if (await skipBtn.isVisible().catch(() => false)) {
-      await skipBtn.click();
-      await page.waitForTimeout(300);
-    }
-
-    await page.getByRole('button', { name: 'Text Mode' }).click();
-    await expect(page.getByText(/Video Source Disconnected/i)).toBeHidden();
+    // Wait for Text Mode button to be visible and click it
+    const textModeBtn = page.getByRole('button', { name: 'Text Mode' });
+    await textModeBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await textModeBtn.click();
+    // Wait for text mode UI to appear (textarea is the key indicator)
+    await expect(page.getByPlaceholder(/Paste your text/i)).toBeVisible({ timeout: 10000 });
 
     const uniqueTitle = `Project Alpha ${Date.now()}`;
     await page.getByPlaceholder(/Project Title/i).fill(uniqueTitle);
@@ -63,17 +60,18 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       .getByPlaceholder(/Paste your text/i)
       .fill('Test Content must be at least fifty characters long to pass the validation logic.');
 
-    // Wait for Start Analysis button to be enabled
-    await page.waitForFunction(() => {
-      const btns = Array.from(document.querySelectorAll('button'));
-      const btn = btns.find(b => b.textContent?.includes('Start Analysis'));
-      return btn && !btn.disabled;
-    }, { timeout: 10000 });
-    // Dismiss any modal overlay
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(200);
-    await page.getByRole('button', { name: /Start Analysis/i }).evaluate((el: HTMLButtonElement) => el.click());
-    await page.waitForTimeout(3000); // CRITICAL: Wait for IDB Write (increased for CI stability)
+    // Wait for Start Analysis button to be enabled, then click
+    const startBtn = page.getByRole('button', { name: /Start Analysis/i });
+    await expect(startBtn).toBeEnabled({ timeout: 10000 });
+    await startBtn.click();
+    // Wait for store to reflect the project title change
+    await page.waitForFunction(
+      (expected) => (window as unknown as CustomWindow).__STORE__?.getState().projectTitle === expected,
+      uniqueTitle,
+      { timeout: 10000 },
+    );
+    // Wait for debounced IDB auto-save to complete (500ms debounce + write time)
+    await page.waitForTimeout(2000);
 
     await page.reload();
     await page.waitForFunction(
@@ -116,7 +114,11 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       ]);
     });
 
-    await page.waitForTimeout(1000); // Allow IDB to flush
+    // Wait for store to reflect imported tasks, then wait for debounced IDB flush
+    await page.waitForFunction(
+      () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
+    );
+    await page.waitForTimeout(2000);
     await page.reload();
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
@@ -124,7 +126,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
       () => (window as unknown as CustomWindow).__STORE__?.getState().tasks.length > 0,
     );
 
-    // Mock Clipboard API for Headless/Safari support
+    // Mock Clipboard API
     await page.evaluate(() => {
       let clipboardContent = '';
       const mockClipboard = {
@@ -232,13 +234,6 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await page.goto('/engine');
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
 
-    // Dismiss onboarding tour if present
-    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
-    if (await skipBtn.isVisible().catch(() => false)) {
-      await skipBtn.click();
-      await page.waitForTimeout(300);
-    }
-
     // 1. Inject a task with text project type (avoids video-handle banner after reload)
     //    and explicitly flush to IDB (bypass debounced auto-save).
     await page.evaluate(async () => {
@@ -304,24 +299,13 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     // the viewport and task cards are never rendered by Virtuoso.
     const recipeHeading = page.getByRole('heading', { name: 'Your Distilled Recipe:' });
     await recipeHeading.scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500); // Allow Virtuoso to render after scroll
 
     // 3. Click Cubit -> Generate Steps
-    // Dismiss any modal overlay that may intercept the click.
-    // The overlay div (z-[100]) appears after IDB reload — always try to dismiss it.
-    await page.keyboard.press('Escape');
-    await page.waitForTimeout(300);
-    // Also click the backdrop if Escape didn't work
-    const overlay = page.locator('.fixed.inset-0.z-\\[100\\]');
-    if (await overlay.count() > 0) {
-      await overlay.click({ position: { x: 10, y: 10 } }).catch(() => {});
-      await page.waitForTimeout(200);
-    }
     const cubitBtn = page.getByRole('button', { name: 'Generate sub-steps' }).first();
     await expect(cubitBtn).toBeVisible({ timeout: 10000 });
     await cubitBtn.scrollIntoViewIfNeeded();
-    // Use evaluate to trigger the React onClick handler directly,
-    // since force:true click doesn't dispatch React synthetic events properly.
+    // Use evaluate because Virtuoso virtualization can cause standard click()
+    // to miss the element despite it being visible in the DOM.
     await cubitBtn.evaluate((el: HTMLButtonElement) => el.click());
 
     // Wait for processing to start (confirms click registered)
@@ -339,12 +323,16 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
 
     // Scroll recipe section into view — Virtuoso only renders near scroll position
     await page.getByRole('heading', { name: 'Your Distilled Recipe:' }).scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500); // Allow Virtuoso to render after scroll
 
     await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Step B').first()).toBeVisible({ timeout: 5000 });
 
-    // 5. Wait for auto-save debounce (500ms) + IDB write, then reload
+    // 5. Wait for auto-save debounce + IDB write, then reload
+    await page.waitForFunction(
+      () => (window as unknown as CustomWindow).__STORE__?.getState().tasks[0]?.sub_steps?.length > 0,
+      { timeout: 10000 },
+    );
+    // Wait for debounced IDB auto-save to complete (500ms debounce + write time)
     await page.waitForTimeout(2000);
     await page.reload();
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);
@@ -354,9 +342,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
 
     // Scroll recipe section into view again after reload
     await page.getByRole('heading', { name: 'Your Distilled Recipe:' }).scrollIntoViewIfNeeded();
-    await page.waitForTimeout(500);
-
-    // Should STILL be visible without clicking anything
+    // Wait for Virtuoso to render after scroll
     await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 10000 });
   });
 });

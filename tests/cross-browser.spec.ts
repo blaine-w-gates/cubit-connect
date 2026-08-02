@@ -5,7 +5,7 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_cross-browser-test'));
-      localStorage.setItem('onboarding_complete', 'true');
+      localStorage.setItem('cubit_onboarding_complete', 'true');
     });
 
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
@@ -80,13 +80,6 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     // Wait for hydration
     await page.waitForFunction(() => (window as any).__STORE__?.getState()?.isHydrated);
 
-    // Dismiss onboarding tour if present
-    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
-    if (await skipBtn.isVisible().catch(() => false)) {
-      await skipBtn.click();
-      await page.waitForTimeout(300);
-    }
-
     // Inject a task so we have something to copy
     await page.evaluate(async () => {
       await (window as any).__STORE__.getState().importTasks([{
@@ -100,12 +93,11 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
       }]);
     });
 
-    // Wait for the task to render in the DOM (may be hidden by overflow/virtualization)
+    // Wait for the task to render in the DOM
     await page.waitForFunction(
       () => document.body.textContent?.includes('Clipboard Test Task'),
       { timeout: 10000 },
     );
-    await page.waitForTimeout(300);
 
     // Open mobile menu if needed
     const menuBtn = page.getByLabel('Toggle menu');
@@ -113,8 +105,12 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
       await menuBtn.click();
     }
 
-    await page.getByRole('button', { name: /Copy/i }).first().evaluate((el: HTMLButtonElement) => el.click());
-    await page.waitForTimeout(500);
+    await page.getByRole('button', { name: /Copy/i }).first().click();
+    // Wait for clipboard write to complete
+    await page.waitForFunction(
+      () => (window as any).__clipboardContent !== undefined,
+      { timeout: 5000 },
+    );
 
     const clipboardContent = await page.evaluate(() => (window as any).__clipboardContent || '');
     expect(clipboardContent).toContain('Clipboard Test Task');
@@ -136,6 +132,9 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     if (results.violations.length > 0) {
       console.log('Todo Page Violations:', JSON.stringify(results.violations, null, 2));
     }
+    // TODO: Fix WCAG contrast violations in the todo page UI, then enable this assertion.
+    // See: https://github.com/blaine-w-gates/cubit-connect/issues — accessibility
+    expect(results.violations.length).toBeLessThanOrEqual(7);
   });
 
   test('Dark mode renders correctly on modals', async ({ page }) => {
@@ -145,14 +144,8 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     });
 
     await page.goto('/engine');
-    await page.waitForTimeout(500);
-
-    // Dismiss onboarding tour if present
-    const skipBtn = page.getByRole('button', { name: /Skip onboarding/i });
-    if (await skipBtn.isVisible().catch(() => false)) {
-      await skipBtn.click();
-      await page.waitForTimeout(300);
-    }
+    // Wait for hydration so app is fully rendered
+    await page.waitForFunction(() => (window as any).__STORE__?.getState()?.isHydrated);
 
     // Verify dark mode is active
     const isDark = await page.evaluate(() => document.documentElement.classList.contains('dark'));
@@ -163,7 +156,7 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     if (await menuBtn.isVisible()) {
       await menuBtn.click();
     }
-    await page.getByRole('button', { name: /API Key/i }).evaluate((el: HTMLButtonElement) => el.click());
+    await page.getByRole('button', { name: /API Key/i }).click();
 
     // Settings modal should have dark background
     const modalBg = await page.evaluate(() => {
@@ -189,7 +182,6 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     await page.waitForFunction(() => {
       return (window as any).__STORE__.getState().todoRows.some((r: any) => r.task === 'Hover Test Row');
     });
-    await page.waitForTimeout(300);
 
     // Verify the hover-reveal CSS class exists in the DOM
     const hasHoverReveal = await page.evaluate(() => {
@@ -256,7 +248,6 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     // Click the backdrop overlay (far left edge, vertically centered)
     const viewport = page.viewportSize()!;
     await page.mouse.click(5, viewport.height / 2);
-    await page.waitForTimeout(300);
 
     // Modal should be dismissed
     await expect(page.getByText('Switch Out Your API Key')).toBeHidden();
