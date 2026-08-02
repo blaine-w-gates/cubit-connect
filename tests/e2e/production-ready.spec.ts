@@ -301,9 +301,10 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     const cubitBtn = page.getByRole('button', { name: 'Generate sub-steps' }).first();
     await expect(cubitBtn).toBeVisible({ timeout: 10000 });
     await cubitBtn.scrollIntoViewIfNeeded();
-    // Use evaluate because Virtuoso virtualization can cause standard click()
-    // to miss the element despite it being visible in the DOM.
-    await cubitBtn.evaluate((el: HTMLButtonElement) => el.click());
+    // force: true bypasses actionability checks (Virtuoso virtualization can
+    // cause standard click() to miss the element) but still uses Playwright's
+    // event pipeline for better test fidelity than evaluate(el => el.click()).
+    await cubitBtn.click({ force: true });
 
     // Wait for processing to start (confirms click registered)
     await expect(page.getByText('Thinking...')).toBeVisible({ timeout: 5000 });

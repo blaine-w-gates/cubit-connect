@@ -125,7 +125,7 @@ export default function TodoPage() {
                                 {todoProjects.find(p => p.id === activeProjectId) && (
                                     <span className={`flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] sm:text-xs font-bold rounded-full border shadow-sm ${
                                         todoProjects.find(p => p.id === activeProjectId)?.ownerId === deviceId 
-                                            ? 'bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 border-zinc-200 dark:border-stone-700'
+                                            ? 'bg-zinc-100 dark:bg-stone-800 text-black dark:text-stone-300 border-zinc-200 dark:border-stone-700'
                                             : 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
                                     }`}>
                                         <Monitor className="w-3 h-3" />
@@ -137,7 +137,7 @@ export default function TodoPage() {
                             </div>
 
                             {activeWorkspaceType === 'personalUno' ? (
-                                <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-stone-800 text-zinc-600 dark:text-stone-400 text-xs font-bold rounded-full border border-zinc-200 dark:border-stone-700">
+                                <span className="flex items-center gap-1.5 px-3 py-1 bg-zinc-100 dark:bg-stone-800 text-black dark:text-stone-300 text-xs font-bold rounded-full border border-zinc-200 dark:border-stone-700">
                                     <Monitor className="w-3.5 h-3.5" />
                                     Local Only
                                 </span>
@@ -168,7 +168,7 @@ export default function TodoPage() {
                             )}
                         </div>
                         {todoRows.length > 0 && (
-                            <span className="text-sm font-mono text-zinc-500 dark:text-stone-500">
+                            <span className="text-sm font-mono text-black dark:text-stone-400">
                                 {activeTasks} active {activeTasks === 1 ? 'task' : 'tasks'} · {todoRows.length} total
                             </span>
                         )}

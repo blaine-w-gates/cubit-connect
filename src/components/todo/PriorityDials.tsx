@@ -49,7 +49,7 @@ export default function PriorityDials() {
             <h2 className="text-center font-serif text-2xl font-bold italic mb-1 text-zinc-900 dark:text-stone-200">
                 Dial in Your Priorities
             </h2>
-            <p className="text-center text-sm text-zinc-600 dark:text-stone-400 mb-4">
+            <p className="text-center text-sm text-black dark:text-stone-300 mb-4">
                 Focus on what matters now
             </p>
             <div className="grid grid-cols-2 gap-4">
@@ -74,11 +74,12 @@ export default function PriorityDials() {
             ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
           `}
                 >
-                    <span className="text-xs font-mono uppercase tracking-widest text-green-700 dark:text-green-400 block mb-1">
-                        Dial Left
+                    <span className="text-xs font-mono uppercase tracking-widest block mb-1" style={{ color: '#000000' }}>
+                        <span className="dark:hidden">Dial Left</span>
+                        <span className="hidden dark:inline text-green-400">Dial Left</span>
                     </span>
                     <p className="text-zinc-800 dark:text-stone-300 min-h-[2rem] pr-4">
-                        {left || <span className="text-zinc-400 dark:text-stone-600 italic">Click a step in green mode…</span>}
+                        {left || <span className="italic dark:text-stone-500" style={{ color: '#000000' }}>Click a step in green mode…</span>}
                     </p>
                     {left && (
                         <button
@@ -119,11 +120,12 @@ export default function PriorityDials() {
             ${isLocked ? 'opacity-50 cursor-not-allowed' : ''}
           `}
                 >
-                    <span className="text-xs font-mono uppercase tracking-widest text-yellow-700 dark:text-yellow-400 block mb-1">
-                        Dial Right
+                    <span className="text-xs font-mono uppercase tracking-widest block mb-1" style={{ color: '#000000' }}>
+                        <span className="dark:hidden">Dial Right</span>
+                        <span className="hidden dark:inline text-yellow-400">Dial Right</span>
                     </span>
                     <p className="text-zinc-800 dark:text-stone-300 min-h-[2rem] pr-4">
-                        {right || <span className="text-zinc-400 dark:text-stone-600 italic">Click a step in yellow mode…</span>}
+                        {right || <span className="italic dark:text-stone-500" style={{ color: '#000000' }}>Click a step in yellow mode…</span>}
                     </p>
                     {right && (
                         <button

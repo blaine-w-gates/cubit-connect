@@ -67,17 +67,15 @@ test.describe('CRDT Physics & Performance Verification', () => {
         const rowText = page.getByText('Performance Test Row', { exact: true }).first();
         await rowText.waitFor({ state: 'attached', timeout: 10000 });
         await rowText.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(300);
 
         // Enter edit mode: focus the span (EditableCell enters edit on focus or dblclick)
         await rowText.focus();
-        await page.waitForTimeout(100);
 
         // If focus didn't trigger edit mode, try dblclick
         const textareas = page.locator('textarea');
-        if (await textareas.count() === 0) {
+        await textareas.first().waitFor({ state: 'visible', timeout: 10000 }).catch(async () => {
             await rowText.dblclick({ force: true });
-        }
+        });
 
         await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
         await textareas.first().evaluate((el: HTMLElement) => {
@@ -122,17 +120,15 @@ test.describe('CRDT Physics & Performance Verification', () => {
         const rowText = page.getByText('The quick brown fox jumps.', { exact: true }).first();
         await rowText.waitFor({ state: 'attached', timeout: 10000 });
         await rowText.scrollIntoViewIfNeeded();
-        await page.waitForTimeout(300);
 
         // Enter edit mode: focus the span (EditableCell enters edit on focus or dblclick)
         await rowText.focus();
-        await page.waitForTimeout(100);
 
         // If focus didn't trigger edit mode, try dblclick
         const textareas = page.locator('textarea');
-        if (await textareas.count() === 0) {
+        await textareas.first().waitFor({ state: 'visible', timeout: 10000 }).catch(async () => {
             await rowText.dblclick({ force: true });
-        }
+        });
 
         await textareas.first().waitFor({ state: 'visible', timeout: 10000 });
         await textareas.first().evaluate((el: HTMLElement) => {

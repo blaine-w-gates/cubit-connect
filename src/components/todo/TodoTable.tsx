@@ -439,7 +439,7 @@ export default function TodoTable() {
                     <h3 className="font-serif text-xl font-bold italic text-zinc-900 dark:text-stone-200 mb-2">
                         Ready to get things done.
                     </h3>
-                    <p className="text-zinc-500 dark:text-stone-500 text-sm max-w-md mx-auto">
+                    <p className="text-black dark:text-stone-400 text-sm max-w-md mx-auto">
                         Add your first task below, then use <strong>Cubit</strong> to break it into steps
                         and <strong>Deep Dive</strong> to go deeper.
                     </p>
@@ -469,7 +469,7 @@ export default function TodoTable() {
                                     className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[30%] border-b border-zinc-300 dark:border-stone-600
                 ${activeMode === 'cubit'
                                             ? 'z-10 relative bg-cyan-100 dark:bg-cyan-950/30 text-cyan-700 dark:text-cyan-400'
-                                            : 'z-10 text-zinc-500 dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
+                                            : 'z-10 text-black dark:text-stone-400 bg-zinc-100 dark:bg-stone-800'}
               `}
                                 >
                                     Task
@@ -480,9 +480,9 @@ export default function TodoTable() {
                                         className={`text-left text-xs font-mono uppercase tracking-widest px-3 py-3 w-[17.5%] border-b border-zinc-300 dark:border-stone-600
                       ${n === 4 ? 'rounded-tr-xl' : ''}
                   ${activeMode === 'deepDive' ? 'relative bg-fuchsia-500/10 text-fuchsia-700 dark:text-fuchsia-400' :
-                                                activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-700 dark:text-green-400' :
-                                                    activeMode === 'dialRight' ? 'relative bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :
-                                                        'text-zinc-500 dark:text-stone-400'
+                                                activeMode === 'dialLeft' ? 'relative bg-green-500/10 text-green-900 dark:text-green-400' :
+                                                    activeMode === 'dialRight' ? 'relative bg-yellow-500/10 text-yellow-900 dark:text-yellow-400' :
+                                                        'text-black dark:text-stone-400'
                                             }
                 `}
                                     >

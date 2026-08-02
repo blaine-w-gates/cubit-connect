@@ -45,22 +45,22 @@ export default function ActionBar() {
         cyan: {
             active: 'bg-cyan-500 text-white shadow-lg shadow-cyan-500/30',
             ring: 'ring-2 ring-cyan-400/50',
-            text: 'text-cyan-600 dark:text-cyan-400',
+            text: 'text-black dark:text-cyan-400',
         },
         fuchsia: {
             active: 'bg-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/30',
             ring: 'ring-2 ring-fuchsia-400/50',
-            text: 'text-fuchsia-600 dark:text-fuchsia-400',
+            text: 'text-black dark:text-fuchsia-400',
         },
         green: {
             active: 'bg-green-500 text-white shadow-lg shadow-green-500/30',
             ring: 'ring-2 ring-green-400/50',
-            text: 'text-green-700 dark:text-green-400',
+            text: 'text-black dark:text-green-400',
         },
         yellow: {
             active: 'bg-yellow-500 text-white shadow-lg shadow-yellow-500/30',
             ring: 'ring-2 ring-yellow-400/50',
-            text: 'text-yellow-700 dark:text-yellow-400',
+            text: 'text-black dark:text-yellow-400',
         },
     };
 

@@ -132,14 +132,9 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     if (results.violations.length > 0) {
       console.log('Todo Page Violations:', JSON.stringify(results.violations, null, 2));
     }
-    // Snapshot known violations. If a known violation is fixed, remove its ID here.
-    // If a new violation appears, this test will fail — preventing regressions from
-    // being masked by the known violation count.
-    const knownViolationIds = ['color-contrast'];
-    const newViolations = results.violations.filter(
-      (v) => !knownViolationIds.includes(v.id),
-    );
-    expect(newViolations).toEqual([]);
+    // All known WCAG violations have been fixed.
+    // If a new violation appears, this test will fail.
+    expect(results.violations).toEqual([]);
   });
 
   test('Dark mode renders correctly on modals', async ({ page }) => {
