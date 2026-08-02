@@ -14,6 +14,7 @@ test.describe('CRDT Physics & Performance Verification', () => {
         // Inject API key, navigate to /todo, wait for hydration
         await page.addInitScript(() => {
             localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_crdt-physics-test'));
+            localStorage.setItem('cubit_onboarding_complete', 'true');
         });
         await page.goto('/todo', { waitUntil: 'domcontentloaded' });
         await page.waitForFunction(() => {

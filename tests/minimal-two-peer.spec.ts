@@ -53,6 +53,7 @@ test.describe('Minimal Two-Peer Sync', () => {
     await pageA.goto('/todo');
     await pageA.evaluate(() => {
       localStorage.setItem('cubit_api_key', btoa('minimal-test-key'));
+      localStorage.setItem('cubit_onboarding_complete', 'true');
       localStorage.setItem('sync_server_url', 'ws://localhost:8080');
     });
     await pageA.reload();
@@ -78,6 +79,7 @@ test.describe('Minimal Two-Peer Sync', () => {
     await pageB.goto('/todo');
     await pageB.evaluate(() => {
       localStorage.setItem('cubit_api_key', btoa('minimal-test-key'));
+      localStorage.setItem('cubit_onboarding_complete', 'true');
       localStorage.setItem('sync_server_url', 'ws://localhost:8080');
     });
     await pageB.reload();

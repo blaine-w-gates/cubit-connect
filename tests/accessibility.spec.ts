@@ -33,6 +33,7 @@ test.describe('Accessibility Compliance', () => {
     // Inject key to skip login
     await page.addInitScript(() => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test-key'));
+      localStorage.setItem('cubit_onboarding_complete', 'true');
     });
 
     await page.goto('/engine');

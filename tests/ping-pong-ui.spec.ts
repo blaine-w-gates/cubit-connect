@@ -16,6 +16,7 @@ async function setupDevice(browser: Browser, name: string): Promise<DeviceSessio
   await page.goto('/todo');
   await page.evaluate(() => {
     localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_test'));
+    localStorage.setItem('cubit_onboarding_complete', 'true');
     localStorage.setItem('sync_server_url', 'ws://localhost:8080');
   });
   await page.reload();

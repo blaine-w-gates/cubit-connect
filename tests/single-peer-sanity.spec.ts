@@ -26,6 +26,7 @@ async function setupPeer(browser: Browser): Promise<PeerSession> {
   await page.goto('/todo');
   await page.evaluate(() => {
     localStorage.setItem('cubit_api_key', btoa('sanity-test-key'));
+    localStorage.setItem('cubit_onboarding_complete', 'true');
   });
   await page.reload();
   

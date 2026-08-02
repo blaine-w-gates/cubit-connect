@@ -194,9 +194,6 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
 
   // TEST 4: Auto-Expansion & Persistence
   test('UX: Steps auto-expand on creation and persist state', async ({ page }) => {
-    // Forward browser console logs to terminal to diagnose silent click failure
-    page.on('console', msg => console.log(`BROWSER CONSOLE: ${msg.type().toUpperCase()} - ${msg.text()}`));
-
     // Register route mock BEFORE goto — Playwright routes persist across reloads (LIFO),
     // so this overrides the beforeEach mock and survives all reloads within this test.
     // generateSubSteps expects a string[] response, not the task objects from beforeEach.
@@ -327,12 +324,7 @@ test.describe.serial('The Reinforced 5: Production Integrity', () => {
     await expect(page.getByText('Step A').first()).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('Step B').first()).toBeVisible({ timeout: 5000 });
 
-    // 5. Wait for auto-save debounce + IDB write, then reload
-    await page.waitForFunction(
-      () => (window as unknown as CustomWindow).__STORE__?.getState().tasks[0]?.sub_steps?.length > 0,
-      { timeout: 10000 },
-    );
-    // Wait for debounced IDB auto-save to complete (500ms debounce + write time)
+    // 5. Wait for debounced IDB auto-save to complete (500ms debounce + write time)
     await page.waitForTimeout(2000);
     await page.reload();
     await page.waitForFunction(() => (window as unknown as CustomWindow).__STORE__?.getState().isHydrated);

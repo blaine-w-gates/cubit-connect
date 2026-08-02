@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Scout Feature', () => {
   test.beforeEach(async ({ page }) => {
+    // Dismiss onboarding overlay (key must match OnboardingOverlay.tsx)
+    await page.addInitScript(() => {
+      localStorage.setItem('cubit_onboarding_complete', 'true');
+    });
+
     // Mock Gemini API
     await page.route(/generativelanguage\.googleapis\.com/, async (route) => {
       const url = route.request().url();

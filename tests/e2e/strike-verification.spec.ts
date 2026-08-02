@@ -142,6 +142,7 @@ test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
 
     await page.addInitScript((key) => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_' + key));
+      localStorage.setItem('cubit_onboarding_complete', 'true');
     }, TEST_API_KEY);
 
     await page.goto('/engine');

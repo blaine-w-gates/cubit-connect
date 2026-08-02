@@ -14,6 +14,7 @@ test.describe('QA Hardening: Robustness Checks', () => {
     // Setup Ignition
     await page.addInitScript((key) => {
       localStorage.setItem('cubit_api_key', btoa('CUBIT_V1_SALT_' + key));
+      localStorage.setItem('cubit_onboarding_complete', 'true');
     }, TEST_API_KEY);
   });
 
