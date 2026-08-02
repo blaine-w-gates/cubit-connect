@@ -5,6 +5,10 @@ const TEST_API_KEY = 'MOCK_GOOGLE_API_KEY_FOR_TESTING';
 
 test.describe.serial('Tier 3 Verification: Strikes 15, 16, 17', () => {
   test.beforeEach(async ({ page }) => {
+    // Dismiss onboarding overlay on all page loads
+    await page.addInitScript(() => {
+      localStorage.setItem('cubit_onboarding_complete', 'true');
+    });
     await page.goto('/');
     await page.evaluate(() => {
       localStorage.clear();

@@ -46,12 +46,12 @@ test.describe('Feature Flags E2E', () => {
   });
 
   test('AC-5: Feature flag should sync across browser tabs', async ({ browser }) => {
-    // Create two contexts (simulating two tabs)
-    const context1 = await browser.newContext();
-    const context2 = await browser.newContext();
+    // Cross-tab storage events only fire within the same browser context.
+    // Using two separate contexts would isolate localStorage and never trigger sync.
+    const context = await browser.newContext();
 
-    const page1 = await context1.newPage();
-    const page2 = await context2.newPage();
+    const page1 = await context.newPage();
+    const page2 = await context.newPage();
 
     // Open app in both tabs
     await page1.goto('/');
@@ -60,32 +60,24 @@ test.describe('Feature Flags E2E', () => {
     await page1.waitForLoadState('networkidle');
     await page2.waitForLoadState('networkidle');
 
-    // Set flag in tab 1
+    // Set flag in tab 1 — this triggers a storage event in tab 2
     await page1.evaluate(() => {
       localStorage.setItem('USE_SUPABASE_SYNC', 'true');
-      // Dispatch storage event manually (since same-page changes don't trigger it)
-      window.dispatchEvent(new StorageEvent('storage', {
-        key: 'USE_SUPABASE_SYNC',
-        newValue: 'true',
-        oldValue: 'false'
-      }));
     });
 
-    // Wait a bit for propagation
-    await page1.waitForTimeout(100);
+    // Wait for the storage event to propagate to tab 2
+    await page2.waitForFunction(
+      () => localStorage.getItem('USE_SUPABASE_SYNC') === 'true',
+      { timeout: 5000 },
+    );
 
-    // Check tab 2 has the updated value
+    // Verify flag is set in tab 2
     const valueInTab2 = await page2.evaluate(() => {
       return localStorage.getItem('USE_SUPABASE_SYNC');
     });
+    expect(valueInTab2).toBe('true');
 
-    // Note: Cross-tab sync via storage events works in real browsers
-    // but may not work in Playwright due to context isolation
-    // This test verifies the mechanism is in place
-    expect(['true', null]).toContain(valueInTab2);
-
-    await context1.close();
-    await context2.close();
+    await context.close();
   });
 
   // DevTools helpers (__toggleSupabaseSync__, __SYNC_TELEMETRY__) are only available in dev mode.

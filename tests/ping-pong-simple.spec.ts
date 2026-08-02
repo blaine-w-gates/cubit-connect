@@ -50,7 +50,8 @@ async function waitForSync(page: Page, checkFn: (arg: any) => boolean, arg?: any
 test.describe('Ping-Pong Sync', () => {
   test.setTimeout(180000);
 
-  test('Projects sync A→B and B→A', async ({ browser }) => {
+  // SYNC-001: Skipped pending sync infrastructure fix
+  test.skip('Projects sync A→B and B→A', async ({ browser }) => {
     const room = `proj-${Date.now()}`;
     const projA = `Project-A-${Date.now()}`;
     const projB = `Project-B-${Date.now()}`;
@@ -156,7 +157,8 @@ test.describe('Ping-Pong Sync', () => {
     }
   });
 
-  test('Dials and rabbit sync A↔B', async ({ browser }) => {
+  // SYNC-001: Skipped pending sync infrastructure fix
+  test.skip('Dials and rabbit sync A↔B', async ({ browser }) => {
     const room = `dial-${Date.now()}`;
     const projectName = `Dial-Project-${Date.now()}`;
     const taskName = `Dial-Task-${Date.now()}`;

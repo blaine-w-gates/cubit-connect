@@ -28,7 +28,12 @@ test.describe('CRDT Physics & Performance Verification', () => {
         await page.evaluate(async () => {
             await (window as any).__STORE__.getState().resetProject();
         });
-        await page.waitForTimeout(300);
+
+        // Wait for reset to complete — store should have no projects or tasks
+        await page.waitForFunction(() => {
+            const store = (window as any).__STORE__.getState();
+            return store.todoProjects.length === 0 && store.tasks.length === 0;
+        }, { timeout: 5000 });
 
         // Add a default project for tests
         await page.evaluate(() => {
@@ -36,7 +41,11 @@ test.describe('CRDT Physics & Performance Verification', () => {
             if (store.todoProjects.length === 0) store.addTodoProject('Test Project');
         });
 
-        await page.waitForTimeout(200);
+        // Wait for project to appear in store
+        await page.waitForFunction(() => {
+            const store = (window as any).__STORE__.getState();
+            return store.todoProjects.some((p: any) => p.name === 'Test Project');
+        }, { timeout: 5000 });
     });
 
     // TEST 1: The "CPU Throttle" Typing Test (Checking the Stringify Trap)

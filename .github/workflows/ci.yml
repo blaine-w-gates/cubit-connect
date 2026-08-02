@@ -95,7 +95,7 @@ jobs:
           fi
           echo "✅ PASS: $COUNT integration tests ran"
 
-  # FULL CHROME TESTS: Run weekly on schedule, manual trigger, or PRs touching store/sync code
+  # FULL CHROME TESTS: Run on main pushes, weekly schedule, manual trigger, or labeled PRs
   test-chrome:
     name: Full Chrome Tests
     runs-on: ubuntu-latest
@@ -103,6 +103,7 @@ jobs:
     if: |
       github.event_name == 'schedule' ||
       github.event.inputs.test_mode == 'full-chrome' ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
       (github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'needs-chrome-tests'))
     steps:
       - uses: actions/checkout@v4

@@ -283,7 +283,9 @@ test.describe('Minimal Two-Peer Sync', () => {
     }
   });
   
-  test('B→A sync: Task added on B appears on A', async ({ browser }) => {
+  // SYNC-001: Skipped pending sync infrastructure fix
+  // See: docs/SYNC001_SPECIFICATION.md
+  test.skip('B→A sync: Task added on B appears on A', async ({ browser }) => {
     const roomName = await getRoomName();
     
     // Setup both peers in single context

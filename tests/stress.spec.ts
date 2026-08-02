@@ -2,6 +2,11 @@ import { test, expect } from '@playwright/test';
 
 test.describe('The Stress Test: Edge Cases & Vulnerabilities', () => {
   test.beforeEach(async ({ page }) => {
+    // Dismiss onboarding overlay on all page loads
+    await page.addInitScript(() => {
+      localStorage.setItem('cubit_onboarding_complete', 'true');
+    });
+
     // Debug Console
     page.on('console', (msg) => console.log(`[Browser Console]: ${msg.text()}`));
 

@@ -132,9 +132,14 @@ test.describe('Cross-Browser & Mobile Hardening', () => {
     if (results.violations.length > 0) {
       console.log('Todo Page Violations:', JSON.stringify(results.violations, null, 2));
     }
-    // TODO: Fix WCAG contrast violations in the todo page UI, then enable this assertion.
-    // See: https://github.com/blaine-w-gates/cubit-connect/issues — accessibility
-    expect(results.violations.length).toBeLessThanOrEqual(7);
+    // Snapshot known violations. If a known violation is fixed, remove its ID here.
+    // If a new violation appears, this test will fail — preventing regressions from
+    // being masked by the known violation count.
+    const knownViolationIds = ['color-contrast'];
+    const newViolations = results.violations.filter(
+      (v) => !knownViolationIds.includes(v.id),
+    );
+    expect(newViolations).toEqual([]);
   });
 
   test('Dark mode renders correctly on modals', async ({ page }) => {
